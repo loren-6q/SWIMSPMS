@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WET Vol Calendar</title>
+    <title>SWIMS PMS</title>
     
     <!-- Favicon: Thick Bungee-style V -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%232563eb%22/><text x=%2250%22 y=%2275%22 font-family=%22Arial Black, sans-serif%22 font-size=%2280%22 fill=%22white%22 text-anchor=%22middle%22>V</text></svg>">
@@ -31,15 +31,15 @@
         .day-column { border-right: 1px solid #e2e8f0; height: 100%; position: relative; cursor: cell; min-width: 25px; transition: filter 0.1s; }
         .bed-row { height: 38px; border-bottom: 1px solid #cbd5e1; position: relative; transition: filter 0.1s; }
         
-        /* Crosshair Highlighting - Uses Brightness Filter to work over shaded columns */
+        /* Crosshair Highlighting */
         .bed-row:hover { filter: brightness(0.94); }
         .hover-col { filter: brightness(0.94); }
         
         /* DARKER Full Moon Shading Colors for Visibility */
-        .day-fmp-dark { background-color: rgba(225, 29, 72, 0.5) !important; } /* Deep Rose/Red - Party Day */
-        .day-fmp-medium { background-color: rgba(249, 115, 22, 0.35) !important; } /* Saturated Orange - Party Week */
-        .day-fmp-light { background-color: rgba(245, 158, 11, 0.25) !important; } /* Rich Amber - Buffer Period */
-        .day-today { background-color: rgba(219, 234, 254, 0.8); } /* Light Blue - Today Highlight */
+        .day-fmp-dark { background-color: rgba(225, 29, 72, 0.5) !important; }
+        .day-fmp-medium { background-color: rgba(249, 115, 22, 0.35) !important; }
+        .day-fmp-light { background-color: rgba(245, 158, 11, 0.25) !important; }
+        .day-today { background-color: rgba(219, 234, 254, 0.8); }
         
         .staff-bar {
             position: absolute; height: 30px; top: 4px; border-radius: 4px;
@@ -108,7 +108,7 @@
     <div id="boot-loader" class="loading-overlay">
         <div class="spinner"></div>
         <div class="mt-4 font-black text-slate-800 uppercase tracking-widest text-center px-4">
-            <span id="sync-status">Cloud Syncing...</span>
+            <span id="sync-status">Authenticating...</span>
         </div>
     </div>
 
@@ -121,7 +121,7 @@
                         <div class="logo-v-back">V</div>
                         <i data-lucide="users" class="logo-people-front" size="34"></i>
                     </div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tighter leading-none uppercase">Vol Calendar</h1>
+                    <h1 class="text-2xl font-black text-slate-800 tracking-tighter leading-none uppercase">SWIMS PMS</h1>
                 </div>
                 <div class="flex bg-slate-100 rounded-lg p-1 w-full sm:w-auto justify-between">
                     <button id="tab-cal" onclick="window.switchTab('calendar')" class="tab-btn active w-1/2 sm:w-auto">Calendar</button>
@@ -146,7 +146,7 @@
                             <i data-lucide="clipboard-paste" size="16"></i> Import
                         </button>
                         <button onclick="window.openStaffModal()" class="px-5 py-1.5 bg-blue-600 text-white rounded shadow-lg font-black text-xs uppercase flex items-center gap-2 hover:bg-blue-700 transition-all active:scale-95">
-                            <i data-lucide="plus" size="16"></i> Add Staff
+                            <i data-lucide="plus" size="16"></i> Add Booking
                         </button>
                     </div>
                 </div>
@@ -215,7 +215,7 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-800 text-white text-[12px] font-black uppercase tracking-widest cursor-pointer">
-                        <th onclick="window.sortDatabase('name')" class="p-3 border-r border-slate-700 hover:bg-slate-700">Volunteer Name</th>
+                        <th onclick="window.sortDatabase('name')" class="p-3 border-r border-slate-700 hover:bg-slate-700">Guest Name</th>
                         <th onclick="window.sortDatabase('country')" class="p-3 border-r border-slate-700 hover:bg-slate-700">Country</th>
                         <th class="p-3 border-r border-slate-700">Contact / Info</th>
                         <th onclick="window.sortDatabase('checkIn')" class="p-3 border-r border-slate-700 hover:bg-slate-700">Stay Dates</th>
@@ -232,7 +232,7 @@
     <div id="staff-modal" class="modal-overlay p-2">
         <div class="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden border-2 border-slate-800">
             <div class="bg-slate-900 p-3 text-white flex justify-between items-center">
-                <h3 id="modal-title" class="text-md font-bold uppercase tracking-tighter">Volunteer Record</h3>
+                <h3 id="modal-title" class="text-md font-bold uppercase tracking-tighter">Booking Record</h3>
                 <button type="button" onclick="window.closeStaffModal()"><i data-lucide="x"></i></button>
             </div>
             <form id="staff-form" class="p-4 pt-1 space-y-3">
@@ -273,12 +273,12 @@
                         <input type="text" id="staff-contact" placeholder="Email, WhatsApp..." class="bg-slate-50">
                     </div>
                     <div class="flex flex-col">
-                        <label class="field-label">Special Job</label>
+                        <label class="field-label">Special Tag</label>
                         <select id="staff-job" class="bg-slate-50 font-bold">
                             <option value="none">NONE</option>
-                            <option value="art">ART</option>
+                            <option value="art">VIP</option>
                             <option value="socials">SOCIALS</option>
-                            <option value="bar">BAR</option>
+                            <option value="bar">GROUP</option>
                         </select>
                     </div>
                 </div>
@@ -302,7 +302,7 @@
                 </div>
                 <div class="bg-slate-100 p-3 pt-1 rounded border-2 border-slate-300">
                     <div class="flex justify-between items-center mb-1 pb-1 border-b-2 border-slate-200">
-                        <label class="text-[20px] font-black text-slate-800 uppercase">DEPOSITS</label>
+                        <label class="text-[20px] font-black text-slate-800 uppercase">LEDGER</label>
                         <div class="flex gap-6">
                             <div class="text-right"><label class="field-label">Held</label><div class="font-black text-2xl leading-none" id="display-held">฿0</div></div>
                             <div class="text-right"><label class="field-label !text-blue-500">Refund Due</label><div class="font-black text-blue-600 text-2xl leading-none" id="display-refund-due">฿0</div></div>
@@ -361,7 +361,7 @@
             </div>
             <div class="p-4 flex flex-col gap-3">
                 <p class="text-sm font-bold text-slate-500 uppercase">Paste confirmation text from parser here:</p>
-                <textarea id="import-textarea" rows="6" class="w-full bg-slate-50 border border-slate-300 font-bold text-sm p-2 rounded outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g. fabi confirmed his stay!&#10;Arrive on May/05/2026 and leave on Jun/04/2026..."></textarea>
+                <textarea id="import-textarea" rows="6" class="w-full bg-slate-50 border border-slate-300 font-bold text-sm p-2 rounded outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g. John confirmed his stay!&#10;Arrive on May/05/2026 and leave on Jun/04/2026..."></textarea>
                 <div class="flex gap-2 justify-end mt-2">
                     <button onclick="document.getElementById('import-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button>
                     <button onclick="window.processImport()" class="px-8 py-2 bg-indigo-600 text-white rounded-lg font-black text-sm uppercase">Parse & Save</button>
@@ -372,27 +372,32 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration
-        const personalConfig = {
-            apiKey: "AIzaSyDd_i6as2LtvNWE1I44HFCU0LyJ4iO7KKQ",
-            authDomain: "volcalendar1.firebaseapp.com",
-            projectId: "volcalendar1",
-            storageBucket: "volcalendar1.firebasestorage.app",
-            messagingSenderId: "1081934202587",
-            appId: "1:1081934202587:web:28b226efb37216a2442efe"
+        // --- ACCESS CONTROL LISTS ---
+        // UPDATE THESE EMAILS TO YOUR ACTUAL GOOGLE ACCOUNTS
+        const ADMIN_EMAILS = ['loren@wildandwandering.com']; 
+        const STAFF_EMAILS = ['wetkpg@gmail.com']; 
+
+        // Firebase Configuration (SWIMSPMS)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyz--TlQZf_d-YNxhtGCV29LuFoRBfEeU",
+            authDomain: "swimspms.firebaseapp.com",
+            projectId: "swimspms",
+            storageBucket: "swimspms.firebasestorage.app",
+            messagingSenderId: "989960113115",
+            appId: "1:989960113115:web:a99e08a23a36ff4289f5fe"
         };
 
-        const envConfig = JSON.parse(window.__firebase_config || '{}');
-        const finalConfig = personalConfig.apiKey ? personalConfig : envConfig;
-        const appId = 'vol-calendar-wet-v1'; // Locked to ensure Canvas and Live use exact same DB folder
-        const app = initializeApp(finalConfig);
+        const appId = 'hotel-pms-v1'; 
+        const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
         const db = getFirestore(app);
 
         // State & Constants
+        let currentUserRole = null; 
         const DEPOSIT_VAL = 3000;
         let staff = [];
         let viewStart = new Date(); viewStart.setHours(12,0,0,0);
@@ -404,7 +409,6 @@
         
         // Full Moon Party Dates 2026
         const fmpDates = ["2026-01-03", "2026-02-02", "2026-03-03", "2026-04-02", "2026-05-01", "2026-06-01", "2026-06-29", "2026-07-31", "2026-08-28", "2026-09-26", "2026-10-27", "2026-11-24", "2026-12-24", "2026-12-31"];
-
         const countries = ["Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"].sort();
 
         // Icon Helpers
@@ -412,7 +416,6 @@
         const ICONS = { D: makeIcon("$", "#eab308", "white"), H: makeIcon("H", "#f15a24"), B: makeIcon("B", "#003580"), A: makeIcon("A", "#888") };
         const to15MAR = d => !d || isNaN(d.getTime()) ? "---" : `${d.getDate()}${mNames[d.getMonth()]}${d.getFullYear().toString().substr(-2)}`;
 
-        // Strict Flat Date Math: Computes integer days between two dates, ignoring timezone drift
         const getDayIndex = (dateStr) => {
             const [y, m, d] = dateStr.split('-');
             const target = Date.UTC(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
@@ -420,24 +423,75 @@
             return Math.round((target - anchor) / 86400000);
         };
 
-        const init = async () => {
-            try {
-                // If using a personal Firebase Config, do NOT attempt to use Canvas custom tokens. Go straight to Anonymous.
-                if (personalConfig.apiKey) {
-                    await signInAnonymously(auth);
-                } else {
-                    const token = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : null;
-                    if (token) await signInWithCustomToken(auth, token); else await signInAnonymously(auth);
-                }
-            } catch(e) { await signInAnonymously(auth); }
+        const createLoginUI = () => {
+            let loginUI = document.getElementById('login-ui');
+            if(!loginUI) {
+                loginUI = document.createElement('div');
+                loginUI.id = 'login-ui';
+                loginUI.className = 'loading-overlay';
+                loginUI.style.zIndex = '10000';
+                loginUI.innerHTML = `
+                    <div class="bg-white p-8 rounded-xl shadow-2xl text-center border-2 border-slate-800 max-w-sm w-11/12">
+                        <h2 class="text-3xl font-black mb-2 uppercase text-slate-800 tracking-tighter">SWIMS PMS</h2>
+                        <p class="text-slate-500 mb-8 font-bold text-sm uppercase">Authorized Personnel Only</p>
+                        <button onclick="window.loginWithGoogle()" class="px-6 py-3 bg-blue-600 text-white rounded shadow-lg font-black uppercase hover:bg-blue-700 w-full flex items-center justify-center gap-2 transition-all active:scale-95">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"/></svg>
+                            Sign in with Google
+                        </button>
+                    </div>`;
+                document.body.appendChild(loginUI);
+            }
+            loginUI.style.display = 'flex';
+        };
 
+        window.loginWithGoogle = () => {
+            signInWithPopup(auth, provider).catch(error => {
+                console.error("Login failed:", error);
+                window.showAlert("Login failed. Please try again.");
+            });
+        };
+
+        const applyRoleRestrictions = () => {
+            if (currentUserRole === 'staff') {
+                // Hide global action buttons
+                const importBtn = document.querySelector('button[onclick="window.openImportModal()"]');
+                const addStaffBtn = document.querySelector('button[onclick="window.openStaffModal()"]');
+                if(importBtn) importBtn.style.display = 'none';
+                if(addStaffBtn) addStaffBtn.style.display = 'none';
+            }
+        };
+
+        const init = () => {
             onAuthStateChanged(auth, (user) => {
                 if (user) {
+                    const email = user.email.toLowerCase();
+                    if (ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email)) {
+                        currentUserRole = 'admin';
+                    } else if (STAFF_EMAILS.map(e => e.toLowerCase()).includes(email)) {
+                        currentUserRole = 'staff';
+                    } else {
+                        // Unauthorized user
+                        signOut(auth);
+                        window.showAlert("Access Denied: Your email address is not authorized to access this system.");
+                        createLoginUI();
+                        return;
+                    }
+
+                    // Authorized! Hide login & bootloader
+                    const loginUI = document.getElementById('login-ui');
+                    if(loginUI) loginUI.style.display = 'none';
+                    document.getElementById('boot-loader').style.display = 'none';
+
+                    applyRoleRestrictions();
+
                     onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => {
                         staff = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                        document.getElementById('boot-loader').style.display = 'none';
                         window.render();
                     }, (err) => console.error("Snapshot error:", err));
+
+                } else {
+                    document.getElementById('boot-loader').style.display = 'none';
+                    createLoginUI();
                 }
             });
 
@@ -445,7 +499,7 @@
             countries.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; cSel.appendChild(opt); });
             
             document.getElementById('footer-booking-icons').innerHTML = `<div class="legend-item">${ICONS.D} DEPOSIT</div><div class="legend-item">${ICONS.H} HW</div><div class="legend-item">${ICONS.B} BDC</div><div class="legend-item">${ICONS.A} AGODA</div>`;
-            document.getElementById('footer-job-icons').innerHTML = `<div class="legend-item"><i data-lucide="palette" size="16"></i> ART</div><div class="legend-item"><i data-lucide="megaphone" size="16"></i> SOCIALS</div><div class="legend-item"><i data-lucide="beer" size="16"></i> BAR</div>`;
+            document.getElementById('footer-job-icons').innerHTML = `<div class="legend-item"><i data-lucide="palette" size="16"></i> VIP</div><div class="legend-item"><i data-lucide="megaphone" size="16"></i> SOCIALS</div><div class="legend-item"><i data-lucide="beer" size="16"></i> GROUP</div>`;
             
             document.getElementById('modal-icon-d').innerHTML = `${ICONS.D} DEPOSIT`;
             document.getElementById('modal-icon-h').innerHTML = `${ICONS.H} HOSTELWORLD`;
@@ -511,9 +565,7 @@
             const bedGroups = {};
             
             // Pre-populate permanent room 211
-            for(let i=1; i<=14; i++) {
-                bedGroups[`211-${i}`] = [];
-            }
+            for(let i=1; i<=14; i++) { bedGroups[`211-${i}`] = []; }
 
             activeStaff.forEach(s => {
                 const k = (s.room && s.bed) ? `${s.room}-${s.bed}` : 'NONE';
@@ -525,7 +577,6 @@
             
             Object.keys(bedGroups).forEach(key => {
                 if (key === 'NONE') {
-                    // Only process NONE staff who OVERLAP the current view!
                     const overlappingNone = bedGroups[key].filter(s => {
                         const [inY, inM, inD] = s.checkIn.split('-');
                         const [outY, outM, outD] = s.checkOut.split('-');
@@ -561,11 +612,9 @@
                 }
             });
 
-            // Fill with blank rows if short
             let currentLength = timelineBeds.length;
             while (timelineBeds.length < 15) { timelineBeds.push({ label: '—', staff: [], isTemp: true, isUnassigned: false }); }
 
-            // Sorting: Rooms first, Temp Fillers next, NONE rows at the bottom
             timelineBeds.sort((a,b) => {
                 const typeA = a.isUnassigned ? 2 : (a.isTemp ? 1 : 0);
                 const typeB = b.isUnassigned ? 2 : (b.isTemp ? 1 : 0);
@@ -575,7 +624,6 @@
 
             timelineBeds.forEach((bedObj, index) => {
                 const isFirstUnassigned = bedObj.isUnassigned && (index === 0 || !timelineBeds[index-1].isUnassigned);
-                
                 const row = document.createElement('div'); 
                 row.className = `timeline-grid bed-row ${isFirstUnassigned ? 'mt-4 border-t-4 border-slate-300 border-dashed' : ''}`;
                 
@@ -587,14 +635,15 @@
                     const isToday = days[i].toDateString() === new Date().toDateString();
                     cell.className = `day-column ${fmpClass} ${isToday ? 'day-today' : ''} ${bedObj.isUnassigned ? 'bg-amber-50/50' : ''}`;
                     
-                    // Hover crosshair logic
                     cell.dataset.colIndex = i;
                     cell.onmouseenter = () => { document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.add('hover-col')); };
                     cell.onmouseleave = () => { document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.remove('hover-col')); };
 
                     cell.onclick = () => { 
-                        const parts = bedObj.label.startsWith('NONE') || bedObj.label === '—' ? ["", ""] : bedObj.label.split('-');
-                        window.quickAdd(bedObj.isTemp || bedObj.isUnassigned ? "" : parts[0], bedObj.isTemp || bedObj.isUnassigned ? "" : parts[1], days[i]); 
+                        if(currentUserRole === 'admin') {
+                            const parts = bedObj.label.startsWith('NONE') || bedObj.label === '—' ? ["", ""] : bedObj.label.split('-');
+                            window.quickAdd(bedObj.isTemp || bedObj.isUnassigned ? "" : parts[0], bedObj.isTemp || bedObj.isUnassigned ? "" : parts[1], days[i]); 
+                        }
                     }; 
                     row.appendChild(cell);
                 }
@@ -606,8 +655,6 @@
                     if (exactStart < daysToShow && exactEnd > 0) {
                         const diffStart = Math.max(0, exactStart);
                         const diffEnd = Math.min(daysToShow, exactEnd);
-                        
-                        // Strict CSS calc to avoid Sidebar-width percentage bugs
                         const startFraction = diffStart / daysToShow;
                         const widthFraction = (diffEnd - diffStart) / daysToShow;
                         
@@ -681,12 +728,15 @@
         window.jumpToDate = (val) => { if(!val) return; viewStart = new Date(val + "T12:00:00"); document.getElementById('jump-date').value = ""; window.render(); };
         
         window.openStaffModal = () => { 
+            if(currentUserRole === 'staff') return; // Security Check
+
             const modal = document.getElementById('staff-modal'), form = document.getElementById('staff-form'); 
             if (form) form.reset(); 
             document.getElementById('staff-id').value = ""; 
-            document.getElementById('modal-title').innerText = "Add Volunteer"; 
+            document.getElementById('modal-title').innerText = "Add Booking"; 
             document.getElementById('delete-btn').style.display = 'none'; 
             document.getElementById('split-btn').style.display = 'none';
+            document.querySelector('#staff-form button[type="submit"]').style.display = 'block';
             
             const rInput = document.getElementById('room-name'), bInput = document.getElementById('bed-number');
             rInput.disabled = true; bInput.disabled = true;
@@ -700,9 +750,10 @@
         
         window.closeStaffModal = () => { document.getElementById('staff-modal').style.display = 'none'; };
         
-        window.quickAdd = (room, bed, date) => { window.openStaffModal(); document.getElementById('room-name').value = ""; document.getElementById('bed-number').value = ""; const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0'); document.getElementById('check-in').value = `${y}-${m}-${d}`; const out = new Date(date); out.setDate(date.getDate() + 14); const oy = out.getFullYear(), om = String(out.getMonth() + 1).padStart(2, '0'), od = String(out.getDate()).padStart(2, '0'); document.getElementById('check-out').value = `${oy}-${om}-${od}`; window.syncLabels(); };
+        window.quickAdd = (room, bed, date) => { window.openStaffModal(); document.getElementById('room-name').value = room; document.getElementById('bed-number').value = bed; const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0'); document.getElementById('check-in').value = `${y}-${m}-${d}`; const out = new Date(date); out.setDate(date.getDate() + 1); const oy = out.getFullYear(), om = String(out.getMonth() + 1).padStart(2, '0'), od = String(out.getDate()).padStart(2, '0'); document.getElementById('check-out').value = `${oy}-${om}-${od}`; window.syncLabels(); };
 
         window.requestSplit = () => {
+            if(currentUserRole === 'staff') return;
             const id = document.getElementById('staff-id').value;
             const s = staff.find(x => x.id === id);
             if (!s) return;
@@ -735,6 +786,7 @@
         };
 
         window.openImportModal = () => {
+            if(currentUserRole === 'staff') return;
             document.getElementById('import-textarea').value = '';
             document.getElementById('import-modal').style.display = 'flex';
         };
@@ -744,12 +796,10 @@
             if (!text) return;
 
             try {
-                // Parse Names
                 const firstLine = text.split('\n')[0].trim();
                 const namePart = firstLine.split(/ confirmed | have confirmed /i)[0].trim();
                 let names = namePart.split(/ and /i).map(n => n.trim().toUpperCase());
                 
-                // Parse Dates
                 const dateMatch = text.match(/Arrive on\s*([a-zA-Z]{3}\/\d{1,2}\/\d{4})\s*and leave on\s*([a-zA-Z]{3}\/\d{1,2}\/\d{4})/i);
                 if (!dateMatch) {
                     window.showAlert("Could not find arrival and departure dates in the expected format.");
@@ -766,14 +816,12 @@
                 const checkIn = parseDate(dateMatch[1]);
                 const checkOut = parseDate(dateMatch[2]);
 
-                // Parse Job (BAR IGNORED)
                 let job = 'none';
                 if (/\b(art|arts|paint|painting)\b/i.test(text)) job = 'art';
                 else if (/\b(social|socials|photo|photography|video)\b/i.test(text)) job = 'socials';
 
                 let firstId = null;
 
-                // Save Entries
                 for (let i = 0; i < names.length; i++) {
                     const name = names[i];
                     let notes = "";
@@ -809,7 +857,6 @@
 
                 document.getElementById('import-modal').style.display = 'none';
                 
-                // Wait for Firestore to sync locally, then open edit modal
                 const checkSyncAndEdit = (idToOpen) => {
                     let attempts = 0;
                     const checkSync = setInterval(() => {
@@ -818,12 +865,11 @@
                             clearInterval(checkSync);
                             window.editStaff(idToOpen, true);
                         } else if (attempts > 30) {
-                            clearInterval(checkSync); // Timeout safety fallback
+                            clearInterval(checkSync);
                         }
                     }, 100);
                 };
 
-                // Single person: open immediately. Two people: alert first, then open first person.
                 if (names.length > 1) {
                     window.showAlert(`Successfully imported ${names.length} bookings. Opening the first one for review...`, false, () => {
                         checkSyncAndEdit(firstId);
@@ -839,7 +885,10 @@
         };
 
         document.getElementById('staff-form').onsubmit = async (e) => {
-            e.preventDefault(); const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value;
+            e.preventDefault(); 
+            if(currentUserRole === 'staff') return; // Prevent saving if staff
+
+            const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value;
             if (cin >= cout) { window.showAlert("INVALID DATES:\nDeparture must be after arrival."); return; }
             const id = document.getElementById('staff-id').value || Math.random().toString(36).substr(2, 9);
             const entry = { id, name: document.getElementById('staff-name').value.trim().toUpperCase(), status: document.getElementById('staff-status').value, room: document.getElementById('room-name').value.trim().toUpperCase(), bed: document.getElementById('bed-number').value, checkIn: cin, checkOut: cout, country: document.getElementById('staff-country').value, contact: document.getElementById('staff-contact').value, job: document.getElementById('staff-job').value, notes: document.getElementById('staff-notes').value, ledger: { deposit: { paid: document.getElementById('paid-deposit').checked, ref: document.getElementById('ref-deposit').checked }, agoda: { amt: document.getElementById('amt-agoda').value, ref: document.getElementById('ref-agoda').checked }, hostelworld: { amt: document.getElementById('amt-hostelworld').value, ref: document.getElementById('ref-hostelworld').checked }, booking: { amt: document.getElementById('amt-booking').value, ref: document.getElementById('ref-booking').checked } } };
@@ -853,7 +902,10 @@
 
         window.editStaff = (id, justImported = false) => {
             const s = staff.find(x => x.id === id); if (!s) return;
-            document.getElementById('modal-title').innerText = "Edit Volunteer"; document.getElementById('staff-id').value = s.id; document.getElementById('staff-name').value = s.name; document.getElementById('staff-status').value = s.status; 
+            document.getElementById('modal-title').innerText = currentUserRole === 'staff' ? "View Booking Details" : "Edit Booking"; 
+            document.getElementById('staff-id').value = s.id; 
+            document.getElementById('staff-name').value = s.name; 
+            document.getElementById('staff-status').value = s.status; 
             
             const rInput = document.getElementById('room-name'), bInput = document.getElementById('bed-number');
             if (justImported) {
@@ -869,12 +921,25 @@
             document.getElementById('room-name').value = s.room || ""; document.getElementById('bed-number').value = s.bed || ""; document.getElementById('check-in').value = s.checkIn; document.getElementById('check-out').value = s.checkOut; document.getElementById('staff-country').value = s.country; document.getElementById('staff-contact').value = s.contact || ""; document.getElementById('staff-job').value = s.job || "none"; document.getElementById('staff-notes').value = s.notes || ""; window.syncLabels();
             const L = s.ledger; document.getElementById('paid-deposit').checked = L.deposit.paid; document.getElementById('ref-deposit').checked = L.deposit.ref; document.getElementById('amt-agoda').value = L.agoda.amt || ""; document.getElementById('ref-agoda').checked = L.agoda.ref; document.getElementById('amt-hostelworld').value = L.hostelworld.amt || ""; document.getElementById('ref-hostelworld').checked = L.hostelworld.ref; document.getElementById('amt-booking').value = L.booking.amt || ""; document.getElementById('ref-booking').checked = L.booking.ref;
             window.calcRefund(); 
-            document.getElementById('delete-btn').style.display = 'block'; 
-            document.getElementById('split-btn').style.display = 'block';
+            
+            // Apply Staff Display Logic
+            if(currentUserRole === 'staff') {
+                document.getElementById('delete-btn').style.display = 'none'; 
+                document.getElementById('split-btn').style.display = 'none';
+                document.querySelector('#staff-form button[type="submit"]').style.display = 'none';
+                
+                // Optional: You can iterate through inputs here and set disabled=true if you want to prevent them from typing at all
+            } else {
+                document.getElementById('delete-btn').style.display = 'block'; 
+                document.getElementById('split-btn').style.display = 'block';
+                document.querySelector('#staff-form button[type="submit"]').style.display = 'block';
+            }
+
             document.getElementById('staff-modal').style.display = 'flex';
         };
 
         window.requestDelete = () => {
+            if(currentUserRole === 'staff') return;
             const name = document.getElementById('staff-name').value;
             window.showAlert(`Are you sure you want to permanently delete the record for ${name}?`, true, async () => {
                 const id = document.getElementById('staff-id').value;
@@ -892,6 +957,5 @@
 
         init();
     </script>
-    <script src="https://loren-6q.github.io/WETNav/nav.js"></script>
 </body>
 </html>
