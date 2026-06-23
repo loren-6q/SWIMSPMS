@@ -31,10 +31,13 @@
         .timeline-grid { display: grid; grid-template-columns: var(--sidebar-w) repeat(var(--days), minmax(40px, 1fr)); width: max-content; min-width: 100%; }
         .zoom-wide-mode .timeline-grid { grid-template-columns: var(--sidebar-w) repeat(var(--days), minmax(140px, 1fr)); }
 
-        .day-column { border-right: 1px solid #e2e8f0; height: 100%; position: relative; cursor: cell; transition: background-color 0.1s; }
+        .day-column { border-right: 1px solid #e2e8f0; height: 100%; position: relative; cursor: cell; }
         .bed-row { height: 28px; border-bottom: 1px solid #cbd5e1; position: relative; }
         
-        .hover-col { background-color: rgba(0, 0, 0, 0.06) !important; }
+        /* Transparent overlay system to preserve explicit background colors while highlighting */
+        .day-column::after { content: ''; position: absolute; inset: 0; pointer-events: none; transition: background-color 0.1s; z-index: 5; }
+        .hover-col::after { background-color: rgba(0, 0, 0, 0.08); }
+        .bed-row:hover .day-column::after { background-color: rgba(0, 0, 0, 0.04); }
         
         .day-fmp-dark { background-color: rgba(225, 29, 72, 0.4) !important; }
         .day-fmp-medium { background-color: rgba(249, 115, 22, 0.25) !important; }
@@ -300,7 +303,7 @@
                             <label class="field-label text-blue-600 mb-0">Assigned</label>
                             <button type="button" onclick="window.addRoomSelect()" class="text-[10px] font-black uppercase text-blue-600 bg-blue-100 px-1.5 py-1 leading-none rounded hover:bg-blue-200">+ ADD</button>
                         </div>
-                        <div id="assigned-rooms-container" class="max-h-24 overflow-y-auto no-scrollbar border border-slate-200 rounded p-1 bg-slate-50 flex flex-col gap-1">
+                        <div id="assigned-rooms-container" class="max-h-24 overflow-x-hidden overflow-y-auto no-scrollbar border border-slate-200 rounded p-1 bg-slate-50 flex flex-col gap-1">
                             <!-- Selects dynamically injected here -->
                         </div>
                     </div>
@@ -399,8 +402,8 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
             <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm"><span>Parse Confirmation Email</span><button type="button" onclick="document.getElementById('email-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div>
             <div class="p-4 flex flex-col gap-3">
-                <p class="text-sm font-bold text-slate-500 leading-tight">Paste the text of an AirBnB or Hostelworld confirmation email here. We will build the extraction engine for this next!</p>
-                <textarea id="email-textarea" rows="8" class="w-full bg-slate-50 border border-slate-300 font-mono text-[10px] p-2 rounded outline-none focus:ring-2 focus:ring-purple-500 whitespace-pre" placeholder="Paste email text here..."></textarea>
+                <p class="text-sm font-bold text-slate-500 leading-tight">Paste the text of an AirBnB or Booking.com confirmation directly from the web or email!</p>
+                <textarea id="email-textarea" rows="8" class="w-full bg-slate-50 border border-slate-300 font-mono text-[10px] p-2 rounded outline-none focus:ring-2 focus:ring-purple-500 whitespace-pre" placeholder="Paste email or web text here..."></textarea>
                 <div class="flex gap-2 justify-end mt-2">
                     <button onclick="document.getElementById('email-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button>
                     <button onclick="window.parseEmail()" class="px-8 py-2 bg-purple-600 text-white rounded-lg font-black text-sm uppercase flex items-center gap-1"><i data-lucide="zap" size="16"></i> Extract</button>
@@ -450,7 +453,7 @@
             'af': 'Afghanistan', 'al': 'Albania', 'dz': 'Algeria', 'as': 'American Samoa', 'ad': 'Andorra', 'ao': 'Angola', 'ai': 'Anguilla', 'aq': 'Antarctica', 'ag': 'Antigua and Barbuda', 'ar': 'Argentina', 'am': 'Armenia', 'aw': 'Aruba', 'au': 'Australia', 'at': 'Austria', 'az': 'Azerbaijan', 'bs': 'Bahamas', 'bh': 'Bahrain', 'bd': 'Bangladesh', 'bb': 'Barbados', 'by': 'Belarus', 'be': 'Belgium', 'bz': 'Belize', 'bj': 'Benin', 'bm': 'Bermuda', 'bt': 'Bhutan', 'bo': 'Bolivia', 'bq': 'Bonaire', 'ba': 'Bosnia and Herzegovina', 'bw': 'Botswana', 'bv': 'Bouvet Island', 'br': 'Brazil', 'io': 'British Indian Ocean Territory', 'bn': 'Brunei', 'bg': 'Bulgaria', 'bf': 'Burkina Faso', 'bi': 'Burundi', 'cv': 'Cabo Verde', 'kh': 'Cambodia', 'cm': 'Cameroon', 'ca': 'Canada', 'ky': 'Cayman Islands', 'cf': 'Central African Republic', 'td': 'Chad', 'cl': 'Chile', 'cn': 'China', 'cx': 'Christmas Island', 'cc': 'Cocos Islands', 'co': 'Colombia', 'km': 'Comoros', 'cd': 'Congo (DRC)', 'cg': 'Congo', 'ck': 'Cook Islands', 'cr': 'Costa Rica', 'hr': 'Croatia', 'cu': 'Cuba', 'cw': 'Curaçao', 'cy': 'Cyprus', 'cz': 'Czechia', 'ci': "Côte d'Ivoire", 'dk': 'Denmark', 'dj': 'Djibouti', 'dm': 'Dominica', 'do': 'Dominican Republic', 'ec': 'Ecuador', 'eg': 'Egypt', 'sv': 'El Salvador', 'gq': 'Equatorial Guinea', 'er': 'Eritrea', 'ee': 'Estonia', 'sz': 'Eswatini', 'et': 'Ethiopia', 'fk': 'Falkland Islands', 'fo': 'Faroe Islands', 'fj': 'Fiji', 'fi': 'Finland', 'fr': 'France', 'gf': 'French Guiana', 'pf': 'French Polynesia', 'tf': 'French Southern Territories', 'ga': 'Gabon', 'gm': 'Gambia', 'ge': 'Georgia', 'de': 'Germany', 'gh': 'Ghana', 'gi': 'Gibraltar', 'gr': 'Greece', 'gl': 'Greenland', 'gd': 'Grenada', 'gp': 'Guadeloupe', 'gu': 'Guam', 'gt': 'Guatemala', 'gg': 'Guernsey', 'gn': 'Guinea', 'gw': 'Guinea-Bissau', 'gy': 'Guyana', 'ht': 'Haiti', 'hm': 'Heard Island', 'va': 'Holy See', 'hn': 'Honduras', 'hk': 'Hong Kong', 'hu': 'Hungary', 'is': 'Iceland', 'in': 'India', 'id': 'Indonesia', 'ir': 'Iran', 'iq': 'Iraq', 'ie': 'Ireland', 'im': 'Isle of Man', 'il': 'Israel', 'it': 'Italy', 'jm': 'Jamaica', 'jp': 'Japan', 'jo': 'Jordan', 'kz': 'Kazakhstan', 'ke': 'Kenya', 'ki': 'Kiribati', 'kp': 'North Korea', 'kr': 'South Korea', 'kw': 'Kuwait', 'kg': 'Kyrgyzstan', 'la': 'Laos', 'lv': 'Latvia', 'lb': 'Lebanon', 'ls': 'Lesotho', 'lr': 'Liberia', 'ly': 'Libya', 'li': 'Liechtenstein', 'lt': 'Lithuania', 'lu': 'Luxembourg', 'mo': 'Macao', 'mg': 'Madagascar', 'mw': 'Malawi', 'my': 'Malaysia', 'mv': 'Maldives', 'ml': 'Mali', 'mt': 'Malta', 'mh': 'Marshall Islands', 'mq': 'Martinique', 'mr': 'Mauritania', 'mu': 'Mauritius', 'yt': 'Mayotte', 'mx': 'Mexico', 'fm': 'Micronesia', 'md': 'Moldova', 'mc': 'Monaco', 'mn': 'Mongolia', 'me': 'Montenegro', 'ms': 'Montserrat', 'ma': 'Morocco', 'mz': 'Mozambique', 'mm': 'Myanmar', 'na': 'Namibia', 'nr': 'Nauru', 'np': 'Nepal', 'nl': 'Netherlands', 'nc': 'New Caledonia', 'nz': 'New Zealand', 'ni': 'Nicaragua', 'ne': 'Niger', 'ng': 'Nigeria', 'nu': 'Niue', 'nf': 'Norfolk Island', 'mp': 'Northern Mariana Islands', 'no': 'Norway', 'om': 'Oman', 'pk': 'Pakistan', 'pw': 'Palau', 'ps': 'Palestine', 'pa': 'Panama', 'pg': 'Papua New Guinea', 'py': 'Paraguay', 'pe': 'Peru', 'ph': 'Philippines', 'pn': 'Pitcairn', 'pl': 'Poland', 'pt': 'Portugal', 'pr': 'Puerto Rico', 'qa': 'Qatar', 'mk': 'North Macedonia', 'ro': 'Romania', 'ru': 'Russia', 'rw': 'Rwanda', 're': 'Réunion', 'bl': 'Saint Barthélemy', 'sh': 'Saint Helena', 'kn': 'Saint Kitts and Nevis', 'lc': 'Saint Lucia', 'mf': 'Saint Martin', 'pm': 'Saint Pierre and Miquelon', 'vc': 'Saint Vincent', 'ws': 'Samoa', 'sm': 'San Marino', 'st': 'Sao Tome and Principe', 'sa': 'Saudi Arabia', 'sn': 'Senegal', 'rs': 'Serbia', 'sc': 'Seychelles', 'sl': 'Sierra Leone', 'sg': 'Singapore', 'sx': 'Sint Maarten', 'sk': 'Slovakia', 'si': 'Slovenia', 'sb': 'Solomon Islands', 'so': 'Somalia', 'za': 'South Africa', 'gs': 'South Georgia', 'ss': 'South Sudan', 'es': 'Spain', 'lk': 'Sri Lanka', 'sd': 'Sudan', 'sr': 'Suriname', 'sj': 'Svalbard', 'se': 'Sweden', 'ch': 'Switzerland', 'sy': 'Syria', 'tw': 'Taiwan', 'tj': 'Tajikistan', 'tz': 'Tanzania', 'tl': 'Timor-Leste', 'tg': 'Togo', 'tk': 'Tokelau', 'to': 'Tonga', 'tt': 'Trinidad and Tobago', 'tn': 'Tunisia', 'tr': 'Turkey', 'tm': 'Turkmenistan', 'tc': 'Turks and Caicos Islands', 'tv': 'Tuvalu', 'ug': 'Uganda', 'ua': 'Ukraine', 'ae': 'United Arab Emirates', 'gb': 'United Kingdom', 'um': 'U.S. Outlying Islands', 'us': 'United States', 'uy': 'Uruguay', 'uz': 'Uzbekistan', 'vu': 'Vanuatu', 've': 'Venezuela', 'vn': 'Vietnam', 'ye': 'Yemen', 'zm': 'Zambia', 'zw': 'Zimbabwe', 'ax': 'Åland Islands'
         };
         const uniqueCountries = [...new Set(Object.values(rawCountryMap))].filter(c => c !== 'Thailand').sort();
-        const countries = ["Thailand", ...uniqueCountries];
+        const countries = ["[UNKNOWN]", "Thailand", ...uniqueCountries];
 
         const hotelRooms = [
             { id: "B1", type: "OV Deluxe", bed: "KING", floor: 1, order: 101 },
@@ -1002,6 +1005,14 @@
             document.getElementById('modal-guest-name-display').innerText = f || l ? `${f} ${l}` : "NEW BOOKING";
         };
 
+        window.toggleGuestProfile = (forceState = null) => {
+            const sec = document.getElementById('guest-profile-section');
+            const icon = document.getElementById('profile-chevron');
+            const isVis = sec.style.display !== 'none';
+            if (forceState === true || (!isVis && forceState === null)) { sec.style.display = 'block'; icon.style.transform = 'rotate(0deg)'; } 
+            else if (forceState === false || (isVis && forceState === null)) { sec.style.display = 'none'; icon.style.transform = 'rotate(-90deg)'; }
+        };
+
         window.checkEmailProxy = (val) => {
             const el = document.getElementById('email');
             const v = val.toLowerCase();
@@ -1023,13 +1034,6 @@
         window.updateStatusColor = (sel) => {
             const c = { 'future': '#2563eb', 'here': '#059669', 'left': '#475569', 'cancelled': '#94a3b8', 'noshow': '#000', 'unconfirmed': '#8b5cf6' };
             sel.style.background = c[sel.value] || '#2563eb';
-        };
-
-        window.toggleBadCC = () => {
-            const box = document.getElementById('bad-cc-box');
-            const isBad = box.dataset.bad === 'true';
-            if(isBad) { box.dataset.bad = 'false'; box.innerHTML = ''; box.classList.remove('bg-red-500', 'border-red-600'); box.classList.add('border-slate-300'); }
-            else { box.dataset.bad = 'true'; box.innerHTML = '<span class="text-white text-[10px] font-black">X</span>'; box.classList.remove('border-slate-300'); box.classList.add('bg-red-500', 'border-red-600'); }
         };
 
         window.calcFinancials = () => {
@@ -1152,7 +1156,7 @@
             wrapper.className = "flex items-center gap-1 mb-1";
             
             const sel = document.createElement('select');
-            sel.className = "assigned-room-select flex-1 bg-blue-50 border-blue-300 text-sm font-bold uppercase text-blue-800 rounded px-1 py-1 outline-none";
+            sel.className = "assigned-room-select flex-1 bg-blue-50 border-blue-300 text-sm font-bold uppercase text-blue-800 rounded px-1 py-1 outline-none w-full text-ellipsis overflow-hidden whitespace-nowrap";
             sel.innerHTML = `<option value="">-- UNASSIGNED --</option>`;
             sel.onchange = window.updateAvailableRooms;
             
@@ -1199,6 +1203,7 @@
             document.getElementById('payments-list').innerHTML = "";
             document.getElementById('net-price').dataset.override = 'false';
             document.getElementById('bad-cc-box').dataset.bad = 'false'; document.getElementById('bad-cc-box').innerHTML = ''; document.getElementById('bad-cc-box').className = 'w-4 h-4 border-2 border-slate-300 rounded mt-0.5 flex items-center justify-center';
+            document.getElementById('staff-country').value = "Thailand";
             
             document.getElementById('assigned-rooms-container').innerHTML = '';
             window.addRoomSelect();
@@ -1285,9 +1290,148 @@
         window.parseEmail = () => {
             const text = document.getElementById('email-textarea').value.trim();
             if(!text) return;
-            window.showAlert("Email Parser logic will be implemented in the next update! We are ready for it.", false, null);
+            
+            let source = 'other', name = '', cin = '', cout = '', pax = 1, total = 0, comm = 0, bookId = '', phone = '', email = '', notes = '', bookedType = '', bookDate = '', country = '[UNKNOWN]';
+
+            const parseAirBnbDate = (str) => {
+                let d = new Date(str + ", " + new Date().getFullYear());
+                if(d.getMonth() > new Date().getMonth() + 6) d.setFullYear(d.getFullYear() - 1);
+                else if (d.getMonth() < new Date().getMonth() - 6) d.setFullYear(d.getFullYear() + 1);
+                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            };
+
+            function parseDateStr(dStr) {
+                try {
+                    const d = new Date(dStr);
+                    if(isNaN(d)) return "";
+                    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                } catch(e) { return ""; }
+            }
+
+            if (text.includes('Reservation Details') && text.includes('Booking.com')) {
+                source = 'booking.com';
+                
+                const nameMatch = text.match(/Guest name:\s*\n([^\n]+)/i);
+                if(nameMatch) name = nameMatch[1].trim();
+                
+                const countryMatch = text.match(/Guest name:\s*\n[^\n]+\s*\n\s*([a-zA-Z]{2})\s*\n/);
+                if(countryMatch && rawCountryMap[countryMatch[1].toLowerCase()]) country = rawCountryMap[countryMatch[1].toLowerCase()];
+                
+                const emailMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/);
+                if(emailMatch) email = emailMatch[1];
+                
+                const phoneMatch = text.match(/(\+\d[\d\s]+)/); 
+                if(phoneMatch) phone = phoneMatch[1].trim();
+
+                const cinMatch = text.match(/Check-in\s*\n(?:[A-Za-z]+,\s*)?([A-Za-z]+\s+\d+,\s*\d{4})/i);
+                if(cinMatch) cin = parseDateStr(cinMatch[1]);
+                
+                const coutMatch = text.match(/Check-out\s*\n(?:[A-Za-z]+,\s*)?([A-Za-z]+\s+\d+,\s*\d{4})/i);
+                if(coutMatch) cout = parseDateStr(coutMatch[1]);
+
+                const recMatch = text.match(/Received\s*\n(?:[A-Za-z]+,\s*)?([A-Za-z]+\s+\d+,\s*\d{4})/i);
+                if(recMatch) bookDate = parseDateStr(recMatch[1]);
+                
+                const typeMatch = text.match(/\((.*)\)\s*\n\s*[A-Z]{3}\s*[\d,.]+/i);
+                if(typeMatch) bookedType = typeMatch[1].trim();
+
+                const paxMatch = text.match(/Total guests:\s*\n(\d+)/i);
+                if(paxMatch) pax = parseInt(paxMatch[1]);
+                
+                const totalMatch = text.match(/Total price\s*\n[^\d]*([\d,.]+)/i);
+                if(totalMatch) total = parseFloat(totalMatch[1].replace(/,/g, ''));
+                
+                const commMatch = text.match(/Commission and charges:\s*\n[^\d]*([\d,.]+)/i);
+                if(commMatch) comm = parseFloat(commMatch[1].replace(/,/g, ''));
+                
+                const idMatch = text.match(/Booking number:\s*\n(\d+)/i);
+                if(idMatch) bookId = idMatch[1];
+
+                const bedPrefMatch = text.match(/BED PREFERENCE:([^\n]+)/i);
+                if (bedPrefMatch) notes += "BED PREF: " + bedPrefMatch[1].trim() + "\n";
+            }
+            else if (text.includes('Airbnb') || text.includes('Confirmation code')) {
+                source = 'airbnb';
+                
+                const nameMatch = text.match(/Reservation\s*confirmed\s*-\s*([^\n]+) arrives/i) || text.match(/([A-Za-z\s]+)\nIdentity verified/i);
+                if(nameMatch) name = nameMatch[1].trim();
+                
+                const airbnbDateMatch = text.match(/Airbnb\s*\n\s*(?:[A-Za-z]+,\s*)?([A-Za-z]+\s+\d+)/i);
+                if (airbnbDateMatch) bookDate = parseAirBnbDate(airbnbDateMatch[1]);
+
+                const typeMatch = text.match(/([^\n]+)\s*\n\s*Room\s*\n\s*Check-in/i);
+                if (typeMatch) bookedType = typeMatch[1].trim();
+
+                const notesMatch = text.match(/Identity verified(?:[^\n]*)\s*\n+([^\n]+)/i);
+                if (notesMatch && !notesMatch[1].includes('Messages from guest') && !notesMatch[1].includes('Send ')) {
+                    notes += notesMatch[1].trim() + "\n";
+                }
+
+                const cinMatch = text.match(/Check-in\s*\n[A-Za-z]+, ([A-Za-z]+ \d+)/i);
+                if(cinMatch) cin = parseAirBnbDate(cinMatch[1]);
+                
+                const coutMatch = text.match(/Checkout\s*\n[A-Za-z]+, ([A-Za-z]+ \d+)/i);
+                if(coutMatch) cout = parseAirBnbDate(coutMatch[1]);
+                
+                const paxMatch = text.match(/Guests\s*\n(\d+)/i) || text.match(/(\d+) adult/i);
+                if(paxMatch) pax = parseInt(paxMatch[1]);
+                
+                const idMatch = text.match(/Confirmation\s*code\s*\n([A-Z0-9]+)/i);
+                if(idMatch) bookId = idMatch[1];
+                
+                const totalMatch = text.match(/Total \([A-Z]+\)\s*\n[^\d]*([\d,.]+)/i);
+                if(totalMatch) total = parseFloat(totalMatch[1].replace(/,/g, ''));
+                
+                const earnMatch = text.match(/You earn\s*\n[^\d]*([\d,.]+)/i);
+                if(earnMatch && total) {
+                    const earn = parseFloat(earnMatch[1].replace(/,/g, ''));
+                    comm = total - earn;
+                }
+            } else {
+                window.showAlert("Could not recognize this format. Please ensure you paste the full text from Booking.com or AirBnB.");
+                return;
+            }
+
+            window.openStaffModal();
             document.getElementById('email-modal').style.display = 'none';
-        }
+
+            const nameParts = name.split(' ');
+            document.getElementById('first-name').value = nameParts[0] || '';
+            document.getElementById('last-name').value = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+            
+            if(cin) document.getElementById('check-in').value = cin;
+            if(cout) document.getElementById('check-out').value = cout;
+            document.getElementById('pax-count').value = pax;
+            
+            document.getElementById('booking-source').value = source;
+            document.getElementById('booking-date').value = bookDate;
+            document.getElementById('booking-id').value = bookId;
+            document.getElementById('phone').value = phone;
+            document.getElementById('email').value = email;
+            document.getElementById('staff-country').value = country;
+            document.getElementById('booked-type').value = bookedType;
+            document.getElementById('staff-notes').value = notes.trim();
+            
+            document.getElementById('total-price').value = Number(total || 0).toFixed(2);
+            
+            document.getElementById('payments-list').innerHTML = '';
+            if(comm > 0) {
+                window.addPaymentRow(cin, comm.toFixed(2), source === 'airbnb' ? 'airbnb-kp' : 'bdc-kp');
+                if (total - comm > 0 && source !== 'airbnb') {
+                    if (text.includes("Payment is facilitated through Payments by Booking.com")) {
+                        window.addPaymentRow(cin, (total - comm).toFixed(2), 'bdc-pay');
+                    }
+                } else if (source === 'airbnb' && total - comm > 0) {
+                     window.addPaymentRow(cin, (total - comm).toFixed(2), 'airbnb-pay');
+                }
+            }
+            
+            window.calcFinancials();
+            window.updateHeaderName();
+            window.checkEmailProxy(email);
+            window.syncLabels();
+            window.updateAvailableRooms();
+        };
 
         window.processCSV = async () => {
             const text = document.getElementById('import-textarea').value.trim(); if (!text) return;
@@ -1594,7 +1738,7 @@
             modalContent.style.position = 'relative';
             modalContent.style.left = 'auto';
             modalContent.style.top = 'auto';
-            modalContent.style.margin = '0';
+            modalContent.style.margin = 'auto';
             
             document.getElementById('staff-id').value = s.id; 
             document.getElementById('first-name').value = s.firstName || ""; 
