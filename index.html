@@ -158,7 +158,6 @@
 
         <div id="calendar-view">
             <div id="calendar-scroll-container" class="bg-white rounded shadow border border-slate-300">
-                <!-- Fused Sticky Timeline Grid Layer -->
                 <div class="timeline-grid sticky top-0 z-40 bg-slate-800 shadow-sm border-b border-slate-700 h-[26px] box-border">
                     <div class="border-r border-slate-700 flex items-center justify-center h-full sticky left-0 z-50 bg-slate-800">
                         <button id="zoom-toggle-btn" onclick="window.toggleZoom()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1 transition-colors"><i data-lucide="zoom-in" size="12"></i> ZOOM: WIDE</button>
@@ -195,7 +194,7 @@
                         <th onclick="window.sortDatabase('lastName')" class="p-2 border-r border-slate-700 hover:bg-slate-700">Guest Name</th>
                         <th onclick="window.sortDatabase('source')" class="p-2 border-r border-slate-700 hover:bg-slate-700">Source</th>
                         <th onclick="window.sortDatabase('checkIn')" class="p-2 border-r border-slate-700 hover:bg-slate-700">Stay Dates</th>
-                        <th onclick="window.sortDatabase('room')" class="p-2 border-r border-slate-700 hover:bg-slate-700">Room</th>
+                        <th onclick="window.sortDatabase('room')" class="p-2 border-r border-slate-700 hover:bg-slate-700">Rooms</th>
                         <th class="p-2 border-r border-slate-700 text-right">Total</th>
                         <th class="p-2 border-r border-slate-700 text-right">Due</th>
                         <th onclick="window.sortDatabase('status')" class="p-2 hover:bg-slate-700">Status</th>
@@ -257,16 +256,19 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-3 gap-2">
                     <div class="flex flex-col">
                         <label class="field-label">Booked Type</label>
                         <input type="text" id="booked-type" class="bg-slate-50 w-full text-sm font-bold uppercase border-slate-300 rounded px-2 py-1" placeholder="--">
                     </div>
-                    <div class="flex flex-col">
-                        <label class="field-label text-blue-600">Assigned Room</label>
-                        <select id="assigned-room" class="bg-blue-50 border-blue-300 w-full text-sm font-bold uppercase text-blue-800">
-                            <option value="">-- UNASSIGNED --</option>
-                        </select>
+                    <div class="flex flex-col col-span-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="field-label text-blue-600">Assigned Rooms</label>
+                            <button type="button" onclick="window.addRoomSelect()" class="text-[10px] font-black uppercase text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded hover:bg-blue-200">+ ADD</button>
+                        </div>
+                        <div id="assigned-rooms-container" class="max-h-24 overflow-y-auto no-scrollbar border border-slate-200 rounded p-1 bg-slate-50 flex flex-col gap-1">
+                            <!-- Selects dynamically injected here -->
+                        </div>
                     </div>
                 </div>
 
@@ -407,77 +409,89 @@
         const countries = Object.values(rawCountryMap).sort((a,b) => a === 'Thailand' ? -1 : (b === 'Thailand' ? 1 : a.localeCompare(b)));
 
         const hotelRooms = [
-            { id: "101", type: "Standard", bed: "", floor: 1, order: 201 },
-            { id: "102", type: "Standard", bed: "", floor: 1, order: 202 },
-            { id: "103", type: "Standard", bed: "", floor: 1, order: 203 },
-            { id: "201", type: "Standard", bed: "2 Twin", floor: 2, order: 204 },
-            { id: "202", type: "Standard", bed: "1 King", floor: 2, order: 205 },
-            { id: "203", type: "Standard", bed: "2 Twin", floor: 2, order: 206 },
-            { id: "204", type: "Standard", bed: "1 King", floor: 2, order: 207 },
-            { id: "205", type: "Standard", bed: "2 Twin", floor: 2, order: 208 },
-            { id: "206", type: "OV Standard", bed: "1 King", floor: 2, order: 301 },
-            { id: "207", type: "Standard", bed: "1 King", floor: 2, order: 209 },
-            { id: "208", type: "Standard", bed: "1 King", floor: 2, order: 210 },
-            { id: "209", type: "Standard", bed: "1 King", floor: 2, order: 211 },
-            { id: "210", type: "Standard", bed: "1 King", floor: 2, order: 212 },
-            { id: "211", type: "Standard", bed: "1 King", floor: 2, order: 213 },
-            { id: "212", type: "OV Standard", bed: "2 Twin", floor: 2, order: 703 },
-            { id: "301", type: "Standard", bed: "Quad", floor: 3, order: 214 },
-            { id: "302", type: "Standard", bed: "Quad", floor: 3, order: 215 },
-            { id: "303", type: "Standard", bed: "Quad", floor: 3, order: 216 },
-            { id: "304", type: "Standard", bed: "Quad", floor: 3, order: 217 },
-            { id: "305", type: "Standard", bed: "1 King 1 Twin", floor: 3, order: 218 },
-            { id: "306", type: "OV Standard", bed: "1 King", floor: 3, order: 302 },
-            { id: "307", type: "Standard", bed: "1 Bunk 1 Twin", floor: 3, order: 219 },
-            { id: "308", type: "Standard", bed: "1 Bunk 1 Twin", floor: 3, order: 220 },
-            { id: "309", type: "Standard", bed: "1 King 1 Twin", floor: 3, order: 221 },
-            { id: "310", type: "Standard", bed: "1 King 1 Twin", floor: 3, order: 222 },
-            { id: "311", type: "OV Standard", bed: "1 King", floor: 3, order: 303 },
-            { id: "A1", type: "OV Superior", bed: "1 King", floor: 1, order: 501 },
-            { id: "A2", type: "OV Superior", bed: "2 Twin", floor: 2, order: 502 },
-            { id: "A3", type: "Superior", bed: "1 King", floor: 1, order: 401 },
-            { id: "A4", type: "Superior", bed: "1 King", floor: 2, order: 402 },
-            { id: "A5", type: "Superior", bed: "1 King", floor: 1, order: 403 },
-            { id: "A6", type: "Superior", bed: "1 King", floor: 2, order: 404 },
-            { id: "A7", type: "Superior", bed: "1 King", floor: 1, order: 405 },
-            { id: "A8", type: "Superior", bed: "2 Twin", floor: 2, order: 406 },
-            { id: "A9", type: "Superior", bed: "1 King", floor: 1, order: 407 },
-            { id: "A10", type: "Superior", bed: "2 Twin", floor: 2, order: 408 },
-            { id: "A11", type: "Superior", bed: "1 King", floor: 1, order: 409 },
-            { id: "A12", type: "Superior", bed: "1 King", floor: 2, order: 410 },
-            { id: "B1", type: "OV Deluxe", bed: "1 King", floor: 1, order: 701 },
-            { id: "B2", type: "OV Deluxe", bed: "2 Twin", floor: 2, order: 702 },
-            { id: "B3", type: "Deluxe", bed: "1 King", floor: 1, order: 601 },
-            { id: "B4", type: "Deluxe", bed: "2 Twin", floor: 2, order: 602 },
-            { id: "B5", type: "Superior", bed: "1 King", floor: 1, order: 411 },
-            { id: "B6", type: "Superior", bed: "2 Twin", floor: 2, order: 412 },
-            { id: "B7", type: "Superior", bed: "1 King", floor: 1, order: 413 },
-            { id: "B8", type: "Superior", bed: "2 Twin", floor: 2, order: 414 },
-            { id: "B9", type: "Superior", bed: "1 King", floor: 1, order: 415 },
-            { id: "B10", type: "Superior", bed: "2 Twin", floor: 2, order: 416 },
-            { id: "B11", type: "Superior", bed: "1 King", floor: 1, order: 417 },
-            { id: "B12", type: "Superior", bed: "2 Twin", floor: 2, order: 418 },
-            { id: "B13", type: "Superior", bed: "1 King", floor: 1, order: 419 },
-            { id: "B14", type: "Superior", bed: "2 Twin", floor: 2, order: 420 },
-            { id: "B15", type: "Superior", bed: "1 King", floor: 1, order: 421 },
-            { id: "B16", type: "Superior", bed: "2 Twin", floor: 2, order: 422 },
-            { id: "B17", type: "Superior", bed: "1 King", floor: 1, order: 423 },
-            { id: "B18", type: "Superior", bed: "2 Twin", floor: 2, order: 424 },
-            { id: "B19", type: "Superior", bed: "", floor: 1, order: 425 },
-            { id: "B20", type: "Superior", bed: "2 Twin", floor: 2, order: 426 },
-            { id: "B21", type: "Superior", bed: "", floor: 1, order: 427 },
+            { id: "B1", type: "OV Deluxe", bed: "KING", floor: 1, order: 101 },
+            { id: "B2", type: "OV Deluxe", bed: "TWIN", floor: 2, order: 102 },
+            { id: "B3", type: "Deluxe", bed: "KING", floor: 1, order: 201 },
+            { id: "B4", type: "Deluxe", bed: "TWIN", floor: 2, order: 202 },
+            { id: "A1", type: "OV Superior", bed: "KING", floor: 1, order: 301 },
+            { id: "A2", type: "OV Superior", bed: "TWIN", floor: 2, order: 302 },
+            { id: "A3", type: "Superior", bed: "KING", floor: 1, order: 401 },
+            { id: "A5", type: "Superior", bed: "KING", floor: 1, order: 402 },
+            { id: "A7", type: "Superior", bed: "KING", floor: 1, order: 403 },
+            { id: "A9", type: "Superior", bed: "KING", floor: 1, order: 404 },
+            { id: "A11", type: "Superior", bed: "KING", floor: 1, order: 405 },
+            { id: "B5", type: "Superior", bed: "KING", floor: 1, order: 406 },
+            { id: "B7", type: "Superior", bed: "KING", floor: 1, order: 407 },
+            { id: "B9", type: "Superior", bed: "KING", floor: 1, order: 408 },
+            { id: "B11", type: "Superior", bed: "KING", floor: 1, order: 409 },
+            { id: "B13", type: "Superior", bed: "KING", floor: 1, order: 410 },
+            { id: "B15", type: "Superior", bed: "KING", floor: 1, order: 411 },
+            { id: "B17", type: "Superior", bed: "KING", floor: 1, order: 412 },
+            { id: "B19", type: "Superior", bed: "", floor: 1, order: 413 },
+            { id: "B21", type: "Superior", bed: "", floor: 1, order: 414 },
+            { id: "A4", type: "Superior", bed: "KING", floor: 2, order: 415 },
+            { id: "A6", type: "Superior", bed: "KING", floor: 2, order: 416 },
+            { id: "A8", type: "Superior", bed: "TWIN", floor: 2, order: 417 },
+            { id: "A10", type: "Superior", bed: "TWIN", floor: 2, order: 418 },
+            { id: "A12", type: "Superior", bed: "KING", floor: 2, order: 419 },
+            { id: "B6", type: "Superior", bed: "TWIN", floor: 2, order: 420 },
+            { id: "B8", type: "Superior", bed: "TWIN", floor: 2, order: 421 },
+            { id: "B10", type: "Superior", bed: "TWIN", floor: 2, order: 422 },
+            { id: "B12", type: "Superior", bed: "TWIN", floor: 2, order: 423 },
+            { id: "B14", type: "Superior", bed: "TWIN", floor: 2, order: 424 },
+            { id: "B16", type: "Superior", bed: "TWIN", floor: 2, order: 425 },
+            { id: "B18", type: "Superior", bed: "TWIN", floor: 2, order: 426 },
+            { id: "B20", type: "Superior", bed: "TWIN", floor: 2, order: 427 },
             { id: "B22", type: "Superior", bed: "", floor: 2, order: 428 },
-            { id: "F1", type: "Budget", bed: "", floor: 1, order: 101 },
-            { id: "F2", type: "Budget", bed: "", floor: 1, order: 102 },
-            { id: "F3", type: "Budget", bed: "", floor: 1, order: 103 },
-            { id: "F4", type: "Budget", bed: "", floor: 1, order: 104 },
-            { id: "F5", type: "Budget", bed: "", floor: 1, order: 105 },
-            { id: "F6", type: "Budget", bed: "", floor: 1, order: 106 },
-            { id: "F7", type: "Budget", bed: "", floor: 1, order: 107 },
-            { id: "F8", type: "Budget", bed: "", floor: 1, order: 108 },
-            { id: "F9", type: "Budget", bed: "", floor: 1, order: 109 },
-            { id: "F10", type: "Budget", bed: "", floor: 1, order: 110 },
-            { id: "F11", type: "Budget", bed: "", floor: 1, order: 111 }
+            { id: "206", type: "OV Standard", bed: "KING", floor: 2, order: 501 },
+            { id: "212", type: "OV Standard", bed: "TWIN", floor: 2, order: 502 },
+            { id: "306", type: "OV Standard", bed: "KING", floor: 3, order: 503 },
+            { id: "311", type: "OV Standard", bed: "KING", floor: 3, order: 504 },
+            { id: "101", type: "Standard", bed: "", floor: 1, order: 601 },
+            { id: "102", type: "Standard", bed: "", floor: 1, order: 602 },
+            { id: "103", type: "Standard", bed: "", floor: 1, order: 603 },
+            { id: "201", type: "Standard", bed: "TWIN", floor: 2, order: 604 },
+            { id: "202", type: "Standard", bed: "TWIN", floor: 2, order: 605 },
+            { id: "203", type: "Standard", bed: "TWIN", floor: 2, order: 606 },
+            { id: "204", type: "Standard", bed: "TWIN", floor: 2, order: 607 },
+            { id: "205", type: "Standard", bed: "TWIN", floor: 2, order: 608 },
+            { id: "207", type: "Standard", bed: "KING", floor: 2, order: 609 },
+            { id: "208", type: "Standard", bed: "KING", floor: 2, order: 610 },
+            { id: "209", type: "Standard", bed: "KING", floor: 2, order: 611 },
+            { id: "210", type: "Standard", bed: "KING", floor: 2, order: 612 },
+            { id: "211", type: "Standard", bed: "KING", floor: 2, order: 613 },
+            { id: "305", type: "Standard", bed: "K+T", floor: 3, order: 614 },
+            { id: "307", type: "Standard", bed: "BUNK+T", floor: 3, order: 615 },
+            { id: "308", type: "Standard", bed: "BUNK+T", floor: 3, order: 616 },
+            { id: "309", type: "Standard", bed: "K+T", floor: 3, order: 617 },
+            { id: "310", type: "Standard", bed: "K+T", floor: 3, order: 618 },
+            { id: "301-1", type: "Dorm", bed: "BUNK", floor: 3, order: 701 },
+            { id: "301-2", type: "Dorm", bed: "BUNK", floor: 3, order: 702 },
+            { id: "301-3", type: "Dorm", bed: "BUNK", floor: 3, order: 703 },
+            { id: "301-4", type: "Dorm", bed: "BUNK", floor: 3, order: 704 },
+            { id: "302-1", type: "Dorm", bed: "BUNK", floor: 3, order: 705 },
+            { id: "302-2", type: "Dorm", bed: "BUNK", floor: 3, order: 706 },
+            { id: "302-3", type: "Dorm", bed: "BUNK", floor: 3, order: 707 },
+            { id: "302-4", type: "Dorm", bed: "BUNK", floor: 3, order: 708 },
+            { id: "303-1", type: "Dorm", bed: "BUNK", floor: 3, order: 709 },
+            { id: "303-2", type: "Dorm", bed: "BUNK", floor: 3, order: 710 },
+            { id: "303-3", type: "Dorm", bed: "BUNK", floor: 3, order: 711 },
+            { id: "303-4", type: "Dorm", bed: "BUNK", floor: 3, order: 712 },
+            { id: "304-1", type: "Dorm", bed: "BUNK", floor: 3, order: 713 },
+            { id: "304-2", type: "Dorm", bed: "BUNK", floor: 3, order: 714 },
+            { id: "304-3", type: "Dorm", bed: "BUNK", floor: 3, order: 715 },
+            { id: "304-4", type: "Dorm", bed: "BUNK", floor: 3, order: 716 },
+            { id: "F1", type: "Budget", bed: "", floor: 1, order: 801 },
+            { id: "F2", type: "Budget", bed: "", floor: 1, order: 802 },
+            { id: "F3", type: "Budget", bed: "", floor: 1, order: 803 },
+            { id: "F4", type: "Budget", bed: "", floor: 1, order: 804 },
+            { id: "F5", type: "Budget", bed: "", floor: 1, order: 805 },
+            { id: "F6", type: "Budget", bed: "", floor: 1, order: 806 },
+            { id: "F7", type: "Budget", bed: "", floor: 1, order: 807 },
+            { id: "F8", type: "Budget", bed: "", floor: 1, order: 808 },
+            { id: "F9", type: "Budget", bed: "", floor: 1, order: 809 },
+            { id: "F10", type: "Budget", bed: "", floor: 1, order: 810 },
+            { id: "F11", type: "Budget", bed: "", floor: 1, order: 811 }
         ];
 
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
@@ -550,13 +564,6 @@
 
             const cSel = document.getElementById('staff-country');
             countries.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; cSel.appendChild(opt); });
-            
-            const aSel = document.getElementById('assigned-room');
-            let currentGroup = ''; let optGroup = null;
-            [...hotelRooms].sort((a,b) => a.order - b.order).forEach(r => {
-                if (r.type !== currentGroup) { optGroup = document.createElement('optgroup'); optGroup.label = `--- ${r.type.toUpperCase()} ---`; aSel.appendChild(optGroup); currentGroup = r.type; }
-                const opt = document.createElement('option'); opt.value = r.id; opt.innerText = `Room ${r.id} (${r.bed})`; optGroup.appendChild(opt);
-            });
 
             window.addEventListener('resize', window.render);
             lucide.createIcons();
@@ -638,16 +645,32 @@
             const timelineRows = [];
             
             // Build Rooms
-            [...hotelRooms].sort((a,b) => a.order - b.order).forEach((r, idx, arr) => {
+            hotelRooms.forEach((r, idx, arr) => {
                 const prevType = idx > 0 ? arr[idx-1].type : null;
                 if (r.type !== prevType) timelineRows.push({ isDivider: true, label: r.type });
                 
-                const roomBookings = activeStaff.filter(s => s.room === r.id && s.status !== 'unconfirmed' && parseYMD(s.checkIn) <= viewEndUTC && parseYMD(s.checkOut) >= viewStartUTC);
+                const roomBookings = activeStaff.filter(s => {
+                    const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                    return rList.includes(r.id) && s.status !== 'unconfirmed' && parseYMD(s.checkIn) <= viewEndUTC && parseYMD(s.checkOut) >= viewStartUTC;
+                });
                 timelineRows.push({ isRoom: true, id: r.id, type: r.type, bed: r.bed, floor: r.floor, bookings: roomBookings });
             });
 
             // Build Unconfirmed/Unassigned Zone
-            const unconfirmed = staff.filter(s => (s.status === 'unconfirmed' || !s.room) && s.status !== 'cancelled' && s.status !== 'noshow' && parseYMD(s.checkIn) <= viewEndUTC && parseYMD(s.checkOut) >= viewStartUTC);
+            const unconfirmed = activeStaff.flatMap(s => {
+                if (parseYMD(s.checkIn) > viewEndUTC || parseYMD(s.checkOut) < viewStartUTC) return [];
+                
+                const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : [""]);
+                
+                if (s.status === 'unconfirmed') {
+                    return Array(rList.length).fill(s);
+                } else {
+                    const unassignedCount = rList.filter(rid => !rid).length;
+                    if (unassignedCount > 0) return Array(unassignedCount).fill(s);
+                }
+                return [];
+            });
+
             if(unconfirmed.length > 0) {
                 timelineRows.push({ isDivider: true, label: "UNCONFIRMED / HOLD", isUnconfirmedZone: true });
                 const rows = [];
@@ -675,14 +698,13 @@
                 row.className = `timeline-grid bed-row`;
                 let headerHtml = '';
                 if(rowDef.isRoom) {
-                    const shortBed = rowDef.bed.replace('1 King', '1K').replace('2 Twin', '2T').replace('1 King 1 Twin', '1K 1T').replace('1 Bunk 1 Twin', '1B 1T');
                     headerHtml = `
                         <div class="flex items-center justify-between px-1 w-full gap-1">
                             <div class="flex items-center gap-0.5 shrink-0">
                                 <span class="text-[13px] font-black text-slate-700">${rowDef.id}</span>
                                 ${getFloorIcon(rowDef.floor)}
                             </div>
-                            <span class="text-[9px] font-bold text-slate-400 text-right leading-[10px] tracking-tighter truncate">${shortBed}</span>
+                            <span class="text-[10px] font-bold text-slate-600 text-right leading-none tracking-tighter truncate">${rowDef.bed}</span>
                         </div>`;
                 } else {
                     headerHtml = `<span class="text-[11px] font-black text-amber-700">${rowDef.label}</span>`;
@@ -739,8 +761,8 @@
                         
                         if (searchTerm && !(s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)) bar.style.opacity = "0.15";
 
-                        const svgUpgFree = `<svg class="w-3.5 h-3.5 text-amber-500 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.6));" fill="currentColor" viewBox="0 0 24 24"><path d="M4 14h4v7h8v-7h4l-8-11z"/></svg>`;
-                        const svgUpgPaid = `<svg class="w-3.5 h-3.5 text-green-500 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.6));" fill="currentColor" viewBox="0 0 24 24"><path d="M4 14h4v7h8v-7h4l-8-11z"/></svg>`;
+                        const svgUpgFree = `<svg class="w-4 h-4 text-yellow-400 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.8));" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 14h7v8h6v-8h7L12 2z"/></svg>`;
+                        const svgUpgPaid = `<svg class="w-4 h-4 text-green-400 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.8));" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 14h7v8h6v-8h7L12 2z"/></svg>`;
                         const svgMailSpec = `<svg class="w-3 h-3 text-red-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><line x1="12" y1="10" x2="12" y2="16" stroke-width="3"></line></svg>`;
                         const svgMailPre = `<svg class="w-3 h-3 text-orange-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><circle cx="12" cy="16" r="1.5" fill="currentColor"></circle></svg>`;
                         const svgMailConf = `<svg class="w-3 h-3 text-slate-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
@@ -779,11 +801,15 @@
                         if (s.emailSpecial) metaTags.push('Special Sent');
                         if (isLinked) metaTags.push(`Linked: ${s.linkedId}`);
 
+                        const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                        const assignedStr = rList.filter(Boolean).length > 0 ? rList.filter(Boolean).join(', ') : 'Unassigned';
+
                         let ttHtml = `<div class="font-black text-[15px] text-blue-300 leading-tight mb-1">${s.firstName||''} ${s.lastName||''}</div>`;
                         ttHtml += `<div>Total: ฿${Number(s.totalPrice || 0).toFixed(2)} | <span class="${due > 0 ? 'text-red-400' : 'text-green-400'}">Due: ฿${due.toFixed(2)} ${isBadCC ? '(*BAD CC*)' : ''}</span></div>`;
                         ttHtml += `<div class="text-slate-300 mt-1">${formatDateShort(s.checkIn)} → ${formatDateShort(s.checkOut)} (${s.pax} PAX)</div>`;
+                        ttHtml += `<div class="text-slate-300 mt-0.5">Rooms: ${assignedStr}</div>`;
                         if(s.bookedType) ttHtml += `<div class="text-slate-300 mt-0.5">Booked: ${s.bookedType}</div>`;
-                        ttHtml += `<div class="text-slate-300">Src: ${(s.source||'other').toUpperCase()}</div>`;
+                        ttHtml += `<div class="text-slate-300 mt-0.5">Src: ${(s.source||'other').toUpperCase()}</div>`;
                         if (metaTags.length > 0) ttHtml += `<div class="mt-1 pt-1 border-t border-slate-600 text-yellow-200 text-[10px] uppercase font-bold max-w-[200px] leading-tight">${metaTags.join(' • ')}</div>`;
                         if (s.phone || s.email) ttHtml += `<div class="mt-1 pt-1 border-t border-slate-600 text-slate-400 text-[10px] leading-tight">${s.phone||''}<br>${s.email||''}</div>`;
 
@@ -822,13 +848,16 @@
                 return nameMatch && statusMatch;
             }).sort((a, b) => {
                 let vA = a[sortKey], vB = b[sortKey];
-                if (sortKey === 'room') { vA = a.room || 'ZZZ'; vB = b.room || 'ZZZ'; }
+                if (sortKey === 'room') { vA = (a.rooms && a.rooms[0]) || a.room || 'ZZZ'; vB = (b.rooms && b.rooms[0]) || b.room || 'ZZZ'; }
                 return sortAsc ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
             });
             filtered.forEach(s => {
                 const due = Number(((s.totalPrice || 0) - (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0)).toFixed(2));
+                const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                const assignedStr = rList.filter(Boolean).length > 0 ? rList.filter(Boolean).join(', ') : '--';
+
                 const tr = document.createElement('tr'); tr.className = "border-b hover:bg-slate-50 cursor-pointer"; tr.onclick = () => window.editStaff(s.id);
-                tr.innerHTML = `<td class="p-2 border-r">${s.firstName||''} ${s.lastName||''}</td><td class="p-2 border-r uppercase">${s.source||''}</td><td class="p-2 border-r">${s.checkIn?s.checkIn.substr(5):''} to ${s.checkOut?s.checkOut.substr(5):''}</td><td class="p-2 border-r">${s.room || '--'}</td><td class="p-2 border-r text-right font-black">฿${Number(s.totalPrice||0).toFixed(2)}</td><td class="p-2 border-r text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due.toFixed(2)}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`;
+                tr.innerHTML = `<td class="p-2 border-r">${s.firstName||''} ${s.lastName||''}</td><td class="p-2 border-r uppercase">${s.source||''}</td><td class="p-2 border-r">${s.checkIn?s.checkIn.substr(5):''} to ${s.checkOut?s.checkOut.substr(5):''}</td><td class="p-2 border-r font-black">${assignedStr}</td><td class="p-2 border-r text-right font-black">฿${Number(s.totalPrice||0).toFixed(2)}</td><td class="p-2 border-r text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due.toFixed(2)}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`;
                 body.appendChild(tr);
             });
         };
@@ -965,6 +994,24 @@
                 document.getElementById(id).remove(); window.calcFinancials();
             });
         };
+        
+        window.addRoomSelect = (val = "") => {
+            const container = document.getElementById('assigned-rooms-container');
+            const sel = document.createElement('select');
+            sel.className = "assigned-room-select bg-blue-50 border-blue-300 w-full text-sm font-bold uppercase text-blue-800 rounded px-1 py-1 mb-1 outline-none";
+            sel.innerHTML = `<option value="">-- UNASSIGNED --</option>`;
+            
+            let currentGroup = ''; let optGroup = null;
+            [...hotelRooms].sort((a,b) => a.order - b.order).forEach(r => {
+                if (r.type !== currentGroup) { optGroup = document.createElement('optgroup'); optGroup.label = `--- ${r.type.toUpperCase()} ---`; sel.appendChild(optGroup); currentGroup = r.type; }
+                const opt = document.createElement('option'); opt.value = r.id; 
+                const floorArrow = r.floor === 1 ? '↓' : (r.floor === 2 ? '↑' : (r.floor === 3 ? '⇈' : ''));
+                opt.innerText = `Room ${r.id} ${floorArrow} (${r.bed || '?'})`; 
+                optGroup.appendChild(opt);
+            });
+            sel.value = val;
+            container.appendChild(sel);
+        };
 
         window.openStaffModal = () => { 
             const form = document.getElementById('staff-form'); if (form) form.reset(); 
@@ -975,6 +1022,9 @@
             document.getElementById('net-price').dataset.override = 'false';
             document.getElementById('bad-cc-box').dataset.bad = 'false'; document.getElementById('bad-cc-box').innerHTML = ''; document.getElementById('bad-cc-box').className = 'w-4 h-4 border-2 border-slate-300 rounded mt-0.5 flex items-center justify-center';
             
+            document.getElementById('assigned-rooms-container').innerHTML = '';
+            window.addRoomSelect();
+
             setMulti('email-confirm-btn', 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
             setMulti('email-prepost-btn', 0, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
             setMulti('email-special-btn', 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400']);
@@ -997,7 +1047,7 @@
         
         window.closeStaffModal = () => { document.getElementById('staff-modal').style.display = 'none'; };
         
-        window.quickAdd = (room, date) => { window.openStaffModal(); document.getElementById('assigned-room').value = room; const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0'); document.getElementById('check-in').value = `${y}-${m}-${d}`; const out = new Date(date); out.setDate(date.getDate() + 1); const oy = out.getFullYear(), om = String(out.getMonth() + 1).padStart(2, '0'), od = String(out.getDate()).padStart(2, '0'); document.getElementById('check-out').value = `${oy}-${om}-${od}`; window.syncLabels(); };
+        window.quickAdd = (room, date) => { window.openStaffModal(); document.getElementById('assigned-rooms-container').innerHTML = ''; window.addRoomSelect(room); const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0'); document.getElementById('check-in').value = `${y}-${m}-${d}`; const out = new Date(date); out.setDate(date.getDate() + 1); const oy = out.getFullYear(), om = String(out.getMonth() + 1).padStart(2, '0'), od = String(out.getDate()).padStart(2, '0'); document.getElementById('check-out').value = `${oy}-${om}-${od}`; window.syncLabels(); };
 
         window.requestDuplicate = async () => {
             if(currentUserRole === 'staff') return;
@@ -1008,7 +1058,7 @@
             if(!s.linkedId) { const updatedOriginal = { ...s, linkedId: linkCode }; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), updatedOriginal); }
 
             const newId = Math.random().toString(36).substr(2, 9);
-            const newRecord = { ...s, id: newId, room: "", linkedId: linkCode, payments: [], createdAt: new Date().toISOString(), createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null };
+            const newRecord = { ...s, id: newId, room: "", rooms: [""], linkedId: linkCode, payments: [], createdAt: new Date().toISOString(), createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), newRecord);
             window.closeStaffModal();
         };
@@ -1025,7 +1075,7 @@
             let linkCode = s.linkedId || Math.random().toString(36).substr(2, 4).toUpperCase();
             const updatedRecord = { ...s, checkOut: splitDate, linkedId: linkCode };
             const newId = Math.random().toString(36).substr(2, 9);
-            const newRecord = { ...s, id: newId, checkIn: splitDate, room: "", linkedId: linkCode };
+            const newRecord = { ...s, id: newId, checkIn: splitDate, room: "", rooms: [""], linkedId: linkCode };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), updatedRecord); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), newRecord);
             document.getElementById('split-modal').style.display = 'none'; window.closeStaffModal();
         };
@@ -1141,10 +1191,7 @@
             const currentUserEmail = auth.currentUser ? auth.currentUser.email : 'admin';
             const now = new Date().toISOString();
             
-            const existingBookIds = new Set();
-            staff.forEach(s => {
-                if (s.bookId) existingBookIds.add(s.bookId.toString().trim());
-            });
+            const existingImportedMap = {};
 
             // Detect Legacy Friendly Resort Export format
             const isFriendlyResort = getIdx(['folio no.', 'swims status']) > -1;
@@ -1154,8 +1201,28 @@
                 if (r.join('').trim() === '') continue;
                 
                 let rawBId = safeStr(idx.bookId, r).replace(/\.0$/, '');
-                if (rawBId && existingBookIds.has(rawBId)) continue; 
-                if (rawBId) existingBookIds.add(rawBId);
+                let newRoom = safeStr(idx.room, r).toUpperCase();
+                
+                // If it's already in the DB, just append the room to the existing array
+                let dbStaff = rawBId ? staff.find(s => s.bookId === rawBId) : null;
+                if (dbStaff) {
+                    if (!dbStaff.rooms) dbStaff.rooms = dbStaff.room ? [dbStaff.room] : [];
+                    let emptyIndex = dbStaff.rooms.findIndex(rid => !rid);
+                    if (emptyIndex > -1) dbStaff.rooms[emptyIndex] = newRoom;
+                    else dbStaff.rooms.push(newRoom);
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', dbStaff.id), dbStaff);
+                    continue; 
+                }
+
+                // If it's already in the CURRENT import batch, append the room to the array
+                if (rawBId && existingImportedMap[rawBId]) {
+                    let existingEntry = existingImportedMap[rawBId];
+                    let emptyIndex = existingEntry.rooms.findIndex(rid => !rid);
+                    if (emptyIndex > -1) existingEntry.rooms[emptyIndex] = newRoom;
+                    else existingEntry.rooms.push(newRoom);
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', existingEntry.id), existingEntry);
+                    continue;
+                }
                 
                 let fullName = safeStr(idx.name, r) || "UNKNOWN";
                 let last = fullName, first = "";
@@ -1205,38 +1272,42 @@
 
                 let cCode = safeStr(idx.country, r).toLowerCase();
                 let parsedCountry = rawCountryMap[cCode] || (cCode.length === 2 ? cCode.toUpperCase() : "Thailand");
-                if (cCode.length > 2) parsedCountry = safeStr(idx.country, r); // Use full name if they provided a word instead of code
+                if (cCode.length > 2) parsedCountry = safeStr(idx.country, r); 
 
-                for(let k = 0; k < count; k++) {
-                    const payments = [];
-                    const cin = parseDate(safeStr(idx.in, r));
-                    
-                    if (isFriendlyResort) {
-                        statusClean = 'unconfirmed';
-                        remarksTxt = "FRIENDLY RESORT BOOKING\n" + remarksTxt;
-                    } else if (isBdcPaid) {
-                        let prefix = sourceClean === 'agoda' ? 'agoda' : 'bdc';
-                        if (comm > 0) payments.push({ date: cin, amt: comm, method: `${prefix}-kp` });
-                        if (total - comm > 0) payments.push({ date: cin, amt: Number((total - comm).toFixed(2)), method: `${prefix}-pay` });
-                    }
-
-                    const id = Math.random().toString(36).substr(2, 9);
-                    const entry = {
-                        id, firstName: first.toUpperCase(), lastName: last.toUpperCase(), status: statusClean, room: safeStr(idx.room, r).toUpperCase(),
-                        checkIn: cin, checkOut: parseDate(safeStr(idx.out, r)), pax: parseInt(safeStr(idx.pax, r)) || 1,
-                        source: sourceClean, bookDate: parseDate(safeStr(idx.bookDate, r)), bookId: rawBId,
-                        phone: safeStr(idx.phone, r), email: safeStr(idx.email, r),
-                        totalPrice: total, netOverride: false, netPrice: total, payments: payments, badCC: false,
-                        refundability: 'non-ref', upgrade: 'none', rating: 'none',
-                        emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: linkCode,
-                        country: parsedCountry, notes: remarksTxt, bookedType: safeStr(idx.roomType, r),
-                        createdAt: now, createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null
-                    };
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
-                    importCount++;
+                const payments = [];
+                const cin = parseDate(safeStr(idx.in, r));
+                
+                if (isFriendlyResort) {
+                    statusClean = 'unconfirmed';
+                    remarksTxt = "FRIENDLY RESORT BOOKING\n" + remarksTxt;
+                } else if (isBdcPaid) {
+                    let prefix = sourceClean === 'agoda' ? 'agoda' : 'bdc';
+                    if (comm > 0) payments.push({ date: cin, amt: comm, method: `${prefix}-kp` });
+                    if (total - comm > 0) payments.push({ date: cin, amt: Number((total - comm).toFixed(2)), method: `${prefix}-pay` });
                 }
+
+                let roomsArr = Array(count).fill("");
+                if (newRoom) roomsArr[0] = newRoom;
+
+                const id = Math.random().toString(36).substr(2, 9);
+                const entry = {
+                    id, firstName: first.toUpperCase(), lastName: last.toUpperCase(), status: statusClean, room: newRoom, rooms: roomsArr,
+                    checkIn: cin, checkOut: parseDate(safeStr(idx.out, r)), pax: parseInt(safeStr(idx.pax, r)) || 1,
+                    source: sourceClean, bookDate: parseDate(safeStr(idx.bookDate, r)), bookId: rawBId,
+                    phone: safeStr(idx.phone, r), email: safeStr(idx.email, r),
+                    totalPrice: total, netOverride: false, netPrice: total, payments: payments, badCC: false,
+                    refundability: 'non-ref', upgrade: 'none', rating: 'none',
+                    emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: linkCode,
+                    country: parsedCountry, notes: remarksTxt, bookedType: safeStr(idx.roomType, r),
+                    createdAt: now, createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null
+                };
+                
+                if (rawBId) existingImportedMap[rawBId] = entry;
+                
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
+                importCount++;
             }
-            document.getElementById('import-modal').style.display = 'none'; window.showAlert(`Import Complete. Added ${importCount} bookings.`);
+            document.getElementById('import-modal').style.display = 'none'; window.showAlert(`Import Complete. Created ${importCount} booking records.`);
         };
 
         window.saveBooking = async () => {
@@ -1259,6 +1330,8 @@
 
             const existing = staff.find(s => s.id === id);
             const now = new Date().toISOString();
+            
+            const roomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value);
 
             const entry = { 
                 id, 
@@ -1266,7 +1339,8 @@
                 lastName: document.getElementById('last-name').value.trim().toUpperCase(), 
                 status: document.getElementById('staff-status').value, 
                 bookedType: document.getElementById('booked-type').value,
-                room: document.getElementById('assigned-room').value, 
+                room: roomsList[0] || "", 
+                rooms: roomsList,
                 checkIn: cin, checkOut: cout, pax: parseInt(document.getElementById('pax-count').value) || 1,
                 country: document.getElementById('staff-country').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value, 
                 source: document.getElementById('booking-source').value, bookDate: document.getElementById('booking-date').value, bookId: document.getElementById('booking-id').value,
@@ -1302,8 +1376,11 @@
             document.getElementById('staff-country').value = s.country || "Thailand"; 
             document.getElementById('staff-status').value = s.status; window.updateStatusColor(document.getElementById('staff-status'));
             document.getElementById('booked-type').value = s.bookedType || ""; 
-            document.getElementById('assigned-room').value = s.room || ""; 
             document.getElementById('check-in').value = s.checkIn; document.getElementById('check-out').value = s.checkOut; document.getElementById('pax-count').value = s.pax || 1;
+            
+            document.getElementById('assigned-rooms-container').innerHTML = '';
+            const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : [""]);
+            rList.forEach(r => window.addRoomSelect(r));
             
             document.getElementById('total-price').value = Number(s.totalPrice || 0).toFixed(2);
             document.getElementById('net-price').value = Number(s.netPrice || 0).toFixed(2);
