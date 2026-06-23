@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SWIMS PMS</title>
     
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%232563eb%22/><text x=%2250%22 y=%2275%22 font-family=%22Arial Black, sans-serif%22 font-size=%2280%22 fill=%22white%22 text-anchor=%22middle%22>V</text></svg>">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -73,9 +76,7 @@
         .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .logo-box { width: 40px; height: 40px; position: relative; display: flex; align-items: center; justify-content: center; background: #2563eb; border-radius: 8px; overflow: hidden; }
-        .logo-v-back { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Bungee', cursive; font-size: 42px; color: rgba(255,255,255,0.18); z-index: 1; pointer-events: none; top: 50%; left: 50%; transform: translate(-50%, -48%); }
-        .logo-people-front { position: relative; z-index: 2; color: #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        .logo-box { width: 40px; height: 40px; position: relative; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; }
 
         .unassigned-header { background: #f8fafc !important; color: #475569 !important; font-weight: 900; font-size: 0.8rem !important; border-top: 4px solid #cbd5e1; }
         
@@ -83,8 +84,8 @@
         .smart-notes:focus { height: 120px; overflow-y: auto; }
         
         #calendar-scroll-container { max-height: calc(100vh - 180px); overflow-y: auto; overflow-x: auto; position: relative; }
-        #month-header { position: sticky; top: 0; z-index: 30; width: fit-content; min-width: 100%; }
-        #timeline-header { position: sticky; top: 28px; z-index: 30; width: fit-content; min-width: 100%; }
+        #month-header { position: sticky; top: 0; z-index: 40; height: 26px; box-sizing: border-box; width: fit-content; min-width: 100%; }
+        #timeline-header-grid { position: sticky; top: 26px; z-index: 35; height: 28px; box-sizing: border-box; width: fit-content; min-width: 100%; }
         
         .multi-state-btn { cursor: pointer; user-select: none; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         
@@ -102,7 +103,9 @@
         <div class="bg-white p-2 rounded-lg shadow-sm border border-slate-200 mb-1">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
                 <div class="flex items-center gap-3">
-                    <div class="logo-box"><div class="logo-v-back">V</div><i data-lucide="users" class="logo-people-front" size="28"></i></div>
+                    <div class="logo-box">
+                        <img src="apple-touch-icon.png" alt="SWIMS Logo" class="w-full h-full object-contain">
+                    </div>
                     <h1 class="text-2xl font-black text-slate-800 tracking-tighter leading-none uppercase">SWIMS PMS</h1>
                 </div>
                 <div class="flex bg-slate-100 rounded-lg p-1 w-full sm:w-auto justify-between">
@@ -124,8 +127,8 @@
                     <button onclick="window.goToday()" class="px-3 py-1 bg-white border border-slate-300 rounded font-bold text-xs uppercase hover:bg-slate-50">Today</button>
                     <div class="flex gap-1 ml-1">
                         <button onclick="window.openCSVModal()" class="px-3 py-1 bg-indigo-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-indigo-700 active:scale-95"><i data-lucide="clipboard-paste" size="14"></i> Import CSV</button>
+                        <button onclick="window.openEmailParserModal()" class="px-3 py-1 bg-purple-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-purple-700 active:scale-95"><i data-lucide="mail" size="14"></i> Parse Email</button>
                         <button onclick="window.openStaffModal()" class="px-3 py-1 bg-blue-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-blue-700 active:scale-95"><i data-lucide="plus" size="14"></i> Add</button>
-                        <button onclick="window.wipeAllData()" class="px-3 py-1 bg-red-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-red-700 animate-pulse active:scale-95 ml-2 border-2 border-red-800"><i data-lucide="skull" size="14"></i> WIPE ALL DB DATA NOW</button>
                     </div>
                 </div>
                 
@@ -155,13 +158,13 @@
         <div id="calendar-view">
             <div id="calendar-scroll-container" class="bg-white rounded shadow border border-slate-300">
                 <div id="month-header" class="timeline-grid bg-slate-800 text-white text-[11px] font-bold uppercase tracking-widest py-1">
-                    <div class="border-r border-slate-700 flex items-center justify-center">
+                    <div class="border-r border-slate-700 flex items-center justify-center h-full">
                         <button id="zoom-toggle-btn" onclick="window.toggleZoom()" class="bg-slate-700 hover:bg-slate-600 text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1 transition-colors"><i data-lucide="zoom-in" size="12"></i> ZOOM: WIDE</button>
                     </div>
                     <div id="month-labels" class="contents"></div>
                 </div>
                 <div class="timeline-grid bg-slate-100 border-b border-slate-300 shadow-sm" id="timeline-header-grid">
-                    <div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-center border-r border-slate-300 bg-slate-100" style="position: sticky; left: 0; z-index: 35;">ROOM</div>
+                    <div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-center border-r border-slate-300 bg-slate-100 h-full" style="position: sticky; left: 0; z-index: 35;">ROOM</div>
                     <div id="timeline-header" class="contents"></div>
                 </div>
                 <div id="timeline-body" class="relative pb-2"></div>
@@ -182,6 +185,9 @@
         </div>
 
         <div id="database-view" class="bg-white rounded shadow border border-slate-300 overflow-hidden">
+            <div class="p-2 bg-slate-100 border-b border-slate-300 flex justify-end">
+                <button onclick="window.wipeAllData()" class="px-4 py-1 bg-red-600 text-white rounded shadow font-black text-xs uppercase flex items-center gap-1 hover:bg-red-700 animate-pulse"><i data-lucide="skull" size="14"></i> WIPE ALL DB DATA NOW</button>
+            </div>
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-800 text-white text-[12px] font-black uppercase tracking-widest cursor-pointer">
@@ -332,11 +338,26 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
             <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm"><span>Import Spreadsheet CSV</span><button type="button" onclick="document.getElementById('import-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div>
             <div class="p-4 flex flex-col gap-3">
-                <p class="text-sm font-bold text-slate-500 leading-tight">Paste rows directly from your spreadsheet.<br><span class="text-xs text-rose-500">Must include the Header row! (Supports BDC Export)</span></p>
+                <p class="text-sm font-bold text-slate-500 leading-tight">Paste rows directly from your spreadsheet.<br><span class="text-xs text-rose-500">Must include the Header row! (Supports BDC Export & Legacy SWIMS)</span></p>
                 <textarea id="import-textarea" rows="6" class="w-full bg-slate-50 border border-slate-300 font-bold text-xs p-2 rounded outline-none focus:ring-2 focus:ring-indigo-500 whitespace-pre" placeholder="Reservation number	Booked on	Arrival	Departure	Guest name..."></textarea>
                 <div class="flex gap-2 justify-end mt-2">
                     <button onclick="document.getElementById('import-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button>
                     <button onclick="window.processCSV()" class="px-8 py-2 bg-green-600 text-white rounded-lg font-black text-sm uppercase flex items-center gap-1"><i data-lucide="sheet" size="16"></i> Process</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Parser Modal -->
+    <div id="email-modal" class="alert-modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
+            <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm"><span>Parse Confirmation Email</span><button type="button" onclick="document.getElementById('email-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div>
+            <div class="p-4 flex flex-col gap-3">
+                <p class="text-sm font-bold text-slate-500 leading-tight">Paste the text of an AirBnB or Hostelworld confirmation email here. We will build the extraction engine for this next!</p>
+                <textarea id="email-textarea" rows="8" class="w-full bg-slate-50 border border-slate-300 font-mono text-[10px] p-2 rounded outline-none focus:ring-2 focus:ring-purple-500 whitespace-pre" placeholder="Paste email text here..."></textarea>
+                <div class="flex gap-2 justify-end mt-2">
+                    <button onclick="document.getElementById('email-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button>
+                    <button onclick="window.parseEmail()" class="px-8 py-2 bg-purple-600 text-white rounded-lg font-black text-sm uppercase flex items-center gap-1"><i data-lucide="zap" size="16"></i> Extract</button>
                 </div>
             </div>
         </div>
@@ -673,7 +694,7 @@
                         const startFraction = diffStart / daysToShow;
                         const widthFraction = (diffEnd - diffStart) / daysToShow;
                         
-                        const due = (s.totalPrice || 0) - (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
+                        const due = Number(((s.totalPrice || 0) - (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0)).toFixed(2));
                         const isBadCC = s.badCC;
                         const owes = due > 0;
                         const isRef = s.refundability === 'ref';
@@ -699,8 +720,8 @@
                         
                         if (searchTerm && !(s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)) bar.style.opacity = "0.15";
 
-                        const svgUpgFree = `<svg class="w-3 h-3 text-yellow-300 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
-                        const svgUpgPaid = `<svg class="w-3 h-3 text-green-400 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+                        const svgUpgFree = `<svg class="w-3.5 h-3.5 text-amber-500 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.6));" fill="currentColor" viewBox="0 0 24 24"><path d="M4 14h4v7h8v-7h4l-8-11z"/></svg>`;
+                        const svgUpgPaid = `<svg class="w-3.5 h-3.5 text-green-500 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.6));" fill="currentColor" viewBox="0 0 24 24"><path d="M4 14h4v7h8v-7h4l-8-11z"/></svg>`;
                         const svgMailSpec = `<svg class="w-3 h-3 text-red-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><line x1="12" y1="10" x2="12" y2="16" stroke-width="3"></line></svg>`;
                         const svgMailPre = `<svg class="w-3 h-3 text-orange-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><circle cx="12" cy="16" r="1.5" fill="currentColor"></circle></svg>`;
                         const svgMailConf = `<svg class="w-3 h-3 text-slate-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
@@ -740,8 +761,9 @@
                         if (isLinked) metaTags.push(`Linked: ${s.linkedId}`);
 
                         let ttHtml = `<div class="font-black text-[15px] text-blue-300 leading-tight mb-1">${s.firstName||''} ${s.lastName||''}</div>`;
-                        ttHtml += `<div>Total: ฿${s.totalPrice} | <span class="${due > 0 ? 'text-red-400' : 'text-green-400'}">Due: ฿${due} ${isBadCC ? '(*BAD CC*)' : ''}</span></div>`;
+                        ttHtml += `<div>Total: ฿${Number(s.totalPrice || 0).toFixed(2)} | <span class="${due > 0 ? 'text-red-400' : 'text-green-400'}">Due: ฿${due.toFixed(2)} ${isBadCC ? '(*BAD CC*)' : ''}</span></div>`;
                         ttHtml += `<div class="text-slate-300 mt-1">${formatDateShort(s.checkIn)} → ${formatDateShort(s.checkOut)} (${s.pax} PAX)</div>`;
+                        if(s.bookedType) ttHtml += `<div class="text-slate-300 mt-0.5">Booked: ${s.bookedType}</div>`;
                         ttHtml += `<div class="text-slate-300">Src: ${(s.source||'other').toUpperCase()}</div>`;
                         if (metaTags.length > 0) ttHtml += `<div class="mt-1 pt-1 border-t border-slate-600 text-yellow-200 text-[10px] uppercase font-bold max-w-[200px] leading-tight">${metaTags.join(' • ')}</div>`;
                         if (s.phone || s.email) ttHtml += `<div class="mt-1 pt-1 border-t border-slate-600 text-slate-400 text-[10px] leading-tight">${s.phone||''}<br>${s.email||''}</div>`;
@@ -785,9 +807,9 @@
                 return sortAsc ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
             });
             filtered.forEach(s => {
-                const due = (s.totalPrice || 0) - (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
+                const due = Number(((s.totalPrice || 0) - (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0)).toFixed(2));
                 const tr = document.createElement('tr'); tr.className = "border-b hover:bg-slate-50 cursor-pointer"; tr.onclick = () => window.editStaff(s.id);
-                tr.innerHTML = `<td class="p-2 border-r">${s.firstName||''} ${s.lastName||''}</td><td class="p-2 border-r uppercase">${s.source||''}</td><td class="p-2 border-r">${s.checkIn?s.checkIn.substr(5):''} to ${s.checkOut?s.checkOut.substr(5):''}</td><td class="p-2 border-r">${s.room || '--'}</td><td class="p-2 border-r text-right font-black">฿${s.totalPrice||0}</td><td class="p-2 border-r text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`;
+                tr.innerHTML = `<td class="p-2 border-r">${s.firstName||''} ${s.lastName||''}</td><td class="p-2 border-r uppercase">${s.source||''}</td><td class="p-2 border-r">${s.checkIn?s.checkIn.substr(5):''} to ${s.checkOut?s.checkOut.substr(5):''}</td><td class="p-2 border-r">${s.room || '--'}</td><td class="p-2 border-r text-right font-black">฿${Number(s.totalPrice||0).toFixed(2)}</td><td class="p-2 border-r text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due.toFixed(2)}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`;
                 body.appendChild(tr);
             });
         };
@@ -860,7 +882,7 @@
                 paid += amt;
                 if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp'].includes(method)) commDeduct += amt;
             });
-            const due = total - paid;
+            const due = Number((total - paid).toFixed(2));
             document.getElementById('display-paid').innerText = `฿${paid.toFixed(2)}`;
             document.getElementById('display-due').innerText = `฿${due.toFixed(2)}`;
 
@@ -990,35 +1012,62 @@
         };
 
         window.openCSVModal = () => { document.getElementById('import-textarea').value = ''; document.getElementById('import-modal').style.display = 'flex'; };
+        
+        window.openEmailParserModal = () => { document.getElementById('email-textarea').value = ''; document.getElementById('email-modal').style.display = 'flex'; };
+        
+        window.parseEmail = () => {
+            const text = document.getElementById('email-textarea').value.trim();
+            if(!text) return;
+            window.showAlert("Email Parser logic will be implemented in the next update! We are ready for it.", false, null);
+            document.getElementById('email-modal').style.display = 'none';
+        }
 
         window.processCSV = async () => {
             const text = document.getElementById('import-textarea').value.trim(); if (!text) return;
             
             const delimiter = text.indexOf('\t') !== -1 ? '\t' : ',';
             
-            const parseCSVLine = (line, delim) => {
-                const result = [];
-                let current = '';
+            const parseCSVData = (csvText, delim) => {
+                const rows = [];
+                let currentRow = [];
+                let currentCell = '';
                 let inQuotes = false;
-                for (let i = 0; i < line.length; i++) {
-                    const c = line[i];
+                
+                for (let i = 0; i < csvText.length; i++) {
+                    const c = csvText[i];
+                    const nextC = csvText[i+1];
+                    
                     if (c === '"') {
-                        inQuotes = !inQuotes;
+                        if (inQuotes && nextC === '"') {
+                            currentCell += '"'; 
+                            i++; 
+                        } else {
+                            inQuotes = !inQuotes; 
+                        }
                     } else if (c === delim && !inQuotes) {
-                        result.push(current);
-                        current = '';
+                        currentRow.push(currentCell);
+                        currentCell = '';
+                    } else if ((c === '\n' || c === '\r') && !inQuotes) {
+                        if (c === '\r' && nextC === '\n') i++; 
+                        currentRow.push(currentCell);
+                        rows.push(currentRow);
+                        currentRow = [];
+                        currentCell = '';
                     } else {
-                        current += c;
+                        currentCell += c;
                     }
                 }
-                result.push(current);
-                return result;
+                if (currentCell || currentRow.length > 0) {
+                    currentRow.push(currentCell);
+                    rows.push(currentRow);
+                }
+                return rows;
             };
 
-            const lines = text.split('\n');
-            if (lines.length < 2) { window.showAlert("Please include the header row and at least one data row."); return; }
+            const rows = parseCSVData(text, delimiter).filter(r => r.join('').trim() !== '');
+            if (rows.length < 2) { window.showAlert("Please include the header row and at least one data row."); return; }
 
-            const headers = parseCSVLine(lines[0], delimiter).map(h => h.trim().toLowerCase());
+            const headers = rows[0].map(h => h.trim().toLowerCase());
             
             const getIdx = (keywords) => {
                 for(let kw of keywords) {
@@ -1038,7 +1087,7 @@
                 bookDate: getIdx(['booked on', 'booking date']),
                 bookId: getIdx(['book number', 'reservation number', 'booking id']), 
                 pax: getIdx(['people', 'guests', 'adults']),
-                total: getIdx(['price', 'total']), 
+                total: getIdx(['price', 'total', 'amount']), 
                 comm: getIdx(['commission amount', 'commission']),
                 payStatus: getIdx(['payment status']),
                 address: getIdx(['address']),
@@ -1050,7 +1099,7 @@
                 notes: getIdx(['remarks', 'notes', 'comments', 'special comments'])
             };
 
-            const safeStr = (i, r) => (i > -1 && r[i] != null) ? String(r[i]).replace(/^"|"$/g, '').trim() : "";
+            const safeStr = (i, r) => (i > -1 && r[i] != null) ? String(r[i]).trim() : "";
 
             const parseDate = (str) => {
                 if(!str) return "";
@@ -1076,9 +1125,12 @@
                 if (s.bookId) existingBookIds.add(s.bookId.toString().trim());
             });
 
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const r = parseCSVLine(lines[i], delimiter);
+            // Detect Legacy Friendly Resort Export format
+            const isFriendlyResort = getIdx(['folio no.', 'swims status']) > -1;
+
+            for (let i = 1; i < rows.length; i++) {
+                const r = rows[i];
+                if (r.join('').trim() === '') continue;
                 
                 let rawBId = safeStr(idx.bookId, r).replace(/\.0$/, '');
                 if (rawBId && existingBookIds.has(rawBId)) continue; 
@@ -1092,8 +1144,8 @@
                     first = parts.slice(1).join(',').trim();
                 } else {
                     const parts = fullName.split(' ');
-                    last = parts[0].trim();
-                    first = parts.length > 1 ? parts.slice(1).join(' ').trim() : "";
+                    first = parts[0].trim(); 
+                    last = parts.length > 1 ? parts.slice(1).join(' ').trim() : "";
                 }
                 
                 let payStatusTxt = safeStr(idx.payStatus, r);
@@ -1132,12 +1184,16 @@
 
                 let cCode = safeStr(idx.country, r).toLowerCase();
                 let parsedCountry = rawCountryMap[cCode] || (cCode.length === 2 ? cCode.toUpperCase() : "Thailand");
-                if (cCode.length > 2) parsedCountry = safeStr(idx.country, r); // Use full name if they provided a word instead of code
+                if (cCode.length > 2) parsedCountry = safeStr(idx.country, r); 
 
                 for(let k = 0; k < count; k++) {
                     const payments = [];
                     const cin = parseDate(safeStr(idx.in, r));
-                    if (isBdcPaid) {
+                    
+                    if (isFriendlyResort) {
+                        statusClean = 'unconfirmed';
+                        remarksTxt = "FRIENDLY RESORT BOOKING\n" + remarksTxt;
+                    } else if (isBdcPaid) {
                         let prefix = sourceClean === 'agoda' ? 'agoda' : 'bdc';
                         if (comm > 0) payments.push({ date: cin, amt: comm, method: `${prefix}-kp` });
                         if (total - comm > 0) payments.push({ date: cin, amt: Number((total - comm).toFixed(2)), method: `${prefix}-pay` });
@@ -1228,8 +1284,8 @@
             document.getElementById('assigned-room').value = s.room || ""; 
             document.getElementById('check-in').value = s.checkIn; document.getElementById('check-out').value = s.checkOut; document.getElementById('pax-count').value = s.pax || 1;
             
-            document.getElementById('total-price').value = s.totalPrice || 0;
-            document.getElementById('net-price').value = s.netPrice || 0;
+            document.getElementById('total-price').value = Number(s.totalPrice || 0).toFixed(2);
+            document.getElementById('net-price').value = Number(s.netPrice || 0).toFixed(2);
             document.getElementById('net-price').dataset.override = s.netOverride ? 'true' : 'false';
             
             const bcc = document.getElementById('bad-cc-box'); bcc.dataset.bad = s.badCC ? 'true' : 'false';
@@ -1237,7 +1293,7 @@
             else { bcc.innerHTML = ''; bcc.classList.remove('bg-red-500', 'border-red-600'); bcc.classList.add('border-slate-300'); }
 
             document.getElementById('payments-list').innerHTML = '';
-            if(s.payments) s.payments.forEach(p => window.addPaymentRow(p.date, p.amt, p.method, true));
+            if(s.payments) s.payments.forEach(p => window.addPaymentRow(p.date, Number(p.amt || 0).toFixed(2), p.method, true));
 
             document.getElementById('booking-source').value = s.source || 'direct';
             document.getElementById('booking-date').value = s.bookDate || "";
