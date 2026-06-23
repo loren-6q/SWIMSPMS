@@ -58,7 +58,7 @@
         .status-unconfirmed { background-color: #f3e8ff; color: #581c87; border: 1px solid #d8b4fe; }
         .status-cancelled, .status-noshow { background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; opacity: 0.8; }
         
-        /* Transparent Overlay - Flex-start anchors to top to prevent off-screen clipping */
+        /* Transparent Overlay */
         .modal-overlay { display: none; position: fixed; inset: 0; background: transparent; pointer-events: none; z-index: 100; align-items: flex-start; justify-content: center; padding-top: 5vh; padding-bottom: 5vh; }
         .modal-overlay.active { display: flex; }
         .modal-content { pointer-events: auto; width: 512px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
@@ -218,7 +218,11 @@
             </footer>
         </div>
 
-        <div id="database-view" class="bg-white rounded shadow border border-slate-300 overflow-hidden unselectable">
+        <div id="database-view" class="bg-white rounded shadow border border-slate-300 overflow-hidden">
+            <div class="p-2 bg-slate-100 border-b border-slate-300 flex justify-between items-center">
+                <h2 class="font-black text-slate-700 uppercase tracking-widest text-sm">Database Editor</h2>
+                <button id="admin-bulk-delete" onclick="window.bulkDelete()" class="hidden px-4 py-1.5 bg-orange-600 text-white rounded font-black text-xs uppercase items-center gap-1 hover:bg-orange-700 shadow-md"><i data-lucide="list-x" size="14"></i> BULK DELETE VISIBLE</button>
+            </div>
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-800 text-white text-[12px] font-black uppercase tracking-widest cursor-pointer">
@@ -644,6 +648,7 @@
                     await signInAnonymously(auth);
                     currentUserRole = 'admin'; currentUserEmail = 'Admin (Test)';
                     document.getElementById('boot-loader').style.display = 'none';
+                    const bulkBtn = document.getElementById('admin-bulk-delete'); if(bulkBtn) bulkBtn.classList.replace('hidden', 'flex');
                     onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => { staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.render(); });
                 } catch (error) { console.error("Auth Error:", error); document.getElementById('sync-status').innerText = "Auth Error"; }
             } else {
@@ -661,6 +666,9 @@
                         if (currentUserRole === 'staff') {
                             const importBtn = document.querySelector('button[onclick="window.openCSVModal()"]');
                             if(importBtn) importBtn.style.display = 'none';
+                        }
+                        if (currentUserRole === 'admin') {
+                            const bulkBtn = document.getElementById('admin-bulk-delete'); if(bulkBtn) bulkBtn.classList.replace('hidden', 'flex');
                         }
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => { staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.render(); });
                     } else { document.getElementById('boot-loader').style.display = 'none'; createLoginUI(); }
@@ -1036,6 +1044,13 @@
             sel.style.background = c[sel.value] || '#2563eb';
         };
 
+        window.toggleBadCC = () => {
+            const box = document.getElementById('bad-cc-box');
+            const isBad = box.dataset.bad === 'true';
+            if(isBad) { box.dataset.bad = 'false'; box.innerHTML = ''; box.classList.remove('bg-red-500', 'border-red-600'); box.classList.add('border-slate-300'); }
+            else { box.dataset.bad = 'true'; box.innerHTML = '<span class="text-white text-[10px] font-black">X</span>'; box.classList.remove('border-slate-300'); box.classList.add('bg-red-500', 'border-red-600'); }
+        };
+
         window.calcFinancials = () => {
             const total = Number(document.getElementById('total-price').value) || 0;
             let paid = 0; let commDeduct = 0;
@@ -1156,7 +1171,7 @@
             wrapper.className = "flex items-center gap-1 mb-1";
             
             const sel = document.createElement('select');
-            sel.className = "assigned-room-select flex-1 bg-blue-50 border-blue-300 text-sm font-bold uppercase text-blue-800 rounded px-1 py-1 outline-none w-full text-ellipsis overflow-hidden whitespace-nowrap";
+            sel.className = "assigned-room-select flex-1 bg-blue-50 border-blue-300 text-sm font-bold uppercase text-blue-800 rounded px-1 py-1 outline-none";
             sel.innerHTML = `<option value="">-- UNASSIGNED --</option>`;
             sel.onchange = window.updateAvailableRooms;
             
@@ -1203,7 +1218,6 @@
             document.getElementById('payments-list').innerHTML = "";
             document.getElementById('net-price').dataset.override = 'false';
             document.getElementById('bad-cc-box').dataset.bad = 'false'; document.getElementById('bad-cc-box').innerHTML = ''; document.getElementById('bad-cc-box').className = 'w-4 h-4 border-2 border-slate-300 rounded mt-0.5 flex items-center justify-center';
-            document.getElementById('staff-country').value = "Thailand";
             
             document.getElementById('assigned-rooms-container').innerHTML = '';
             window.addRoomSelect();
@@ -1512,6 +1526,11 @@
                 notes: getIdx(['remarks', 'notes', 'comments', 'special comments'])
             };
 
+            if (idx.in === -1 && idx.name === -1 && idx.bookId === -1 && idx.status === -1) {
+                window.showAlert("IMPORT ERROR:\n\nThis does not look like a valid spreadsheet. No standard headers (Check-in, Guest Name, etc.) were found.\n\nPlease make sure you are pasting a spreadsheet with the header row included.");
+                return;
+            }
+
             const safeStr = (i, r) => (i > -1 && r[i] != null) ? String(r[i]).replace(/^"|"$/g, '').trim() : "";
 
             const parseDate = (str) => {
@@ -1804,6 +1823,26 @@
         window.requestDelete = () => {
             if(currentUserRole === 'staff') return;
             window.showAlert(`Permanently delete this record?`, true, async () => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', document.getElementById('staff-id').value)); window.closeStaffModal(); });
+        };
+        
+        window.bulkDelete = () => {
+            if(currentUserRole !== 'admin') { window.showAlert("Admin access required."); return; }
+            
+            const selStatus = document.getElementById('status-filter').value;
+            const filtered = staff.filter(s => {
+                const nameMatch = !searchTerm || (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm);
+                const statusMatch = selStatus === 'ALL' || s.status === selStatus;
+                return nameMatch && statusMatch;
+            });
+
+            if (filtered.length === 0) { window.showAlert("No records match your current search criteria."); return; }
+
+            window.showAlert(`BULK DELETE WARNING:\n\nYou are about to permanently delete the ${filtered.length} bookings currently visible in the list below.\n\nThis cannot be undone!`, true, async () => { 
+                document.getElementById('boot-loader').style.display = 'flex'; document.getElementById('sync-status').innerText = 'DELETING...';
+                const promises = filtered.map(s => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id)));
+                await Promise.all(promises); 
+                document.getElementById('boot-loader').style.display = 'none'; window.closeAlert(); 
+            });
         };
 
         window.showAlert = (msg, isConfirm = false, onConfirm = null) => {
