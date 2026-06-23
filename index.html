@@ -14,7 +14,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Roboto+Condensed:wght@400;700;900&display=swap');
         
-        body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; overflow-x: hidden; font-size: 1.2rem; user-select: none; }
+        body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; overflow-x: hidden; font-size: 1.2rem; }
+        
+        /* Protect UI elements from accidental dragging */
+        .unselectable { user-select: none; -webkit-user-select: none; }
         
         /* Allow text selection universally inside the modal so staff can copy/paste easily */
         .modal-content * { user-select: auto !important; }
@@ -26,13 +29,12 @@
         @media (min-width: 1150px) { :root { --days: 35; } --sidebar-w: 140px; }
 
         .timeline-grid { display: grid; grid-template-columns: var(--sidebar-w) repeat(var(--days), minmax(40px, 1fr)); width: max-content; min-width: 100%; }
-        .zoom-wide-mode .timeline-grid { grid-template-columns: var(--sidebar-w) repeat(var(--days), minmax(90px, 1fr)); }
+        .zoom-wide-mode .timeline-grid { grid-template-columns: var(--sidebar-w) repeat(var(--days), minmax(140px, 1fr)); }
 
-        .day-column { border-right: 1px solid #e2e8f0; height: 100%; position: relative; cursor: cell; transition: filter 0.1s; }
-        .bed-row { height: 28px; border-bottom: 1px solid #cbd5e1; position: relative; transition: filter 0.1s; }
+        .day-column { border-right: 1px solid #e2e8f0; height: 100%; position: relative; cursor: cell; transition: background-color 0.1s; }
+        .bed-row { height: 28px; border-bottom: 1px solid #cbd5e1; position: relative; }
         
-        .bed-row:hover { filter: brightness(0.92); }
-        .hover-col { filter: brightness(0.92); }
+        .hover-col { background-color: rgba(0, 0, 0, 0.06) !important; }
         
         .day-fmp-dark { background-color: rgba(225, 29, 72, 0.4) !important; }
         .day-fmp-medium { background-color: rgba(249, 115, 22, 0.25) !important; }
@@ -56,7 +58,7 @@
         /* Transparent Overlay - Flex-start anchors to top to prevent off-screen clipping */
         .modal-overlay { display: none; position: fixed; inset: 0; background: transparent; pointer-events: none; z-index: 100; align-items: flex-start; justify-content: center; padding-top: 5vh; padding-bottom: 5vh; }
         .modal-overlay.active { display: flex; }
-        .modal-content { pointer-events: auto; width: 512px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; position: relative; }
+        .modal-content { pointer-events: auto; width: 512px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
         .alert-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); align-items: center; justify-content: center; z-index: 200; pointer-events: auto;}
         .alert-modal-overlay.active { display: flex; }
@@ -110,7 +112,7 @@
 
     <div id="boot-loader" class="loading-overlay"><div class="spinner"></div><div class="mt-4 font-black text-slate-800 uppercase tracking-widest text-center px-4"><span id="sync-status">Authenticating...</span></div></div>
 
-    <div class="max-w-[1950px] mx-auto">
+    <div class="max-w-[1950px] mx-auto unselectable">
         <div class="bg-white p-2 rounded-lg shadow-sm border border-slate-200 mb-1">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
                 <div class="flex items-center gap-3">
@@ -140,7 +142,6 @@
                         <button onclick="window.openCSVModal()" class="px-3 py-1 bg-indigo-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-indigo-700 active:scale-95"><i data-lucide="clipboard-paste" size="14"></i> Import CSV</button>
                         <button onclick="window.openEmailParserModal()" class="px-3 py-1 bg-purple-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-purple-700 active:scale-95"><i data-lucide="mail" size="14"></i> Parse Email</button>
                         <button onclick="window.openStaffModal()" class="px-3 py-1 bg-blue-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-blue-700 active:scale-95"><i data-lucide="plus" size="14"></i> Add</button>
-                        <button onclick="window.wipeAllData()" class="px-3 py-1 bg-red-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-red-700 animate-pulse active:scale-95 ml-2 border border-red-800"><i data-lucide="skull" size="14"></i> WIPE DATA</button>
                     </div>
                 </div>
                 
@@ -167,7 +168,7 @@
             </div>
         </div>
 
-        <div id="calendar-view">
+        <div id="calendar-view" class="unselectable">
             <div id="calendar-scroll-container" class="bg-white rounded shadow border border-slate-300">
                 <div class="timeline-grid sticky top-0 z-40 bg-slate-800 shadow-sm border-b border-slate-700 h-[26px] box-border">
                     <div class="border-r border-slate-700 flex items-center justify-center h-full sticky left-0 z-50 bg-slate-800 w-[var(--sidebar-w)]">
@@ -214,7 +215,7 @@
             </footer>
         </div>
 
-        <div id="database-view" class="bg-white rounded shadow border border-slate-300 overflow-hidden">
+        <div id="database-view" class="bg-white rounded shadow border border-slate-300 overflow-hidden unselectable">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-800 text-white text-[12px] font-black uppercase tracking-widest cursor-pointer">
@@ -237,7 +238,7 @@
         <div id="staff-modal-content" class="modal-content bg-white rounded-xl shadow-2xl border-2 border-slate-800">
             
             <!-- Draggable Smart Header -->
-            <div id="modal-header-btn" class="bg-slate-900 p-2 text-white flex justify-between items-center cursor-move rounded-t-lg" onmousedown="window.startDrag(event)">
+            <div id="modal-header-btn" class="bg-slate-900 p-2 text-white flex justify-between items-center cursor-move rounded-t-lg unselectable" onmousedown="window.startDrag(event)">
                 <div class="flex items-center gap-2 pointer-events-none">
                     <i data-lucide="user" size="18"></i>
                     <h3 id="modal-guest-name-display" class="text-lg font-black uppercase tracking-tighter leading-none">NEW BOOKING</h3>
@@ -253,7 +254,7 @@
                 <input type="hidden" id="created-by">
 
                 <!-- Collapsible Guest Profile -->
-                <div class="section-header rounded-t-md mt-1" onclick="window.toggleSection('guest-profile-section', 'profile-chevron')">
+                <div class="section-header rounded-t-md mt-1 unselectable" onclick="window.toggleSection('guest-profile-section', 'profile-chevron')">
                     <span>Guest Profile</span>
                     <i data-lucide="chevron-down" id="profile-chevron" size="16" class="transition-transform duration-200"></i>
                 </div>
@@ -267,7 +268,7 @@
                         <div><label class="field-label">Country</label><select id="staff-country" class="w-full font-bold text-sm"></select></div>
                     </div>
                     <div><label class="field-label">Email</label><input type="text" id="email" class="w-full text-sm" oninput="window.checkEmailProxy(this.value)"></div>
-                    <div class="flex gap-2 pt-1 border-t border-slate-200 mt-2">
+                    <div class="flex gap-2 pt-1 border-t border-slate-200 mt-2 unselectable">
                         <div id="email-confirm-btn" class="w-[120px] multi-state-btn px-1 py-1 rounded text-[10px] font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400'])">CONFIRM: --</div>
                         <div id="email-prepost-btn" class="w-[140px] multi-state-btn px-1 py-1 rounded text-[10px] font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400'])">PRE/POST: --</div>
                         <div id="email-special-btn" class="w-[120px] multi-state-btn px-1 py-1 rounded text-[10px] font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400'])">SPECIAL: --</div>
@@ -306,14 +307,14 @@
                 </div>
 
                 <!-- Booking Tags -->
-                <div class="flex gap-2 pb-2">
+                <div class="flex gap-2 pb-2 unselectable">
                     <div id="refund-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400'])">NON-REFUNDABLE</div>
                     <div id="upgrade-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400'])">NO UPGRADE</div>
                     <div id="rating-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400'])">FEEDBACK: --</div>
                 </div>
 
                 <!-- Collapsible Financials -->
-                <div class="section-header rounded-t-md" onclick="window.toggleSection('fin-section', 'fin-chevron')">
+                <div class="section-header rounded-t-md unselectable" onclick="window.toggleSection('fin-section', 'fin-chevron')">
                     <span>Financials</span>
                     <i data-lucide="chevron-down" id="fin-chevron" size="16" class="transition-transform duration-200" style="transform: rotate(-90deg)"></i>
                 </div>
@@ -330,7 +331,7 @@
                         <div class="flex gap-4 text-right items-center">
                             <div><label class="field-label">Paid</label><div class="font-black text-xl text-green-600 leading-none" id="display-paid">฿0</div></div>
                             <div><label class="field-label !text-red-500">Due</label><div class="font-black text-red-600 text-2xl leading-none" id="display-due">฿0</div></div>
-                            <div class="flex flex-col items-center justify-center ml-2 border-l border-slate-300 pl-2 cursor-pointer" onclick="window.toggleBadCC()">
+                            <div class="flex flex-col items-center justify-center ml-2 border-l border-slate-300 pl-2 cursor-pointer unselectable" onclick="window.toggleBadCC()">
                                 <span class="text-[10px] font-black leading-none text-slate-400">BAD</span><span class="text-[10px] font-black leading-none text-slate-400">CC</span>
                                 <div id="bad-cc-box" class="w-4 h-4 border-2 border-slate-300 rounded mt-0.5 flex items-center justify-center"></div>
                             </div>
@@ -338,11 +339,11 @@
                     </div>
                     
                     <div id="payments-list" class="space-y-1 mb-2"></div>
-                    <button type="button" onclick="window.addPaymentRow()" class="w-full py-1 border-2 border-dashed border-slate-300 rounded text-xs font-black text-slate-500 hover:bg-slate-200 uppercase">+ ADD PAYMENT</button>
+                    <button type="button" onclick="window.addPaymentRow()" class="w-full py-1 border-2 border-dashed border-slate-300 rounded text-xs font-black text-slate-500 hover:bg-slate-200 uppercase unselectable">+ ADD PAYMENT</button>
                 </div>
 
                 <!-- Collapsible Meta/Source -->
-                <div class="section-header rounded-t-md" onclick="window.toggleSection('meta-section', 'meta-chevron')">
+                <div class="section-header rounded-t-md unselectable" onclick="window.toggleSection('meta-section', 'meta-chevron')">
                     <span>Source & Meta</span>
                     <i data-lucide="chevron-down" id="meta-chevron" size="16" class="transition-transform duration-200" style="transform: rotate(-90deg)"></i>
                 </div>
@@ -362,7 +363,7 @@
 
             </form>
             
-            <div class="bg-slate-100 p-3 flex justify-between items-center border-t border-slate-300 rounded-b-lg">
+            <div class="bg-slate-100 p-3 flex justify-between items-center border-t border-slate-300 rounded-b-lg unselectable">
                 <div class="flex items-center gap-2">
                     <button type="button" id="delete-btn" onclick="window.requestDelete()" class="p-1.5 bg-red-100 text-red-600 rounded hover:bg-red-200" title="Delete"><i data-lucide="trash-2" size="16"></i></button>
                     <button type="button" id="split-btn" onclick="window.requestSplit()" class="p-1.5 bg-orange-100 text-orange-600 rounded hover:bg-orange-200" title="Split"><i data-lucide="scissors" size="16"></i></button>
@@ -374,7 +375,7 @@
                 </div>
             </div>
             <!-- Audit Log -->
-            <div id="audit-log" class="bg-slate-800 text-[9px] text-slate-400 font-bold uppercase text-center py-0.5 rounded-b-lg"></div>
+            <div id="audit-log" class="bg-slate-800 text-[9px] text-slate-400 font-bold uppercase text-center py-0.5 rounded-b-lg unselectable"></div>
         </div>
     </div>
 
@@ -410,7 +411,7 @@
 
     <!-- Alert / Split Modals -->
     <div id="alert-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div id="alert-header" class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Attention</div><div class="p-6 text-center"><p id="alert-message" class="font-black text-slate-700 leading-tight text-md whitespace-pre-wrap"></p><div id="alert-actions" class="mt-6 flex gap-2 justify-center"><button id="alert-cancel" onclick="window.closeAlert()" class="hidden px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button id="alert-confirm" onclick="window.closeAlert()" class="px-10 py-2 bg-red-600 text-white rounded-lg font-black text-sm uppercase">Okay</button></div></div></div></div>
-    <div id="split-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Split Stay</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select date to split booking.</p><input type="date" id="split-date" class="w-full mb-6 bg-slate-50 border border-slate-300 font-bold text-lg p-2 rounded outline-none"><div class="flex gap-2 justify-center"><button onclick="document.getElementById('split-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button onclick="window.confirmSplit()" class="px-10 py-2 bg-orange-600 text-white rounded-lg font-black text-sm uppercase">Split Stay</button></div></div></div></div>
+    <div id="split-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Split Stay</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select date to split booking.<br><span class="text-xs font-bold text-slate-500 mt-2 block">This creates a zero-balance linked segment so you can easily move guests to a different room mid-stay without messing up your accounting!</span></p><input type="date" id="split-date" class="w-full mb-6 bg-slate-50 border border-slate-300 font-bold text-lg p-2 rounded outline-none"><div class="flex gap-2 justify-center"><button onclick="document.getElementById('split-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button onclick="window.confirmSplit()" class="px-10 py-2 bg-orange-600 text-white rounded-lg font-black text-sm uppercase">Split Stay</button></div></div></div></div>
 
     <div id="custom-tooltip"></div>
 
@@ -545,7 +546,7 @@
         let dragOffsetX, dragOffsetY;
 
         window.startDrag = (e) => {
-            if (e.target.closest('button, input, select, i')) return; // Ignore buttons
+            if (e.target.closest('button, input, select, i, textarea')) return; // Ignore form elements
             isDragging = true;
             const modal = document.getElementById('staff-modal-content');
             const rect = modal.getBoundingClientRect();
@@ -579,7 +580,6 @@
         document.addEventListener('mouseup', () => { 
             if(isDragging) {
                 isDragging = false; 
-                document.body.style.userSelect = '';
             }
         });
 
@@ -729,13 +729,13 @@
             days.forEach((d, i) => {
                 if (d.getMonth() !== currentMonth) {
                     if (currentMonth !== -1) {
-                        const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "flex items-center justify-center month-divider py-1 border-b border-slate-700";
+                        const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "unselectable flex items-center justify-center month-divider py-1 border-b border-slate-700";
                         mDiv.innerText = `${mNames[currentMonth]} ${days[i-1].getFullYear()}`; monthLabels.appendChild(mDiv);
                     }
                     currentMonth = d.getMonth(); currentSpan = 1;
                 } else currentSpan++;
                 if (i === days.length - 1) {
-                    const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "flex items-center justify-center month-divider py-1 border-b border-slate-700";
+                    const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "unselectable flex items-center justify-center month-divider py-1 border-b border-slate-700";
                     mDiv.innerText = `${mNames[currentMonth]} ${d.getFullYear()}`; monthLabels.appendChild(mDiv);
                 }
             });
@@ -800,7 +800,7 @@
                 
                 if (rowDef.isDivider) {
                     currentGroup = rowDef.label.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase();
-                    row.className = `timeline-grid ${rowDef.isUnconfirmedZone ? 'mt-4' : ''} cursor-pointer transition-colors`;
+                    row.className = `timeline-grid ${rowDef.isUnconfirmedZone ? 'mt-4' : ''} cursor-pointer transition-colors unselectable`;
                     row.innerHTML = `<div class="${rowDef.isUnconfirmedZone ? 'unassigned-header bg-slate-300 hover:bg-slate-400 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-white border-t border-slate-600'} p-0.5 text-[10px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-20 transition-colors" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')">
                         <span>${rowDef.label}</span>
                         <i data-lucide="chevron-up" class="transition-transform duration-200" id="icon-${currentGroup}" size="14"></i>
@@ -874,14 +874,14 @@
                         const src = srcConfig[s.source] || { bg: 'bg-slate-700', text: '?' };
                         
                         const bar = document.createElement('div'); 
-                        bar.className = `staff-bar status-${s.status} ${borderStyles} ${isLinked ? 'linked-'+s.linkedId : ''}`; 
+                        bar.className = `unselectable staff-bar status-${s.status} ${borderStyles} ${isLinked ? 'linked-'+s.linkedId : ''}`; 
                         bar.style.left = `calc(var(--sidebar-w) + (100% - var(--sidebar-w)) * ${startFraction})`;
                         bar.style.width = `calc((100% - var(--sidebar-w)) * ${widthFraction})`;
                         
                         if (searchTerm && !(s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)) bar.style.opacity = "0.15";
 
-                        const svgUpgFree = `<svg class="w-3.5 h-3.5 text-amber-500 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.6));" fill="currentColor" viewBox="0 0 24 24"><path d="M4 14h4v7h8v-7h4l-8-11z"/></svg>`;
-                        const svgUpgPaid = `<svg class="w-3.5 h-3.5 text-green-500 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.6));" fill="currentColor" viewBox="0 0 24 24"><path d="M4 14h4v7h8v-7h4l-8-11z"/></svg>`;
+                        const svgUpgFree = `<svg class="w-4 h-4 text-yellow-400 shrink-0 ml-0.5 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" fill="currentColor" viewBox="0 0 24 24"><polygon points="12,2 5,12 9,12 9,22 15,22 15,12 19,12" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+                        const svgUpgPaid = `<svg class="w-4 h-4 text-green-400 shrink-0 ml-0.5 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" fill="currentColor" viewBox="0 0 24 24"><polygon points="12,2 5,12 9,12 9,22 15,22 15,12 19,12" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
                         const svgMailSpec = `<svg class="w-3 h-3 text-red-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><line x1="12" y1="10" x2="12" y2="16" stroke-width="3"></line></svg>`;
                         const svgMailPre = `<svg class="w-3 h-3 text-orange-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><circle cx="12" cy="16" r="1.5" fill="currentColor"></circle></svg>`;
                         const svgMailConf = `<svg class="w-3 h-3 text-slate-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
@@ -1013,11 +1013,11 @@
         window.cycleMulti = (el, labels, classes) => {
             let s = parseInt(el.dataset.state) + 1; if(s >= labels.length) s = 0;
             el.dataset.state = s; el.innerText = labels[s];
-            el.className = el.id.includes('email') ? `multi-state-btn w-[110px] px-1 py-1 rounded text-[10px] font-black uppercase border text-center ${classes[s]}` : `multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border flex-1 ${classes[s]}`;
+            el.className = el.id.includes('email') ? `unselectable multi-state-btn w-[110px] px-1 py-1 rounded text-[10px] font-black uppercase border text-center ${classes[s]}` : `unselectable multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border flex-1 ${classes[s]}`;
         };
         const setMulti = (id, state, labels, classes) => {
             const el = document.getElementById(id); el.dataset.state = state; el.innerText = labels[state];
-            el.className = id.includes('email') ? `multi-state-btn w-[110px] px-1 py-1 rounded text-[10px] font-black uppercase border text-center ${classes[state]}` : `multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border flex-1 ${classes[state]}`;
+            el.className = id.includes('email') ? `unselectable multi-state-btn w-[110px] px-1 py-1 rounded text-[10px] font-black uppercase border text-center ${classes[state]}` : `unselectable multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border flex-1 ${classes[state]}`;
         };
 
         window.updateStatusColor = (sel) => {
@@ -1148,8 +1148,11 @@
         
         window.addRoomSelect = (val = "") => {
             const container = document.getElementById('assigned-rooms-container');
+            const wrapper = document.createElement('div');
+            wrapper.className = "flex items-center gap-1 mb-1";
+            
             const sel = document.createElement('select');
-            sel.className = "assigned-room-select bg-blue-50 border-blue-300 w-full text-sm font-bold uppercase text-blue-800 rounded px-1 py-1 mb-1 outline-none";
+            sel.className = "assigned-room-select flex-1 bg-blue-50 border-blue-300 text-sm font-bold uppercase text-blue-800 rounded px-1 py-1 outline-none";
             sel.innerHTML = `<option value="">-- UNASSIGNED --</option>`;
             sel.onchange = window.updateAvailableRooms;
             
@@ -1162,8 +1165,23 @@
                 optGroup.appendChild(opt);
             });
             sel.value = val;
-            container.appendChild(sel);
+            
+            const delBtn = document.createElement('button');
+            delBtn.type = "button";
+            delBtn.className = "p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded flex-shrink-0";
+            delBtn.innerHTML = `<i data-lucide="x" size="14"></i>`;
+            delBtn.onclick = () => { 
+                wrapper.remove(); 
+                if(container.children.length === 0) window.addRoomSelect(); 
+                window.updateAvailableRooms(); 
+            };
+            
+            wrapper.appendChild(sel);
+            wrapper.appendChild(delBtn);
+            container.appendChild(wrapper);
+            
             window.updateAvailableRooms();
+            lucide.createIcons();
         };
 
         window.openStaffModal = () => { 
@@ -1240,8 +1258,23 @@
             let linkCode = s.linkedId || Math.random().toString(36).substr(2, 4).toUpperCase();
             const updatedRecord = { ...s, checkOut: splitDate, linkedId: linkCode };
             const newId = Math.random().toString(36).substr(2, 9);
-            const newRecord = { ...s, id: newId, checkIn: splitDate, room: "", rooms: [""], linkedId: linkCode };
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), updatedRecord); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), newRecord);
+            
+            // Zero-Balance Split Logic
+            const newRecord = { 
+                ...s, 
+                id: newId, 
+                checkIn: splitDate, 
+                room: "", 
+                rooms: [""], 
+                linkedId: linkCode, 
+                totalPrice: 0, 
+                netPrice: 0, 
+                payments: [], 
+                notes: "Split segment for mid-stay room change. Master folio kept on original booking.\n" + (s.notes || "")
+            };
+            
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), updatedRecord); 
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), newRecord);
             document.getElementById('split-modal').style.display = 'none'; window.closeStaffModal();
         };
 
@@ -1627,16 +1660,6 @@
         window.requestDelete = () => {
             if(currentUserRole === 'staff') return;
             window.showAlert(`Permanently delete this record?`, true, async () => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', document.getElementById('staff-id').value)); window.closeStaffModal(); });
-        };
-        
-        window.wipeAllData = () => {
-            if(currentUserRole === 'staff') return;
-            window.showAlert(`WIPE ENTIRE DATABASE?\nThis cannot be undone!`, true, async () => { 
-                document.getElementById('boot-loader').style.display = 'flex'; document.getElementById('sync-status').innerText = 'WIPING...';
-                const promises = staff.map(s => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id)));
-                await Promise.all(promises); 
-                document.getElementById('boot-loader').style.display = 'none'; window.closeAlert(); 
-            });
         };
 
         window.showAlert = (msg, isConfirm = false, onConfirm = null) => {
