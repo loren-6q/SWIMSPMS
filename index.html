@@ -15,6 +15,9 @@
         @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Roboto+Condensed:wght@400;700;900&display=swap');
         
         body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; overflow-x: hidden; font-size: 1.2rem; user-select: none; }
+        
+        /* Allow text selection universally inside the modal so staff can copy/paste easily */
+        .modal-content * { user-select: auto !important; }
         input, textarea, select, [contenteditable] { user-select: auto !important; }
 
         :root { --sidebar-w: 110px; --days: 14; }
@@ -50,12 +53,15 @@
         .status-unconfirmed { background-color: #f3e8ff; color: #581c87; border: 1px solid #d8b4fe; }
         .status-cancelled, .status-noshow { background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; opacity: 0.8; }
         
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 100; }
+        /* Transparent Overlay - Allows clicking calendar behind */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: transparent; pointer-events: none; z-index: 100; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
-        .alert-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); align-items: center; justify-content: center; z-index: 200; }
+        .modal-content { pointer-events: auto; width: 512px; max-width: 95vw; }
+
+        .alert-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); align-items: center; justify-content: center; z-index: 200; pointer-events: auto;}
         .alert-modal-overlay.active { display: flex; }
 
-        .legend-item { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; font-weight: 900; color: #475569; text-transform: uppercase; }
+        .legend-item { display: flex; align-items: center; gap: 4px; font-weight: 900; color: #475569; text-transform: uppercase; }
         .bar-sticky-content { position: sticky; left: 0; display: flex; align-items: center; padding: 0 4px; width: fit-content; max-width: 100vw; white-space: nowrap; }
         
         input, select, textarea { font-size: 1rem !important; padding: 2px 6px !important; border-radius: 4px !important; border: 1px solid #cbd5e1 !important; font-weight: 700 !important; }
@@ -72,13 +78,13 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         #database-view { display: none; }
         
-        .loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
         .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .logo-box { width: 40px; height: 40px; position: relative; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; }
 
-        .unassigned-header { background: #f8fafc !important; color: #475569 !important; font-weight: 900; font-size: 0.8rem !important; border-top: 4px solid #cbd5e1; }
+        .unassigned-header { border-top: 4px solid #cbd5e1; }
         
         .smart-notes { transition: height 0.2s ease; height: 50px; resize: none; overflow: hidden; }
         .smart-notes:focus { height: 120px; overflow-y: auto; }
@@ -93,6 +99,11 @@
         #custom-tooltip { position: fixed; z-index: 99999; pointer-events: none; background: rgba(15, 23, 42, 0.95); color: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); font-size: 13px; font-family: 'Roboto Condensed', sans-serif; display: none; white-space: pre-wrap; transform: translate(10px, 10px); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px); }
         
         .month-divider { border-left: 3px solid white; display: flex; align-items: center; justify-content: center; height: 100%; }
+        select option:disabled { color: #94a3b8; font-style: italic; }
+        
+        /* Collapsible Section Styling */
+        .section-header { background: #e2e8f0; padding: 6px 8px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #475569; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; transition: background 0.2s; }
+        .section-header:hover { background: #cbd5e1; }
     </style>
 </head>
 <body class="p-1 lg:p-2">
@@ -159,30 +170,46 @@
         <div id="calendar-view">
             <div id="calendar-scroll-container" class="bg-white rounded shadow border border-slate-300">
                 <div class="timeline-grid sticky top-0 z-40 bg-slate-800 shadow-sm border-b border-slate-700 h-[26px] box-border">
-                    <div class="border-r border-slate-700 flex items-center justify-center h-full sticky left-0 z-50 bg-slate-800">
+                    <div class="border-r border-slate-700 flex items-center justify-center h-full sticky left-0 z-50 bg-slate-800 w-[var(--sidebar-w)]">
                         <button id="zoom-toggle-btn" onclick="window.toggleZoom()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1 transition-colors"><i data-lucide="zoom-in" size="12"></i> ZOOM: WIDE</button>
                     </div>
                     <div id="month-labels" class="contents text-white text-[11px] font-bold uppercase tracking-widest"></div>
                 </div>
                 
                 <div class="timeline-grid sticky top-[26px] z-30 bg-slate-100 shadow-sm border-b border-slate-300 h-[28px] box-border">
-                    <div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-center border-r border-slate-300 bg-slate-100 h-full sticky left-0 z-40">ROOM</div>
+                    <div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-center border-r border-slate-300 bg-slate-100 h-full sticky left-0 z-40 w-[var(--sidebar-w)]">ROOM</div>
                     <div id="timeline-header" class="contents"></div>
                 </div>
                 
                 <div id="timeline-body" class="relative pb-2"></div>
             </div>
 
-            <footer class="mt-2 bg-white p-2 rounded-lg border border-slate-200 flex flex-row flex-wrap items-center justify-center gap-3 text-center">
-                <div class="flex items-center justify-center gap-3 bg-slate-50 px-3 py-1 rounded border border-slate-200">
+            <footer class="mt-2 bg-white p-2 rounded-lg border border-slate-200 flex flex-col md:flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-[10px] md:text-[11px]">
+                <div class="flex flex-wrap items-center justify-center gap-3">
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-blue-200 border border-blue-400"></span> FUTURE</div>
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-green-200 border border-green-400"></span> HERE</div>
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-slate-200 border border-slate-400"></span> LEFT</div>
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-purple-200 border border-purple-400"></span> UNCONFIRMED</div>
                 </div>
-                <div class="flex items-center justify-center gap-3 bg-slate-50 px-3 py-1 rounded border border-slate-200">
-                    <div class="legend-item"><span class="w-3 h-3 rounded-sm border border-slate-300" style="background-color: rgba(225, 29, 72, 0.4)"></span> FMP</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-sm border border-slate-300" style="background-color: rgba(249, 115, 22, 0.25)"></span> FMW</div>
+                <div class="w-px h-4 bg-slate-300 hidden md:block"></div>
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <div class="legend-item"><span class="w-3 h-3 rounded-sm border border-slate-300" style="background-color: rgba(225, 29, 72, 0.4)"></span> FULL MOON PARTY</div>
+                    <div class="legend-item"><span class="w-3 h-3 rounded-sm border border-slate-300" style="background-color: rgba(249, 115, 22, 0.25)"></span> FULL MOON WEEK</div>
+                </div>
+                <div class="w-px h-4 bg-slate-300 hidden md:block"></div>
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <div class="legend-item"><svg class="w-4 h-4 text-yellow-400 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" fill="currentColor" viewBox="0 0 24 24"><polygon points="12,2 5,12 9,12 9,22 15,22 15,12 19,12" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/></svg> FREE UPGRADE</div>
+                    <div class="legend-item"><svg class="w-4 h-4 text-green-400 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" fill="currentColor" viewBox="0 0 24 24"><polygon points="12,2 5,12 9,12 9,22 15,22 15,12 19,12" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/></svg> PAID UPGRADE</div>
+                    <div class="legend-item"><svg class="w-3.5 h-3.5 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> LINKED BOOKING</div>
+                    <div class="legend-item"><i>ITALICS</i> REFUNDABLE</div>
+                    <div class="legend-item"><div class="border-[2px] border-red-500 w-3 h-3"></div> MONEY DUE</div>
+                    <div class="legend-item"><div class="border-[2px] border-red-500 border-dashed w-3 h-3"></div> INVALID CREDIT CARD</div>
+                </div>
+                <div class="w-px h-4 bg-slate-300 hidden xl:block"></div>
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <div class="legend-item"><svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> CONFIRMATION SENT</div>
+                    <div class="legend-item"><svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><circle cx="12" cy="16" r="1.5" fill="currentColor"></circle></svg> PRE/POST EMAIL</div>
+                    <div class="legend-item"><svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><line x1="12" y1="10" x2="12" y2="16" stroke-width="3"></line></svg> SPECIAL EMAIL</div>
                 </div>
             </footer>
         </div>
@@ -205,29 +232,32 @@
         </div>
     </div>
 
-    <!-- Main Modal -->
-    <div id="staff-modal" class="modal-overlay p-2">
-        <div class="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border-2 border-slate-800 flex flex-col" style="max-height: 95vh;">
+    <!-- Draggable Floating Modal -->
+    <div id="staff-modal" class="modal-overlay">
+        <div id="staff-modal-content" class="modal-content bg-white rounded-xl shadow-2xl border-2 border-slate-800 flex flex-col relative" style="max-height: 90vh;">
             
-            <!-- Smart Header -->
-            <div id="modal-header-btn" class="bg-slate-900 p-3 text-white flex justify-between items-center cursor-pointer hover:bg-slate-800 transition-colors" onclick="window.toggleGuestProfile()">
-                <div class="flex items-center gap-2">
+            <!-- Draggable Smart Header -->
+            <div id="modal-header-btn" class="bg-slate-900 p-2 text-white flex justify-between items-center cursor-move rounded-t-lg" onmousedown="window.startDrag(event)">
+                <div class="flex items-center gap-2 pointer-events-none">
                     <i data-lucide="user" size="18"></i>
                     <h3 id="modal-guest-name-display" class="text-lg font-black uppercase tracking-tighter leading-none">NEW BOOKING</h3>
                 </div>
                 <div class="flex items-center gap-2">
-                    <i id="profile-chevron" data-lucide="chevron-down" size="20" class="transition-transform duration-300"></i>
                     <button type="button" onclick="event.stopPropagation(); window.closeStaffModal()" class="p-1 hover:bg-red-500 rounded"><i data-lucide="x" size="20"></i></button>
                 </div>
             </div>
 
-            <form id="staff-form" class="flex-1 overflow-y-auto overflow-x-hidden p-3 pt-2 space-y-3 no-scrollbar relative">
+            <form id="staff-form" class="flex-1 overflow-y-auto overflow-x-hidden p-3 pt-2 space-y-3 no-scrollbar">
                 <input type="hidden" id="staff-id">
                 <input type="hidden" id="created-at">
                 <input type="hidden" id="created-by">
 
                 <!-- Collapsible Guest Profile -->
-                <div id="guest-profile-section" class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2" style="display: block;">
+                <div class="section-header rounded-t-md mt-1" onclick="window.toggleSection('guest-profile-section', 'profile-chevron')">
+                    <span>Guest Profile</span>
+                    <i data-lucide="chevron-down" id="profile-chevron" size="16" class="transition-transform duration-200"></i>
+                </div>
+                <div id="guest-profile-section" class="bg-slate-50 p-2 border-x border-b border-slate-200 rounded-b-md space-y-2 mt-0" style="display: block;">
                     <div class="grid grid-cols-2 gap-2">
                         <div><label class="field-label">First Name</label><input type="text" id="first-name" class="w-full uppercase" oninput="window.updateHeaderName()"></div>
                         <div><label class="field-label">Last Name</label><input type="text" id="last-name" required class="w-full uppercase" oninput="window.updateHeaderName()"></div>
@@ -244,10 +274,10 @@
                     </div>
                 </div>
 
-                <!-- Core Booking Info -->
-                <div class="grid grid-cols-4 gap-2">
-                    <div class="col-span-1"><label class="field-label">In</label><input type="date" id="check-in" required class="w-full text-sm px-1!" onchange="window.syncLabels()"></div>
-                    <div class="col-span-1"><label class="field-label">Out</label><input type="date" id="check-out" required class="w-full text-sm px-1!" onchange="window.syncLabels()"></div>
+                <!-- Core Booking Info (Always Visible) -->
+                <div class="grid grid-cols-4 gap-2 pt-1">
+                    <div class="col-span-1"><label class="field-label">In</label><input type="date" id="check-in" required class="w-full text-sm px-1!" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
+                    <div class="col-span-1"><label class="field-label">Out</label><input type="date" id="check-out" required class="w-full text-sm px-1!" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
                     <div class="col-span-1"><label class="field-label">PAX</label><input type="number" id="pax-count" value="1" min="1" class="w-full text-center"></div>
                     <div class="col-span-1"><label class="field-label">Status</label>
                         <select id="staff-status" class="w-full text-sm font-black text-white px-1!" style="background: #2563eb" onchange="window.updateStatusColor(this)">
@@ -256,15 +286,18 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="flex flex-col">
-                        <label class="field-label">Booked Type</label>
+                <!-- Aligned Grid for Assignment -->
+                <div class="grid grid-cols-12 gap-2">
+                    <div class="flex flex-col col-span-7">
+                        <div class="flex items-end mb-1 h-[22px]">
+                            <label class="field-label mb-0">Booked Type</label>
+                        </div>
                         <input type="text" id="booked-type" class="bg-slate-50 w-full text-sm font-bold uppercase border-slate-300 rounded px-2 py-1" placeholder="--">
                     </div>
-                    <div class="flex flex-col col-span-2">
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="field-label text-blue-600">Assigned Rooms</label>
-                            <button type="button" onclick="window.addRoomSelect()" class="text-[10px] font-black uppercase text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded hover:bg-blue-200">+ ADD</button>
+                    <div class="flex flex-col col-span-5">
+                        <div class="flex justify-between items-end mb-1 h-[22px]">
+                            <label class="field-label text-blue-600 mb-0">Assigned</label>
+                            <button type="button" onclick="window.addRoomSelect()" class="text-[10px] font-black uppercase text-blue-600 bg-blue-100 px-1.5 py-1 leading-none rounded hover:bg-blue-200">+ ADD</button>
                         </div>
                         <div id="assigned-rooms-container" class="max-h-24 overflow-y-auto no-scrollbar border border-slate-200 rounded p-1 bg-slate-50 flex flex-col gap-1">
                             <!-- Selects dynamically injected here -->
@@ -273,14 +306,18 @@
                 </div>
 
                 <!-- Booking Tags -->
-                <div class="flex gap-2">
+                <div class="flex gap-2 pb-2">
                     <div id="refund-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400'])">NON-REFUNDABLE</div>
                     <div id="upgrade-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400'])">NO UPGRADE</div>
                     <div id="rating-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400'])">FEEDBACK: --</div>
                 </div>
 
-                <!-- Financials -->
-                <div class="bg-slate-100 p-2 rounded-lg border-2 border-slate-300 mt-2">
+                <!-- Collapsible Financials -->
+                <div class="section-header rounded-t-md" onclick="window.toggleSection('fin-section', 'fin-chevron')">
+                    <span>Financials</span>
+                    <i data-lucide="chevron-down" id="fin-chevron" size="16" class="transition-transform duration-200" style="transform: rotate(-90deg)"></i>
+                </div>
+                <div id="fin-section" class="bg-slate-100 p-2 border-x border-b border-slate-200 rounded-b-md mt-0" style="display: none;">
                     <div class="flex justify-between items-end mb-2 pb-2 border-b-2 border-slate-200">
                         <div class="flex gap-2 items-end">
                             <div><label class="field-label">Total Price</label>
@@ -304,23 +341,28 @@
                     <button type="button" onclick="window.addPaymentRow()" class="w-full py-1 border-2 border-dashed border-slate-300 rounded text-xs font-black text-slate-500 hover:bg-slate-200 uppercase">+ ADD PAYMENT</button>
                 </div>
 
-                <!-- Notes & Meta -->
-                <textarea id="staff-notes" class="smart-notes w-full bg-slate-50 border border-slate-300 font-bold text-sm p-2" placeholder="NOTES..."></textarea>
-
-                <div class="grid grid-cols-3 gap-2 bg-slate-50 p-2 rounded border border-slate-200">
-                    <div class="flex flex-col"><label class="field-label">Source</label>
-                        <select id="booking-source" class="w-full text-xs font-bold bg-transparent border-none p-0 outline-none uppercase" onchange="window.calcFinancials()">
-                            <option value="direct">DIRECT</option><option value="booking.com">BOOKING.COM</option><option value="agoda">AGODA</option><option value="hostelworld">HOSTELWORLD</option><option value="airbnb">AIRBNB</option><option value="walkin">WALK-IN</option><option value="other">OTHER</option>
-                        </select>
+                <!-- Collapsible Meta/Source -->
+                <div class="section-header rounded-t-md" onclick="window.toggleSection('meta-section', 'meta-chevron')">
+                    <span>Source & Meta</span>
+                    <i data-lucide="chevron-down" id="meta-chevron" size="16" class="transition-transform duration-200" style="transform: rotate(-90deg)"></i>
+                </div>
+                <div id="meta-section" class="bg-slate-50 p-2 border-x border-b border-slate-200 rounded-b-md mt-0" style="display: none;">
+                    <textarea id="staff-notes" class="smart-notes w-full bg-white border border-slate-300 font-bold text-sm p-2 mb-2 rounded" placeholder="NOTES..."></textarea>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="flex flex-col"><label class="field-label">Source</label>
+                            <select id="booking-source" class="w-full text-xs font-bold bg-transparent border-none p-0 outline-none uppercase" onchange="window.calcFinancials()">
+                                <option value="direct">DIRECT</option><option value="booking.com">BOOKING.COM</option><option value="agoda">AGODA</option><option value="hostelworld">HOSTELWORLD</option><option value="airbnb">AIRBNB</option><option value="walkin">WALK-IN</option><option value="other">OTHER</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col"><label class="field-label">Book Date</label><input type="date" id="booking-date" class="w-full text-xs font-bold bg-transparent border-none p-0 outline-none"></div>
+                        <div class="flex flex-col"><label class="field-label">Book ID</label><input type="text" id="booking-id" class="w-full text-xs font-bold bg-transparent border-none p-0 outline-none" placeholder="ID..."></div>
+                        <div class="flex flex-col col-span-3 mt-1 pt-1 border-t border-slate-200"><label class="field-label text-[9px] text-amber-600">Link Code (To Group Bookings)</label><input type="text" id="link-code" class="w-24 text-xs font-black bg-amber-50 border border-amber-200 text-amber-700 rounded px-1 outline-none uppercase text-center" placeholder="----"></div>
                     </div>
-                    <div class="flex flex-col"><label class="field-label">Book Date</label><input type="date" id="booking-date" class="w-full text-xs font-bold bg-transparent border-none p-0 outline-none"></div>
-                    <div class="flex flex-col"><label class="field-label">Book ID</label><input type="text" id="booking-id" class="w-full text-xs font-bold bg-transparent border-none p-0 outline-none" placeholder="ID..."></div>
-                    <div class="flex flex-col col-span-3 mt-1 pt-1 border-t border-slate-200"><label class="field-label text-[9px] text-amber-600">Link Code (To Group Bookings)</label><input type="text" id="link-code" class="w-24 text-xs font-black bg-amber-50 border border-amber-200 text-amber-700 rounded px-1 outline-none uppercase text-center" placeholder="----"></div>
                 </div>
 
             </form>
             
-            <div class="bg-slate-100 p-3 flex justify-between items-center border-t border-slate-300">
+            <div class="bg-slate-100 p-3 flex justify-between items-center border-t border-slate-300 rounded-b-lg">
                 <div class="flex items-center gap-2">
                     <button type="button" id="delete-btn" onclick="window.requestDelete()" class="p-1.5 bg-red-100 text-red-600 rounded hover:bg-red-200" title="Delete"><i data-lucide="trash-2" size="16"></i></button>
                     <button type="button" id="split-btn" onclick="window.requestSplit()" class="p-1.5 bg-orange-100 text-orange-600 rounded hover:bg-orange-200" title="Split"><i data-lucide="scissors" size="16"></i></button>
@@ -332,7 +374,7 @@
                 </div>
             </div>
             <!-- Audit Log -->
-            <div id="audit-log" class="bg-slate-800 text-[9px] text-slate-400 font-bold uppercase text-center py-0.5"></div>
+            <div id="audit-log" class="bg-slate-800 text-[9px] text-slate-400 font-bold uppercase text-center py-0.5 rounded-b-lg"></div>
         </div>
     </div>
 
@@ -367,7 +409,7 @@
     </div>
 
     <!-- Alert / Split Modals -->
-    <div id="alert-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div id="alert-header" class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Attention</div><div class="p-6 text-center"><p id="alert-message" class="font-black text-slate-700 leading-tight text-md"></p><div id="alert-actions" class="mt-6 flex gap-2 justify-center"><button id="alert-cancel" onclick="window.closeAlert()" class="hidden px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button id="alert-confirm" onclick="window.closeAlert()" class="px-10 py-2 bg-red-600 text-white rounded-lg font-black text-sm uppercase">Okay</button></div></div></div></div>
+    <div id="alert-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div id="alert-header" class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Attention</div><div class="p-6 text-center"><p id="alert-message" class="font-black text-slate-700 leading-tight text-md whitespace-pre-wrap"></p><div id="alert-actions" class="mt-6 flex gap-2 justify-center"><button id="alert-cancel" onclick="window.closeAlert()" class="hidden px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button id="alert-confirm" onclick="window.closeAlert()" class="px-10 py-2 bg-red-600 text-white rounded-lg font-black text-sm uppercase">Okay</button></div></div></div></div>
     <div id="split-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Split Stay</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select date to split booking.</p><input type="date" id="split-date" class="w-full mb-6 bg-slate-50 border border-slate-300 font-bold text-lg p-2 rounded outline-none"><div class="flex gap-2 justify-center"><button onclick="document.getElementById('split-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button onclick="window.confirmSplit()" class="px-10 py-2 bg-orange-600 text-white rounded-lg font-black text-sm uppercase">Split Stay</button></div></div></div></div>
 
     <div id="custom-tooltip"></div>
@@ -409,93 +451,143 @@
         const countries = Object.values(rawCountryMap).sort((a,b) => a === 'Thailand' ? -1 : (b === 'Thailand' ? 1 : a.localeCompare(b)));
 
         const hotelRooms = [
-            { id: "B1", type: "OV Deluxe", bed: "KING", floor: 1, order: 101 },
-            { id: "B2", type: "OV Deluxe", bed: "TWIN", floor: 2, order: 102 },
-            { id: "B3", type: "Deluxe", bed: "KING", floor: 1, order: 201 },
-            { id: "B4", type: "Deluxe", bed: "TWIN", floor: 2, order: 202 },
-            { id: "A1", type: "OV Superior", bed: "KING", floor: 1, order: 301 },
-            { id: "A2", type: "OV Superior", bed: "TWIN", floor: 2, order: 302 },
-            { id: "A3", type: "Superior", bed: "KING", floor: 1, order: 401 },
-            { id: "A5", type: "Superior", bed: "KING", floor: 1, order: 402 },
-            { id: "A7", type: "Superior", bed: "KING", floor: 1, order: 403 },
-            { id: "A9", type: "Superior", bed: "KING", floor: 1, order: 404 },
-            { id: "A11", type: "Superior", bed: "KING", floor: 1, order: 405 },
-            { id: "B5", type: "Superior", bed: "KING", floor: 1, order: 406 },
-            { id: "B7", type: "Superior", bed: "KING", floor: 1, order: 407 },
-            { id: "B9", type: "Superior", bed: "KING", floor: 1, order: 408 },
-            { id: "B11", type: "Superior", bed: "KING", floor: 1, order: 409 },
-            { id: "B13", type: "Superior", bed: "KING", floor: 1, order: 410 },
-            { id: "B15", type: "Superior", bed: "KING", floor: 1, order: 411 },
-            { id: "B17", type: "Superior", bed: "KING", floor: 1, order: 412 },
-            { id: "B19", type: "Superior", bed: "", floor: 1, order: 413 },
-            { id: "B21", type: "Superior", bed: "", floor: 1, order: 414 },
-            { id: "A4", type: "Superior", bed: "KING", floor: 2, order: 415 },
-            { id: "A6", type: "Superior", bed: "KING", floor: 2, order: 416 },
-            { id: "A8", type: "Superior", bed: "TWIN", floor: 2, order: 417 },
-            { id: "A10", type: "Superior", bed: "TWIN", floor: 2, order: 418 },
-            { id: "A12", type: "Superior", bed: "KING", floor: 2, order: 419 },
-            { id: "B6", type: "Superior", bed: "TWIN", floor: 2, order: 420 },
-            { id: "B8", type: "Superior", bed: "TWIN", floor: 2, order: 421 },
-            { id: "B10", type: "Superior", bed: "TWIN", floor: 2, order: 422 },
-            { id: "B12", type: "Superior", bed: "TWIN", floor: 2, order: 423 },
-            { id: "B14", type: "Superior", bed: "TWIN", floor: 2, order: 424 },
-            { id: "B16", type: "Superior", bed: "TWIN", floor: 2, order: 425 },
-            { id: "B18", type: "Superior", bed: "TWIN", floor: 2, order: 426 },
-            { id: "B20", type: "Superior", bed: "TWIN", floor: 2, order: 427 },
-            { id: "B22", type: "Superior", bed: "", floor: 2, order: 428 },
-            { id: "206", type: "OV Standard", bed: "KING", floor: 2, order: 501 },
-            { id: "212", type: "OV Standard", bed: "TWIN", floor: 2, order: 502 },
-            { id: "306", type: "OV Standard", bed: "KING", floor: 3, order: 503 },
-            { id: "311", type: "OV Standard", bed: "KING", floor: 3, order: 504 },
-            { id: "101", type: "Standard", bed: "", floor: 1, order: 601 },
-            { id: "102", type: "Standard", bed: "", floor: 1, order: 602 },
-            { id: "103", type: "Standard", bed: "", floor: 1, order: 603 },
-            { id: "201", type: "Standard", bed: "TWIN", floor: 2, order: 604 },
-            { id: "202", type: "Standard", bed: "TWIN", floor: 2, order: 605 },
-            { id: "203", type: "Standard", bed: "TWIN", floor: 2, order: 606 },
-            { id: "204", type: "Standard", bed: "TWIN", floor: 2, order: 607 },
-            { id: "205", type: "Standard", bed: "TWIN", floor: 2, order: 608 },
-            { id: "207", type: "Standard", bed: "KING", floor: 2, order: 609 },
-            { id: "208", type: "Standard", bed: "KING", floor: 2, order: 610 },
-            { id: "209", type: "Standard", bed: "KING", floor: 2, order: 611 },
-            { id: "210", type: "Standard", bed: "KING", floor: 2, order: 612 },
-            { id: "211", type: "Standard", bed: "KING", floor: 2, order: 613 },
-            { id: "305", type: "Standard", bed: "K+T", floor: 3, order: 614 },
-            { id: "307", type: "Standard", bed: "BUNK+T", floor: 3, order: 615 },
-            { id: "308", type: "Standard", bed: "BUNK+T", floor: 3, order: 616 },
-            { id: "309", type: "Standard", bed: "K+T", floor: 3, order: 617 },
-            { id: "310", type: "Standard", bed: "K+T", floor: 3, order: 618 },
-            { id: "301-1", type: "Dorm", bed: "BUNK", floor: 3, order: 701 },
-            { id: "301-2", type: "Dorm", bed: "BUNK", floor: 3, order: 702 },
-            { id: "301-3", type: "Dorm", bed: "BUNK", floor: 3, order: 703 },
-            { id: "301-4", type: "Dorm", bed: "BUNK", floor: 3, order: 704 },
-            { id: "302-1", type: "Dorm", bed: "BUNK", floor: 3, order: 705 },
-            { id: "302-2", type: "Dorm", bed: "BUNK", floor: 3, order: 706 },
-            { id: "302-3", type: "Dorm", bed: "BUNK", floor: 3, order: 707 },
-            { id: "302-4", type: "Dorm", bed: "BUNK", floor: 3, order: 708 },
-            { id: "303-1", type: "Dorm", bed: "BUNK", floor: 3, order: 709 },
-            { id: "303-2", type: "Dorm", bed: "BUNK", floor: 3, order: 710 },
-            { id: "303-3", type: "Dorm", bed: "BUNK", floor: 3, order: 711 },
-            { id: "303-4", type: "Dorm", bed: "BUNK", floor: 3, order: 712 },
-            { id: "304-1", type: "Dorm", bed: "BUNK", floor: 3, order: 713 },
-            { id: "304-2", type: "Dorm", bed: "BUNK", floor: 3, order: 714 },
-            { id: "304-3", type: "Dorm", bed: "BUNK", floor: 3, order: 715 },
-            { id: "304-4", type: "Dorm", bed: "BUNK", floor: 3, order: 716 },
-            { id: "F1", type: "Budget", bed: "", floor: 1, order: 801 },
-            { id: "F2", type: "Budget", bed: "", floor: 1, order: 802 },
-            { id: "F3", type: "Budget", bed: "", floor: 1, order: 803 },
-            { id: "F4", type: "Budget", bed: "", floor: 1, order: 804 },
-            { id: "F5", type: "Budget", bed: "", floor: 1, order: 805 },
-            { id: "F6", type: "Budget", bed: "", floor: 1, order: 806 },
-            { id: "F7", type: "Budget", bed: "", floor: 1, order: 807 },
-            { id: "F8", type: "Budget", bed: "", floor: 1, order: 808 },
-            { id: "F9", type: "Budget", bed: "", floor: 1, order: 809 },
-            { id: "F10", type: "Budget", bed: "", floor: 1, order: 810 },
-            { id: "F11", type: "Budget", bed: "", floor: 1, order: 811 }
+            { id: "B1", type: "OV Deluxe", bed: "KING", floor: 1 },
+            { id: "B2", type: "OV Deluxe", bed: "TWIN", floor: 2 },
+            { id: "B3", type: "Deluxe", bed: "KING", floor: 1 },
+            { id: "B4", type: "Deluxe", bed: "TWIN", floor: 2 },
+            { id: "A1", type: "OV Superior", bed: "KING", floor: 1 },
+            { id: "A2", type: "OV Superior", bed: "TWIN", floor: 2 },
+            { id: "A3", type: "Superior", bed: "KING", floor: 1 },
+            { id: "A4", type: "Superior", bed: "KING", floor: 2 },
+            { id: "A5", type: "Superior", bed: "KING", floor: 1 },
+            { id: "A6", type: "Superior", bed: "KING", floor: 2 },
+            { id: "A7", type: "Superior", bed: "KING", floor: 1 },
+            { id: "A8", type: "Superior", bed: "TWIN", floor: 2 },
+            { id: "A9", type: "Superior", bed: "KING", floor: 1 },
+            { id: "A10", type: "Superior", bed: "TWIN", floor: 2 },
+            { id: "A11", type: "Superior", bed: "KING", floor: 1 },
+            { id: "A12", type: "Superior", bed: "KING", floor: 2 },
+            { id: "B5", type: "Superior", bed: "KING", floor: 1 },
+            { id: "B6", type: "Superior", bed: "TWIN", floor: 2 },
+            { id: "B7", type: "Superior", bed: "KING", floor: 1 },
+            { id: "B8", type: "Superior", bed: "TWIN", floor: 2 },
+            { id: "B9", type: "Superior", bed: "KING", floor: 1 },
+            { id: "B10", type: "Superior", bed: "TWIN", floor: 2 },
+            { id: "B11", type: "Superior", bed: "KING", floor: 1 },
+            { id: "B12", type: "Superior", bed: "TWIN", floor: 2 },
+            { id: "B13", type: "Superior", bed: "KING", floor: 1 },
+            { id: "B14", type: "Superior", bed: "TWIN", floor: 2 },
+            { id: "B15", type: "Superior", bed: "KING", floor: 1 },
+            { id: "B16", type: "Superior", bed: "TWIN", floor: 2 },
+            { id: "B17", type: "Superior", bed: "KING", floor: 1 },
+            { id: "B18", type: "Superior", bed: "TWIN", floor: 2 },
+            { id: "B19", type: "Superior", bed: "", floor: 1 },
+            { id: "B20", type: "Superior", bed: "TWIN", floor: 2 },
+            { id: "B21", type: "Superior", bed: "", floor: 1 },
+            { id: "B22", type: "Superior", bed: "", floor: 2 },
+            { id: "206", type: "OV Standard", bed: "KING", floor: 2 },
+            { id: "212", type: "OV Standard", bed: "TWIN", floor: 2 },
+            { id: "306", type: "OV Standard", bed: "KING", floor: 3 },
+            { id: "311", type: "OV Standard", bed: "KING", floor: 3 },
+            { id: "101", type: "Standard", bed: "", floor: 1 },
+            { id: "102", type: "Standard", bed: "", floor: 1 },
+            { id: "103", type: "Standard", bed: "", floor: 1 },
+            { id: "201", type: "Standard", bed: "TWIN", floor: 2 },
+            { id: "202", type: "Standard", bed: "KING", floor: 2 },
+            { id: "203", type: "Standard", bed: "TWIN", floor: 2 },
+            { id: "204", type: "Standard", bed: "KING", floor: 2 },
+            { id: "205", type: "Standard", bed: "TWIN", floor: 2 },
+            { id: "207", type: "Standard", bed: "KING", floor: 2 },
+            { id: "208", type: "Standard", bed: "KING", floor: 2 },
+            { id: "209", type: "Standard", bed: "KING", floor: 2 },
+            { id: "210", type: "Standard", bed: "KING", floor: 2 },
+            { id: "211", type: "Standard", bed: "KING", floor: 2 },
+            { id: "305", type: "Standard", bed: "K+T", floor: 3 },
+            { id: "307", type: "Standard", bed: "BUNK+T", floor: 3 },
+            { id: "308", type: "Standard", bed: "BUNK+T", floor: 3 },
+            { id: "309", type: "Standard", bed: "K+T", floor: 3 },
+            { id: "310", type: "Standard", bed: "K+T", floor: 3 },
+            { id: "301-1", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "301-2", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "301-3", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "301-4", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "302-1", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "302-2", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "302-3", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "302-4", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "303-1", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "303-2", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "303-3", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "303-4", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "304-1", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "304-2", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "304-3", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "304-4", type: "Dorm", bed: "BUNK", floor: 3 },
+            { id: "F1", type: "Budget", bed: "", floor: 1 },
+            { id: "F2", type: "Budget", bed: "", floor: 1 },
+            { id: "F3", type: "Budget", bed: "", floor: 1 },
+            { id: "F4", type: "Budget", bed: "", floor: 1 },
+            { id: "F5", type: "Budget", bed: "", floor: 1 },
+            { id: "F6", type: "Budget", bed: "", floor: 1 },
+            { id: "F7", type: "Budget", bed: "", floor: 1 },
+            { id: "F8", type: "Budget", bed: "", floor: 1 },
+            { id: "F9", type: "Budget", bed: "", floor: 1 },
+            { id: "F10", type: "Budget", bed: "", floor: 1 },
+            { id: "F11", type: "Budget", bed: "", floor: 1 }
         ];
 
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
         const to15MAR = d => !d || isNaN(d.getTime()) ? "---" : `${d.getDate()}${mNames[d.getMonth()]}${d.getFullYear().toString().substr(-2)}`;
+
+        // Dragging Logic
+        let isDragging = false;
+        let dragOffsetX, dragOffsetY;
+
+        window.startDrag = (e) => {
+            if (e.target.closest('button, input, select, i')) return; // Ignore buttons
+            isDragging = true;
+            const modal = document.getElementById('staff-modal-content');
+            const rect = modal.getBoundingClientRect();
+            
+            // Switch to fixed positioning if relative so dragging is perfectly aligned
+            if(modal.style.position !== 'fixed') {
+                modal.style.position = 'fixed';
+                modal.style.margin = '0';
+                modal.style.left = rect.left + 'px';
+                modal.style.top = rect.top + 'px';
+            }
+            
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+            document.body.style.userSelect = 'none'; // Prevent highlighting while dragging
+        };
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const modal = document.getElementById('staff-modal-content');
+            modal.style.left = (e.clientX - dragOffsetX) + 'px';
+            modal.style.top = (e.clientY - dragOffsetY) + 'px';
+        });
+
+        document.addEventListener('mouseup', () => { 
+            if(isDragging) {
+                isDragging = false; 
+                document.body.style.userSelect = '';
+            }
+        });
+
+        // Toggle Generic Modal Sections
+        window.toggleSection = (secId, iconId) => {
+            const sec = document.getElementById(secId);
+            const icon = document.getElementById(iconId);
+            if(sec.style.display === 'none') {
+                sec.style.display = 'block';
+                if(icon) icon.style.transform = 'rotate(0deg)';
+            } else {
+                sec.style.display = 'none';
+                if(icon) icon.style.transform = 'rotate(-90deg)';
+            }
+        };
 
         const parseYMD = (dateStr) => {
             if (!dateStr || typeof dateStr !== 'string') return 0;
@@ -582,6 +674,14 @@
             }
             lucide.createIcons();
         };
+        
+        window.toggleGroup = (groupClass) => {
+            const rows = document.querySelectorAll(`.group-${groupClass}`);
+            const icon = document.getElementById(`icon-${groupClass}`);
+            let isHidden = rows[0] && rows[0].style.display === 'none';
+            rows.forEach(r => r.style.display = isHidden ? '' : 'none');
+            if(icon) icon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        };
 
         const getFloorIcon = (f) => {
             if(f === 1) return `<i data-lucide="arrow-down" class="text-blue-500 shrink-0" size="12" stroke-width="3" title="1st Floor"></i>`;
@@ -619,13 +719,13 @@
             days.forEach((d, i) => {
                 if (d.getMonth() !== currentMonth) {
                     if (currentMonth !== -1) {
-                        const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "flex items-center justify-center month-divider py-1";
+                        const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "flex items-center justify-center month-divider py-1 border-b border-slate-700";
                         mDiv.innerText = `${mNames[currentMonth]} ${days[i-1].getFullYear()}`; monthLabels.appendChild(mDiv);
                     }
                     currentMonth = d.getMonth(); currentSpan = 1;
                 } else currentSpan++;
                 if (i === days.length - 1) {
-                    const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "flex items-center justify-center month-divider py-1";
+                    const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "flex items-center justify-center month-divider py-1 border-b border-slate-700";
                     mDiv.innerText = `${mNames[currentMonth]} ${d.getFullYear()}`; monthLabels.appendChild(mDiv);
                 }
             });
@@ -643,25 +743,11 @@
             const viewEndUTC = viewStartUTC + daysToShow * 86400000;
             
             const timelineRows = [];
-            
-            // Build Rooms
-            hotelRooms.forEach((r, idx, arr) => {
-                const prevType = idx > 0 ? arr[idx-1].type : null;
-                if (r.type !== prevType) timelineRows.push({ isDivider: true, label: r.type });
-                
-                const roomBookings = activeStaff.filter(s => {
-                    const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
-                    return rList.includes(r.id) && s.status !== 'unconfirmed' && parseYMD(s.checkIn) <= viewEndUTC && parseYMD(s.checkOut) >= viewStartUTC;
-                });
-                timelineRows.push({ isRoom: true, id: r.id, type: r.type, bed: r.bed, floor: r.floor, bookings: roomBookings });
-            });
 
-            // Build Unconfirmed/Unassigned Zone
+            // Build Unconfirmed/Unassigned Zone FIRST so it's at the top
             const unconfirmed = activeStaff.flatMap(s => {
                 if (parseYMD(s.checkIn) > viewEndUTC || parseYMD(s.checkOut) < viewStartUTC) return [];
-                
                 const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : [""]);
-                
                 if (s.status === 'unconfirmed') {
                     return Array(rList.length).fill(s);
                 } else {
@@ -683,19 +769,42 @@
                 });
                 rows.forEach((r, idx) => timelineRows.push({ isUnassigned: true, label: `U-${idx+1}`, bookings: r }));
             }
+            
+            // Build Rooms
+            hotelRooms.forEach((r, idx, arr) => {
+                const prevType = idx > 0 ? arr[idx-1].type : null;
+                if (r.type !== prevType) timelineRows.push({ isDivider: true, label: r.type });
+                
+                const roomBookings = activeStaff.filter(s => {
+                    const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                    return rList.includes(r.id) && s.status !== 'unconfirmed' && parseYMD(s.checkIn) <= viewEndUTC && parseYMD(s.checkOut) >= viewStartUTC;
+                });
+                timelineRows.push({ isRoom: true, id: r.id, type: r.type, bed: r.bed, floor: r.floor, bookings: roomBookings });
+            });
 
             const tooltip = document.getElementById('custom-tooltip');
+            let currentGroup = '';
 
             timelineRows.forEach(rowDef => {
                 const row = document.createElement('div'); 
                 
                 if (rowDef.isDivider) {
-                    row.className = `timeline-grid ${rowDef.isUnconfirmedZone ? 'mt-4' : ''}`;
-                    row.innerHTML = `<div class="${rowDef.isUnconfirmedZone ? 'unassigned-header' : 'bg-slate-300 text-slate-700'} p-0.5 text-[10px] font-black uppercase flex items-center justify-center border-r border-slate-400 sticky left-0 z-20" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw;">${rowDef.label}</div>`;
+                    currentGroup = rowDef.label.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase();
+                    row.className = `timeline-grid ${rowDef.isUnconfirmedZone ? 'mt-4' : ''} cursor-pointer transition-colors`;
+                    row.innerHTML = `<div class="${rowDef.isUnconfirmedZone ? 'unassigned-header bg-slate-300 hover:bg-slate-400 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-white border-t border-slate-600'} p-0.5 text-[10px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-20 transition-colors" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')">
+                        <span>${rowDef.label}</span>
+                        <i data-lucide="chevron-up" class="transition-transform duration-200" id="icon-${currentGroup}" size="14"></i>
+                    </div>`;
                     body.appendChild(row); return;
                 }
 
-                row.className = `timeline-grid bed-row`;
+                row.className = `timeline-grid bed-row group-${currentGroup}`;
+                
+                // Dorm Row thick divider logic
+                if (rowDef.isRoom && rowDef.id.endsWith('-4')) {
+                    row.classList.add('!border-b-[3px]', '!border-slate-400');
+                }
+                
                 let headerHtml = '';
                 if(rowDef.isRoom) {
                     headerHtml = `
@@ -761,8 +870,8 @@
                         
                         if (searchTerm && !(s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)) bar.style.opacity = "0.15";
 
-                        const svgUpgFree = `<svg class="w-4 h-4 text-yellow-400 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.8));" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 14h7v8h6v-8h7L12 2z"/></svg>`;
-                        const svgUpgPaid = `<svg class="w-4 h-4 text-green-400 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.8));" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 14h7v8h6v-8h7L12 2z"/></svg>`;
+                        const svgUpgFree = `<svg class="w-4 h-4 text-yellow-400 shrink-0 ml-0.5 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" fill="currentColor" viewBox="0 0 24 24"><polygon points="12,2 5,12 9,12 9,22 15,22 15,12 19,12" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+                        const svgUpgPaid = `<svg class="w-4 h-4 text-green-400 shrink-0 ml-0.5 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" fill="currentColor" viewBox="0 0 24 24"><polygon points="12,2 5,12 9,12 9,22 15,22 15,12 19,12" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
                         const svgMailSpec = `<svg class="w-3 h-3 text-red-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><line x1="12" y1="10" x2="12" y2="16" stroke-width="3"></line></svg>`;
                         const svgMailPre = `<svg class="w-3 h-3 text-orange-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><circle cx="12" cy="16" r="1.5" fill="currentColor"></circle></svg>`;
                         const svgMailConf = `<svg class="w-3 h-3 text-slate-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
@@ -995,14 +1104,55 @@
             });
         };
         
+        window.updateAvailableRooms = () => {
+            const cin = document.getElementById('check-in').value;
+            const cout = document.getElementById('check-out').value;
+            const currentStaffId = document.getElementById('staff-id').value;
+
+            if(!cin || !cout) return;
+
+            const startUTC = parseYMD(cin);
+            const endUTC = parseYMD(cout);
+
+            const occupiedRooms = new Set();
+            staff.forEach(s => {
+                if(s.id === currentStaffId) return;
+                if(s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed') return;
+                
+                const sStart = parseYMD(s.checkIn);
+                const sEnd = parseYMD(s.checkOut);
+                
+                if(startUTC < sEnd && sStart < endUTC) {
+                    const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                    rList.forEach(r => { if(r) occupiedRooms.add(r); });
+                }
+            });
+
+            document.querySelectorAll('.assigned-room-select').forEach(sel => {
+                const currentVal = sel.value;
+                Array.from(sel.options).forEach(opt => {
+                    if(!opt.value) return; 
+                    if(occupiedRooms.has(opt.value)) {
+                        opt.disabled = true;
+                        opt.text = opt.text.replace(' (OCCUPIED)', '') + ' (OCCUPIED)';
+                    } else {
+                        opt.disabled = false;
+                        opt.text = opt.text.replace(' (OCCUPIED)', '');
+                    }
+                });
+                sel.value = currentVal;
+            });
+        };
+        
         window.addRoomSelect = (val = "") => {
             const container = document.getElementById('assigned-rooms-container');
             const sel = document.createElement('select');
             sel.className = "assigned-room-select bg-blue-50 border-blue-300 w-full text-sm font-bold uppercase text-blue-800 rounded px-1 py-1 mb-1 outline-none";
             sel.innerHTML = `<option value="">-- UNASSIGNED --</option>`;
+            sel.onchange = window.updateAvailableRooms;
             
             let currentGroup = ''; let optGroup = null;
-            [...hotelRooms].sort((a,b) => a.order - b.order).forEach(r => {
+            hotelRooms.forEach(r => {
                 if (r.type !== currentGroup) { optGroup = document.createElement('optgroup'); optGroup.label = `--- ${r.type.toUpperCase()} ---`; sel.appendChild(optGroup); currentGroup = r.type; }
                 const opt = document.createElement('option'); opt.value = r.id; 
                 const floorArrow = r.floor === 1 ? '↓' : (r.floor === 2 ? '↑' : (r.floor === 3 ? '⇈' : ''));
@@ -1011,10 +1161,18 @@
             });
             sel.value = val;
             container.appendChild(sel);
+            window.updateAvailableRooms();
         };
 
         window.openStaffModal = () => { 
             const form = document.getElementById('staff-form'); if (form) form.reset(); 
+            
+            const modalContent = document.getElementById('staff-modal-content');
+            modalContent.style.position = 'relative';
+            modalContent.style.left = 'auto';
+            modalContent.style.top = 'auto';
+            modalContent.style.margin = 'auto';
+
             document.getElementById('staff-id').value = ""; 
             document.getElementById('created-at').value = "";
             document.getElementById('created-by').value = "";
@@ -1042,12 +1200,12 @@
             window.checkEmailProxy('');
             window.toggleGuestProfile(true);
             document.getElementById('staff-modal').style.display = 'flex'; 
-            window.calcFinancials(); window.syncLabels(); 
+            window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms();
         };
         
         window.closeStaffModal = () => { document.getElementById('staff-modal').style.display = 'none'; };
         
-        window.quickAdd = (room, date) => { window.openStaffModal(); document.getElementById('assigned-rooms-container').innerHTML = ''; window.addRoomSelect(room); const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0'); document.getElementById('check-in').value = `${y}-${m}-${d}`; const out = new Date(date); out.setDate(date.getDate() + 1); const oy = out.getFullYear(), om = String(out.getMonth() + 1).padStart(2, '0'), od = String(out.getDate()).padStart(2, '0'); document.getElementById('check-out').value = `${oy}-${om}-${od}`; window.syncLabels(); };
+        window.quickAdd = (room, date) => { window.openStaffModal(); document.getElementById('assigned-rooms-container').innerHTML = ''; window.addRoomSelect(room); const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0'); document.getElementById('check-in').value = `${y}-${m}-${d}`; const out = new Date(date); out.setDate(date.getDate() + 1); const oy = out.getFullYear(), om = String(out.getMonth() + 1).padStart(2, '0'), od = String(out.getDate()).padStart(2, '0'); document.getElementById('check-out').value = `${oy}-${om}-${od}`; window.syncLabels(); window.updateAvailableRooms(); };
 
         window.requestDuplicate = async () => {
             if(currentUserRole === 'staff') return;
@@ -1316,6 +1474,29 @@
             if (cin >= cout) { window.showAlert("INVALID DATES:\nDeparture must be after arrival."); return; }
             
             const id = document.getElementById('staff-id').value || Math.random().toString(36).substr(2, 9);
+            const status = document.getElementById('staff-status').value;
+            const startUTC = parseYMD(cin);
+            const endUTC = parseYMD(cout);
+            const roomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
+
+            if (status !== 'unconfirmed' && status !== 'cancelled' && status !== 'noshow') {
+                for (let s of staff) {
+                    if (s.id === id) continue;
+                    if (s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed') continue;
+                    const sStart = parseYMD(s.checkIn);
+                    const sEnd = parseYMD(s.checkOut);
+                    if(startUTC < sEnd && sStart < endUTC) {
+                        const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                        for (let r of roomsList) {
+                            if (rList.includes(r)) {
+                                window.showAlert(`ROOM OVERLAP ERROR:\n\nRoom ${r} is already assigned to ${s.firstName} ${s.lastName} during these dates.`);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
             const payments = [];
             document.querySelectorAll('.payment-row').forEach(row => {
                 payments.push({ date: row.querySelector('.pay-date').value, amt: Number(row.querySelector('.pay-amt').value) || 0, method: row.querySelector('.pay-method').value });
@@ -1331,16 +1512,16 @@
             const existing = staff.find(s => s.id === id);
             const now = new Date().toISOString();
             
-            const roomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value);
+            const allRoomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value);
 
             const entry = { 
                 id, 
                 firstName: document.getElementById('first-name').value.trim().toUpperCase(), 
                 lastName: document.getElementById('last-name').value.trim().toUpperCase(), 
-                status: document.getElementById('staff-status').value, 
+                status: status, 
                 bookedType: document.getElementById('booked-type').value,
-                room: roomsList[0] || "", 
-                rooms: roomsList,
+                room: allRoomsList[0] || "", 
+                rooms: allRoomsList,
                 checkIn: cin, checkOut: cout, pax: parseInt(document.getElementById('pax-count').value) || 1,
                 country: document.getElementById('staff-country').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value, 
                 source: document.getElementById('booking-source').value, bookDate: document.getElementById('booking-date').value, bookId: document.getElementById('booking-id').value,
@@ -1368,6 +1549,13 @@
 
         window.editStaff = (id) => {
             const s = staff.find(x => x.id === id); if (!s) return;
+            
+            const modalContent = document.getElementById('staff-modal-content');
+            modalContent.style.position = 'relative';
+            modalContent.style.left = 'auto';
+            modalContent.style.top = 'auto';
+            modalContent.style.margin = 'auto';
+            
             document.getElementById('staff-id').value = s.id; 
             document.getElementById('first-name').value = s.firstName || ""; 
             document.getElementById('last-name').value = s.lastName || ""; 
@@ -1407,6 +1595,7 @@
             setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating==='good'?1:2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
 
             window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.toggleGuestProfile(false);
+            window.updateAvailableRooms();
             
             document.getElementById('delete-btn').style.visibility = 'visible'; document.getElementById('split-btn').style.visibility = 'visible'; document.getElementById('dup-btn').style.visibility = 'visible';
             
