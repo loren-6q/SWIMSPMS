@@ -53,10 +53,10 @@
         .status-unconfirmed { background-color: #f3e8ff; color: #581c87; border: 1px solid #d8b4fe; }
         .status-cancelled, .status-noshow { background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; opacity: 0.8; }
         
-        /* Transparent Overlay - Allows clicking calendar behind */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: transparent; pointer-events: none; z-index: 100; align-items: center; justify-content: center; }
+        /* Transparent Overlay - Flex-start anchors to top to prevent off-screen clipping */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: transparent; pointer-events: none; z-index: 100; align-items: flex-start; justify-content: center; padding-top: 5vh; padding-bottom: 5vh; }
         .modal-overlay.active { display: flex; }
-        .modal-content { pointer-events: auto; width: 512px; max-width: 95vw; }
+        .modal-content { pointer-events: auto; width: 512px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; position: relative; }
 
         .alert-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); align-items: center; justify-content: center; z-index: 200; pointer-events: auto;}
         .alert-modal-overlay.active { display: flex; }
@@ -91,7 +91,7 @@
         
         #calendar-scroll-container { max-height: calc(100vh - 180px); overflow-y: auto; overflow-x: auto; position: relative; }
         
-        .multi-state-btn { cursor: pointer; user-select: none; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .multi-state-btn { cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         
         .link-glow { box-shadow: 0 0 0 3px #fbbf24 !important; z-index: 40 !important; filter: brightness(1.1); }
         
@@ -234,7 +234,7 @@
 
     <!-- Draggable Floating Modal -->
     <div id="staff-modal" class="modal-overlay">
-        <div id="staff-modal-content" class="modal-content bg-white rounded-xl shadow-2xl border-2 border-slate-800 flex flex-col relative" style="max-height: 90vh;">
+        <div id="staff-modal-content" class="modal-content bg-white rounded-xl shadow-2xl border-2 border-slate-800">
             
             <!-- Draggable Smart Header -->
             <div id="modal-header-btn" class="bg-slate-900 p-2 text-white flex justify-between items-center cursor-move rounded-t-lg" onmousedown="window.startDrag(event)">
@@ -247,7 +247,7 @@
                 </div>
             </div>
 
-            <form id="staff-form" class="flex-1 overflow-y-auto overflow-x-hidden p-3 pt-2 space-y-3 no-scrollbar">
+            <form id="staff-form" class="flex-1 overflow-y-auto overflow-x-hidden p-3 pt-2 space-y-3 no-scrollbar relative">
                 <input type="hidden" id="staff-id">
                 <input type="hidden" id="created-at">
                 <input type="hidden" id="created-by">
@@ -448,92 +448,93 @@
         const rawCountryMap = {
             'af': 'Afghanistan', 'al': 'Albania', 'dz': 'Algeria', 'as': 'American Samoa', 'ad': 'Andorra', 'ao': 'Angola', 'ai': 'Anguilla', 'aq': 'Antarctica', 'ag': 'Antigua and Barbuda', 'ar': 'Argentina', 'am': 'Armenia', 'aw': 'Aruba', 'au': 'Australia', 'at': 'Austria', 'az': 'Azerbaijan', 'bs': 'Bahamas', 'bh': 'Bahrain', 'bd': 'Bangladesh', 'bb': 'Barbados', 'by': 'Belarus', 'be': 'Belgium', 'bz': 'Belize', 'bj': 'Benin', 'bm': 'Bermuda', 'bt': 'Bhutan', 'bo': 'Bolivia', 'bq': 'Bonaire', 'ba': 'Bosnia and Herzegovina', 'bw': 'Botswana', 'bv': 'Bouvet Island', 'br': 'Brazil', 'io': 'British Indian Ocean Territory', 'bn': 'Brunei', 'bg': 'Bulgaria', 'bf': 'Burkina Faso', 'bi': 'Burundi', 'cv': 'Cabo Verde', 'kh': 'Cambodia', 'cm': 'Cameroon', 'ca': 'Canada', 'ky': 'Cayman Islands', 'cf': 'Central African Republic', 'td': 'Chad', 'cl': 'Chile', 'cn': 'China', 'cx': 'Christmas Island', 'cc': 'Cocos Islands', 'co': 'Colombia', 'km': 'Comoros', 'cd': 'Congo (DRC)', 'cg': 'Congo', 'ck': 'Cook Islands', 'cr': 'Costa Rica', 'hr': 'Croatia', 'cu': 'Cuba', 'cw': 'Curaçao', 'cy': 'Cyprus', 'cz': 'Czechia', 'ci': "Côte d'Ivoire", 'dk': 'Denmark', 'dj': 'Djibouti', 'dm': 'Dominica', 'do': 'Dominican Republic', 'ec': 'Ecuador', 'eg': 'Egypt', 'sv': 'El Salvador', 'gq': 'Equatorial Guinea', 'er': 'Eritrea', 'ee': 'Estonia', 'sz': 'Eswatini', 'et': 'Ethiopia', 'fk': 'Falkland Islands', 'fo': 'Faroe Islands', 'fj': 'Fiji', 'fi': 'Finland', 'fr': 'France', 'gf': 'French Guiana', 'pf': 'French Polynesia', 'tf': 'French Southern Territories', 'ga': 'Gabon', 'gm': 'Gambia', 'ge': 'Georgia', 'de': 'Germany', 'gh': 'Ghana', 'gi': 'Gibraltar', 'gr': 'Greece', 'gl': 'Greenland', 'gd': 'Grenada', 'gp': 'Guadeloupe', 'gu': 'Guam', 'gt': 'Guatemala', 'gg': 'Guernsey', 'gn': 'Guinea', 'gw': 'Guinea-Bissau', 'gy': 'Guyana', 'ht': 'Haiti', 'hm': 'Heard Island', 'va': 'Holy See', 'hn': 'Honduras', 'hk': 'Hong Kong', 'hu': 'Hungary', 'is': 'Iceland', 'in': 'India', 'id': 'Indonesia', 'ir': 'Iran', 'iq': 'Iraq', 'ie': 'Ireland', 'im': 'Isle of Man', 'il': 'Israel', 'it': 'Italy', 'jm': 'Jamaica', 'jp': 'Japan', 'jo': 'Jordan', 'kz': 'Kazakhstan', 'ke': 'Kenya', 'ki': 'Kiribati', 'kp': 'North Korea', 'kr': 'South Korea', 'kw': 'Kuwait', 'kg': 'Kyrgyzstan', 'la': 'Laos', 'lv': 'Latvia', 'lb': 'Lebanon', 'ls': 'Lesotho', 'lr': 'Liberia', 'ly': 'Libya', 'li': 'Liechtenstein', 'lt': 'Lithuania', 'lu': 'Luxembourg', 'mo': 'Macao', 'mg': 'Madagascar', 'mw': 'Malawi', 'my': 'Malaysia', 'mv': 'Maldives', 'ml': 'Mali', 'mt': 'Malta', 'mh': 'Marshall Islands', 'mq': 'Martinique', 'mr': 'Mauritania', 'mu': 'Mauritius', 'yt': 'Mayotte', 'mx': 'Mexico', 'fm': 'Micronesia', 'md': 'Moldova', 'mc': 'Monaco', 'mn': 'Mongolia', 'me': 'Montenegro', 'ms': 'Montserrat', 'ma': 'Morocco', 'mz': 'Mozambique', 'mm': 'Myanmar', 'na': 'Namibia', 'nr': 'Nauru', 'np': 'Nepal', 'nl': 'Netherlands', 'nc': 'New Caledonia', 'nz': 'New Zealand', 'ni': 'Nicaragua', 'ne': 'Niger', 'ng': 'Nigeria', 'nu': 'Niue', 'nf': 'Norfolk Island', 'mp': 'Northern Mariana Islands', 'no': 'Norway', 'om': 'Oman', 'pk': 'Pakistan', 'pw': 'Palau', 'ps': 'Palestine', 'pa': 'Panama', 'pg': 'Papua New Guinea', 'py': 'Paraguay', 'pe': 'Peru', 'ph': 'Philippines', 'pn': 'Pitcairn', 'pl': 'Poland', 'pt': 'Portugal', 'pr': 'Puerto Rico', 'qa': 'Qatar', 'mk': 'North Macedonia', 'ro': 'Romania', 'ru': 'Russia', 'rw': 'Rwanda', 're': 'Réunion', 'bl': 'Saint Barthélemy', 'sh': 'Saint Helena', 'kn': 'Saint Kitts and Nevis', 'lc': 'Saint Lucia', 'mf': 'Saint Martin', 'pm': 'Saint Pierre and Miquelon', 'vc': 'Saint Vincent', 'ws': 'Samoa', 'sm': 'San Marino', 'st': 'Sao Tome and Principe', 'sa': 'Saudi Arabia', 'sn': 'Senegal', 'rs': 'Serbia', 'sc': 'Seychelles', 'sl': 'Sierra Leone', 'sg': 'Singapore', 'sx': 'Sint Maarten', 'sk': 'Slovakia', 'si': 'Slovenia', 'sb': 'Solomon Islands', 'so': 'Somalia', 'za': 'South Africa', 'gs': 'South Georgia', 'ss': 'South Sudan', 'es': 'Spain', 'lk': 'Sri Lanka', 'sd': 'Sudan', 'sr': 'Suriname', 'sj': 'Svalbard', 'se': 'Sweden', 'ch': 'Switzerland', 'sy': 'Syria', 'tw': 'Taiwan', 'tj': 'Tajikistan', 'tz': 'Tanzania', 'tl': 'Timor-Leste', 'tg': 'Togo', 'tk': 'Tokelau', 'to': 'Tonga', 'tt': 'Trinidad and Tobago', 'tn': 'Tunisia', 'tr': 'Turkey', 'tm': 'Turkmenistan', 'tc': 'Turks and Caicos Islands', 'tv': 'Tuvalu', 'ug': 'Uganda', 'ua': 'Ukraine', 'ae': 'United Arab Emirates', 'gb': 'United Kingdom', 'um': 'U.S. Outlying Islands', 'us': 'United States', 'uy': 'Uruguay', 'uz': 'Uzbekistan', 'vu': 'Vanuatu', 've': 'Venezuela', 'vn': 'Vietnam', 'ye': 'Yemen', 'zm': 'Zambia', 'zw': 'Zimbabwe', 'ax': 'Åland Islands'
         };
-        const countries = Object.values(rawCountryMap).sort((a,b) => a === 'Thailand' ? -1 : (b === 'Thailand' ? 1 : a.localeCompare(b)));
+        const uniqueCountries = [...new Set(Object.values(rawCountryMap))].filter(c => c !== 'Thailand').sort();
+        const countries = ["Thailand", ...uniqueCountries];
 
         const hotelRooms = [
-            { id: "B1", type: "OV Deluxe", bed: "KING", floor: 1 },
-            { id: "B2", type: "OV Deluxe", bed: "TWIN", floor: 2 },
-            { id: "B3", type: "Deluxe", bed: "KING", floor: 1 },
-            { id: "B4", type: "Deluxe", bed: "TWIN", floor: 2 },
-            { id: "A1", type: "OV Superior", bed: "KING", floor: 1 },
-            { id: "A2", type: "OV Superior", bed: "TWIN", floor: 2 },
-            { id: "A3", type: "Superior", bed: "KING", floor: 1 },
-            { id: "A4", type: "Superior", bed: "KING", floor: 2 },
-            { id: "A5", type: "Superior", bed: "KING", floor: 1 },
-            { id: "A6", type: "Superior", bed: "KING", floor: 2 },
-            { id: "A7", type: "Superior", bed: "KING", floor: 1 },
-            { id: "A8", type: "Superior", bed: "TWIN", floor: 2 },
-            { id: "A9", type: "Superior", bed: "KING", floor: 1 },
-            { id: "A10", type: "Superior", bed: "TWIN", floor: 2 },
-            { id: "A11", type: "Superior", bed: "KING", floor: 1 },
-            { id: "A12", type: "Superior", bed: "KING", floor: 2 },
-            { id: "B5", type: "Superior", bed: "KING", floor: 1 },
-            { id: "B6", type: "Superior", bed: "TWIN", floor: 2 },
-            { id: "B7", type: "Superior", bed: "KING", floor: 1 },
-            { id: "B8", type: "Superior", bed: "TWIN", floor: 2 },
-            { id: "B9", type: "Superior", bed: "KING", floor: 1 },
-            { id: "B10", type: "Superior", bed: "TWIN", floor: 2 },
-            { id: "B11", type: "Superior", bed: "KING", floor: 1 },
-            { id: "B12", type: "Superior", bed: "TWIN", floor: 2 },
-            { id: "B13", type: "Superior", bed: "KING", floor: 1 },
-            { id: "B14", type: "Superior", bed: "TWIN", floor: 2 },
-            { id: "B15", type: "Superior", bed: "KING", floor: 1 },
-            { id: "B16", type: "Superior", bed: "TWIN", floor: 2 },
-            { id: "B17", type: "Superior", bed: "KING", floor: 1 },
-            { id: "B18", type: "Superior", bed: "TWIN", floor: 2 },
-            { id: "B19", type: "Superior", bed: "", floor: 1 },
-            { id: "B20", type: "Superior", bed: "TWIN", floor: 2 },
-            { id: "B21", type: "Superior", bed: "", floor: 1 },
-            { id: "B22", type: "Superior", bed: "", floor: 2 },
-            { id: "206", type: "OV Standard", bed: "KING", floor: 2 },
-            { id: "212", type: "OV Standard", bed: "TWIN", floor: 2 },
-            { id: "306", type: "OV Standard", bed: "KING", floor: 3 },
-            { id: "311", type: "OV Standard", bed: "KING", floor: 3 },
-            { id: "101", type: "Standard", bed: "", floor: 1 },
-            { id: "102", type: "Standard", bed: "", floor: 1 },
-            { id: "103", type: "Standard", bed: "", floor: 1 },
-            { id: "201", type: "Standard", bed: "TWIN", floor: 2 },
-            { id: "202", type: "Standard", bed: "KING", floor: 2 },
-            { id: "203", type: "Standard", bed: "TWIN", floor: 2 },
-            { id: "204", type: "Standard", bed: "KING", floor: 2 },
-            { id: "205", type: "Standard", bed: "TWIN", floor: 2 },
-            { id: "207", type: "Standard", bed: "KING", floor: 2 },
-            { id: "208", type: "Standard", bed: "KING", floor: 2 },
-            { id: "209", type: "Standard", bed: "KING", floor: 2 },
-            { id: "210", type: "Standard", bed: "KING", floor: 2 },
-            { id: "211", type: "Standard", bed: "KING", floor: 2 },
-            { id: "305", type: "Standard", bed: "K+T", floor: 3 },
-            { id: "307", type: "Standard", bed: "BUNK+T", floor: 3 },
-            { id: "308", type: "Standard", bed: "BUNK+T", floor: 3 },
-            { id: "309", type: "Standard", bed: "K+T", floor: 3 },
-            { id: "310", type: "Standard", bed: "K+T", floor: 3 },
-            { id: "301-1", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "301-2", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "301-3", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "301-4", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "302-1", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "302-2", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "302-3", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "302-4", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "303-1", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "303-2", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "303-3", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "303-4", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "304-1", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "304-2", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "304-3", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "304-4", type: "Dorm", bed: "BUNK", floor: 3 },
-            { id: "F1", type: "Budget", bed: "", floor: 1 },
-            { id: "F2", type: "Budget", bed: "", floor: 1 },
-            { id: "F3", type: "Budget", bed: "", floor: 1 },
-            { id: "F4", type: "Budget", bed: "", floor: 1 },
-            { id: "F5", type: "Budget", bed: "", floor: 1 },
-            { id: "F6", type: "Budget", bed: "", floor: 1 },
-            { id: "F7", type: "Budget", bed: "", floor: 1 },
-            { id: "F8", type: "Budget", bed: "", floor: 1 },
-            { id: "F9", type: "Budget", bed: "", floor: 1 },
-            { id: "F10", type: "Budget", bed: "", floor: 1 },
-            { id: "F11", type: "Budget", bed: "", floor: 1 }
+            { id: "B1", type: "OV Deluxe", bed: "KING", floor: 1, order: 101 },
+            { id: "B2", type: "OV Deluxe", bed: "TWIN", floor: 2, order: 102 },
+            { id: "B3", type: "Deluxe", bed: "KING", floor: 1, order: 201 },
+            { id: "B4", type: "Deluxe", bed: "TWIN", floor: 2, order: 202 },
+            { id: "A1", type: "OV Superior", bed: "KING", floor: 1, order: 301 },
+            { id: "A2", type: "OV Superior", bed: "TWIN", floor: 2, order: 302 },
+            { id: "A3", type: "Superior", bed: "KING", floor: 1, order: 401 },
+            { id: "A4", type: "Superior", bed: "KING", floor: 2, order: 402 },
+            { id: "A5", type: "Superior", bed: "KING", floor: 1, order: 403 },
+            { id: "A6", type: "Superior", bed: "KING", floor: 2, order: 404 },
+            { id: "A7", type: "Superior", bed: "KING", floor: 1, order: 405 },
+            { id: "A8", type: "Superior", bed: "TWIN", floor: 2, order: 406 },
+            { id: "A9", type: "Superior", bed: "KING", floor: 1, order: 407 },
+            { id: "A10", type: "Superior", bed: "TWIN", floor: 2, order: 408 },
+            { id: "A11", type: "Superior", bed: "KING", floor: 1, order: 409 },
+            { id: "A12", type: "Superior", bed: "KING", floor: 2, order: 410 },
+            { id: "B5", type: "Superior", bed: "KING", floor: 1, order: 411 },
+            { id: "B6", type: "Superior", bed: "TWIN", floor: 2, order: 412 },
+            { id: "B7", type: "Superior", bed: "KING", floor: 1, order: 413 },
+            { id: "B8", type: "Superior", bed: "TWIN", floor: 2, order: 414 },
+            { id: "B9", type: "Superior", bed: "KING", floor: 1, order: 415 },
+            { id: "B10", type: "Superior", bed: "TWIN", floor: 2, order: 416 },
+            { id: "B11", type: "Superior", bed: "KING", floor: 1, order: 417 },
+            { id: "B12", type: "Superior", bed: "TWIN", floor: 2, order: 418 },
+            { id: "B13", type: "Superior", bed: "KING", floor: 1, order: 419 },
+            { id: "B14", type: "Superior", bed: "TWIN", floor: 2, order: 420 },
+            { id: "B15", type: "Superior", bed: "KING", floor: 1, order: 421 },
+            { id: "B16", type: "Superior", bed: "TWIN", floor: 2, order: 422 },
+            { id: "B17", type: "Superior", bed: "KING", floor: 1, order: 423 },
+            { id: "B18", type: "Superior", bed: "TWIN", floor: 2, order: 424 },
+            { id: "B19", type: "Superior", bed: "", floor: 1, order: 425 },
+            { id: "B20", type: "Superior", bed: "TWIN", floor: 2, order: 426 },
+            { id: "B21", type: "Superior", bed: "", floor: 1, order: 427 },
+            { id: "B22", type: "Superior", bed: "", floor: 2, order: 428 },
+            { id: "206", type: "OV Standard", bed: "KING", floor: 2, order: 501 },
+            { id: "212", type: "OV Standard", bed: "TWIN", floor: 2, order: 502 },
+            { id: "306", type: "OV Standard", bed: "KING", floor: 3, order: 503 },
+            { id: "311", type: "OV Standard", bed: "KING", floor: 3, order: 504 },
+            { id: "101", type: "Standard", bed: "", floor: 1, order: 601 },
+            { id: "102", type: "Standard", bed: "", floor: 1, order: 602 },
+            { id: "103", type: "Standard", bed: "", floor: 1, order: 603 },
+            { id: "201", type: "Standard", bed: "TWIN", floor: 2, order: 604 },
+            { id: "202", type: "Standard", bed: "TWIN", floor: 2, order: 605 },
+            { id: "203", type: "Standard", bed: "TWIN", floor: 2, order: 606 },
+            { id: "204", type: "Standard", bed: "TWIN", floor: 2, order: 607 },
+            { id: "205", type: "Standard", bed: "TWIN", floor: 2, order: 608 },
+            { id: "207", type: "Standard", bed: "KING", floor: 2, order: 609 },
+            { id: "208", type: "Standard", bed: "KING", floor: 2, order: 610 },
+            { id: "209", type: "Standard", bed: "KING", floor: 2, order: 611 },
+            { id: "210", type: "Standard", bed: "KING", floor: 2, order: 612 },
+            { id: "211", type: "Standard", bed: "KING", floor: 2, order: 613 },
+            { id: "305", type: "Standard", bed: "K+T", floor: 3, order: 614 },
+            { id: "307", type: "Standard", bed: "BUNK+T", floor: 3, order: 615 },
+            { id: "308", type: "Standard", bed: "BUNK+T", floor: 3, order: 616 },
+            { id: "309", type: "Standard", bed: "K+T", floor: 3, order: 617 },
+            { id: "310", type: "Standard", bed: "K+T", floor: 3, order: 618 },
+            { id: "301-1", type: "Dorm", bed: "2BUNK", floor: 3, order: 701 },
+            { id: "301-2", type: "Dorm", bed: "2BUNK", floor: 3, order: 702 },
+            { id: "301-3", type: "Dorm", bed: "2BUNK", floor: 3, order: 703 },
+            { id: "301-4", type: "Dorm", bed: "2BUNK", floor: 3, order: 704 },
+            { id: "302-1", type: "Dorm", bed: "2BUNK", floor: 3, order: 705 },
+            { id: "302-2", type: "Dorm", bed: "2BUNK", floor: 3, order: 706 },
+            { id: "302-3", type: "Dorm", bed: "2BUNK", floor: 3, order: 707 },
+            { id: "302-4", type: "Dorm", bed: "2BUNK", floor: 3, order: 708 },
+            { id: "303-1", type: "Dorm", bed: "2BUNK", floor: 3, order: 709 },
+            { id: "303-2", type: "Dorm", bed: "2BUNK", floor: 3, order: 710 },
+            { id: "303-3", type: "Dorm", bed: "2BUNK", floor: 3, order: 711 },
+            { id: "303-4", type: "Dorm", bed: "2BUNK", floor: 3, order: 712 },
+            { id: "304-1", type: "Dorm", bed: "2BUNK", floor: 3, order: 713 },
+            { id: "304-2", type: "Dorm", bed: "2BUNK", floor: 3, order: 714 },
+            { id: "304-3", type: "Dorm", bed: "2BUNK", floor: 3, order: 715 },
+            { id: "304-4", type: "Dorm", bed: "2BUNK", floor: 3, order: 716 },
+            { id: "F1", type: "Budget", bed: "", floor: 1, order: 801 },
+            { id: "F2", type: "Budget", bed: "", floor: 1, order: 802 },
+            { id: "F3", type: "Budget", bed: "", floor: 1, order: 803 },
+            { id: "F4", type: "Budget", bed: "", floor: 1, order: 804 },
+            { id: "F5", type: "Budget", bed: "", floor: 1, order: 805 },
+            { id: "F6", type: "Budget", bed: "", floor: 1, order: 806 },
+            { id: "F7", type: "Budget", bed: "", floor: 1, order: 807 },
+            { id: "F8", type: "Budget", bed: "", floor: 1, order: 808 },
+            { id: "F9", type: "Budget", bed: "", floor: 1, order: 809 },
+            { id: "F10", type: "Budget", bed: "", floor: 1, order: 810 },
+            { id: "F11", type: "Budget", bed: "", floor: 1, order: 811 }
         ];
 
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
@@ -559,14 +560,20 @@
             
             dragOffsetX = e.clientX - rect.left;
             dragOffsetY = e.clientY - rect.top;
-            document.body.style.userSelect = 'none'; // Prevent highlighting while dragging
         };
 
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const modal = document.getElementById('staff-modal-content');
-            modal.style.left = (e.clientX - dragOffsetX) + 'px';
-            modal.style.top = (e.clientY - dragOffsetY) + 'px';
+            let newLeft = e.clientX - dragOffsetX;
+            let newTop = e.clientY - dragOffsetY;
+            
+            // Basic constraints so it's never fully dragged off-screen
+            if (newTop < 0) newTop = 0;
+            if (newTop > window.innerHeight - 50) newTop = window.innerHeight - 50;
+            
+            modal.style.left = newLeft + 'px';
+            modal.style.top = newTop + 'px';
         });
 
         document.addEventListener('mouseup', () => { 
@@ -577,10 +584,13 @@
         });
 
         // Toggle Generic Modal Sections
-        window.toggleSection = (secId, iconId) => {
+        window.toggleSection = (secId, iconId, forceState = null) => {
             const sec = document.getElementById(secId);
             const icon = document.getElementById(iconId);
-            if(sec.style.display === 'none') {
+            const isHidden = sec.style.display === 'none';
+            const shouldShow = forceState !== null ? forceState : isHidden;
+            
+            if (shouldShow) {
                 sec.style.display = 'block';
                 if(icon) icon.style.transform = 'rotate(0deg)';
             } else {
@@ -870,8 +880,8 @@
                         
                         if (searchTerm && !(s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)) bar.style.opacity = "0.15";
 
-                        const svgUpgFree = `<svg class="w-4 h-4 text-yellow-400 shrink-0 ml-0.5 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" fill="currentColor" viewBox="0 0 24 24"><polygon points="12,2 5,12 9,12 9,22 15,22 15,12 19,12" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
-                        const svgUpgPaid = `<svg class="w-4 h-4 text-green-400 shrink-0 ml-0.5 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" fill="currentColor" viewBox="0 0 24 24"><polygon points="12,2 5,12 9,12 9,22 15,22 15,12 19,12" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+                        const svgUpgFree = `<svg class="w-3.5 h-3.5 text-amber-500 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.6));" fill="currentColor" viewBox="0 0 24 24"><path d="M4 14h4v7h8v-7h4l-8-11z"/></svg>`;
+                        const svgUpgPaid = `<svg class="w-3.5 h-3.5 text-green-500 shrink-0 ml-0.5" style="filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.6));" fill="currentColor" viewBox="0 0 24 24"><path d="M4 14h4v7h8v-7h4l-8-11z"/></svg>`;
                         const svgMailSpec = `<svg class="w-3 h-3 text-red-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><line x1="12" y1="10" x2="12" y2="16" stroke-width="3"></line></svg>`;
                         const svgMailPre = `<svg class="w-3 h-3 text-orange-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><circle cx="12" cy="16" r="1.5" fill="currentColor"></circle></svg>`;
                         const svgMailConf = `<svg class="w-3 h-3 text-slate-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
@@ -990,14 +1000,6 @@
             const f = document.getElementById('first-name').value.trim().toUpperCase();
             const l = document.getElementById('last-name').value.trim().toUpperCase();
             document.getElementById('modal-guest-name-display').innerText = f || l ? `${f} ${l}` : "NEW BOOKING";
-        };
-
-        window.toggleGuestProfile = (forceState = null) => {
-            const sec = document.getElementById('guest-profile-section');
-            const icon = document.getElementById('profile-chevron');
-            const isVis = sec.style.display !== 'none';
-            if (forceState === true || (!isVis && forceState === null)) { sec.style.display = 'block'; icon.style.transform = 'rotate(0deg)'; } 
-            else if (forceState === false || (isVis && forceState === null)) { sec.style.display = 'none'; icon.style.transform = 'rotate(-90deg)'; }
         };
 
         window.checkEmailProxy = (val) => {
@@ -1171,7 +1173,7 @@
             modalContent.style.position = 'relative';
             modalContent.style.left = 'auto';
             modalContent.style.top = 'auto';
-            modalContent.style.margin = 'auto';
+            modalContent.style.margin = '0';
 
             document.getElementById('staff-id').value = ""; 
             document.getElementById('created-at').value = "";
@@ -1198,7 +1200,12 @@
             window.updateStatusColor(document.getElementById('staff-status'));
             window.updateHeaderName();
             window.checkEmailProxy('');
-            window.toggleGuestProfile(true);
+            
+            // Reset collapsible sections to "Mini Mode"
+            window.toggleSection('guest-profile-section', 'profile-chevron', true);
+            window.toggleSection('fin-section', 'fin-chevron', false);
+            window.toggleSection('meta-section', 'meta-chevron', false);
+            
             document.getElementById('staff-modal').style.display = 'flex'; 
             window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms();
         };
@@ -1554,7 +1561,7 @@
             modalContent.style.position = 'relative';
             modalContent.style.left = 'auto';
             modalContent.style.top = 'auto';
-            modalContent.style.margin = 'auto';
+            modalContent.style.margin = '0';
             
             document.getElementById('staff-id').value = s.id; 
             document.getElementById('first-name').value = s.firstName || ""; 
@@ -1594,7 +1601,16 @@
             setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade==='free'?1:2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
             setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating==='good'?1:2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
 
-            window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.toggleGuestProfile(false);
+            window.updateHeaderName(); 
+            window.checkEmailProxy(s.email || ""); 
+            window.calcFinancials(); 
+            window.syncLabels(); 
+            
+            // Mini Mode: Collapse all 3 sections on open so it takes up less space
+            window.toggleSection('guest-profile-section', 'profile-chevron', false);
+            window.toggleSection('fin-section', 'fin-chevron', false);
+            window.toggleSection('meta-section', 'meta-chevron', false);
+            
             window.updateAvailableRooms();
             
             document.getElementById('delete-btn').style.visibility = 'visible'; document.getElementById('split-btn').style.visibility = 'visible'; document.getElementById('dup-btn').style.visibility = 'visible';
