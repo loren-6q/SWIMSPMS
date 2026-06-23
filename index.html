@@ -11,19 +11,22 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Roboto+Condensed:wght@400;700;900&display=swap');
         
-        body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; overflow-x: hidden; font-size: 1.2rem; }
+        body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; overflow-x: hidden; font-size: 1.2rem; user-select: none; }
+        input, textarea, select, [contenteditable] { user-select: auto !important; }
 
         :root { --sidebar-w: 110px; --days: 14; }
         @media (min-width: 650px) { :root { --days: 21; } --sidebar-w: 120px; }
         @media (min-width: 950px) { :root { --days: 28; } --sidebar-w: 130px; }
         @media (min-width: 1150px) { :root { --days: 35; } --sidebar-w: 140px; }
 
-        .timeline-grid { display: grid; grid-template-columns: var(--sidebar-w) repeat(var(--days), 1fr); }
-        .day-column { border-right: 1px solid #e2e8f0; height: 100%; position: relative; cursor: cell; min-width: 25px; transition: filter 0.1s; }
+        .timeline-grid { display: grid; grid-template-columns: var(--sidebar-w) repeat(var(--days), minmax(40px, 1fr)); width: max-content; min-width: 100%; }
+        .zoom-wide-mode .timeline-grid { grid-template-columns: var(--sidebar-w) repeat(var(--days), minmax(90px, 1fr)); }
+
+        .day-column { border-right: 1px solid #e2e8f0; height: 100%; position: relative; cursor: cell; transition: filter 0.1s; }
         .bed-row { height: 28px; border-bottom: 1px solid #cbd5e1; position: relative; transition: filter 0.1s; }
         
-        .bed-row:hover { filter: brightness(0.94); }
-        .hover-col { filter: brightness(0.94); }
+        .bed-row:hover { filter: brightness(0.92); }
+        .hover-col { filter: brightness(0.92); }
         
         .day-fmp-dark { background-color: rgba(225, 29, 72, 0.4) !important; }
         .day-fmp-medium { background-color: rgba(249, 115, 22, 0.25) !important; }
@@ -31,18 +34,18 @@
         
         .staff-bar {
             position: absolute; height: 22px; top: 3px; border-radius: 4px;
-            display: flex; align-items: center; color: white; cursor: pointer; z-index: 10;
-            font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(0,0,0,0.2);
+            display: flex; align-items: center; cursor: pointer; z-index: 10;
+            font-size: 0.85rem; font-weight: 700; 
             text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;
             transition: all 0.2s;
         }
 
-        .status-future { background-color: #2563eb; } 
-        .status-here { background-color: #059669; }   
-        .status-left { background-color: #475569; }
-        .status-cancelled { background-color: #94a3b8; }
-        .status-noshow { background-color: #000; }
-        .status-unconfirmed { background-color: #8b5cf6; }
+        /* Pastel Status Colors */
+        .status-future { background-color: #dbeafe; color: #1e3a8a; border: 1px solid #93c5fd; } 
+        .status-here { background-color: #dcfce7; color: #14532d; border: 1px solid #86efac; }   
+        .status-left { background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+        .status-unconfirmed { background-color: #f3e8ff; color: #581c87; border: 1px solid #d8b4fe; }
+        .status-cancelled, .status-noshow { background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; opacity: 0.8; }
         
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 100; }
         .modal-overlay.active { display: flex; }
@@ -51,8 +54,7 @@
 
         .legend-item { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; font-weight: 900; color: #475569; text-transform: uppercase; }
         .bar-sticky-content { position: sticky; left: 0; display: flex; align-items: center; padding: 0 4px; width: fit-content; max-width: 100vw; white-space: nowrap; }
-        .month-divider { border-left: 3px solid white; }
-
+        
         input, select, textarea { font-size: 1rem !important; padding: 2px 6px !important; border-radius: 4px !important; border: 1px solid #cbd5e1 !important; font-weight: 700 !important; }
         .field-label { font-size: 12px; font-weight: 900; color: #64748b; text-transform: uppercase; display: block; margin-bottom: -2px; }
 
@@ -77,19 +79,19 @@
 
         .unassigned-header { background: #f8fafc !important; color: #475569 !important; font-weight: 900; font-size: 0.8rem !important; border-top: 4px solid #cbd5e1; }
         
-        /* Auto-compressing Notes */
         .smart-notes { transition: height 0.2s ease; height: 50px; resize: none; overflow: hidden; }
         .smart-notes:focus { height: 120px; overflow-y: auto; }
         
-        /* Sticky Calendar Container */
-        #calendar-scroll-container { max-height: calc(100vh - 180px); overflow-y: auto; position: relative; }
-        #month-header { position: sticky; top: 0; z-index: 30; }
-        #timeline-header { position: sticky; top: 28px; z-index: 30; }
+        #calendar-scroll-container { max-height: calc(100vh - 180px); overflow-y: auto; overflow-x: auto; position: relative; }
+        #month-header { position: sticky; top: 0; z-index: 30; width: fit-content; min-width: 100%; }
+        #timeline-header { position: sticky; top: 28px; z-index: 30; width: fit-content; min-width: 100%; }
         
-        .multi-state-btn { cursor: pointer; user-select: none; transition: all 0.2s; }
+        .multi-state-btn { cursor: pointer; user-select: none; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         
-        /* Linked Glow Effect */
         .link-glow { box-shadow: 0 0 0 3px #fbbf24 !important; z-index: 40 !important; filter: brightness(1.1); }
+        
+        /* Custom Tooltip */
+        #custom-tooltip { position: fixed; z-index: 99999; pointer-events: none; background: rgba(15, 23, 42, 0.95); color: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); font-size: 13px; font-family: 'Roboto Condensed', sans-serif; display: none; white-space: pre-wrap; transform: translate(10px, 10px); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px); }
     </style>
 </head>
 <body class="p-1 lg:p-2">
@@ -121,8 +123,9 @@
                     </div>
                     <button onclick="window.goToday()" class="px-3 py-1 bg-white border border-slate-300 rounded font-bold text-xs uppercase hover:bg-slate-50">Today</button>
                     <div class="flex gap-1 ml-1">
-                        <button onclick="window.openImportModal()" class="px-3 py-1 bg-indigo-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-indigo-700 active:scale-95"><i data-lucide="clipboard-paste" size="14"></i> Import CSV</button>
+                        <button onclick="window.openCSVModal()" class="px-3 py-1 bg-indigo-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-indigo-700 active:scale-95"><i data-lucide="clipboard-paste" size="14"></i> Import CSV</button>
                         <button onclick="window.openStaffModal()" class="px-3 py-1 bg-blue-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-blue-700 active:scale-95"><i data-lucide="plus" size="14"></i> Add</button>
+                        <button onclick="window.wipeAllData()" class="px-3 py-1 bg-red-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-red-700 animate-pulse active:scale-95 ml-2 border-2 border-red-800"><i data-lucide="skull" size="14"></i> WIPE ALL DB DATA NOW</button>
                     </div>
                 </div>
                 
@@ -152,10 +155,13 @@
         <div id="calendar-view">
             <div id="calendar-scroll-container" class="bg-white rounded shadow border border-slate-300">
                 <div id="month-header" class="timeline-grid bg-slate-800 text-white text-[11px] font-bold uppercase tracking-widest py-1">
-                    <div class="border-r border-slate-700"></div><div id="month-labels" class="contents"></div>
+                    <div class="border-r border-slate-700 flex items-center justify-center">
+                        <button id="zoom-toggle-btn" onclick="window.toggleZoom()" class="bg-slate-700 hover:bg-slate-600 text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1 transition-colors"><i data-lucide="zoom-in" size="12"></i> ZOOM: WIDE</button>
+                    </div>
+                    <div id="month-labels" class="contents"></div>
                 </div>
-                <div class="timeline-grid bg-slate-100 border-b border-slate-300">
-                    <div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-center border-r border-slate-300">ROOM</div>
+                <div class="timeline-grid bg-slate-100 border-b border-slate-300 shadow-sm" id="timeline-header-grid">
+                    <div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-center border-r border-slate-300 bg-slate-100" style="position: sticky; left: 0; z-index: 35;">ROOM</div>
                     <div id="timeline-header" class="contents"></div>
                 </div>
                 <div id="timeline-body" class="relative pb-2"></div>
@@ -163,10 +169,10 @@
 
             <footer class="mt-2 bg-white p-2 rounded-lg border border-slate-200 flex flex-row flex-wrap items-center justify-center gap-3 text-center">
                 <div class="flex items-center justify-center gap-3 bg-slate-50 px-3 py-1 rounded border border-slate-200">
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-blue-600"></span> FUTURE</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-green-600"></span> HERE</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-slate-500"></span> LEFT</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-purple-500"></span> UNCONFIRMED</div>
+                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-blue-200 border border-blue-400"></span> FUTURE</div>
+                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-green-200 border border-green-400"></span> HERE</div>
+                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-slate-200 border border-slate-400"></span> LEFT</div>
+                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-purple-200 border border-purple-400"></span> UNCONFIRMED</div>
                 </div>
                 <div class="flex items-center justify-center gap-3 bg-slate-50 px-3 py-1 rounded border border-slate-200">
                     <div class="legend-item"><span class="w-3 h-3 rounded-sm border border-slate-300" style="background-color: rgba(225, 29, 72, 0.4)"></span> FMP</div>
@@ -225,10 +231,10 @@
                         <div><label class="field-label">Country</label><select id="staff-country" class="w-full font-bold text-sm"></select></div>
                     </div>
                     <div><label class="field-label">Email</label><input type="text" id="email" class="w-full text-sm" oninput="window.checkEmailProxy(this.value)"></div>
-                    <div class="flex flex-wrap gap-2 pt-1 border-t border-slate-200 mt-2">
-                        <div id="email-confirm-btn" class="multi-state-btn px-2 py-1 rounded text-[10px] font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['CONFIRMATION: --', 'CONFIRMATION: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400'])">CONFIRMATION: --</div>
-                        <div id="email-prepost-btn" class="multi-state-btn px-2 py-1 rounded text-[10px] font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONFIRMED'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400'])">PRE/POST: --</div>
-                        <div id="email-special-btn" class="multi-state-btn px-2 py-1 rounded text-[10px] font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400'])">SPECIAL: --</div>
+                    <div class="flex gap-2 pt-1 border-t border-slate-200 mt-2">
+                        <div id="email-confirm-btn" class="w-[120px] multi-state-btn px-1 py-1 rounded text-[10px] font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400'])">CONFIRM: --</div>
+                        <div id="email-prepost-btn" class="w-[140px] multi-state-btn px-1 py-1 rounded text-[10px] font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400'])">PRE/POST: --</div>
+                        <div id="email-special-btn" class="w-[120px] multi-state-btn px-1 py-1 rounded text-[10px] font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400'])">SPECIAL: --</div>
                     </div>
                 </div>
 
@@ -247,7 +253,7 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div class="flex flex-col">
                         <label class="field-label">Booked Type</label>
-                        <select id="booked-type" class="bg-slate-50 w-full text-sm font-bold uppercase"></select>
+                        <input type="text" id="booked-type" class="bg-slate-50 w-full text-sm font-bold uppercase border-slate-300 rounded px-2 py-1" placeholder="--">
                     </div>
                     <div class="flex flex-col">
                         <label class="field-label text-blue-600">Assigned Room</label>
@@ -261,7 +267,7 @@
                 <div class="flex gap-2">
                     <div id="refund-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400'])">NON-REFUNDABLE</div>
                     <div id="upgrade-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400'])">NO UPGRADE</div>
-                    <div id="rating-btn" class="multi-state-btn px-3 py-1.5 rounded text-[12px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['--', '✔', '❌'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400'])">--</div>
+                    <div id="rating-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400'])">FEEDBACK: --</div>
                 </div>
 
                 <!-- Financials -->
@@ -271,8 +277,8 @@
                             <div><label class="field-label">Total Price</label>
                                 <div class="flex items-center text-xl font-black">฿<input type="number" id="total-price" value="0" step="0.01" class="w-24 p-0 ml-1 border-none bg-transparent outline-none focus:ring-0 text-xl font-black" oninput="window.calcFinancials()"></div>
                             </div>
-                            <div class="mb-1"><label class="field-label text-[10px] text-slate-400">Net Est.</label>
-                                <div class="flex items-center text-xs font-bold text-slate-500">฿<input type="number" id="net-price" value="0" step="0.01" class="w-16 p-0 ml-0.5 border-none bg-transparent outline-none focus:ring-0 text-xs font-bold text-slate-500" oninput="window.overrideNet()"></div>
+                            <div class="mb-1"><label class="field-label text-[10px] text-slate-400 cursor-pointer hover:text-blue-500" onclick="document.getElementById('net-price').focus()">Net Est.</label>
+                                <div class="flex items-center text-xs font-bold text-slate-500">฿<input type="number" id="net-price" value="0" step="0.01" class="w-16 p-0 ml-0.5 border-none bg-transparent outline-none focus:ring-0 text-xs font-bold text-slate-500 transition-all focus:bg-white focus:border focus:border-blue-300 focus:rounded px-1" oninput="window.overrideNet()"></div>
                             </div>
                         </div>
                         <div class="flex gap-4 text-right items-center">
@@ -286,7 +292,7 @@
                     </div>
                     
                     <div id="payments-list" class="space-y-1 mb-2"></div>
-                    <button type="button" onclick="window.addPaymentRow()" class="w-full py-1 border-2 border-dashed border-slate-300 rounded text-xs font-black text-slate-500 hover:bg-slate-200 uppercase">+ Add Payment</button>
+                    <button type="button" onclick="window.addPaymentRow()" class="w-full py-1 border-2 border-dashed border-slate-300 rounded text-xs font-black text-slate-500 hover:bg-slate-200 uppercase">+ ADD PAYMENT</button>
                 </div>
 
                 <!-- Notes & Meta -->
@@ -326,8 +332,8 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
             <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm"><span>Import Spreadsheet CSV</span><button type="button" onclick="document.getElementById('import-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div>
             <div class="p-4 flex flex-col gap-3">
-                <p class="text-sm font-bold text-slate-500 leading-tight">Paste rows directly from your spreadsheet.<br><span class="text-xs text-rose-500">Must include the Header row!</span></p>
-                <textarea id="import-textarea" rows="6" class="w-full bg-slate-50 border border-slate-300 font-bold text-xs p-2 rounded outline-none focus:ring-2 focus:ring-indigo-500 whitespace-pre" placeholder="Checkin	Checkout	Room	Guest Name	Source	...&#10;2026-Jun-28	2026-Jun-30	B19	Smith John	booking.com	..."></textarea>
+                <p class="text-sm font-bold text-slate-500 leading-tight">Paste rows directly from your spreadsheet.<br><span class="text-xs text-rose-500">Must include the Header row! (Supports BDC Export)</span></p>
+                <textarea id="import-textarea" rows="6" class="w-full bg-slate-50 border border-slate-300 font-bold text-xs p-2 rounded outline-none focus:ring-2 focus:ring-indigo-500 whitespace-pre" placeholder="Reservation number	Booked on	Arrival	Departure	Guest name..."></textarea>
                 <div class="flex gap-2 justify-end mt-2">
                     <button onclick="document.getElementById('import-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button>
                     <button onclick="window.processCSV()" class="px-8 py-2 bg-green-600 text-white rounded-lg font-black text-sm uppercase flex items-center gap-1"><i data-lucide="sheet" size="16"></i> Process</button>
@@ -336,9 +342,11 @@
         </div>
     </div>
 
-    <!-- Alert / Split Modals (unchanged logic, compressed HTML) -->
-    <div id="alert-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div id="alert-header" class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Attention</div><div class="p-6 text-center"><p id="alert-message" class="font-black text-slate-700 leading-tight text-md"></p><div id="alert-actions" class="mt-6 flex gap-2 justify-center"><button id="alert-cancel" onclick="window.closeAlert()" class="hidden px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button id="alert-confirm" onclick="window.closeAlert()" class="px-10 py-2 bg-blue-600 text-white rounded-lg font-black text-sm uppercase">Okay</button></div></div></div></div>
+    <!-- Alert / Split Modals -->
+    <div id="alert-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div id="alert-header" class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Attention</div><div class="p-6 text-center"><p id="alert-message" class="font-black text-slate-700 leading-tight text-md"></p><div id="alert-actions" class="mt-6 flex gap-2 justify-center"><button id="alert-cancel" onclick="window.closeAlert()" class="hidden px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button id="alert-confirm" onclick="window.closeAlert()" class="px-10 py-2 bg-red-600 text-white rounded-lg font-black text-sm uppercase">Okay</button></div></div></div></div>
     <div id="split-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Split Stay</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select date to split booking.</p><input type="date" id="split-date" class="w-full mb-6 bg-slate-50 border border-slate-300 font-bold text-lg p-2 rounded outline-none"><div class="flex gap-2 justify-center"><button onclick="document.getElementById('split-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button onclick="window.confirmSplit()" class="px-10 py-2 bg-orange-600 text-white rounded-lg font-black text-sm uppercase">Split Stay</button></div></div></div></div>
+
+    <div id="custom-tooltip"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -367,27 +375,104 @@
         let currentUserEmail = 'unknown';
         let staff = [];
         let viewStart = new Date(); viewStart.setHours(12,0,0,0);
-        let searchTerm = ""; let searchMatchIndex = 0; let sortKey = "checkIn"; let sortAsc = false;
+        let searchTerm = ""; let searchMatchIndex = 0; let sortKey = "checkIn"; let sortAsc = false; let isZoomWide = false;
         const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         const fmpDates = ["2026-01-03", "2026-02-02", "2026-03-03", "2026-04-02", "2026-05-01", "2026-06-01", "2026-06-29", "2026-07-31", "2026-08-28", "2026-09-26", "2026-10-27", "2026-11-24", "2026-12-24", "2026-12-31"];
-        const countries = ["Thailand", "Afghanistan", "Albania", "Algeria", "Argentina", "Australia", "Austria", "Belgium", "Brazil", "Canada", "Chile", "China", "Colombia", "Czech Republic", "Denmark", "Egypt", "Finland", "France", "Germany", "Greece", "Hungary", "India", "Indonesia", "Ireland", "Israel", "Italy", "Japan", "Malaysia", "Mexico", "Netherlands", "New Zealand", "Norway", "Philippines", "Poland", "Portugal", "Russia", "Saudi Arabia", "Singapore", "South Africa", "South Korea", "Spain", "Sweden", "Switzerland", "Taiwan", "Turkey", "United Arab Emirates", "United Kingdom", "United States", "Vietnam"].sort((a,b) => a === 'Thailand' ? -1 : (b === 'Thailand' ? 1 : a.localeCompare(b)));
+        
+        const rawCountryMap = {
+            'af': 'Afghanistan', 'al': 'Albania', 'dz': 'Algeria', 'as': 'American Samoa', 'ad': 'Andorra', 'ao': 'Angola', 'ai': 'Anguilla', 'aq': 'Antarctica', 'ag': 'Antigua and Barbuda', 'ar': 'Argentina', 'am': 'Armenia', 'aw': 'Aruba', 'au': 'Australia', 'at': 'Austria', 'az': 'Azerbaijan', 'bs': 'Bahamas', 'bh': 'Bahrain', 'bd': 'Bangladesh', 'bb': 'Barbados', 'by': 'Belarus', 'be': 'Belgium', 'bz': 'Belize', 'bj': 'Benin', 'bm': 'Bermuda', 'bt': 'Bhutan', 'bo': 'Bolivia', 'bq': 'Bonaire', 'ba': 'Bosnia and Herzegovina', 'bw': 'Botswana', 'bv': 'Bouvet Island', 'br': 'Brazil', 'io': 'British Indian Ocean Territory', 'bn': 'Brunei', 'bg': 'Bulgaria', 'bf': 'Burkina Faso', 'bi': 'Burundi', 'cv': 'Cabo Verde', 'kh': 'Cambodia', 'cm': 'Cameroon', 'ca': 'Canada', 'ky': 'Cayman Islands', 'cf': 'Central African Republic', 'td': 'Chad', 'cl': 'Chile', 'cn': 'China', 'cx': 'Christmas Island', 'cc': 'Cocos Islands', 'co': 'Colombia', 'km': 'Comoros', 'cd': 'Congo (DRC)', 'cg': 'Congo', 'ck': 'Cook Islands', 'cr': 'Costa Rica', 'hr': 'Croatia', 'cu': 'Cuba', 'cw': 'Curaçao', 'cy': 'Cyprus', 'cz': 'Czechia', 'ci': "Côte d'Ivoire", 'dk': 'Denmark', 'dj': 'Djibouti', 'dm': 'Dominica', 'do': 'Dominican Republic', 'ec': 'Ecuador', 'eg': 'Egypt', 'sv': 'El Salvador', 'gq': 'Equatorial Guinea', 'er': 'Eritrea', 'ee': 'Estonia', 'sz': 'Eswatini', 'et': 'Ethiopia', 'fk': 'Falkland Islands', 'fo': 'Faroe Islands', 'fj': 'Fiji', 'fi': 'Finland', 'fr': 'France', 'gf': 'French Guiana', 'pf': 'French Polynesia', 'tf': 'French Southern Territories', 'ga': 'Gabon', 'gm': 'Gambia', 'ge': 'Georgia', 'de': 'Germany', 'gh': 'Ghana', 'gi': 'Gibraltar', 'gr': 'Greece', 'gl': 'Greenland', 'gd': 'Grenada', 'gp': 'Guadeloupe', 'gu': 'Guam', 'gt': 'Guatemala', 'gg': 'Guernsey', 'gn': 'Guinea', 'gw': 'Guinea-Bissau', 'gy': 'Guyana', 'ht': 'Haiti', 'hm': 'Heard Island', 'va': 'Holy See', 'hn': 'Honduras', 'hk': 'Hong Kong', 'hu': 'Hungary', 'is': 'Iceland', 'in': 'India', 'id': 'Indonesia', 'ir': 'Iran', 'iq': 'Iraq', 'ie': 'Ireland', 'im': 'Isle of Man', 'il': 'Israel', 'it': 'Italy', 'jm': 'Jamaica', 'jp': 'Japan', 'jo': 'Jordan', 'kz': 'Kazakhstan', 'ke': 'Kenya', 'ki': 'Kiribati', 'kp': 'North Korea', 'kr': 'South Korea', 'kw': 'Kuwait', 'kg': 'Kyrgyzstan', 'la': 'Laos', 'lv': 'Latvia', 'lb': 'Lebanon', 'ls': 'Lesotho', 'lr': 'Liberia', 'ly': 'Libya', 'li': 'Liechtenstein', 'lt': 'Lithuania', 'lu': 'Luxembourg', 'mo': 'Macao', 'mg': 'Madagascar', 'mw': 'Malawi', 'my': 'Malaysia', 'mv': 'Maldives', 'ml': 'Mali', 'mt': 'Malta', 'mh': 'Marshall Islands', 'mq': 'Martinique', 'mr': 'Mauritania', 'mu': 'Mauritius', 'yt': 'Mayotte', 'mx': 'Mexico', 'fm': 'Micronesia', 'md': 'Moldova', 'mc': 'Monaco', 'mn': 'Mongolia', 'me': 'Montenegro', 'ms': 'Montserrat', 'ma': 'Morocco', 'mz': 'Mozambique', 'mm': 'Myanmar', 'na': 'Namibia', 'nr': 'Nauru', 'np': 'Nepal', 'nl': 'Netherlands', 'nc': 'New Caledonia', 'nz': 'New Zealand', 'ni': 'Nicaragua', 'ne': 'Niger', 'ng': 'Nigeria', 'nu': 'Niue', 'nf': 'Norfolk Island', 'mp': 'Northern Mariana Islands', 'no': 'Norway', 'om': 'Oman', 'pk': 'Pakistan', 'pw': 'Palau', 'ps': 'Palestine', 'pa': 'Panama', 'pg': 'Papua New Guinea', 'py': 'Paraguay', 'pe': 'Peru', 'ph': 'Philippines', 'pn': 'Pitcairn', 'pl': 'Poland', 'pt': 'Portugal', 'pr': 'Puerto Rico', 'qa': 'Qatar', 'mk': 'North Macedonia', 'ro': 'Romania', 'ru': 'Russia', 'rw': 'Rwanda', 're': 'Réunion', 'bl': 'Saint Barthélemy', 'sh': 'Saint Helena', 'kn': 'Saint Kitts and Nevis', 'lc': 'Saint Lucia', 'mf': 'Saint Martin', 'pm': 'Saint Pierre and Miquelon', 'vc': 'Saint Vincent', 'ws': 'Samoa', 'sm': 'San Marino', 'st': 'Sao Tome and Principe', 'sa': 'Saudi Arabia', 'sn': 'Senegal', 'rs': 'Serbia', 'sc': 'Seychelles', 'sl': 'Sierra Leone', 'sg': 'Singapore', 'sx': 'Sint Maarten', 'sk': 'Slovakia', 'si': 'Slovenia', 'sb': 'Solomon Islands', 'so': 'Somalia', 'za': 'South Africa', 'gs': 'South Georgia', 'ss': 'South Sudan', 'es': 'Spain', 'lk': 'Sri Lanka', 'sd': 'Sudan', 'sr': 'Suriname', 'sj': 'Svalbard', 'se': 'Sweden', 'ch': 'Switzerland', 'sy': 'Syria', 'tw': 'Taiwan', 'tj': 'Tajikistan', 'tz': 'Tanzania', 'tl': 'Timor-Leste', 'tg': 'Togo', 'tk': 'Tokelau', 'to': 'Tonga', 'tt': 'Trinidad and Tobago', 'tn': 'Tunisia', 'tr': 'Turkey', 'tm': 'Turkmenistan', 'tc': 'Turks and Caicos Islands', 'tv': 'Tuvalu', 'ug': 'Uganda', 'ua': 'Ukraine', 'ae': 'United Arab Emirates', 'gb': 'United Kingdom', 'um': 'U.S. Outlying Islands', 'us': 'United States', 'uy': 'Uruguay', 'uz': 'Uzbekistan', 'vu': 'Vanuatu', 've': 'Venezuela', 'vn': 'Vietnam', 'ye': 'Yemen', 'zm': 'Zambia', 'zw': 'Zimbabwe', 'ax': 'Åland Islands'
+        };
+        const countries = Object.values(rawCountryMap).sort((a,b) => a === 'Thailand' ? -1 : (b === 'Thailand' ? 1 : a.localeCompare(b)));
 
         const hotelRooms = [
-            { id: "F1", type: "Budget", bed: "1B1T", order: 101 },{ id: "F2", type: "Budget", bed: "1B1T", order: 102 },{ id: "F3", type: "Budget", bed: "1B1T", order: 103 },{ id: "F4", type: "Budget", bed: "1B1T", order: 104 },{ id: "F5", type: "Budget", bed: "1B1T", order: 105 },{ id: "F6", type: "Budget", bed: "1B1T", order: 106 },{ id: "F7", type: "Budget", bed: "1B1T", order: 107 },{ id: "F8", type: "Budget", bed: "1B1T", order: 108 },{ id: "F9", type: "Budget", bed: "1B1T", order: 109 },{ id: "F10", type: "Budget", bed: "1B1T", order: 110 },{ id: "F11", type: "Budget", bed: "1B1T", order: 111 },
-            { id: "101", type: "Standard", bed: "1K", order: 201 },{ id: "102", type: "Standard", bed: "1K", order: 202 },{ id: "103", type: "Standard", bed: "1K", order: 203 },{ id: "201", type: "Standard", bed: "2T", order: 204 },{ id: "202", type: "Standard", bed: "1K", order: 205 },{ id: "203", type: "Standard", bed: "2T", order: 206 },{ id: "204", type: "Standard", bed: "1K", order: 207 },{ id: "205", type: "Standard", bed: "2T", order: 208 },{ id: "207", type: "Standard", bed: "2T", order: 209 },{ id: "208", type: "Standard", bed: "1K", order: 210 },{ id: "209", type: "Standard", bed: "2T", order: 211 },{ id: "210", type: "Standard", bed: "1K", order: 212 },{ id: "211", type: "Standard", bed: "2T", order: 213 },{ id: "301", type: "Standard", bed: "1K", order: 214 },{ id: "302", type: "Standard", bed: "1K", order: 215 },{ id: "303", type: "Standard", bed: "1K", order: 216 },{ id: "304", type: "Standard", bed: "1K", order: 217 },{ id: "305", type: "Standard", bed: "1K", order: 218 },{ id: "307", type: "Standard", bed: "1B1T", order: 219 },{ id: "308", type: "Standard", bed: "1B1T", order: 220 },{ id: "309", type: "Standard", bed: "1K", order: 221 },{ id: "310", type: "Standard", bed: "1K", order: 222 },
-            { id: "206", type: "OV Standard", bed: "1K", order: 301 },{ id: "306", type: "OV Standard", bed: "1K", order: 302 },{ id: "311", type: "OV Standard", bed: "1K", order: 303 },
-            { id: "A3", type: "Superior", bed: "1K", order: 401 },{ id: "A4", type: "Superior", bed: "1K", order: 402 },{ id: "A5", type: "Superior", bed: "1K", order: 403 },{ id: "A6", type: "Superior", bed: "1K", order: 404 },{ id: "A7", type: "Superior", bed: "1K", order: 405 },{ id: "A8", type: "Superior", bed: "2T", order: 406 },{ id: "A9", type: "Superior", bed: "1K", order: 407 },{ id: "A10", type: "Superior", bed: "2T", order: 408 },{ id: "A11", type: "Superior", bed: "1K", order: 409 },{ id: "A12", type: "Superior", bed: "1K", order: 410 },{ id: "B5", type: "Superior", bed: "1K", order: 411 },{ id: "B6", type: "Superior", bed: "2T", order: 412 },{ id: "B7", type: "Superior", bed: "1K", order: 413 },{ id: "B8", type: "Superior", bed: "2T", order: 414 },{ id: "B9", type: "Superior", bed: "1K", order: 415 },{ id: "B10", type: "Superior", bed: "2T", order: 416 },{ id: "B11", type: "Superior", bed: "1K", order: 417 },{ id: "B12", type: "Superior", bed: "2T", order: 418 },{ id: "B13", type: "Superior", bed: "1K", order: 419 },{ id: "B14", type: "Superior", bed: "2T", order: 420 },{ id: "B15", type: "Superior", bed: "1K", order: 421 },{ id: "B16", type: "Superior", bed: "2T", order: 422 },{ id: "B17", type: "Superior", bed: "1K", order: 423 },{ id: "B18", type: "Superior", bed: "2T", order: 424 },{ id: "B19", type: "Superior", bed: "1K", order: 425 },{ id: "B20", type: "Superior", bed: "2T", order: 426 },{ id: "B21", type: "Superior", bed: "1K", order: 427 },{ id: "B22", type: "Superior", bed: "1K", order: 428 },
-            { id: "A1", type: "OV Superior", bed: "1K", order: 501 },{ id: "A2", type: "OV Superior", bed: "2T", order: 502 },
-            { id: "B3", type: "Deluxe", bed: "1K", order: 601 },{ id: "B4", type: "Deluxe", bed: "2T", order: 602 },
-            { id: "B1", type: "OV Deluxe", bed: "1K", order: 701 },{ id: "B2", type: "OV Deluxe", bed: "2T", order: 702 },{ id: "212", type: "OV Deluxe", bed: "1K", order: 703 }
+            { id: "F1", type: "Budget", bed: "XXXX", order: 101 },
+            { id: "F2", type: "Budget", bed: "XXXX", order: 102 },
+            { id: "F3", type: "Budget", bed: "XXXX", order: 103 },
+            { id: "F4", type: "Budget", bed: "XXXX", order: 104 },
+            { id: "F5", type: "Budget", bed: "XXXX", order: 105 },
+            { id: "F6", type: "Budget", bed: "XXXX", order: 106 },
+            { id: "F7", type: "Budget", bed: "XXXX", order: 107 },
+            { id: "F8", type: "Budget", bed: "XXXX", order: 108 },
+            { id: "F9", type: "Budget", bed: "XXXX", order: 109 },
+            { id: "F10", type: "Budget", bed: "XXXX", order: 110 },
+            { id: "F11", type: "Budget", bed: "XXXX", order: 111 },
+            { id: "101", type: "Standard", bed: "????", order: 201 },
+            { id: "102", type: "Standard", bed: "????", order: 202 },
+            { id: "103", type: "Standard", bed: "????", order: 203 },
+            { id: "201", type: "Standard", bed: "2T", order: 204 },
+            { id: "202", type: "Standard", bed: "1K", order: 205 },
+            { id: "203", type: "Standard", bed: "2T", order: 206 },
+            { id: "204", type: "Standard", bed: "1K", order: 207 },
+            { id: "205", type: "Standard", bed: "2T", order: 208 },
+            { id: "207", type: "Standard", bed: "2T", order: 209 },
+            { id: "208", type: "Standard", bed: "1K", order: 210 },
+            { id: "209", type: "Standard", bed: "2T", order: 211 },
+            { id: "210", type: "Standard", bed: "1K", order: 212 },
+            { id: "211", type: "Standard", bed: "2T", order: 213 },
+            { id: "301", type: "Standard", bed: "1K", order: 214 },
+            { id: "302", type: "Standard", bed: "1K", order: 215 },
+            { id: "303", type: "Standard", bed: "1K", order: 216 },
+            { id: "304", type: "Standard", bed: "1K", order: 217 },
+            { id: "305", type: "Standard", bed: "1K", order: 218 },
+            { id: "307", type: "Standard", bed: "1B 1T", order: 219 },
+            { id: "308", type: "Standard", bed: "1B 1T", order: 220 },
+            { id: "309", type: "Standard", bed: "1K", order: 221 },
+            { id: "310", type: "Standard", bed: "1K", order: 222 },
+            { id: "206", type: "OV Standard", bed: "XXXX", order: 301 },
+            { id: "306", type: "OV Standard", bed: "1K", order: 302 },
+            { id: "311", type: "OV Standard", bed: "1K", order: 303 },
+            { id: "A3", type: "Superior", bed: "1K", order: 401 },
+            { id: "A4", type: "Superior", bed: "1K", order: 402 },
+            { id: "A5", type: "Superior", bed: "1K", order: 403 },
+            { id: "A6", type: "Superior", bed: "1K", order: 404 },
+            { id: "A7", type: "Superior", bed: "1K", order: 405 },
+            { id: "A8", type: "Superior", bed: "2T", order: 406 },
+            { id: "A9", type: "Superior", bed: "1K", order: 407 },
+            { id: "A10", type: "Superior", bed: "2T", order: 408 },
+            { id: "A11", type: "Superior", bed: "1K", order: 409 },
+            { id: "A12", type: "Superior", bed: "1K", order: 410 },
+            { id: "B5", type: "Superior", bed: "1K", order: 411 },
+            { id: "B6", type: "Superior", bed: "2T", order: 412 },
+            { id: "B7", type: "Superior", bed: "1K", order: 413 },
+            { id: "B8", type: "Superior", bed: "2T", order: 414 },
+            { id: "B9", type: "Superior", bed: "1K", order: 415 },
+            { id: "B10", type: "Superior", bed: "2T", order: 416 },
+            { id: "B11", type: "Superior", bed: "1K", order: 417 },
+            { id: "B12", type: "Superior", bed: "2T", order: 418 },
+            { id: "B13", type: "Superior", bed: "1K", order: 419 },
+            { id: "B14", type: "Superior", bed: "2T", order: 420 },
+            { id: "B15", type: "Superior", bed: "1K", order: 421 },
+            { id: "B16", type: "Superior", bed: "2T", order: 422 },
+            { id: "B17", type: "Superior", bed: "1K", order: 423 },
+            { id: "B18", type: "Superior", bed: "2T", order: 424 },
+            { id: "B19", type: "Superior", bed: "????", order: 425 },
+            { id: "B20", type: "Superior", bed: "2T", order: 426 },
+            { id: "B21", type: "Superior", bed: "????", order: 427 },
+            { id: "B22", type: "Superior", bed: "????", order: 428 },
+            { id: "A1", type: "OV Superior", bed: "1K", order: 501 },
+            { id: "A2", type: "OV Superior", bed: "2T", order: 502 },
+            { id: "B3", type: "Deluxe", bed: "1K", order: 601 },
+            { id: "B4", type: "Deluxe", bed: "2T", order: 602 },
+            { id: "B1", type: "OV Deluxe", bed: "1K", order: 701 },
+            { id: "B2", type: "OV Deluxe", bed: "2T", order: 702 },
+            { id: "212", type: "OV Deluxe", bed: "1K", order: 703 }
         ];
 
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
         const to15MAR = d => !d || isNaN(d.getTime()) ? "---" : `${d.getDate()}${mNames[d.getMonth()]}${d.getFullYear().toString().substr(-2)}`;
 
+        const parseYMD = (dateStr) => {
+            if (!dateStr || typeof dateStr !== 'string') return 0;
+            const parts = dateStr.split('-');
+            if(parts.length !== 3) return 0;
+            return Date.UTC(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+        };
+
         const getDayIndex = (dateStr) => {
-            const [y, m, d] = dateStr.split('-');
-            const target = Date.UTC(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+            if (!dateStr || typeof dateStr !== 'string') return -1;
+            const parts = dateStr.split('-');
+            if(parts.length !== 3) return -1;
+            const target = Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
             const anchor = Date.UTC(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate());
             return Math.round((target - anchor) / 86400000);
         };
@@ -415,8 +500,7 @@
 
             if (isCanvas || !REQUIRE_LOGIN) {
                 try {
-                    if (isCanvas && window.__initial_auth_token) await signInWithCustomToken(auth, window.__initial_auth_token);
-                    else await signInAnonymously(auth);
+                    await signInAnonymously(auth);
                     currentUserRole = 'admin'; currentUserEmail = 'Admin (Test)';
                     document.getElementById('boot-loader').style.display = 'none';
                     onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => { staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.render(); });
@@ -434,7 +518,7 @@
                         document.getElementById('boot-loader').style.display = 'none';
                         
                         if (currentUserRole === 'staff') {
-                            const importBtn = document.querySelector('button[onclick="window.openImportModal()"]');
+                            const importBtn = document.querySelector('button[onclick="window.openCSVModal()"]');
                             if(importBtn) importBtn.style.display = 'none';
                         }
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => { staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.render(); });
@@ -445,9 +529,6 @@
             const cSel = document.getElementById('staff-country');
             countries.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; cSel.appendChild(opt); });
             
-            const bSel = document.getElementById('booked-type');
-            roomTypes.forEach(t => { const opt = document.createElement('option'); opt.value = t.toLowerCase(); opt.innerText = t; bSel.appendChild(opt); });
-
             const aSel = document.getElementById('assigned-room');
             let currentGroup = ''; let optGroup = null;
             [...hotelRooms].sort((a,b) => a.order - b.order).forEach(r => {
@@ -456,6 +537,20 @@
             });
 
             window.addEventListener('resize', window.render);
+            lucide.createIcons();
+        };
+
+        window.toggleZoom = () => {
+            isZoomWide = !isZoomWide;
+            const container = document.getElementById('calendar-scroll-container');
+            const btn = document.getElementById('zoom-toggle-btn');
+            if(isZoomWide) {
+                container.classList.add('zoom-wide-mode');
+                btn.innerHTML = `<i data-lucide="zoom-out" size="12"></i> ZOOM: FIT`;
+            } else {
+                container.classList.remove('zoom-wide-mode');
+                btn.innerHTML = `<i data-lucide="zoom-in" size="12"></i> ZOOM: WIDE`;
+            }
             lucide.createIcons();
         };
 
@@ -518,14 +613,14 @@
                 const prevType = idx > 0 ? arr[idx-1].type : null;
                 if (r.type !== prevType) timelineRows.push({ isDivider: true, label: r.type });
                 
-                const roomBookings = activeStaff.filter(s => s.room === r.id && s.status !== 'unconfirmed' && Date.UTC(...s.checkIn.split('-').map((v,i)=>i===1?v-1:v)) <= viewEndUTC && Date.UTC(...s.checkOut.split('-').map((v,i)=>i===1?v-1:v)) >= viewStartUTC);
+                const roomBookings = activeStaff.filter(s => s.room === r.id && s.status !== 'unconfirmed' && parseYMD(s.checkIn) <= viewEndUTC && parseYMD(s.checkOut) >= viewStartUTC);
                 timelineRows.push({ isRoom: true, id: r.id, type: r.type, bed: r.bed, bookings: roomBookings });
             });
 
-            // Build Unconfirmed Zone
-            const unconfirmed = staff.filter(s => s.status === 'unconfirmed' && Date.UTC(...s.checkIn.split('-').map((v,i)=>i===1?v-1:v)) <= viewEndUTC && Date.UTC(...s.checkOut.split('-').map((v,i)=>i===1?v-1:v)) >= viewStartUTC);
+            // Build Unconfirmed/Unassigned Zone
+            const unconfirmed = staff.filter(s => (s.status === 'unconfirmed' || !s.room) && s.status !== 'cancelled' && s.status !== 'noshow' && parseYMD(s.checkIn) <= viewEndUTC && parseYMD(s.checkOut) >= viewStartUTC);
             if(unconfirmed.length > 0) {
-                timelineRows.push({ isDivider: true, label: "UNCONFIRMED", isUnconfirmedZone: true });
+                timelineRows.push({ isDivider: true, label: "UNCONFIRMED / HOLD", isUnconfirmedZone: true });
                 const rows = [];
                 unconfirmed.forEach(s => {
                     let placed = false;
@@ -537,12 +632,14 @@
                 rows.forEach((r, idx) => timelineRows.push({ isUnassigned: true, label: `U-${idx+1}`, bookings: r }));
             }
 
+            const tooltip = document.getElementById('custom-tooltip');
+
             timelineRows.forEach(rowDef => {
                 const row = document.createElement('div'); 
                 
                 if (rowDef.isDivider) {
                     row.className = `timeline-grid ${rowDef.isUnconfirmedZone ? 'mt-4' : ''}`;
-                    row.innerHTML = `<div class="${rowDef.isUnconfirmedZone ? 'unassigned-header' : 'bg-slate-300 text-slate-700'} p-0.5 text-[10px] font-black uppercase flex items-center justify-center border-r border-slate-400" style="grid-column: 1 / -1">${rowDef.label}</div>`;
+                    row.innerHTML = `<div class="${rowDef.isUnconfirmedZone ? 'unassigned-header' : 'bg-slate-300 text-slate-700'} p-0.5 text-[10px] font-black uppercase flex items-center justify-center border-r border-slate-400 sticky left-0 z-20" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw;">${rowDef.label}</div>`;
                     body.appendChild(row); return;
                 }
 
@@ -551,7 +648,7 @@
                 if(rowDef.isRoom) headerHtml = `<div class="flex items-center justify-between px-1 w-full"><span class="text-[13px] font-black text-slate-700">${rowDef.id}</span><span class="text-[9px] font-bold text-slate-400">${rowDef.bed}</span></div>`;
                 else headerHtml = `<span class="text-[11px] font-black text-amber-700">${rowDef.label}</span>`;
                 
-                row.innerHTML = `<div class="border-r border-slate-300 ${rowDef.isUnassigned ? 'bg-amber-100' : 'bg-slate-50'} flex items-center justify-center uppercase overflow-hidden shrink-0">${headerHtml}</div>`;
+                row.innerHTML = `<div class="border-r border-slate-300 ${rowDef.isUnassigned ? 'bg-amber-100' : 'bg-slate-50'} flex items-center justify-center uppercase overflow-hidden shrink-0 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.05)]">${headerHtml}</div>`;
                 
                 for(let i=0; i<daysToShow; i++) {
                     const cell = document.createElement('div'); 
@@ -576,23 +673,23 @@
                         const startFraction = diffStart / daysToShow;
                         const widthFraction = (diffEnd - diffStart) / daysToShow;
                         
-                        const due = s.totalPrice - s.payments.reduce((sum, p) => sum + Number(p.amt), 0);
+                        const due = (s.totalPrice || 0) - (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
                         const isBadCC = s.badCC;
                         const owes = due > 0;
                         const isRef = s.refundability === 'ref';
-                        const isUpgraded = s.upgrade !== 'none';
+                        const isUpgradedFree = s.upgrade === 'free';
+                        const isUpgradedPaid = s.upgrade === 'paid';
                         const isLinked = !!s.linkedId;
                         const isGood = s.rating === 'good';
                         const isBad = s.rating === 'bad';
-                        const isEmailed = s.emailConfirm || s.emailPrePost || s.emailSpecial;
 
-                        let borderStyles = 'border-black/20';
-                        if (isBadCC) borderStyles = '!border-red-400 !border-dashed !border-2';
-                        else if (owes) borderStyles = '!border-red-500 !border-2';
+                        let borderStyles = 'border border-black/10';
+                        if (isBadCC) borderStyles = '!border-red-500 !border-dashed !border-[3px]';
+                        else if (owes) borderStyles = '!border-red-500 !border-[3px]';
 
                         let textStyles = isRef ? 'italic font-bold' : 'font-bold';
 
-                        const srcConfig = { 'booking.com': { bg: 'bg-[#003580]', text: 'B' }, 'agoda': { bg: 'bg-[#87B2D6]', text: 'A' }, 'hostelworld': { bg: 'bg-[#F15A24]', text: 'H' }, 'airbnb': { bg: 'bg-[#FF5A5F]', text: 'R' }, 'direct': { bg: 'bg-emerald-500', text: 'D' } };
+                        const srcConfig = { 'booking.com': { bg: 'bg-[#003580]', text: 'B' }, 'agoda': { bg: 'bg-[#87B2D6]', text: 'A' }, 'hostelworld': { bg: 'bg-[#F15A24]', text: 'H' }, 'airbnb': { bg: 'bg-[#FF5A5F]', text: 'A' }, 'direct': { bg: 'bg-emerald-500', text: 'D' } };
                         const src = srcConfig[s.source] || { bg: 'bg-slate-700', text: '?' };
                         
                         const bar = document.createElement('div'); 
@@ -602,24 +699,72 @@
                         
                         if (searchTerm && !(s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)) bar.style.opacity = "0.15";
 
+                        const svgUpgFree = `<svg class="w-3 h-3 text-yellow-300 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+                        const svgUpgPaid = `<svg class="w-3 h-3 text-green-400 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+                        const svgMailSpec = `<svg class="w-3 h-3 text-red-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><line x1="12" y1="10" x2="12" y2="16" stroke-width="3"></line></svg>`;
+                        const svgMailPre = `<svg class="w-3 h-3 text-orange-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><circle cx="12" cy="16" r="1.5" fill="currentColor"></circle></svg>`;
+                        const svgMailConf = `<svg class="w-3 h-3 text-slate-500 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
+
                         let barHtml = `<div class="bar-sticky-content gap-0.5">`;
-                        barHtml += `<div class="${src.bg} text-white w-[14px] h-[14px] text-[10px] font-black flex items-center justify-center shrink-0 rounded-sm">${src.text}</div>`;
-                        if (isLinked) barHtml += `<svg class="w-3 h-3 text-white/90 shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>`;
-                        barHtml += `<span class="${textStyles} truncate text-[11px] ml-0.5" style="letter-spacing:-0.3px;">${s.lastName}</span>`;
-                        if (s.pax > 1) barHtml += `<span class="text-[8px] opacity-80 leading-none self-start mt-0.5">x${s.pax}</span>`;
-                        if (isUpgraded) barHtml += `<span class="text-yellow-300 text-[10px] ml-0.5" style="line-height:1">★</span>`;
-                        if (isEmailed) barHtml += `<span class="text-white text-[10px] ml-0.5" style="line-height:1">✉</span>`;
-                        if (isGood) barHtml += `<span class="text-green-300 text-[9px] ml-0.5" style="line-height:1">✔</span>`;
-                        if (isBad) barHtml += `<span class="text-red-900 text-[9px] ml-0.5" style="line-height:1">❌</span>`;
-                        barHtml += `</div>`;
+                        if (isLinked) barHtml += `<svg class="w-3 h-3 text-slate-800 shrink-0 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>`;
+                        barHtml += `<span class="${textStyles} truncate text-[11px]" style="letter-spacing:-0.3px;">${s.lastName}</span>`;
+                        if (s.pax > 1) barHtml += `<span class="text-[8px] opacity-60 leading-none self-start mt-0.5 ml-0.5">x${s.pax}</span>`;
+                        
+                        if (isUpgradedFree) barHtml += svgUpgFree;
+                        else if (isUpgradedPaid) barHtml += svgUpgPaid;
+                        
+                        if (s.emailSpecial) barHtml += svgMailSpec;
+                        else if (s.emailPrePost === 'sent' || s.emailPrePost === 'confirmed') barHtml += svgMailPre;
+                        else if (s.emailConfirm) barHtml += svgMailConf;
+
+                        if (isGood) barHtml += `<span class="text-green-600 text-[9px] font-black ml-0.5" style="line-height:1">✔</span>`;
+                        if (isBad) barHtml += `<span class="text-red-600 text-[9px] font-black ml-0.5" style="line-height:1">❌</span>`;
+                        
+                        barHtml += `<div class="ml-1 ${src.bg} text-white w-[14px] h-[14px] text-[10px] font-black flex items-center justify-center shrink-0 rounded-sm">${src.text}</div>`;
+                        barHtml += `<div class="w-2 shrink-0"></div></div>`;
 
                         bar.innerHTML = barHtml;
-                        bar.title = `${s.firstName} ${s.lastName}\nTotal: ฿${s.totalPrice} | Due: ฿${due}\nIn: ${s.checkIn} | Out: ${s.checkOut}\n${s.phone} | ${s.email}`;
+
+                        // Tooltip Construction
+                        const formatDateShort = (dStr) => {
+                            if(!dStr) return ''; const p = dStr.split('-'); return `${p[2]}${mNames[parseInt(p[1])-1]}`;
+                        };
                         
-                        bar.onmouseenter = () => { if(isLinked) document.querySelectorAll('.linked-'+s.linkedId).forEach(el => el.classList.add('link-glow')); };
-                        bar.onmouseleave = () => { if(isLinked) document.querySelectorAll('.linked-'+s.linkedId).forEach(el => el.classList.remove('link-glow')); };
-                        bar.onclick = (e) => { e.stopPropagation(); window.editStaff(s.id); }; 
+                        let metaTags = [];
+                        if (isRef) metaTags.push('Refundable');
+                        if (isUpgradedFree) metaTags.push('Free Upgrade');
+                        if (isUpgradedPaid) metaTags.push('Paid Upgrade');
+                        if (s.emailConfirm) metaTags.push('Conf Sent');
+                        if (s.emailPrePost) metaTags.push(`Pre/Post ${s.emailPrePost}`);
+                        if (s.emailSpecial) metaTags.push('Special Sent');
+                        if (isLinked) metaTags.push(`Linked: ${s.linkedId}`);
+
+                        let ttHtml = `<div class="font-black text-[15px] text-blue-300 leading-tight mb-1">${s.firstName||''} ${s.lastName||''}</div>`;
+                        ttHtml += `<div>Total: ฿${s.totalPrice} | <span class="${due > 0 ? 'text-red-400' : 'text-green-400'}">Due: ฿${due} ${isBadCC ? '(*BAD CC*)' : ''}</span></div>`;
+                        ttHtml += `<div class="text-slate-300 mt-1">${formatDateShort(s.checkIn)} → ${formatDateShort(s.checkOut)} (${s.pax} PAX)</div>`;
+                        ttHtml += `<div class="text-slate-300">Src: ${(s.source||'other').toUpperCase()}</div>`;
+                        if (metaTags.length > 0) ttHtml += `<div class="mt-1 pt-1 border-t border-slate-600 text-yellow-200 text-[10px] uppercase font-bold max-w-[200px] leading-tight">${metaTags.join(' • ')}</div>`;
+                        if (s.phone || s.email) ttHtml += `<div class="mt-1 pt-1 border-t border-slate-600 text-slate-400 text-[10px] leading-tight">${s.phone||''}<br>${s.email||''}</div>`;
+
+                        bar.onmouseenter = (e) => { 
+                            if(isLinked) document.querySelectorAll('.linked-'+s.linkedId).forEach(el => el.classList.add('link-glow')); 
+                            tooltip.innerHTML = ttHtml;
+                            tooltip.style.display = 'block';
+                        };
+                        bar.onmousemove = (e) => {
+                            let x = e.clientX + 15;
+                            let y = e.clientY + 15;
+                            if (x + 220 > window.innerWidth) x = e.clientX - 235;
+                            if (y + 150 > window.innerHeight) y = e.clientY - 165;
+                            tooltip.style.left = x + 'px';
+                            tooltip.style.top = y + 'px';
+                        };
+                        bar.onmouseleave = (e) => { 
+                            if(isLinked) document.querySelectorAll('.linked-'+s.linkedId).forEach(el => el.classList.remove('link-glow')); 
+                            tooltip.style.display = 'none';
+                        };
                         
+                        bar.onclick = (e) => { e.stopPropagation(); tooltip.style.display = 'none'; window.editStaff(s.id); }; 
                         row.appendChild(bar);
                     }
                 });
@@ -640,19 +785,23 @@
                 return sortAsc ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
             });
             filtered.forEach(s => {
-                const due = s.totalPrice - s.payments.reduce((sum, p) => sum + Number(p.amt), 0);
+                const due = (s.totalPrice || 0) - (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
                 const tr = document.createElement('tr'); tr.className = "border-b hover:bg-slate-50 cursor-pointer"; tr.onclick = () => window.editStaff(s.id);
-                tr.innerHTML = `<td class="p-2 border-r">${s.firstName} ${s.lastName}</td><td class="p-2 border-r uppercase">${s.source}</td><td class="p-2 border-r">${s.checkIn.substr(5)} to ${s.checkOut.substr(5)}</td><td class="p-2 border-r">${s.room || '--'}</td><td class="p-2 border-r text-right font-black">฿${s.totalPrice}</td><td class="p-2 border-r text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`;
+                tr.innerHTML = `<td class="p-2 border-r">${s.firstName||''} ${s.lastName||''}</td><td class="p-2 border-r uppercase">${s.source||''}</td><td class="p-2 border-r">${s.checkIn?s.checkIn.substr(5):''} to ${s.checkOut?s.checkOut.substr(5):''}</td><td class="p-2 border-r">${s.room || '--'}</td><td class="p-2 border-r text-right font-black">฿${s.totalPrice||0}</td><td class="p-2 border-r text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`;
                 body.appendChild(tr);
             });
         };
 
         window.sortDatabase = (key) => { if(sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } renderDatabase(); };
         window.switchTab = (t) => { document.getElementById('calendar-view').style.display = t === 'calendar' ? 'block' : 'none'; document.getElementById('database-view').style.display = t === 'database' ? 'block' : 'none'; document.getElementById('tab-cal').classList.toggle('active', t === 'calendar'); document.getElementById('tab-db').classList.toggle('active', t === 'database'); if (t === 'database') renderDatabase(); };
-        window.handleSearch = (val) => { searchTerm = val.trim().toUpperCase(); searchMatchIndex = 0; const jumpBtn = document.getElementById('search-jump-btn'); const matches = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => a.checkIn.localeCompare(b.checkIn)); if (searchTerm && matches.length > 0) { jumpBtn.classList.remove('hidden'); document.getElementById('match-counter').innerText = `Match ${searchMatchIndex + 1} of ${matches.length}`; } else jumpBtn.classList.add('hidden'); window.render(); };
+        window.handleSearch = (val) => { searchTerm = val.trim().toUpperCase(); searchMatchIndex = 0; const jumpBtn = document.getElementById('search-jump-btn'); const matches = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (searchTerm && matches.length > 0) { jumpBtn.classList.remove('hidden'); document.getElementById('match-counter').innerText = `Match ${searchMatchIndex + 1} of ${matches.length}`; } else jumpBtn.classList.add('hidden'); window.render(); };
         window.clearSearch = () => { document.getElementById('staff-search').value = ""; window.handleSearch(""); };
-        window.jumpToSearchMatch = () => { const matches = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => a.checkIn.localeCompare(b.checkIn)); if (matches.length > 0) { const match = matches[searchMatchIndex % matches.length]; const d = new Date(match.checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; document.getElementById('match-counter').innerText = `Match ${(searchMatchIndex % matches.length) + 1} of ${matches.length}`; window.render(); } };
-        window.syncLabels = () => { document.getElementById('ov-in').innerText = to15MAR(new Date(document.getElementById('check-in').value + "T12:00:00")); document.getElementById('ov-out').innerText = to15MAR(new Date(document.getElementById('check-out').value + "T12:00:00")); };
+        window.jumpToSearchMatch = () => { const matches = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (matches.length > 0) { const match = matches[searchMatchIndex % matches.length]; const d = new Date(match.checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; document.getElementById('match-counter').innerText = `Match ${(searchMatchIndex % matches.length) + 1} of ${matches.length}`; window.render(); } };
+        window.syncLabels = () => { 
+            const inEl = document.getElementById('check-in'); const outEl = document.getElementById('check-out');
+            if(inEl && document.getElementById('ov-in')) document.getElementById('ov-in').innerText = to15MAR(new Date(inEl.value + "T12:00:00")); 
+            if(outEl && document.getElementById('ov-out')) document.getElementById('ov-out').innerText = to15MAR(new Date(outEl.value + "T12:00:00")); 
+        };
         window.prevPeriod = () => { viewStart.setDate(viewStart.getDate() - 7); window.render(); };
         window.nextPeriod = () => { viewStart.setDate(viewStart.getDate() + 7); window.render(); };
         window.goToday = () => { viewStart = new Date(); viewStart.setHours(12,0,0,0); window.render(); };
@@ -675,7 +824,7 @@
         window.checkEmailProxy = (val) => {
             const el = document.getElementById('email');
             const v = val.toLowerCase();
-            if (v.includes('guest.booking.com') || v.includes('agoda')) { el.classList.remove('text-green-600'); el.classList.add('text-red-600', 'font-black'); }
+            if (v.includes('booking.com') || v.includes('agoda')) { el.classList.remove('text-green-600'); el.classList.add('text-red-600', 'font-black'); }
             else if (v.includes('@')) { el.classList.remove('text-red-600'); el.classList.add('text-green-600', 'font-black'); }
             else { el.classList.remove('text-red-600', 'text-green-600', 'font-black'); }
         };
@@ -683,11 +832,11 @@
         window.cycleMulti = (el, labels, classes) => {
             let s = parseInt(el.dataset.state) + 1; if(s >= labels.length) s = 0;
             el.dataset.state = s; el.innerText = labels[s];
-            el.className = `multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border flex-1 ${classes[s]}`;
+            el.className = el.id.includes('email') ? `multi-state-btn w-[110px] px-1 py-1 rounded text-[10px] font-black uppercase border text-center ${classes[s]}` : `multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border flex-1 ${classes[s]}`;
         };
         const setMulti = (id, state, labels, classes) => {
             const el = document.getElementById(id); el.dataset.state = state; el.innerText = labels[state];
-            el.className = id.includes('email') ? `multi-state-btn px-2 py-1 rounded text-[10px] font-black uppercase border ${classes[state]}` : `multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border flex-1 ${classes[state]}`;
+            el.className = id.includes('email') ? `multi-state-btn w-[110px] px-1 py-1 rounded text-[10px] font-black uppercase border text-center ${classes[state]}` : `multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border flex-1 ${classes[state]}`;
         };
 
         window.updateStatusColor = (sel) => {
@@ -709,7 +858,7 @@
                 const amt = Number(row.querySelector('.pay-amt').value) || 0;
                 const method = row.querySelector('.pay-method').value;
                 paid += amt;
-                if (method === 'hw-dep' || method === 'airbnb-dep') commDeduct += amt;
+                if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp'].includes(method)) commDeduct += amt;
             });
             const due = total - paid;
             document.getElementById('display-paid').innerText = `฿${paid.toFixed(2)}`;
@@ -735,11 +884,25 @@
             div.className = "payment-row flex gap-1 items-center bg-white p-1 rounded border border-slate-200 transition-opacity";
             if(isLocked) div.classList.add('opacity-70');
             div.id = id;
+            
+            if (!date) { const t = new Date(); date = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
+            
             div.innerHTML = `
                 <input type="date" class="pay-date w-24 text-xs p-1!" value="${date}" ${isLocked ? 'disabled' : ''}>
                 <input type="number" class="pay-amt w-20 text-xs p-1! font-black" value="${amt}" placeholder="0" oninput="window.calcFinancials()" ${isLocked ? 'disabled' : ''}>
                 <select class="pay-method flex-1 text-xs p-1! uppercase" onchange="window.calcFinancials()" ${isLocked ? 'disabled' : ''}>
-                    <option value="cash" ${method==='cash'?'selected':''}>CASH</option><option value="card" ${method==='card'?'selected':''}>CARD</option><option value="scan" ${method==='scan'?'selected':''}>SCAN</option><option value="cc-fee" ${method==='cc-fee'?'selected':''}>CC FEE</option><option value="hw-dep" ${method==='hw-dep'?'selected':''}>HW DEP</option><option value="bdc-pay" ${method==='bdc-pay'?'selected':''}>BDC VCC</option><option value="airbnb-dep" ${method==='airbnb-dep'?'selected':''}>AIRBNB DEP</option><option value="other" ${method==='other'?'selected':''}>OTHER</option>
+                    <option value="cash" ${method==='cash'?'selected':''}>CASH</option>
+                    <option value="card" ${method==='card'?'selected':''}>CARD</option>
+                    <option value="scan" ${method==='scan'?'selected':''}>SCAN</option>
+                    <option value="cc-fee" ${method==='cc-fee'?'selected':''}>CC FEE</option>
+                    <option value="hw-kp" ${method==='hw-kp'?'selected':''}>HW KP</option>
+                    <option value="bdc-kp" ${method==='bdc-kp'?'selected':''}>BDC KP</option>
+                    <option value="bdc-pay" ${method==='bdc-pay'?'selected':''}>BDC PAY</option>
+                    <option value="agoda-kp" ${method==='agoda-kp'?'selected':''}>AGODA KP</option>
+                    <option value="agoda-pay" ${method==='agoda-pay'?'selected':''}>AGODA PAY</option>
+                    <option value="airbnb-kp" ${method==='airbnb-kp'?'selected':''}>AIRBNB KP</option>
+                    <option value="airbnb-pay" ${method==='airbnb-pay'?'selected':''}>AIRBNB PAY</option>
+                    <option value="other" ${method==='other'?'selected':''}>OTHER</option>
                 </select>
                 ${isLocked ? `<button type="button" onclick="window.unlockPayment('${id}')" class="p-1 text-slate-400 hover:text-blue-500"><i data-lucide="pencil" size="14"></i></button>` : `<button type="button" onclick="window.removePaymentRow('${id}')" class="p-1 text-slate-400 hover:text-red-500"><i data-lucide="trash" size="14"></i></button>`}
             `;
@@ -771,12 +934,12 @@
             document.getElementById('net-price').dataset.override = 'false';
             document.getElementById('bad-cc-box').dataset.bad = 'false'; document.getElementById('bad-cc-box').innerHTML = ''; document.getElementById('bad-cc-box').className = 'w-4 h-4 border-2 border-slate-300 rounded mt-0.5 flex items-center justify-center';
             
-            setMulti('email-confirm-btn', 0, ['CONFIRMATION: --', 'CONFIRMATION: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
-            setMulti('email-prepost-btn', 0, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONFIRMED'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
+            setMulti('email-confirm-btn', 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
+            setMulti('email-prepost-btn', 0, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
             setMulti('email-special-btn', 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400']);
             setMulti('refund-btn', 0, ['NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400']);
             setMulti('upgrade-btn', 0, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
-            setMulti('rating-btn', 0, ['--', '✔', '❌'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
+            setMulti('rating-btn', 0, ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
 
             document.getElementById('delete-btn').style.visibility = 'hidden'; 
             document.getElementById('split-btn').style.visibility = 'hidden';
@@ -826,71 +989,177 @@
             document.getElementById('split-modal').style.display = 'none'; window.closeStaffModal();
         };
 
-        window.openImportModal = () => { document.getElementById('import-textarea').value = ''; document.getElementById('import-modal').style.display = 'flex'; };
+        window.openCSVModal = () => { document.getElementById('import-textarea').value = ''; document.getElementById('import-modal').style.display = 'flex'; };
 
         window.processCSV = async () => {
             const text = document.getElementById('import-textarea').value.trim(); if (!text) return;
-            const rows = text.split('\n').map(r => r.split('\t'));
-            const headers = rows[0].map(h => h.trim().toLowerCase());
+            
+            const delimiter = text.indexOf('\t') !== -1 ? '\t' : ',';
+            
+            const parseCSVLine = (line, delim) => {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const c = line[i];
+                    if (c === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (c === delim && !inQuotes) {
+                        result.push(current);
+                        current = '';
+                    } else {
+                        current += c;
+                    }
+                }
+                result.push(current);
+                return result;
+            };
+
+            const lines = text.split('\n');
+            if (lines.length < 2) { window.showAlert("Please include the header row and at least one data row."); return; }
+
+            const headers = parseCSVLine(lines[0], delimiter).map(h => h.trim().toLowerCase());
+            
+            const getIdx = (keywords) => {
+                for(let kw of keywords) {
+                    const index = headers.findIndex(h => h.includes(kw));
+                    if(index > -1) return index;
+                }
+                return -1;
+            };
             
             const idx = {
-                in: headers.findIndex(h => h.includes('checkin') || h === 'in'), out: headers.findIndex(h => h.includes('checkout') || h === 'out'),
-                name: headers.findIndex(h => h.includes('guest name') || h === 'name'), room: headers.findIndex(h => h.includes('room')),
-                source: headers.findIndex(h => h.includes('source')), bookDate: headers.findIndex(h => h.includes('booking date')),
-                bookId: headers.findIndex(h => h.includes('booking id')), pax: headers.findIndex(h => h.includes('pax')),
-                total: headers.findIndex(h => h === 'total' || h.includes('total price')), paid: headers.findIndex(h => h === 'amount paid' || h === 'paid'),
-                phone: headers.findIndex(h => h.includes('mobile') || h.includes('phone')), email: headers.findIndex(h => h.includes('email') && !h.includes('details')),
-                notes: headers.findIndex(h => h.includes('notes') || h.includes('comments'))
+                in: getIdx(['check-in', 'arrival', 'checkin', 'in']), 
+                out: getIdx(['check-out', 'departure', 'checkout', 'out']),
+                name: getIdx(['guest name', 'guest']), 
+                room: headers.findIndex(h => h === 'room'),
+                roomType: getIdx(['unit type', 'room type']),
+                source: getIdx(['source']), 
+                bookDate: getIdx(['booked on', 'booking date']),
+                bookId: getIdx(['book number', 'reservation number', 'booking id']), 
+                pax: getIdx(['people', 'guests', 'adults']),
+                total: getIdx(['price', 'total']), 
+                comm: getIdx(['commission amount', 'commission']),
+                payStatus: getIdx(['payment status']),
+                address: getIdx(['address']),
+                roomsCount: getIdx(['number of rooms', 'rooms']),
+                country: getIdx(['booker country', 'country']),
+                phone: getIdx(['phone number', 'mobile', 'phone']), 
+                email: headers.findIndex(h => h.includes('email') && !h.includes('details')),
+                status: getIdx(['status']),
+                notes: getIdx(['remarks', 'notes', 'comments', 'special comments'])
             };
+
+            const safeStr = (i, r) => (i > -1 && r[i] != null) ? String(r[i]).replace(/^"|"$/g, '').trim() : "";
 
             const parseDate = (str) => {
                 if(!str) return "";
-                const months = {"Jan":"01","Feb":"02","Mar":"03","Apr":"04","May":"05","Jun":"06","Jul":"07","Aug":"08","Sep":"09","Oct":"10","Nov":"11","Dec":"12"};
-                if (str.includes('-')) {
-                    const parts = str.split(' ')[0].split('-');
-                    if(parts[1] && isNaN(parts[1])) return `${parts[0]}-${months[parts[1]]}-${parts[2].padStart(2, '0')}`; // 2026-Jun-28
-                    if(parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`; // 25-03-2026
-                    return str; // YYYY-MM-DD
-                }
-                return str;
+                const dClean = str.split(' ')[0];
+                const parts = dClean.split(/[-/]/);
+                if (parts.length !== 3) return dClean; 
+                
+                const mMap = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+                if (isNaN(parts[1])) return `${parts[0]}-${mMap[parts[1].toLowerCase()] || '01'}-${parts[2].padStart(2, '0')}`;
+                else if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`; 
+                else if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                return dClean;
             };
+            
+            const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
 
-            const parseMoney = (str) => { if(!str) return 0; return Number(str.replace(/[^0-9.-]+/g,"")) || 0; };
+            let importCount = 0;
+            const currentUserEmail = auth.currentUser ? auth.currentUser.email : 'admin';
+            const now = new Date().toISOString();
+            
+            const existingBookIds = new Set();
+            staff.forEach(s => {
+                if (s.bookId) existingBookIds.add(s.bookId.toString().trim());
+            });
 
-            for (let i = 1; i < rows.length; i++) {
-                const r = rows[i]; if(r.length < 3) continue;
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const r = parseCSVLine(lines[i], delimiter);
                 
-                const fullName = r[idx.name] ? r[idx.name].trim() : "UNKNOWN";
-                const nameParts = fullName.split(' ');
-                const last = nameParts.length > 1 ? nameParts[0] : fullName;
-                const first = nameParts.length > 1 ? nameParts.slice(1).join(' ') : "";
+                let rawBId = safeStr(idx.bookId, r).replace(/\.0$/, '');
+                if (rawBId && existingBookIds.has(rawBId)) continue; 
+                if (rawBId) existingBookIds.add(rawBId);
                 
+                let fullName = safeStr(idx.name, r) || "UNKNOWN";
+                let last = fullName, first = "";
+                if (fullName.includes(',')) {
+                    const parts = fullName.split(',');
+                    last = parts[0].trim();
+                    first = parts.slice(1).join(',').trim();
+                } else {
+                    const parts = fullName.split(' ');
+                    last = parts[0].trim();
+                    first = parts.length > 1 ? parts.slice(1).join(' ').trim() : "";
+                }
+                
+                let payStatusTxt = safeStr(idx.payStatus, r);
+                let remarksTxt = safeStr(idx.notes, r);
+                let isBdcPaid = payStatusTxt.includes('Payment through Booking.com') || remarksTxt.includes('Payment through Booking.com') || payStatusTxt.includes('Paid online') || remarksTxt.includes('Paid online');
+
+                let addressTxt = safeStr(idx.address, r);
                 let sourceClean = "other";
-                if(r[idx.source]) {
-                    const s = r[idx.source].toLowerCase();
-                    if(s.includes('booking')) sourceClean = 'booking.com'; else if(s.includes('agoda')) sourceClean = 'agoda'; else if(s.includes('hostelworld')) sourceClean = 'hostelworld'; else if(s.includes('airbnb')) sourceClean = 'airbnb'; else if(s.includes('direct')) sourceClean = 'direct';
+                
+                if (addressTxt.includes("Prudential Tower")) {
+                    sourceClean = 'agoda';
+                } else if (isBdcPaid || (idx.bookId > -1 && headers[idx.bookId].includes('reservation number')) || (idx.bookId > -1 && headers[idx.bookId].includes('book number'))) {
+                    sourceClean = 'booking.com';
+                } else {
+                    const s = safeStr(idx.source, r).toLowerCase();
+                    if(s.includes('booking')) sourceClean = 'booking.com'; 
+                    else if(s.includes('agoda')) sourceClean = 'agoda'; 
+                    else if(s.includes('hostelworld')) sourceClean = 'hostelworld'; 
+                    else if(s.includes('airbnb')) sourceClean = 'airbnb'; 
+                    else if(s.includes('direct') || s.includes('walk')) sourceClean = 'direct';
                 }
 
-                const total = idx.total > -1 ? parseMoney(r[idx.total]) : 0;
-                const paid = idx.paid > -1 ? parseMoney(r[idx.paid]) : 0;
-                const payments = [];
-                if(paid > 0) payments.push({ date: "", amt: paid, method: "other" });
+                let statusClean = "future";
+                const sStatus = safeStr(idx.status, r).toLowerCase();
+                if(sStatus.includes('cancel')) statusClean = "cancelled";
 
-                const id = Math.random().toString(36).substr(2, 9);
-                const entry = {
-                    id, firstName: first.toUpperCase(), lastName: last.toUpperCase(), status: "future", room: r[idx.room] ? r[idx.room].trim().toUpperCase() : "",
-                    checkIn: parseDate(r[idx.in]), checkOut: parseDate(r[idx.out]), pax: r[idx.pax] ? parseInt(r[idx.pax]) : 1,
-                    source: sourceClean, bookDate: parseDate(r[idx.bookDate]), bookId: r[idx.bookId] ? r[idx.bookId].trim() : "",
-                    phone: r[idx.phone] ? r[idx.phone].trim() : "", email: r[idx.email] ? r[idx.email].trim() : "",
-                    totalPrice: total, netOverride: false, netPrice: total, payments: payments, badCC: false,
-                    refundability: 'non-ref', upgrade: 'none', rating: 'none',
-                    emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: "",
-                    country: "Thailand", notes: r[idx.notes] ? r[idx.notes].trim() : "", bookedType: "",
-                    createdAt: new Date().toISOString(), createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null
-                };
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
+                const total = cleanMoney(safeStr(idx.total, r));
+                const comm = cleanMoney(safeStr(idx.comm, r));
+                
+                let count = 1;
+                const rCountStr = safeStr(idx.roomsCount, r);
+                if(rCountStr) count = parseInt(rCountStr) || 1;
+                
+                let linkCode = count > 1 ? last.replace(/[^a-zA-Z]/g, '').substr(0, 4).toUpperCase() : "";
+                if (linkCode.length === 0 && count > 1) linkCode = Math.random().toString(36).substr(2, 4).toUpperCase();
+
+                let cCode = safeStr(idx.country, r).toLowerCase();
+                let parsedCountry = rawCountryMap[cCode] || (cCode.length === 2 ? cCode.toUpperCase() : "Thailand");
+                if (cCode.length > 2) parsedCountry = safeStr(idx.country, r); // Use full name if they provided a word instead of code
+
+                for(let k = 0; k < count; k++) {
+                    const payments = [];
+                    const cin = parseDate(safeStr(idx.in, r));
+                    if (isBdcPaid) {
+                        let prefix = sourceClean === 'agoda' ? 'agoda' : 'bdc';
+                        if (comm > 0) payments.push({ date: cin, amt: comm, method: `${prefix}-kp` });
+                        if (total - comm > 0) payments.push({ date: cin, amt: Number((total - comm).toFixed(2)), method: `${prefix}-pay` });
+                    }
+
+                    const id = Math.random().toString(36).substr(2, 9);
+                    const entry = {
+                        id, firstName: first.toUpperCase(), lastName: last.toUpperCase(), status: statusClean, room: safeStr(idx.room, r).toUpperCase(),
+                        checkIn: cin, checkOut: parseDate(safeStr(idx.out, r)), pax: parseInt(safeStr(idx.pax, r)) || 1,
+                        source: sourceClean, bookDate: parseDate(safeStr(idx.bookDate, r)), bookId: rawBId,
+                        phone: safeStr(idx.phone, r), email: safeStr(idx.email, r),
+                        totalPrice: total, netOverride: false, netPrice: total, payments: payments, badCC: false,
+                        refundability: 'non-ref', upgrade: 'none', rating: 'none',
+                        emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: linkCode,
+                        country: parsedCountry, notes: remarksTxt, bookedType: safeStr(idx.roomType, r),
+                        createdAt: now, createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null
+                    };
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
+                    importCount++;
+                }
             }
-            document.getElementById('import-modal').style.display = 'none'; window.showAlert(`Import Complete.`);
+            document.getElementById('import-modal').style.display = 'none'; window.showAlert(`Import Complete. Added ${importCount} bookings.`);
         };
 
         window.saveBooking = async () => {
@@ -976,12 +1245,12 @@
             document.getElementById('link-code').value = s.linkedId || "";
             document.getElementById('staff-notes').value = s.notes || "";
 
-            setMulti('email-confirm-btn', s.emailConfirm ? 1 : 0, ['CONFIRMATION: --', 'CONFIRMATION: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
-            setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='sent'?1:2), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONFIRMED'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
+            setMulti('email-confirm-btn', s.emailConfirm ? 1 : 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
+            setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='sent'?1:2), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
             setMulti('email-special-btn', s.emailSpecial ? 1 : 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400']);
             setMulti('refund-btn', s.refundability === 'ref' ? 1 : 0, ['NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400']);
             setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade==='free'?1:2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
-            setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating==='good'?1:2), ['--', '✔', '❌'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
+            setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating==='good'?1:2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
 
             window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.toggleGuestProfile(false);
             
@@ -999,6 +1268,16 @@
         window.requestDelete = () => {
             if(currentUserRole === 'staff') return;
             window.showAlert(`Permanently delete this record?`, true, async () => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', document.getElementById('staff-id').value)); window.closeStaffModal(); });
+        };
+        
+        window.wipeAllData = () => {
+            if(currentUserRole === 'staff') return;
+            window.showAlert(`WIPE ENTIRE DATABASE?\nThis cannot be undone!`, true, async () => { 
+                document.getElementById('boot-loader').style.display = 'flex'; document.getElementById('sync-status').innerText = 'WIPING...';
+                const promises = staff.map(s => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id)));
+                await Promise.all(promises); 
+                document.getElementById('boot-loader').style.display = 'none'; window.closeAlert(); 
+            });
         };
 
         window.showAlert = (msg, isConfirm = false, onConfirm = null) => {
