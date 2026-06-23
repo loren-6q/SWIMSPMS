@@ -84,8 +84,6 @@
         .smart-notes:focus { height: 120px; overflow-y: auto; }
         
         #calendar-scroll-container { max-height: calc(100vh - 180px); overflow-y: auto; overflow-x: auto; position: relative; }
-        #month-header { position: sticky; top: 0; z-index: 40; height: 26px; box-sizing: border-box; width: fit-content; min-width: 100%; }
-        #timeline-header-grid { position: sticky; top: 26px; z-index: 35; height: 28px; box-sizing: border-box; width: fit-content; min-width: 100%; }
         
         .multi-state-btn { cursor: pointer; user-select: none; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         
@@ -93,6 +91,8 @@
         
         /* Custom Tooltip */
         #custom-tooltip { position: fixed; z-index: 99999; pointer-events: none; background: rgba(15, 23, 42, 0.95); color: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); font-size: 13px; font-family: 'Roboto Condensed', sans-serif; display: none; white-space: pre-wrap; transform: translate(10px, 10px); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px); }
+        
+        .month-divider { border-left: 3px solid white; display: flex; align-items: center; justify-content: center; height: 100%; }
     </style>
 </head>
 <body class="p-1 lg:p-2">
@@ -129,6 +129,7 @@
                         <button onclick="window.openCSVModal()" class="px-3 py-1 bg-indigo-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-indigo-700 active:scale-95"><i data-lucide="clipboard-paste" size="14"></i> Import CSV</button>
                         <button onclick="window.openEmailParserModal()" class="px-3 py-1 bg-purple-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-purple-700 active:scale-95"><i data-lucide="mail" size="14"></i> Parse Email</button>
                         <button onclick="window.openStaffModal()" class="px-3 py-1 bg-blue-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-blue-700 active:scale-95"><i data-lucide="plus" size="14"></i> Add</button>
+                        <button onclick="window.wipeAllData()" class="px-3 py-1 bg-red-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-red-700 animate-pulse active:scale-95 ml-2 border border-red-800"><i data-lucide="skull" size="14"></i> WIPE DATA</button>
                     </div>
                 </div>
                 
@@ -157,16 +158,19 @@
 
         <div id="calendar-view">
             <div id="calendar-scroll-container" class="bg-white rounded shadow border border-slate-300">
-                <div id="month-header" class="timeline-grid bg-slate-800 text-white text-[11px] font-bold uppercase tracking-widest py-1">
-                    <div class="border-r border-slate-700 flex items-center justify-center h-full">
-                        <button id="zoom-toggle-btn" onclick="window.toggleZoom()" class="bg-slate-700 hover:bg-slate-600 text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1 transition-colors"><i data-lucide="zoom-in" size="12"></i> ZOOM: WIDE</button>
+                <!-- Fused Sticky Timeline Grid Layer -->
+                <div class="timeline-grid sticky top-0 z-40 bg-slate-800 shadow-sm border-b border-slate-700 h-[26px] box-border">
+                    <div class="border-r border-slate-700 flex items-center justify-center h-full sticky left-0 z-50 bg-slate-800">
+                        <button id="zoom-toggle-btn" onclick="window.toggleZoom()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1 transition-colors"><i data-lucide="zoom-in" size="12"></i> ZOOM: WIDE</button>
                     </div>
-                    <div id="month-labels" class="contents"></div>
+                    <div id="month-labels" class="contents text-white text-[11px] font-bold uppercase tracking-widest"></div>
                 </div>
-                <div class="timeline-grid bg-slate-100 border-b border-slate-300 shadow-sm" id="timeline-header-grid">
-                    <div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-center border-r border-slate-300 bg-slate-100 h-full" style="position: sticky; left: 0; z-index: 35;">ROOM</div>
+                
+                <div class="timeline-grid sticky top-[26px] z-30 bg-slate-100 shadow-sm border-b border-slate-300 h-[28px] box-border">
+                    <div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-center border-r border-slate-300 bg-slate-100 h-full sticky left-0 z-40">ROOM</div>
                     <div id="timeline-header" class="contents"></div>
                 </div>
+                
                 <div id="timeline-body" class="relative pb-2"></div>
             </div>
 
@@ -185,9 +189,6 @@
         </div>
 
         <div id="database-view" class="bg-white rounded shadow border border-slate-300 overflow-hidden">
-            <div class="p-2 bg-slate-100 border-b border-slate-300 flex justify-end">
-                <button onclick="window.wipeAllData()" class="px-4 py-1 bg-red-600 text-white rounded shadow font-black text-xs uppercase flex items-center gap-1 hover:bg-red-700 animate-pulse"><i data-lucide="skull" size="14"></i> WIPE ALL DB DATA NOW</button>
-            </div>
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-800 text-white text-[12px] font-black uppercase tracking-widest cursor-pointer">
@@ -406,77 +407,77 @@
         const countries = Object.values(rawCountryMap).sort((a,b) => a === 'Thailand' ? -1 : (b === 'Thailand' ? 1 : a.localeCompare(b)));
 
         const hotelRooms = [
-            { id: "F1", type: "Budget", bed: "XXXX", order: 101 },
-            { id: "F2", type: "Budget", bed: "XXXX", order: 102 },
-            { id: "F3", type: "Budget", bed: "XXXX", order: 103 },
-            { id: "F4", type: "Budget", bed: "XXXX", order: 104 },
-            { id: "F5", type: "Budget", bed: "XXXX", order: 105 },
-            { id: "F6", type: "Budget", bed: "XXXX", order: 106 },
-            { id: "F7", type: "Budget", bed: "XXXX", order: 107 },
-            { id: "F8", type: "Budget", bed: "XXXX", order: 108 },
-            { id: "F9", type: "Budget", bed: "XXXX", order: 109 },
-            { id: "F10", type: "Budget", bed: "XXXX", order: 110 },
-            { id: "F11", type: "Budget", bed: "XXXX", order: 111 },
-            { id: "101", type: "Standard", bed: "????", order: 201 },
-            { id: "102", type: "Standard", bed: "????", order: 202 },
-            { id: "103", type: "Standard", bed: "????", order: 203 },
-            { id: "201", type: "Standard", bed: "2T", order: 204 },
-            { id: "202", type: "Standard", bed: "1K", order: 205 },
-            { id: "203", type: "Standard", bed: "2T", order: 206 },
-            { id: "204", type: "Standard", bed: "1K", order: 207 },
-            { id: "205", type: "Standard", bed: "2T", order: 208 },
-            { id: "207", type: "Standard", bed: "2T", order: 209 },
-            { id: "208", type: "Standard", bed: "1K", order: 210 },
-            { id: "209", type: "Standard", bed: "2T", order: 211 },
-            { id: "210", type: "Standard", bed: "1K", order: 212 },
-            { id: "211", type: "Standard", bed: "2T", order: 213 },
-            { id: "301", type: "Standard", bed: "1K", order: 214 },
-            { id: "302", type: "Standard", bed: "1K", order: 215 },
-            { id: "303", type: "Standard", bed: "1K", order: 216 },
-            { id: "304", type: "Standard", bed: "1K", order: 217 },
-            { id: "305", type: "Standard", bed: "1K", order: 218 },
-            { id: "307", type: "Standard", bed: "1B 1T", order: 219 },
-            { id: "308", type: "Standard", bed: "1B 1T", order: 220 },
-            { id: "309", type: "Standard", bed: "1K", order: 221 },
-            { id: "310", type: "Standard", bed: "1K", order: 222 },
-            { id: "206", type: "OV Standard", bed: "XXXX", order: 301 },
-            { id: "306", type: "OV Standard", bed: "1K", order: 302 },
-            { id: "311", type: "OV Standard", bed: "1K", order: 303 },
-            { id: "A3", type: "Superior", bed: "1K", order: 401 },
-            { id: "A4", type: "Superior", bed: "1K", order: 402 },
-            { id: "A5", type: "Superior", bed: "1K", order: 403 },
-            { id: "A6", type: "Superior", bed: "1K", order: 404 },
-            { id: "A7", type: "Superior", bed: "1K", order: 405 },
-            { id: "A8", type: "Superior", bed: "2T", order: 406 },
-            { id: "A9", type: "Superior", bed: "1K", order: 407 },
-            { id: "A10", type: "Superior", bed: "2T", order: 408 },
-            { id: "A11", type: "Superior", bed: "1K", order: 409 },
-            { id: "A12", type: "Superior", bed: "1K", order: 410 },
-            { id: "B5", type: "Superior", bed: "1K", order: 411 },
-            { id: "B6", type: "Superior", bed: "2T", order: 412 },
-            { id: "B7", type: "Superior", bed: "1K", order: 413 },
-            { id: "B8", type: "Superior", bed: "2T", order: 414 },
-            { id: "B9", type: "Superior", bed: "1K", order: 415 },
-            { id: "B10", type: "Superior", bed: "2T", order: 416 },
-            { id: "B11", type: "Superior", bed: "1K", order: 417 },
-            { id: "B12", type: "Superior", bed: "2T", order: 418 },
-            { id: "B13", type: "Superior", bed: "1K", order: 419 },
-            { id: "B14", type: "Superior", bed: "2T", order: 420 },
-            { id: "B15", type: "Superior", bed: "1K", order: 421 },
-            { id: "B16", type: "Superior", bed: "2T", order: 422 },
-            { id: "B17", type: "Superior", bed: "1K", order: 423 },
-            { id: "B18", type: "Superior", bed: "2T", order: 424 },
-            { id: "B19", type: "Superior", bed: "????", order: 425 },
-            { id: "B20", type: "Superior", bed: "2T", order: 426 },
-            { id: "B21", type: "Superior", bed: "????", order: 427 },
-            { id: "B22", type: "Superior", bed: "????", order: 428 },
-            { id: "A1", type: "OV Superior", bed: "1K", order: 501 },
-            { id: "A2", type: "OV Superior", bed: "2T", order: 502 },
-            { id: "B3", type: "Deluxe", bed: "1K", order: 601 },
-            { id: "B4", type: "Deluxe", bed: "2T", order: 602 },
-            { id: "B1", type: "OV Deluxe", bed: "1K", order: 701 },
-            { id: "B2", type: "OV Deluxe", bed: "2T", order: 702 },
-            { id: "212", type: "OV Deluxe", bed: "1K", order: 703 }
+            { id: "101", type: "Standard", bed: "", floor: 1, order: 201 },
+            { id: "102", type: "Standard", bed: "", floor: 1, order: 202 },
+            { id: "103", type: "Standard", bed: "", floor: 1, order: 203 },
+            { id: "201", type: "Standard", bed: "2 Twin", floor: 2, order: 204 },
+            { id: "202", type: "Standard", bed: "1 King", floor: 2, order: 205 },
+            { id: "203", type: "Standard", bed: "2 Twin", floor: 2, order: 206 },
+            { id: "204", type: "Standard", bed: "1 King", floor: 2, order: 207 },
+            { id: "205", type: "Standard", bed: "2 Twin", floor: 2, order: 208 },
+            { id: "206", type: "OV Standard", bed: "1 King", floor: 2, order: 301 },
+            { id: "207", type: "Standard", bed: "1 King", floor: 2, order: 209 },
+            { id: "208", type: "Standard", bed: "1 King", floor: 2, order: 210 },
+            { id: "209", type: "Standard", bed: "1 King", floor: 2, order: 211 },
+            { id: "210", type: "Standard", bed: "1 King", floor: 2, order: 212 },
+            { id: "211", type: "Standard", bed: "1 King", floor: 2, order: 213 },
+            { id: "212", type: "OV Standard", bed: "2 Twin", floor: 2, order: 703 },
+            { id: "301", type: "Standard", bed: "Quad", floor: 3, order: 214 },
+            { id: "302", type: "Standard", bed: "Quad", floor: 3, order: 215 },
+            { id: "303", type: "Standard", bed: "Quad", floor: 3, order: 216 },
+            { id: "304", type: "Standard", bed: "Quad", floor: 3, order: 217 },
+            { id: "305", type: "Standard", bed: "1 King 1 Twin", floor: 3, order: 218 },
+            { id: "306", type: "OV Standard", bed: "1 King", floor: 3, order: 302 },
+            { id: "307", type: "Standard", bed: "1 Bunk 1 Twin", floor: 3, order: 219 },
+            { id: "308", type: "Standard", bed: "1 Bunk 1 Twin", floor: 3, order: 220 },
+            { id: "309", type: "Standard", bed: "1 King 1 Twin", floor: 3, order: 221 },
+            { id: "310", type: "Standard", bed: "1 King 1 Twin", floor: 3, order: 222 },
+            { id: "311", type: "OV Standard", bed: "1 King", floor: 3, order: 303 },
+            { id: "A1", type: "OV Superior", bed: "1 King", floor: 1, order: 501 },
+            { id: "A2", type: "OV Superior", bed: "2 Twin", floor: 2, order: 502 },
+            { id: "A3", type: "Superior", bed: "1 King", floor: 1, order: 401 },
+            { id: "A4", type: "Superior", bed: "1 King", floor: 2, order: 402 },
+            { id: "A5", type: "Superior", bed: "1 King", floor: 1, order: 403 },
+            { id: "A6", type: "Superior", bed: "1 King", floor: 2, order: 404 },
+            { id: "A7", type: "Superior", bed: "1 King", floor: 1, order: 405 },
+            { id: "A8", type: "Superior", bed: "2 Twin", floor: 2, order: 406 },
+            { id: "A9", type: "Superior", bed: "1 King", floor: 1, order: 407 },
+            { id: "A10", type: "Superior", bed: "2 Twin", floor: 2, order: 408 },
+            { id: "A11", type: "Superior", bed: "1 King", floor: 1, order: 409 },
+            { id: "A12", type: "Superior", bed: "1 King", floor: 2, order: 410 },
+            { id: "B1", type: "OV Deluxe", bed: "1 King", floor: 1, order: 701 },
+            { id: "B2", type: "OV Deluxe", bed: "2 Twin", floor: 2, order: 702 },
+            { id: "B3", type: "Deluxe", bed: "1 King", floor: 1, order: 601 },
+            { id: "B4", type: "Deluxe", bed: "2 Twin", floor: 2, order: 602 },
+            { id: "B5", type: "Superior", bed: "1 King", floor: 1, order: 411 },
+            { id: "B6", type: "Superior", bed: "2 Twin", floor: 2, order: 412 },
+            { id: "B7", type: "Superior", bed: "1 King", floor: 1, order: 413 },
+            { id: "B8", type: "Superior", bed: "2 Twin", floor: 2, order: 414 },
+            { id: "B9", type: "Superior", bed: "1 King", floor: 1, order: 415 },
+            { id: "B10", type: "Superior", bed: "2 Twin", floor: 2, order: 416 },
+            { id: "B11", type: "Superior", bed: "1 King", floor: 1, order: 417 },
+            { id: "B12", type: "Superior", bed: "2 Twin", floor: 2, order: 418 },
+            { id: "B13", type: "Superior", bed: "1 King", floor: 1, order: 419 },
+            { id: "B14", type: "Superior", bed: "2 Twin", floor: 2, order: 420 },
+            { id: "B15", type: "Superior", bed: "1 King", floor: 1, order: 421 },
+            { id: "B16", type: "Superior", bed: "2 Twin", floor: 2, order: 422 },
+            { id: "B17", type: "Superior", bed: "1 King", floor: 1, order: 423 },
+            { id: "B18", type: "Superior", bed: "2 Twin", floor: 2, order: 424 },
+            { id: "B19", type: "Superior", bed: "", floor: 1, order: 425 },
+            { id: "B20", type: "Superior", bed: "2 Twin", floor: 2, order: 426 },
+            { id: "B21", type: "Superior", bed: "", floor: 1, order: 427 },
+            { id: "B22", type: "Superior", bed: "", floor: 2, order: 428 },
+            { id: "F1", type: "Budget", bed: "", floor: 1, order: 101 },
+            { id: "F2", type: "Budget", bed: "", floor: 1, order: 102 },
+            { id: "F3", type: "Budget", bed: "", floor: 1, order: 103 },
+            { id: "F4", type: "Budget", bed: "", floor: 1, order: 104 },
+            { id: "F5", type: "Budget", bed: "", floor: 1, order: 105 },
+            { id: "F6", type: "Budget", bed: "", floor: 1, order: 106 },
+            { id: "F7", type: "Budget", bed: "", floor: 1, order: 107 },
+            { id: "F8", type: "Budget", bed: "", floor: 1, order: 108 },
+            { id: "F9", type: "Budget", bed: "", floor: 1, order: 109 },
+            { id: "F10", type: "Budget", bed: "", floor: 1, order: 110 },
+            { id: "F11", type: "Budget", bed: "", floor: 1, order: 111 }
         ];
 
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
@@ -575,6 +576,13 @@
             lucide.createIcons();
         };
 
+        const getFloorIcon = (f) => {
+            if(f === 1) return `<i data-lucide="arrow-down" class="text-blue-500 shrink-0" size="12" stroke-width="3" title="1st Floor"></i>`;
+            if(f === 2) return `<i data-lucide="arrow-up" class="text-green-500 shrink-0" size="12" stroke-width="3" title="2nd Floor"></i>`;
+            if(f === 3) return `<i data-lucide="chevrons-up" class="text-purple-500 shrink-0" size="12" stroke-width="3" title="3rd Floor"></i>`;
+            return '';
+        };
+
         window.render = () => {
             const width = window.innerWidth;
             let daysToShow = width >= 1150 ? 35 : width >= 950 ? 28 : width >= 650 ? 21 : 14;
@@ -604,13 +612,13 @@
             days.forEach((d, i) => {
                 if (d.getMonth() !== currentMonth) {
                     if (currentMonth !== -1) {
-                        const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "flex items-center justify-center month-divider";
+                        const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "flex items-center justify-center month-divider py-1";
                         mDiv.innerText = `${mNames[currentMonth]} ${days[i-1].getFullYear()}`; monthLabels.appendChild(mDiv);
                     }
                     currentMonth = d.getMonth(); currentSpan = 1;
                 } else currentSpan++;
                 if (i === days.length - 1) {
-                    const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "flex items-center justify-center month-divider";
+                    const mDiv = document.createElement('div'); mDiv.style.gridColumn = `span ${currentSpan}`; mDiv.className = "flex items-center justify-center month-divider py-1";
                     mDiv.innerText = `${mNames[currentMonth]} ${d.getFullYear()}`; monthLabels.appendChild(mDiv);
                 }
             });
@@ -635,7 +643,7 @@
                 if (r.type !== prevType) timelineRows.push({ isDivider: true, label: r.type });
                 
                 const roomBookings = activeStaff.filter(s => s.room === r.id && s.status !== 'unconfirmed' && parseYMD(s.checkIn) <= viewEndUTC && parseYMD(s.checkOut) >= viewStartUTC);
-                timelineRows.push({ isRoom: true, id: r.id, type: r.type, bed: r.bed, bookings: roomBookings });
+                timelineRows.push({ isRoom: true, id: r.id, type: r.type, bed: r.bed, floor: r.floor, bookings: roomBookings });
             });
 
             // Build Unconfirmed/Unassigned Zone
@@ -666,8 +674,19 @@
 
                 row.className = `timeline-grid bed-row`;
                 let headerHtml = '';
-                if(rowDef.isRoom) headerHtml = `<div class="flex items-center justify-between px-1 w-full"><span class="text-[13px] font-black text-slate-700">${rowDef.id}</span><span class="text-[9px] font-bold text-slate-400">${rowDef.bed}</span></div>`;
-                else headerHtml = `<span class="text-[11px] font-black text-amber-700">${rowDef.label}</span>`;
+                if(rowDef.isRoom) {
+                    const shortBed = rowDef.bed.replace('1 King', '1K').replace('2 Twin', '2T').replace('1 King 1 Twin', '1K 1T').replace('1 Bunk 1 Twin', '1B 1T');
+                    headerHtml = `
+                        <div class="flex items-center justify-between px-1 w-full gap-1">
+                            <div class="flex items-center gap-0.5 shrink-0">
+                                <span class="text-[13px] font-black text-slate-700">${rowDef.id}</span>
+                                ${getFloorIcon(rowDef.floor)}
+                            </div>
+                            <span class="text-[9px] font-bold text-slate-400 text-right leading-[10px] tracking-tighter truncate">${shortBed}</span>
+                        </div>`;
+                } else {
+                    headerHtml = `<span class="text-[11px] font-black text-amber-700">${rowDef.label}</span>`;
+                }
                 
                 row.innerHTML = `<div class="border-r border-slate-300 ${rowDef.isUnassigned ? 'bg-amber-100' : 'bg-slate-50'} flex items-center justify-center uppercase overflow-hidden shrink-0 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.05)]">${headerHtml}</div>`;
                 
@@ -1050,7 +1069,9 @@
                     } else if ((c === '\n' || c === '\r') && !inQuotes) {
                         if (c === '\r' && nextC === '\n') i++; 
                         currentRow.push(currentCell);
-                        rows.push(currentRow);
+                        if (currentRow.join('').trim() !== '') {
+                            rows.push(currentRow);
+                        }
                         currentRow = [];
                         currentCell = '';
                     } else {
@@ -1059,12 +1080,12 @@
                 }
                 if (currentCell || currentRow.length > 0) {
                     currentRow.push(currentCell);
-                    rows.push(currentRow);
+                    if (currentRow.join('').trim() !== '') rows.push(currentRow);
                 }
                 return rows;
             };
 
-            const rows = parseCSVData(text, delimiter).filter(r => r.join('').trim() !== '');
+            const rows = parseCSVData(text, delimiter);
             if (rows.length < 2) { window.showAlert("Please include the header row and at least one data row."); return; }
 
             const headers = rows[0].map(h => h.trim().toLowerCase());
@@ -1099,7 +1120,7 @@
                 notes: getIdx(['remarks', 'notes', 'comments', 'special comments'])
             };
 
-            const safeStr = (i, r) => (i > -1 && r[i] != null) ? String(r[i]).trim() : "";
+            const safeStr = (i, r) => (i > -1 && r[i] != null) ? String(r[i]).replace(/^"|"$/g, '').trim() : "";
 
             const parseDate = (str) => {
                 if(!str) return "";
@@ -1184,7 +1205,7 @@
 
                 let cCode = safeStr(idx.country, r).toLowerCase();
                 let parsedCountry = rawCountryMap[cCode] || (cCode.length === 2 ? cCode.toUpperCase() : "Thailand");
-                if (cCode.length > 2) parsedCountry = safeStr(idx.country, r); 
+                if (cCode.length > 2) parsedCountry = safeStr(idx.country, r); // Use full name if they provided a word instead of code
 
                 for(let k = 0; k < count; k++) {
                     const payments = [];
