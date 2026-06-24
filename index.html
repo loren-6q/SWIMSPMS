@@ -200,7 +200,7 @@
         <div id="database-view" class="bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden unselectable hidden">
             <div class="p-2 bg-slate-100 border-b border-slate-300 flex justify-between items-center">
                 <h2 class="font-black text-slate-700 uppercase tracking-widest text-sm">Database Editor</h2>
-                <button id="admin-bulk-delete" onclick="window.bulkDelete()" class="hidden px-4 py-1.5 bg-orange-600 text-white rounded font-black text-xs uppercase items-center gap-1 hover:bg-orange-700 shadow-md"><i data-lucide="list-x" size="14"></i> DELETE VISIBLE</button>
+                <button id="admin-bulk-delete" onclick="window.bulkDelete()" class="hidden px-3 py-1 bg-orange-600 text-white rounded shadow text-xs font-black uppercase items-center gap-1 hover:bg-orange-700 active:scale-95 whitespace-nowrap"><i data-lucide="list-x" size="14"></i> Delete Visible</button>
             </div>
             <div class="overflow-x-auto min-h-[400px]">
                 <table class="w-full text-left border-collapse min-w-[900px]">
@@ -862,6 +862,7 @@
                     document.getElementById('boot-loader').style.display = 'none';
                     document.getElementById('tab-acc').classList.remove('hidden');
                     document.getElementById('admin-bulk-delete').classList.remove('hidden');
+                    document.getElementById('admin-bulk-delete').classList.add('flex');
                     
                     onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => { staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.render(); });
                 } catch (error) { console.error("Auth Error:", error); document.getElementById('sync-status').innerText = "Auth Error"; }
@@ -880,6 +881,7 @@
                         if (currentUserRole === 'admin') {
                             document.getElementById('tab-acc').classList.remove('hidden');
                             document.getElementById('admin-bulk-delete').classList.remove('hidden');
+                            document.getElementById('admin-bulk-delete').classList.add('flex');
                         }
                         
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => { staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.render(); });
