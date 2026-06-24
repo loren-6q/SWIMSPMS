@@ -136,6 +136,10 @@
                     <button onclick="window.openEmailParserModal()" class="px-2 py-1 bg-purple-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-purple-700 active:scale-95"><i data-lucide="mail" size="14"></i> <span class="hidden sm:inline">Single Import</span></button>
                 </div>
 
+                <div id="search-jump-btn" onclick="window.jumpToSearchMatch()" class="hidden items-center bg-orange-100 text-orange-700 px-2 py-1 rounded font-black text-xs uppercase cursor-pointer hover:bg-orange-200 shrink-0">
+                    <span id="match-counter">Match?</span>
+                </div>
+
                 <div class="relative group shrink-0 w-32 sm:w-40">
                     <i data-lucide="search" class="absolute left-2 top-1.5 text-slate-400" size="14"></i>
                     <input type="text" id="staff-search" placeholder="FIND NAME..." oninput="window.handleSearch(this.value)" class="pl-7 pr-7 py-1 w-full bg-white border border-slate-200 rounded font-black text-xs uppercase outline-none focus:ring-2 focus:ring-blue-500">
@@ -1489,9 +1493,22 @@
             if (t === 'accounting') window.renderAccounting();
         };
 
-        window.handleSearch = (val) => { searchTerm = val.trim().toUpperCase(); searchMatchIndex = 0; const jumpBtn = document.getElementById('search-jump-btn'); const matches = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (searchTerm && matches.length > 0) { jumpBtn.classList.remove('hidden'); document.getElementById('match-counter').innerText = `Match ${searchMatchIndex + 1} of ${matches.length}`; } else jumpBtn.classList.add('hidden'); window.render(); };
+        window.handleSearch = (val) => { 
+            searchTerm = val.trim().toUpperCase(); 
+            searchMatchIndex = 0; 
+            const jumpBtn = document.getElementById('search-jump-btn'); 
+            const matches = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); 
+            if (searchTerm && matches.length > 0) { 
+                if (jumpBtn) { jumpBtn.classList.remove('hidden'); jumpBtn.classList.add('flex'); }
+                const matchCounter = document.getElementById('match-counter');
+                if (matchCounter) matchCounter.innerText = `Match ${searchMatchIndex + 1} of ${matches.length}`; 
+            } else { 
+                if (jumpBtn) { jumpBtn.classList.add('hidden'); jumpBtn.classList.remove('flex'); }
+            } 
+            window.render(); 
+        };
         window.clearSearch = () => { document.getElementById('staff-search').value = ""; window.handleSearch(""); };
-        window.jumpToSearchMatch = () => { const matches = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (matches.length > 0) { const match = matches[searchMatchIndex % matches.length]; const d = new Date(match.checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; document.getElementById('match-counter').innerText = `Match ${(searchMatchIndex % matches.length) + 1} of ${matches.length}`; window.render(); } };
+        window.jumpToSearchMatch = () => { const matches = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (matches.length > 0) { const match = matches[searchMatchIndex % matches.length]; const d = new Date(match.checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; const mc = document.getElementById('match-counter'); if(mc) mc.innerText = `Match ${(searchMatchIndex % matches.length) + 1} of ${matches.length}`; window.render(); } };
         window.syncLabels = () => { 
             const inEl = document.getElementById('check-in'); const outEl = document.getElementById('check-out');
             if(inEl && document.getElementById('ov-in')) document.getElementById('ov-in').innerText = to15MAR(new Date(inEl.value + "T12:00:00")); 
@@ -1782,25 +1799,34 @@
             
             const extract = (regex, defaultVal = '') => { const match = text.match(regex); return match ? match[1].trim() : defaultVal; };
             const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
-            const parseDateStr = (dateStr) => {
+            const parseDateStr = (dateStr, isPast = false) => {
                 if(!dateStr) return '';
                 const mths = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-                let parts = dateStr.replace(/,/g, '').split(' ');
-                let day, mth, yr;
+                let cleanStr = dateStr.replace(/,/g, '').replace(/\s+/g, ' ').trim();
+                let parts = cleanStr.split(' ');
                 
-                if (parts.length === 3 && isNaN(parts[2])) {
-                    mth = mths[parts[1].toLowerCase().substring(0,3)];
-                    day = parts[2].padStart(2, '0');
-                    const now = new Date();
-                    yr = now.getFullYear();
-                    const testDate = new Date(`${yr}-${mth}-${day}`);
-                    if(testDate < now && testDate.getMonth() < now.getMonth()) yr++; 
-                } else if (parts.length >= 4) {
-                    mth = mths[parts[1].toLowerCase().substring(0,3)];
-                    day = parts[2].padStart(2, '0');
-                    yr = parts[3];
-                } else return '';
+                let mthIndex = -1;
+                for (let i=0; i<parts.length; i++) {
+                    if (parts[i].length >= 3 && mths[parts[i].toLowerCase().substring(0,3)]) {
+                        mthIndex = i; break;
+                    }
+                }
                 
+                if (mthIndex === -1 || mthIndex + 1 >= parts.length) return '';
+                
+                let mth = mths[parts[mthIndex].toLowerCase().substring(0,3)];
+                let day = parseInt(parts[mthIndex + 1]).toString().padStart(2, '0');
+                
+                let now = new Date();
+                let yr = now.getFullYear();
+                
+                if (mthIndex + 2 < parts.length && /^\d{4}$/.test(parts[mthIndex + 2])) {
+                    yr = parseInt(parts[mthIndex + 2]);
+                } else {
+                    let testDate = new Date(`${yr}-${mth}-${day}`);
+                    if (isPast && testDate > now) yr--;
+                    else if (!isPast && testDate.getMonth() < now.getMonth() && testDate < now) yr++;
+                }
                 return `${yr}-${mth}-${day}`;
             };
 
@@ -1808,23 +1834,25 @@
 
             if (text.includes('Booking.com') && text.includes('Reservation Details')) {
                 src = 'booking.com';
-                gName = extract(/Guest name:\s*\n(.*?)\n/);
-                countryCode = extract(/Guest name:\s*\n.*?\n\s*([a-zA-Z]{2})\s*\n/);
-                checkIn = parseDateStr(extract(/Check-in\s*\n(.*?)\n/));
-                checkOut = parseDateStr(extract(/Check-out\s*\n(.*?)\n/));
-                bId = extract(/Booking number:\s*\n(\d+)/);
-                bDate = parseDateStr(extract(/Received\s*\n(.*?)\n/));
-                const paxStr = extract(/Total guests:\s*\n(\d+)/); if(paxStr) pax = parseInt(paxStr);
-                total = cleanMoney(extract(/Total price\s*\nTHB ([\d,.]+)/));
-                comm = cleanMoney(extract(/Commission and charges:\s*\nTHB ([\d,.]+)/));
+                gName = extract(/Guest name:[\s\S]*?\n(.*?)\n/i) || extract(/Guest name:\s*([^\n]+)/i);
+                countryCode = extract(/Guest name:[\s\S]*?\n.*?\n\s*([a-zA-Z]{2})\s*\n/);
+                checkIn = parseDateStr(extract(/Check-in[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
+                checkOut = parseDateStr(extract(/Check-out[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
+                bId = extract(/Booking number:[\s\S]*?(\d+)/i);
+                bDate = parseDateStr(extract(/Received[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true);
+                const paxStr = extract(/Total guests:[\s\S]*?(\d+)/i); if(paxStr) pax = parseInt(paxStr);
+                
+                total = cleanMoney(extract(/Total price[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i)) || cleanMoney(extract(/Total price[\s\S]{0,15}?([\d,.]+)/i));
+                comm = cleanMoney(extract(/Commission and charges:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i)) || cleanMoney(extract(/Commission and charges:[\s\S]{0,15}?([\d,.]+)/i));
+                
                 phone = extract(/(\+[\d\s]+)/);
                 email = extract(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/);
                 
-                let extractedNotes = extract(/BED PREFERENCE:(.*)/);
+                let extractedNotes = extract(/BED PREFERENCE:(.*)/i);
                 if (extractedNotes) notes = "BED PREFERENCE: " + extractedNotes;
                 
-                const bTypeRaw = extract(/(.*?)\nTHB/); 
-                const parenMatch = bTypeRaw.match(/\((.*)\)/);
+                const bTypeRaw = extract(/([^\n]+?)\s*THB\s*[\d,.]+/i); 
+                const parenMatch = bTypeRaw ? bTypeRaw.match(/\((.*)\)/) : null;
                 bType = parenMatch ? parenMatch[1].trim() : bTypeRaw;
                 
                 if (text.includes('charged the total price of the reservation if they cancel anytime') || text.includes('Non-refundable')) {
@@ -1835,18 +1863,25 @@
 
             } else if (text.includes('Airbnb') && text.includes('Reservation confirmed')) {
                 src = 'airbnb';
-                gName = extract(/Reservation confirmed - (.*?) arrives/);
-                checkIn = parseDateStr(extract(/Check-in\s*\n(.*?)\n/));
-                checkOut = parseDateStr(extract(/Checkout\s*\n(.*?)\n/));
-                bId = extract(/Confirmation code\s*\n([A-Z0-9]+)/);
-                bDate = parseDateStr(extract(/Airbnb\s*\n(.*?)\n/));
-                const paxStr = extract(/Guests\s*\n(\d+)/); if(paxStr) pax = parseInt(paxStr);
-                total = cleanMoney(extract(/Guest paid\s*.*?\n฿([\d,.]+)/m));
-                const payout = cleanMoney(extract(/You earn\s*\n฿([\d,.]+)/));
+                gName = extract(/Reservation confirmed - (.*?)\s+arrives/i);
+                if(!gName) gName = extract(/welcome\s+(.*?)\./i);
+                checkIn = parseDateStr(extract(/Check-in[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
+                checkOut = parseDateStr(extract(/Checkout[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
+                bId = extract(/Confirmation code[\s\S]*?([A-Z0-9]+)/i);
+                bDate = parseDateStr(extract(/Airbnb[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true);
+                const paxStr = extract(/Guests[\s\S]*?(\d+)/i); if(paxStr) pax = parseInt(paxStr);
+                
+                let totalStr = extract(/Total\s*(?:\([A-Z]+\))?[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
+                if (!totalStr) totalStr = extract(/Guest paid[\s\S]{0,60}?nights[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
+                total = cleanMoney(totalStr);
+                
+                const payout = cleanMoney(extract(/You earn[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
                 comm = Number((total - payout).toFixed(2));
                 
-                bType = extract(/(.*?)\nRoom\nCheck-in/);
-                notes = extract(/Identity verified.*?\n\n(.*?)\n/m);
+                bType = extract(/([^\n]+?)\s*Room\s*Check-in/i);
+                
+                notes = extract(/Identity verified[\s\S]*?\n([^\n]+)\n\s*Send.*?a Message/i);
+                if(!notes || notes.includes('Translated') || notes.includes('Add guest')) notes = ""; 
                 
                 const policyMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i);
                 if (policyMatch) {
