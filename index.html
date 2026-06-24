@@ -29,9 +29,11 @@
         .zoom-wide-mode .timeline-grid { grid-template-columns: var(--sidebar-w) repeat(var(--days), minmax(140px, 1fr)); }
 
         .day-column { border-right: 1px solid #e2e8f0; height: 100%; position: relative; cursor: cell; transition: background-color 0.1s; }
+        .day-column::after { content: ''; position: absolute; inset: 0; background-color: rgba(0,0,0,0.06); opacity: 0; pointer-events: none; z-index: 5; transition: opacity 0.1s; }
+        .day-column.hover-col::after { opacity: 1; }
+
         .bed-row { height: 28px; border-bottom: 1px solid #cbd5e1; position: relative; }
         
-        .hover-col { background-color: rgba(0, 0, 0, 0.06) !important; }
         .day-fmp-dark { background-color: rgba(225, 29, 72, 0.4) !important; }
         .day-fmp-medium { background-color: rgba(249, 115, 22, 0.25) !important; }
         .day-today { background-color: rgba(219, 234, 254, 0.8); }
@@ -90,20 +92,19 @@
         .section-header { background: #e2e8f0; padding: 6px 8px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #475569; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; transition: background 0.2s; }
         .section-header:hover { background: #cbd5e1; }
         
-        /* Custom Multi-select Dropdowns */
-        .multi-select-container { position: relative; display: inline-block; width: 100%; }
-        .multi-select-dropdown { position: absolute; background-color: #1e293b; color: white; z-index: 50; width: max-content; min-width: 100%; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); max-height: 250px; overflow-y: auto; border-radius: 4px; display: none; font-size: 0.75rem; }
-        .multi-select-dropdown label { display: block; padding: 6px 8px; cursor: pointer; text-transform: uppercase; border-bottom: 1px solid #334155; }
+        /* Custom Multi-select Dropdowns - Handled via Javascript absolute positioning */
+        .multi-select-dropdown { background-color: #1e293b; color: white; z-index: 99999; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); max-height: 250px; overflow-y: auto; border-radius: 4px; display: none; font-size: 0.75rem; }
+        .multi-select-dropdown label { display: flex; align-items: center; padding: 6px 8px; cursor: pointer; text-transform: uppercase; border-bottom: 1px solid #334155; }
         .multi-select-dropdown label:hover { background-color: #334155; }
     </style>
 </head>
-<body class="bg-slate-100 p-0 sm:p-2">
+<body class="bg-slate-100 p-0 sm:p-2 relative">
 
     <div id="boot-loader" class="loading-overlay"><div class="spinner"></div><div class="mt-4 font-black text-slate-800 uppercase tracking-widest text-center px-4"><span id="sync-status">Authenticating...</span></div></div>
 
     <div class="max-w-[1950px] mx-auto unselectable">
-        <!-- Compact Header -->
-        <div class="bg-white px-2 py-1.5 rounded-none sm:rounded-lg shadow-sm border-b sm:border border-slate-200 mb-1 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2">
+        <!-- Globally Sticky Compact Header -->
+        <div class="bg-white px-2 py-1.5 rounded-none sm:rounded-lg shadow-sm border-b sm:border border-slate-200 mb-1 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2 sticky top-0 z-50">
             
             <div class="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-start">
                 <div class="flex items-center gap-2">
@@ -119,16 +120,16 @@
             </div>
 
             <div class="flex items-center gap-2 w-full lg:w-auto overflow-x-auto no-scrollbar justify-between lg:justify-end">
-                <div class="flex items-center bg-slate-100 p-0.5 rounded border border-slate-200 shrink-0">
-                    <button onclick="window.prevPeriod()" class="p-1 hover:bg-white rounded"><i data-lucide="chevron-left" size="16"></i></button>
-                    <div class="date-input-box mx-1 w-[100px] sm:w-[110px]">
-                        <span id="current-jump-display" class="display-text tracking-tighter">--</span>
-                        <input type="date" id="jump-date" onchange="window.jumpToDate(this.value)">
+                <div class="flex items-center gap-1 shrink-0">
+                    <div class="flex items-center bg-slate-100 p-0.5 rounded border border-slate-200 shrink-0">
+                        <button onclick="window.prevPeriod()" class="p-1 hover:bg-white rounded"><i data-lucide="chevron-left" size="16"></i></button>
+                        <select id="jump-month-select" class="bg-transparent font-black text-blue-600 outline-none text-xs cursor-pointer w-[100px] text-center" onchange="window.jumpToMonth(this.value)">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <button onclick="window.nextPeriod()" class="p-1 hover:bg-white rounded"><i data-lucide="chevron-right" size="16"></i></button>
                     </div>
-                    <button onclick="window.nextPeriod()" class="p-1 hover:bg-white rounded"><i data-lucide="chevron-right" size="16"></i></button>
+                    <button onclick="window.goToday()" class="px-2 py-1 bg-white border border-slate-300 rounded font-bold text-xs uppercase hover:bg-slate-50 shrink-0 h-[28px]">Today</button>
                 </div>
-                
-                <button onclick="window.goToday()" class="px-2 py-1 bg-white border border-slate-300 rounded font-bold text-xs uppercase hover:bg-slate-50 shrink-0">Today</button>
                 
                 <div class="flex gap-1 shrink-0">
                     <button onclick="window.openCSVModal()" class="px-2 py-1 bg-indigo-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-indigo-700 active:scale-95"><i data-lucide="sheet" size="14"></i> <span class="hidden sm:inline">Bulk Import</span></button>
@@ -141,9 +142,9 @@
                     <button onclick="window.clearSearch()" class="absolute right-2 top-1.5 text-slate-400 hover:text-slate-600"><i data-lucide="x" size="14"></i></button>
                 </div>
             </div>
-            
         </div>
 
+        <!-- CALENDAR TAB -->
         <div id="calendar-view" class="unselectable block">
             <div id="calendar-scroll-container" class="bg-white sm:rounded shadow border-y sm:border border-slate-300">
                 <div class="timeline-grid sticky top-0 z-40 bg-slate-800 shadow-sm border-b border-slate-700 h-[26px] box-border">
@@ -191,67 +192,42 @@
             </footer>
         </div>
 
+        <!-- DATABASE TAB -->
         <div id="database-view" class="bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden unselectable hidden">
             <div class="p-2 bg-slate-100 border-b border-slate-300 flex justify-between items-center">
                 <h2 class="font-black text-slate-700 uppercase tracking-widest text-sm">Database Editor</h2>
                 <button id="admin-bulk-delete" onclick="window.bulkDelete()" class="hidden px-4 py-1.5 bg-orange-600 text-white rounded font-black text-xs uppercase items-center gap-1 hover:bg-orange-700 shadow-md"><i data-lucide="list-x" size="14"></i> BULK DELETE VISIBLE</button>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[800px]">
+            <div class="overflow-x-auto min-h-[400px]">
+                <table class="w-full text-left border-collapse min-w-[900px]">
                     <thead>
                         <tr class="bg-slate-800 text-white text-base font-black uppercase tracking-widest cursor-pointer">
-                            <th onclick="window.sortDatabase('lastName')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[16%]">Guest Name <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                            <th onclick="window.sortDatabase('lastName')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[18%]">Guest Name <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
                             <th onclick="window.sortDatabase('source')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[12%]">Source <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
                             <th onclick="window.sortDatabase('checkIn')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[18%]">Stay Dates <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                            <th onclick="window.sortDatabase('room')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[12%]">Rooms <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                            <th onclick="window.sortDatabase('room')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[10%]">Rooms <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
                             <th onclick="window.sortDatabase('totalPrice')" class="p-2 border-r border-slate-700 text-right hover:bg-slate-700 w-[14%]">Total <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
                             <th onclick="window.sortDatabase('due')" class="p-2 border-r border-slate-700 text-right hover:bg-slate-700 w-[14%]">Due <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
                             <th onclick="window.sortDatabase('status')" class="p-2 hover:bg-slate-700 w-[14%]">Status <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
                         </tr>
-                        <tr class="bg-slate-700 text-slate-300 text-xs uppercase">
-                            <th class="p-1 border-r border-slate-600 font-normal"><input type="text" id="db-filter-name" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-xs" placeholder="FILTER NAME..." oninput="window.renderDatabase()"></th>
+                        <tr class="bg-slate-700 text-slate-300 text-[10px] uppercase">
+                            <th class="p-1 border-r border-slate-600 font-normal"><input type="text" id="db-filter-name" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" placeholder="FILTER NAME..." oninput="window.renderDatabase()"></th>
                             <th class="p-1 border-r border-slate-600 font-normal">
-                                <div class="relative multi-select-container w-full text-left">
-                                    <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-xs" onclick="window.toggleMultiSelect('db-source-dropdown')">
-                                        <span id="db-source-label" class="truncate">ALL SOURCES</span><span class="text-[8px] ml-1">▼</span>
-                                    </div>
-                                    <div id="db-source-dropdown" class="multi-select-dropdown hidden absolute top-full left-0 mt-1 bg-slate-800 border border-slate-600 rounded shadow-xl z-50 min-w-[120px] max-h-48 overflow-y-auto text-xs text-white">
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="booking.com" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> BDC</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="agoda" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> AGODA</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="airbnb" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> AIRBNB</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="hostelworld" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> HW</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="direct" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> DIRECT</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="walkin" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> WALK-IN</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="other" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> OTHER</label>
-                                    </div>
+                                <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-[10px]" onclick="window.toggleMultiSelect('db-source-dropdown', this)">
+                                    <span id="db-source-label" class="truncate">ALL SOURCES</span><span class="text-[8px] ml-1">▼</span>
                                 </div>
                             </th>
-                            <th class="p-1 border-r border-slate-600 font-normal"><input type="month" id="db-filter-month" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-xs" onchange="window.renderDatabase()"></th>
+                            <th class="p-1 border-r border-slate-600 font-normal"><select id="db-filter-month" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderDatabase()"></select></th>
                             <th class="p-1 border-r border-slate-600 font-normal">
-                                <div class="relative multi-select-container w-full text-left">
-                                    <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-xs" onclick="window.toggleMultiSelect('db-room-dropdown')">
-                                        <span id="db-room-label" class="truncate">ALL ROOMS</span><span class="text-[8px] ml-1">▼</span>
-                                    </div>
-                                    <div id="db-room-dropdown" class="multi-select-dropdown hidden absolute top-full left-0 mt-1 bg-slate-800 border border-slate-600 rounded shadow-xl z-50 min-w-[140px] max-h-48 overflow-y-auto text-xs text-white">
-                                        <!-- Populated dynamically by JS -->
-                                    </div>
+                                <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-[10px]" onclick="window.toggleMultiSelect('db-room-dropdown', this)">
+                                    <span id="db-room-label" class="truncate">ALL ROOMS</span><span class="text-[8px] ml-1">▼</span>
                                 </div>
                             </th>
-                            <th class="p-1 border-r border-slate-600 font-normal flex gap-1"><input type="number" id="db-filter-min" placeholder="MIN ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-xs" oninput="window.renderDatabase()"><input type="number" id="db-filter-max" placeholder="MAX ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-xs" oninput="window.renderDatabase()"></th>
-                            <th class="p-1 border-r border-slate-600 font-normal"><select id="db-filter-due" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-xs" onchange="window.renderDatabase()"><option value="">ALL</option><option value="zero">PAID</option><option value="owes">OWES</option></select></th>
+                            <th class="p-1 border-r border-slate-600 font-normal flex gap-1"><input type="number" id="db-filter-min" placeholder="MIN ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderDatabase()"><input type="number" id="db-filter-max" placeholder="MAX ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderDatabase()"></th>
+                            <th class="p-1 border-r border-slate-600 font-normal"><select id="db-filter-due" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderDatabase()"><option value="">ALL</option><option value="zero">PAID</option><option value="owes">OWES</option></select></th>
                             <th class="p-1 font-normal">
-                                <div class="relative multi-select-container w-full text-left">
-                                    <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-xs" onclick="window.toggleMultiSelect('db-status-dropdown')">
-                                        <span id="db-status-label" class="truncate">ALL STATUS</span><span class="text-[8px] ml-1">▼</span>
-                                    </div>
-                                    <div id="db-status-dropdown" class="multi-select-dropdown hidden absolute top-full right-0 mt-1 bg-slate-800 border border-slate-600 rounded shadow-xl z-50 min-w-[120px] max-h-48 overflow-y-auto text-xs text-white">
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="future" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> FUTURE</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="here" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> HERE</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="left" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> LEFT</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="unconfirmed" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> UNCONFIRMED</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="cancelled" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CANCELLED</label>
-                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="noshow" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> NO-SHOW</label>
-                                    </div>
+                                <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-[10px]" onclick="window.toggleMultiSelect('db-status-dropdown', this)">
+                                    <span id="db-status-label" class="truncate">ALL STATUS</span><span class="text-[8px] ml-1">▼</span>
                                 </div>
                             </th>
                         </tr>
@@ -261,116 +237,142 @@
             </div>
         </div>
 
-        <div id="accounting-view" class="bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden unselectable hidden">
-            <div class="p-4 bg-slate-100 border-b border-slate-300">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="font-black text-slate-800 uppercase tracking-tighter text-xl"><i data-lucide="bar-chart-3" class="inline-block mr-2 text-blue-600"></i>Financial Accounting & KPIs</h2>
-                </div>
+        <!-- ACCOUNTING TAB -->
+        <div id="accounting-view" class="bg-slate-100 sm:bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden unselectable hidden">
+            <div class="p-4 bg-slate-100 border-b border-slate-300 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+                <h2 class="font-black text-slate-800 uppercase tracking-tighter text-xl shrink-0"><i data-lucide="bar-chart-3" class="inline-block mr-2 text-blue-600"></i>Financial KPIs</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-3 bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <div class="flex flex-col"><label class="field-label mb-1">Date Range Start</label><input type="date" id="acc-date-start" onchange="window.renderAccounting()" class="w-full text-sm"></div>
-                    <div class="flex flex-col"><label class="field-label mb-1">Date Range End</label><input type="date" id="acc-date-end" onchange="window.renderAccounting()" class="w-full text-sm"></div>
-                    <div class="flex flex-col"><label class="field-label mb-1">Status Group</label>
-                        <select id="acc-status" onchange="window.renderAccounting()" class="w-full text-sm uppercase">
-                            <option value="ALL">All (Inc. Cancels)</option>
-                            <option value="ACTIVE" selected>Active & Departed</option>
-                            <option value="DEPARTED">Only Departed</option>
-                            <option value="DEAD">Cancelled & No-Show</option>
-                        </select>
-                    </div>
-                    <div class="flex flex-col"><label class="field-label mb-1">Source</label>
-                        <div class="relative multi-select-container w-full text-left">
-                            <div class="w-full bg-white text-slate-800 px-2 py-1 rounded border border-slate-300 outline-none cursor-pointer flex justify-between items-center text-sm font-bold uppercase" onclick="window.toggleMultiSelect('acc-source-dropdown')">
-                                <span id="acc-source-label" class="truncate">ALL SOURCES</span><span class="text-[10px] ml-1">▼</span>
-                            </div>
-                            <div id="acc-source-dropdown" class="multi-select-dropdown hidden absolute top-full left-0 mt-1 bg-white border border-slate-300 rounded shadow-xl z-50 min-w-[150px] max-h-48 overflow-y-auto text-sm font-bold text-slate-800">
-                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="booking.com" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> BOOKING.COM</label>
-                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="agoda" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> AGODA</label>
-                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="airbnb" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> AIRBNB</label>
-                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="hostelworld" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> HOSTELWORLD</label>
-                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="direct" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> DIRECT</label>
-                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="walkin" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> WALK-IN</label>
-                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer"><input type="checkbox" value="other" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> OTHER</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col"><label class="field-label mb-1">Room Type</label>
-                        <select id="acc-room-type" onchange="window.renderAccounting()" class="w-full text-sm uppercase"><option value="ALL">ALL TYPES</option></select>
-                    </div>
+                <div class="flex items-center gap-2 bg-white p-1 rounded border border-slate-300 shadow-sm w-full md:w-auto overflow-hidden">
+                    <span class="text-[10px] font-black uppercase text-slate-500 px-2 whitespace-nowrap hidden sm:block">Date Range:</span>
+                    <input type="date" id="acc-date-start" onchange="window.renderAccounting()" class="w-full text-xs !border-none !ring-0 !shadow-none p-1">
+                    <span class="text-slate-300 font-bold px-1">TO</span>
+                    <input type="date" id="acc-date-end" onchange="window.renderAccounting()" class="w-full text-xs !border-none !ring-0 !shadow-none p-1">
                 </div>
             </div>
 
             <div class="p-4 sm:p-6 bg-white">
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-                    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm">
-                        <i data-lucide="calculator" class="text-blue-400 mb-1" size="20"></i>
-                        <span class="text-blue-500 font-black text-xs uppercase tracking-widest mb-1">Gross Booked</span>
-                        <span id="acc-gross" class="text-2xl lg:text-3xl font-black text-blue-900 tracking-tighter">฿0</span>
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
+                        <i data-lucide="calculator" class="absolute -bottom-4 -right-4 text-blue-500 opacity-10 w-24 h-24"></i>
+                        <span class="text-blue-500 font-black text-xs uppercase tracking-widest mb-1 z-10">Gross Booked</span>
+                        <span id="acc-gross" class="text-2xl lg:text-3xl font-black text-blue-900 tracking-tighter z-10">฿0</span>
                     </div>
-                    <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm">
-                        <i data-lucide="receipt" class="text-slate-400 mb-1" size="20"></i>
-                        <span class="text-slate-500 font-black text-xs uppercase tracking-widest mb-1">Net Expected</span>
-                        <span id="acc-net" class="text-2xl lg:text-3xl font-black text-slate-800 tracking-tighter">฿0</span>
+                    <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
+                        <i data-lucide="receipt" class="absolute -bottom-4 -right-4 text-slate-500 opacity-10 w-24 h-24"></i>
+                        <span class="text-slate-500 font-black text-xs uppercase tracking-widest mb-1 z-10">Net Expected</span>
+                        <span id="acc-net" class="text-2xl lg:text-3xl font-black text-slate-800 tracking-tighter z-10">฿0</span>
                     </div>
-                    <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm">
-                        <i data-lucide="landmark" class="text-red-400 mb-1" size="20"></i>
-                        <span class="text-red-500 font-black text-xs uppercase tracking-widest mb-1">OTA Comm & Fees</span>
-                        <span id="acc-comm" class="text-2xl lg:text-3xl font-black text-red-700 tracking-tighter">฿0</span>
+                    <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
+                        <i data-lucide="landmark" class="absolute -bottom-4 -right-4 text-red-500 opacity-10 w-24 h-24"></i>
+                        <span class="text-red-500 font-black text-xs uppercase tracking-widest mb-1 z-10">OTA Comm & Fees</span>
+                        <span id="acc-comm" class="text-2xl lg:text-3xl font-black text-red-700 tracking-tighter z-10">฿0</span>
                     </div>
-                    <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden">
-                        <i data-lucide="clock" class="text-amber-400 mb-1" size="20"></i>
-                        <span class="text-amber-600 font-black text-xs uppercase tracking-widest mb-1">Unpaid Balance</span>
-                        <span id="acc-balance" class="text-2xl lg:text-3xl font-black text-amber-700 tracking-tighter">฿0</span>
+                    <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
+                        <i data-lucide="clock" class="absolute -bottom-4 -right-4 text-amber-500 opacity-10 w-24 h-24"></i>
+                        <span class="text-amber-600 font-black text-xs uppercase tracking-widest mb-1 z-10">Unpaid Balance</span>
+                        <span id="acc-balance" class="text-2xl lg:text-3xl font-black text-amber-700 tracking-tighter z-10">฿0</span>
                     </div>
-                    <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transform scale-105">
-                        <div class="absolute top-0 right-0 bg-emerald-400 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg uppercase tracking-widest shadow">Real Money</div>
-                        <i data-lucide="wallet" class="text-emerald-500 mb-1 mt-1" size="24"></i>
-                        <span class="text-emerald-600 font-black text-xs uppercase tracking-widest mb-1">Actual Collected</span>
-                        <span id="acc-collected" class="text-3xl lg:text-4xl font-black text-emerald-800 tracking-tighter">฿0</span>
+                    <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transform scale-105 h-28">
+                        <div class="absolute top-0 right-0 bg-emerald-400 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg uppercase tracking-widest shadow z-20">Real Money</div>
+                        <i data-lucide="wallet" class="absolute -bottom-4 -right-4 text-emerald-600 opacity-10 w-24 h-24"></i>
+                        <span class="text-emerald-600 font-black text-xs uppercase tracking-widest mb-1 z-10">Actual Collected</span>
+                        <span id="acc-collected" class="text-3xl lg:text-4xl font-black text-emerald-800 tracking-tighter z-10">฿0</span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-1">
-                        <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm mb-3 border-b border-slate-200 pb-2">Bed Configuration Popularity</h3>
-                        <table class="w-full text-left border-collapse border border-slate-300 rounded-lg overflow-hidden shadow-sm">
-                            <thead class="bg-slate-800 text-white">
-                                <tr class="text-xs uppercase tracking-widest font-black">
-                                    <th class="p-2 border-r border-slate-600">Bed Setup</th>
-                                    <th class="p-2 border-r border-slate-600 text-right">Bookings</th>
-                                    <th class="p-2 text-right">Room Nights</th>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div class="lg:col-span-1 border border-slate-300 rounded-lg overflow-hidden shadow-sm self-start">
+                        <div class="bg-slate-800 text-white p-2 font-black uppercase tracking-widest text-xs border-b border-slate-700 text-center">Bed Popularity</div>
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-100">
+                                <tr class="text-[10px] uppercase tracking-widest font-bold text-slate-500">
+                                    <th class="p-2 border-r border-slate-200">Bed Setup</th>
+                                    <th class="p-2 border-r border-slate-200 text-right" title="Bookings">Bks</th>
+                                    <th class="p-2 text-right">Nights</th>
                                 </tr>
                             </thead>
-                            <tbody id="acc-bed-body" class="text-sm font-bold text-slate-700 bg-white"></tbody>
+                            <tbody id="acc-bed-body" class="text-xs font-bold text-slate-700 bg-white"></tbody>
                         </table>
                     </div>
-                    <div class="lg:col-span-2">
+                    
+                    <div class="lg:col-span-3">
                         <div class="flex justify-between items-end border-b border-slate-200 pb-2 mb-3">
                             <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm">Filtered Ledger</h3>
-                            <button onclick="window.exportLedgerCSV()" class="text-[10px] font-black uppercase bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded flex items-center gap-1"><i data-lucide="download" size="12"></i> Export CSV</button>
+                            <button onclick="window.exportLedgerCSV()" class="text-[10px] font-black uppercase bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded flex items-center gap-1 shadow-sm transition-colors"><i data-lucide="download" size="12"></i> Export CSV</button>
                         </div>
-                        <div class="overflow-x-auto max-h-[400px] border border-slate-300 rounded-lg shadow-sm">
-                            <table class="w-full text-left border-collapse text-xs min-w-[700px]" id="acc-ledger-table">
-                                <thead class="bg-slate-800 text-white sticky top-0 font-black uppercase tracking-wider">
-                                    <tr>
-                                        <th class="p-2 border-r border-slate-600">Name</th>
-                                        <th class="p-2 border-r border-slate-600">In</th>
-                                        <th class="p-2 border-r border-slate-600">Out</th>
-                                        <th class="p-2 border-r border-slate-600">Src</th>
-                                        <th class="p-2 border-r border-slate-600 text-right">Gross</th>
-                                        <th class="p-2 border-r border-slate-600 text-right">Net</th>
-                                        <th class="p-2 border-r border-slate-600 text-right">Comm</th>
-                                        <th class="p-2 border-r border-slate-600 text-right text-emerald-300">Coll.</th>
-                                        <th class="p-2 text-right text-amber-300">Bal</th>
+                        <div class="overflow-x-auto min-h-[300px] max-h-[500px] border border-slate-300 rounded-lg shadow-sm">
+                            <table class="w-full text-left border-collapse text-sm min-w-[800px]" id="acc-ledger-table">
+                                <thead class="bg-slate-800 text-white sticky top-0 z-10">
+                                    <tr class="font-black uppercase tracking-wider text-sm cursor-pointer">
+                                        <th onclick="window.sortAccounting('name')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[16%]">Guest Name <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                        <th onclick="window.sortAccounting('source')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[10%]">Source <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                        <th onclick="window.sortAccounting('checkIn')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[20%]">Dates <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                        <th onclick="window.sortAccounting('totalPrice')" class="p-2 border-r border-slate-600 text-right hover:bg-slate-700 w-[12%]">Gross <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                        <th onclick="window.sortAccounting('netPrice')" class="p-2 border-r border-slate-600 text-right hover:bg-slate-700 w-[12%]">Net <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                        <th onclick="window.sortAccounting('comm')" class="p-2 border-r border-slate-600 text-right text-red-300 hover:bg-slate-700 w-[10%]">Comm <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                        <th onclick="window.sortAccounting('collected')" class="p-2 border-r border-slate-600 text-right text-emerald-300 hover:bg-slate-700 w-[10%]">Coll. <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                        <th onclick="window.sortAccounting('due')" class="p-2 text-right text-amber-300 hover:bg-slate-700 w-[10%]">Bal <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                    </tr>
+                                    <tr class="bg-slate-700 text-slate-300 text-[10px] uppercase font-normal">
+                                        <th class="p-1 border-r border-slate-600"><input type="text" id="acc-filter-name" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" placeholder="FILTER NAME..." oninput="window.renderAccounting()"></th>
+                                        <th class="p-1 border-r border-slate-600">
+                                            <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-[10px]" onclick="window.toggleMultiSelect('acc-source-dropdown', this)">
+                                                <span id="acc-source-label" class="truncate">ALL SOURCES</span><span class="text-[8px] ml-1">▼</span>
+                                            </div>
+                                        </th>
+                                        <th class="p-1 border-r border-slate-600"><select id="acc-filter-month" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderAccounting()"></select></th>
+                                        <th class="p-1 border-r border-slate-600 flex gap-1"><input type="number" id="acc-filter-min" placeholder="MIN ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderAccounting()"><input type="number" id="acc-filter-max" placeholder="MAX ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderAccounting()"></th>
+                                        <th class="p-1 border-r border-slate-600"></th>
+                                        <th class="p-1 border-r border-slate-600"></th>
+                                        <th class="p-1 border-r border-slate-600"></th>
+                                        <th class="p-1"><select id="acc-filter-due" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderAccounting()"><option value="">ALL</option><option value="zero">PAID</option><option value="owes">OWES</option></select></th>
                                     </tr>
                                 </thead>
-                                <tbody id="acc-ledger-body" class="bg-white text-slate-700 font-bold"></tbody>
+                                <tbody id="acc-ledger-body" class="bg-white text-slate-700 font-bold text-xs"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Hidden Multi-Select Dropdowns -->
+    <div id="db-source-dropdown" class="multi-select-dropdown">
+        <label><input type="checkbox" value="booking.com" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> BDC</label>
+        <label><input type="checkbox" value="agoda" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> AGODA</label>
+        <label><input type="checkbox" value="airbnb" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> AIRBNB</label>
+        <label><input type="checkbox" value="hostelworld" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> HW</label>
+        <label><input type="checkbox" value="direct" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> DIRECT</label>
+        <label><input type="checkbox" value="walkin" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> WALK-IN</label>
+        <label><input type="checkbox" value="other" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> OTHER</label>
+    </div>
+    
+    <div id="db-room-dropdown" class="multi-select-dropdown">
+        <!-- Populated dynamically by JS -->
+    </div>
+    
+    <div id="db-status-dropdown" class="multi-select-dropdown">
+        <label><input type="checkbox" value="future" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> FUTURE</label>
+        <label><input type="checkbox" value="here" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> HERE</label>
+        <label><input type="checkbox" value="left" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> LEFT</label>
+        <label><input type="checkbox" value="unconfirmed" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> UNCONFIRMED</label>
+        <label><input type="checkbox" value="cancelled" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CANCELLED</label>
+        <label><input type="checkbox" value="noshow" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> NO-SHOW</label>
+    </div>
+    
+    <div id="acc-source-dropdown" class="multi-select-dropdown">
+        <label><input type="checkbox" value="booking.com" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> BDC</label>
+        <label><input type="checkbox" value="agoda" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> AGODA</label>
+        <label><input type="checkbox" value="airbnb" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> AIRBNB</label>
+        <label><input type="checkbox" value="hostelworld" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> HW</label>
+        <label><input type="checkbox" value="direct" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> DIRECT</label>
+        <label><input type="checkbox" value="walkin" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> WALK-IN</label>
+        <label><input type="checkbox" value="other" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> OTHER</label>
+    </div>
+    
+    <div id="acc-room-dropdown" class="multi-select-dropdown">
+        <!-- Populated dynamically by JS -->
     </div>
 
     <!-- Draggable Floating Staff Modal -->
@@ -448,7 +450,7 @@
 
                 <!-- Booking Tags -->
                 <div class="flex gap-2 pb-2 unselectable">
-                    <div id="refund-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400'])">NON-REFUNDABLE</div>
+                    <div id="refund-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400'])">REFUNDABILITY: ?</div>
                     <div id="upgrade-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400'])">NO UPGRADE</div>
                     <div id="rating-btn" class="flex-1 multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400'])">FEEDBACK: --</div>
                 </div>
@@ -522,9 +524,9 @@
     <!-- Paste CSV Modal -->
     <div id="import-modal" class="alert-modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
-            <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm"><span>Import Spreadsheet CSV</span><button type="button" onclick="document.getElementById('import-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div>
+            <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm"><span>Bulk Import Spreadsheet</span><button type="button" onclick="document.getElementById('import-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div>
             <div class="p-4 flex flex-col gap-3">
-                <p class="text-sm font-bold text-slate-500 leading-tight">Paste rows directly from your spreadsheet.<br><span class="text-xs text-rose-500">Must include the Header row! (Supports BDC Export & Legacy SWIMS)</span></p>
+                <p class="text-sm font-bold text-slate-500 leading-tight">Paste rows directly from your spreadsheet.<br><span class="text-xs text-rose-500">Must include the Header row!</span></p>
                 <textarea id="import-textarea" rows="6" class="w-full bg-slate-50 border border-slate-300 font-bold text-xs p-2 rounded outline-none focus:ring-2 focus:ring-indigo-500 whitespace-pre" placeholder="Reservation number	Booked on	Arrival	Departure	Guest name..."></textarea>
                 <div class="flex gap-2 justify-end mt-2">
                     <button onclick="document.getElementById('import-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button>
@@ -539,7 +541,7 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
             <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm"><span>Parse Confirmation Email</span><button type="button" onclick="document.getElementById('email-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div>
             <div class="p-4 flex flex-col gap-3">
-                <p class="text-sm font-bold text-slate-500 leading-tight">Paste the text of an AirBnB or Hostelworld confirmation email here.</p>
+                <p class="text-sm font-bold text-slate-500 leading-tight">Paste the text of a Booking.com or AirBnB confirmation email here.</p>
                 <textarea id="email-textarea" rows="8" class="w-full bg-slate-50 border border-slate-300 font-mono text-[10px] p-2 rounded outline-none focus:ring-2 focus:ring-purple-500 whitespace-pre" placeholder="Paste email text here..."></textarea>
                 <div class="flex gap-2 justify-end mt-2">
                     <button onclick="document.getElementById('email-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button>
@@ -583,6 +585,9 @@
         let staff = [];
         let viewStart = new Date(); viewStart.setHours(12,0,0,0);
         let searchTerm = ""; let searchMatchIndex = 0; let sortKey = "checkIn"; let sortAsc = false; let isZoomWide = false;
+        
+        let accSortKey = "checkIn"; let accSortAsc = false;
+        
         const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         const fmpDates = ["2026-01-03", "2026-02-02", "2026-03-03", "2026-04-02", "2026-05-01", "2026-06-01", "2026-06-29", "2026-07-31", "2026-08-28", "2026-09-26", "2026-10-27", "2026-11-24", "2026-12-24", "2026-12-31"];
         
@@ -680,19 +685,30 @@
 
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
 
-        // Format dates correctly (24 JUN 2026)
         const toDisplayDate = (d) => {
             if (!d || isNaN(d.getTime())) return "---";
-            const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-            return `${String(d.getDate()).padStart(2, '0')} ${mNames[d.getMonth()]} ${d.getFullYear()}`;
+            const mNamesStr = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            return `${String(d.getDate()).padStart(2, '0')} ${mNamesStr[d.getMonth()]} ${d.getFullYear()}`;
         };
 
-        // Dragging Logic
+        const generateMonthOptions = () => {
+            const mthsStr = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            let html = '<option value="">ALL DATES</option>';
+            let d = new Date(viewStart.getFullYear(), viewStart.getMonth() - 2, 1);
+            for(let i=0; i<36; i++) {
+                const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                const lbl = `${mthsStr[d.getMonth()]} ${d.getFullYear()}`;
+                html += `<option value="${val}">${lbl}</option>`;
+                d.setMonth(d.getMonth() + 1);
+            }
+            return html;
+        };
+
         let isDragging = false;
         let dragOffsetX, dragOffsetY;
 
         window.startDrag = (e) => {
-            if (e.target.closest('button, input, select, i, textarea')) return; // Ignore form elements
+            if (e.target.closest('button, input, select, i, textarea, .multi-state-btn')) return;
             isDragging = true;
             const modal = document.getElementById('staff-modal-content');
             const rect = modal.getBoundingClientRect();
@@ -722,14 +738,13 @@
         });
 
         document.addEventListener('mouseup', () => { 
-            if(isDragging) {
-                isDragging = false; 
-            }
+            if(isDragging) isDragging = false; 
         });
 
         window.toggleSection = (secId, iconId, forceState = null) => {
             const sec = document.getElementById(secId);
             const icon = document.getElementById(iconId);
+            if(!sec) return;
             const isHidden = sec.style.display === 'none';
             const shouldShow = forceState !== null ? forceState : isHidden;
             
@@ -742,23 +757,36 @@
             }
         };
 
-        // Multi-Select Helpers
-        window.toggleMultiSelect = (id) => {
-            const el = document.getElementById(id);
-            const isHidden = el.style.display === 'none' || el.classList.contains('hidden');
+        window.toggleMultiSelect = (id, btnEventEl) => {
+            event.stopPropagation();
+            const drop = document.getElementById(id);
+            if(!drop) return;
+            const isHidden = drop.classList.contains('hidden');
+            
             document.querySelectorAll('.multi-select-dropdown').forEach(d => {
-                d.style.display = 'none';
                 d.classList.add('hidden');
+                d.style.display = 'none';
             });
+
             if(isHidden) {
-                el.style.display = 'block';
-                el.classList.remove('hidden');
+                const rect = btnEventEl.getBoundingClientRect();
+                document.body.appendChild(drop);
+                drop.style.position = 'absolute';
+                drop.style.top = (rect.bottom + window.scrollY) + 'px';
+                drop.style.left = (rect.left + window.scrollX) + 'px';
+                drop.style.width = Math.max(rect.width, 140) + 'px';
+                
+                if (rect.left + 150 > window.innerWidth) drop.style.left = (window.scrollX + rect.right - 150) + 'px';
+                
+                drop.classList.remove('hidden');
+                drop.style.display = 'block';
             }
         };
 
         window.updateMultiLabel = (dropId, labelId, defaultText) => {
             const checked = document.querySelectorAll(`#${dropId} input[type="checkbox"]:checked`);
             const label = document.getElementById(labelId);
+            if(!label) return;
             if(checked.length === 0) label.innerText = defaultText;
             else if(checked.length === 1) label.innerText = checked[0].parentNode.textContent.trim().toUpperCase();
             else label.innerText = checked.length + ' SELECTED';
@@ -771,10 +799,10 @@
         };
 
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.multi-select-container')) {
+            if (!e.target.closest('.multi-select-container') && !e.target.closest('.multi-select-dropdown')) {
                 document.querySelectorAll('.multi-select-dropdown').forEach(d => {
-                    d.style.display = 'none';
                     d.classList.add('hidden');
+                    d.style.display = 'none';
                 });
             }
         });
@@ -811,6 +839,13 @@
                 if (error.code === 'auth/unauthorized-domain') window.showAlert("Configuration Required:\n\nYou must add this website's domain to the 'Authorized domains' list in your Firebase Authentication settings.");
                 else window.showAlert("Login failed. Please try again.\n" + error.message);
             });
+        };
+
+        window.jumpToMonth = (val) => {
+            if(!val) return;
+            const [y, m] = val.split('-');
+            viewStart = new Date(y, m-1, 1, 12, 0, 0);
+            window.render();
         };
 
         const init = async () => {
@@ -852,41 +887,32 @@
             countries.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; cSel.appendChild(opt); });
             
             const dbRoomDrop = document.getElementById('db-room-dropdown');
-            const accRoomDrop = document.getElementById('acc-room-type');
             if (dbRoomDrop) {
                 roomTypes.forEach(t => { 
                     const lbl = document.createElement('label');
-                    lbl.className = 'flex items-center p-2 hover:bg-slate-700 cursor-pointer uppercase border-b border-slate-600 text-white';
                     lbl.innerHTML = `<input type="checkbox" value="${t}" onchange="window.updateMultiLabel('db-room-dropdown', 'db-room-label', 'ALL ROOMS'); window.renderDatabase();" class="mr-2"> ${t}`;
                     dbRoomDrop.appendChild(lbl);
-                    
-                    if(accRoomDrop) {
-                        const opt = document.createElement('option');
-                        opt.value = t; opt.innerText = t;
-                        accRoomDrop.appendChild(opt);
-                    }
                 });
                 const lbl = document.createElement('label');
-                lbl.className = 'flex items-center p-2 hover:bg-slate-700 cursor-pointer uppercase text-amber-400 font-black';
+                lbl.className = 'text-amber-400 font-black';
                 lbl.innerHTML = `<input type="checkbox" value="UNASSIGNED" onchange="window.updateMultiLabel('db-room-dropdown', 'db-room-label', 'ALL ROOMS'); window.renderDatabase();" class="mr-2"> UNASSIGNED`;
                 dbRoomDrop.appendChild(lbl);
             }
+            
+            const accRoomDrop = document.getElementById('acc-room-dropdown');
+            if (accRoomDrop) {
+                roomTypes.forEach(t => { 
+                    const lbl = document.createElement('label');
+                    lbl.innerHTML = `<input type="checkbox" value="${t}" onchange="window.updateMultiLabel('acc-room-dropdown', 'acc-room-label', 'ALL ROOMS'); window.renderAccounting();" class="mr-2"> ${t}`;
+                    accRoomDrop.appendChild(lbl);
+                });
+                const lbl = document.createElement('label');
+                lbl.className = 'text-amber-400 font-black';
+                lbl.innerHTML = `<input type="checkbox" value="UNASSIGNED" onchange="window.updateMultiLabel('acc-room-dropdown', 'acc-room-label', 'ALL ROOMS'); window.renderAccounting();" class="mr-2"> UNASSIGNED`;
+                accRoomDrop.appendChild(lbl);
+            }
 
             window.addEventListener('resize', window.render);
-            lucide.createIcons();
-        };
-
-        window.toggleZoom = () => {
-            isZoomWide = !isZoomWide;
-            const container = document.getElementById('calendar-scroll-container');
-            const btn = document.getElementById('zoom-toggle-btn');
-            if(isZoomWide) {
-                container.classList.add('zoom-wide-mode');
-                btn.innerHTML = `<i data-lucide="zoom-out" size="12"></i> ZOOM FIT`;
-            } else {
-                container.classList.remove('zoom-wide-mode');
-                btn.innerHTML = `<i data-lucide="zoom-in" size="12"></i> ZOOM WIDE`;
-            }
             lucide.createIcons();
         };
 
@@ -906,11 +932,37 @@
             return '';
         };
 
+        window.toggleZoom = () => {
+            isZoomWide = !isZoomWide;
+            const container = document.getElementById('calendar-scroll-container');
+            const btn = document.getElementById('zoom-toggle-btn');
+            if(isZoomWide) {
+                container.classList.add('zoom-wide-mode');
+                btn.innerHTML = `<i data-lucide="zoom-out" size="12"></i> ZOOM FIT`;
+            } else {
+                container.classList.remove('zoom-wide-mode');
+                btn.innerHTML = `<i data-lucide="zoom-in" size="12"></i> ZOOM WIDE`;
+            }
+            lucide.createIcons();
+        };
+
         window.render = () => {
             const width = window.innerWidth;
             let daysToShow = width >= 1150 ? 35 : width >= 950 ? 28 : width >= 650 ? 21 : 14;
             document.documentElement.style.setProperty('--days', daysToShow);
-            document.getElementById('current-jump-display').innerText = toDisplayDate(viewStart);
+            
+            const displayEl = document.getElementById('current-jump-display');
+            if (displayEl) displayEl.innerText = toDisplayDate(viewStart);
+            
+            const monthOpts = generateMonthOptions();
+            const jumpMonthEl = document.getElementById('jump-month-select'); 
+            if(jumpMonthEl) {
+                if(jumpMonthEl.options.length < 2) jumpMonthEl.innerHTML = monthOpts;
+                jumpMonthEl.value = `${viewStart.getFullYear()}-${String(viewStart.getMonth() + 1).padStart(2, '0')}`;
+            }
+            const dbMonthEl = document.getElementById('db-filter-month'); if(dbMonthEl && dbMonthEl.options.length < 2) dbMonthEl.innerHTML = monthOpts;
+            const accMonthEl = document.getElementById('acc-filter-month'); if(accMonthEl && accMonthEl.options.length < 2) accMonthEl.innerHTML = monthOpts;
+            
             renderTimeline(daysToShow);
             
             if (document.getElementById('database-view').style.display === 'block') window.renderDatabase();
@@ -923,7 +975,6 @@
             const header = document.getElementById('timeline-header'), body = document.getElementById('timeline-body'), monthLabels = document.getElementById('month-labels');
             header.innerHTML = monthLabels.innerHTML = body.innerHTML = '';
             const days = [];
-            const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
             for (let i = 0; i < daysToShow; i++) { const d = new Date(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate() + i, 12, 0, 0); days.push(d); }
             
             let currentMonth = -1, currentSpan = 0;
@@ -955,7 +1006,6 @@
             
             const timelineRows = [];
 
-            // Build Unconfirmed/Unassigned Zone FIRST so it's at the top
             const unconfirmed = activeStaff.flatMap(s => {
                 if (parseYMD(s.checkIn) > viewEndUTC || parseYMD(s.checkOut) < viewStartUTC) return [];
                 const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : [""]);
@@ -981,7 +1031,6 @@
                 rows.forEach((r, idx) => timelineRows.push({ isUnassigned: true, label: `U-${idx+1}`, bookings: r }));
             }
             
-            // Build Rooms
             hotelRooms.forEach((r, idx, arr) => {
                 const prevType = idx > 0 ? arr[idx-1].type : null;
                 if (r.type !== prevType) timelineRows.push({ isDivider: true, label: r.type });
@@ -1011,7 +1060,6 @@
 
                 row.className = `timeline-grid bed-row group-${currentGroup}`;
                 
-                // Dorm Row thick divider logic
                 if (rowDef.isRoom && rowDef.id.endsWith('-4')) {
                     row.classList.add('!border-b-[3px]', '!border-slate-400');
                 }
@@ -1058,7 +1106,12 @@
                         const due = Number(((s.totalPrice || 0) - (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0)).toFixed(2));
                         const isBadCC = s.badCC;
                         const owes = due > 0;
-                        const isRef = s.refundability === 'ref';
+                        
+                        // Smart 7-Day Refundability Override
+                        let isRef = s.refundability === 'ref';
+                        const cinTime = parseYMD(s.checkIn);
+                        if (cinTime - Date.now() <= 7 * 86400000) isRef = false; // Within 7 days is non-refundable
+
                         const isUpgradedFree = s.upgrade === 'free';
                         const isUpgradedPaid = s.upgrade === 'paid';
                         const isLinked = !!s.linkedId;
@@ -1162,37 +1215,29 @@
         window.renderDatabase = () => {
             const body = document.getElementById('database-body'); 
             if (!body) return;
-            
             body.innerHTML = '';
             
             const nameFilterEl = document.getElementById('db-filter-name');
             const dbName = nameFilterEl ? nameFilterEl.value.trim().toUpperCase() : '';
             const dbSources = window.getMultiValues('db-source-dropdown') || [];
-            
             const monthFilterEl = document.getElementById('db-filter-month');
             const dbMonth = monthFilterEl ? monthFilterEl.value : '';
-            
             const dbRooms = window.getMultiValues('db-room-dropdown') || [];
-            
             const minFilterEl = document.getElementById('db-filter-min');
             const dbTotalMin = minFilterEl ? minFilterEl.value : '';
             const maxFilterEl = document.getElementById('db-filter-max');
             const dbTotalMax = maxFilterEl ? maxFilterEl.value : '';
-            
             const dueFilterEl = document.getElementById('db-filter-due');
             const dbDue = dueFilterEl ? dueFilterEl.value : '';
-            
             const dbStatuses = window.getMultiValues('db-status-dropdown') || [];
 
             const filtered = staff.filter(s => {
                 const fullName = (s.firstName+' '+s.lastName).toUpperCase();
-                
                 if (searchTerm && !fullName.includes(searchTerm)) return false;
                 if (dbName && !fullName.includes(dbName)) return false;
                 if (dbSources.length > 0 && !dbSources.includes(s.source)) return false;
                 if (dbStatuses.length > 0 && !dbStatuses.includes(s.status)) return false;
                 
-                // Advanced Month Filter (Checking Overlap)
                 if (dbMonth) {
                     const [mYear, mMonth] = dbMonth.split('-');
                     const monthStart = Date.UTC(mYear, mMonth - 1, 1);
@@ -1220,11 +1265,15 @@
                     });
                     if (!hasType && (!wantsUnassigned || !hasUnassigned)) return false;
                 }
-
                 return true;
             }).sort((a, b) => {
                 let vA = a[sortKey], vB = b[sortKey];
                 if (sortKey === 'room') { vA = (a.rooms && a.rooms[0]) || a.room || 'ZZZ'; vB = (b.rooms && b.rooms[0]) || b.room || 'ZZZ'; }
+                if (sortKey === 'totalPrice') { vA = Number(vA||0); vB = Number(vB||0); }
+                if (sortKey === 'due') { 
+                    vA = Number(((a.totalPrice || 0) - (a.payments || []).reduce((sum, p) => sum + Number(p.amt), 0)));
+                    vB = Number(((b.totalPrice || 0) - (b.payments || []).reduce((sum, p) => sum + Number(p.amt), 0))); 
+                }
                 return sortAsc ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
             });
             
@@ -1236,7 +1285,7 @@
                 const tr = document.createElement('tr'); tr.className = "border-b hover:bg-slate-50 cursor-pointer"; tr.onclick = () => window.editStaff(s.id);
                 tr.dataset.recordId = s.id;
                 
-                tr.innerHTML = `<td class="p-2 border-r">${s.firstName||''} ${s.lastName||''}</td><td class="p-2 border-r uppercase">${s.source||''}</td><td class="p-2 border-r">${s.checkIn?s.checkIn.substr(5):''} to ${s.checkOut?s.checkOut.substr(5):''}</td><td class="p-2 border-r font-black">${assignedStr}</td><td class="p-2 border-r text-right font-black">฿${Number(s.totalPrice||0).toFixed(2)}</td><td class="p-2 border-r text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due.toFixed(2)}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`;
+                tr.innerHTML = `<td class="p-2 border-r border-slate-200">${s.firstName||''} ${s.lastName||''}</td><td class="p-2 border-r border-slate-200 uppercase">${s.source||''}</td><td class="p-2 border-r border-slate-200">${s.checkIn?s.checkIn.substr(5):''} to ${s.checkOut?s.checkOut.substr(5):''}</td><td class="p-2 border-r border-slate-200 font-black">${assignedStr}</td><td class="p-2 border-r border-slate-200 text-right font-black">฿${Number(s.totalPrice||0).toFixed(2)}</td><td class="p-2 border-r border-slate-200 text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due.toFixed(2)}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`;
                 body.appendChild(tr);
             });
         };
@@ -1257,9 +1306,14 @@
         window.renderAccounting = () => {
             const startStr = document.getElementById('acc-date-start').value;
             const endStr = document.getElementById('acc-date-end').value;
-            const targetStatus = document.getElementById('acc-status').value;
-            const activeSources = window.getMultiValues('acc-source-dropdown');
-            const targetRoomType = document.getElementById('acc-room-type').value;
+            
+            const accName = document.getElementById('acc-filter-name') ? document.getElementById('acc-filter-name').value.trim().toUpperCase() : '';
+            const accSources = window.getMultiValues('acc-source-dropdown') || [];
+            const accMonth = document.getElementById('acc-filter-month') ? document.getElementById('acc-filter-month').value : '';
+            const accRooms = window.getMultiValues('acc-room-dropdown') || [];
+            const accTotalMin = document.getElementById('acc-filter-min') ? document.getElementById('acc-filter-min').value : '';
+            const accTotalMax = document.getElementById('acc-filter-max') ? document.getElementById('acc-filter-max').value : '';
+            const accDue = document.getElementById('acc-filter-due') ? document.getElementById('acc-filter-due').value : '';
 
             let totalGross = 0; let totalNet = 0; let totalCollected = 0; let totalBalance = 0; let totalComm = 0;
             let bedStats = {};
@@ -1268,19 +1322,66 @@
             const filtered = staff.filter(s => {
                 if (startStr && s.checkOut < startStr) return false;
                 if (endStr && s.checkIn > endStr) return false;
+                if (s.status === 'cancelled' || s.status === 'noshow') return false; 
                 
-                if (targetStatus === 'ACTIVE') { if (s.status === 'cancelled' || s.status === 'noshow') return false; } 
-                else if (targetStatus === 'DEPARTED') { if (s.status !== 'left') return false; } 
-                else if (targetStatus === 'DEAD') { if (s.status !== 'cancelled' && s.status !== 'noshow') return false; }
+                const fullName = (s.firstName+' '+s.lastName).toUpperCase();
+                if (searchTerm && !fullName.includes(searchTerm)) return false;
+                if (accName && !fullName.includes(accName)) return false;
+                if (accSources.length > 0 && !accSources.includes(s.source)) return false;
                 
-                if (activeSources.length > 0 && !activeSources.includes(s.source)) return false;
+                if (accMonth) {
+                    const [mYear, mMonth] = accMonth.split('-');
+                    const monthStart = Date.UTC(mYear, mMonth - 1, 1);
+                    const monthEnd = Date.UTC(mYear, mMonth, 1); 
+                    const cin = parseYMD(s.checkIn);
+                    const cout = parseYMD(s.checkOut);
+                    if (!(cin < monthEnd && cout > monthStart)) return false;
+                }
                 
+                let paidReal = 0; let paidComm = 0;
+                (s.payments || []).forEach(p => {
+                    const amt = Number(p.amt || 0);
+                    if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)) paidComm += amt;
+                    else paidReal += amt;
+                });
+                
+                const due = Number((Number(s.totalPrice || 0) - (paidReal + paidComm)).toFixed(2));
+                if (accDue === 'zero' && due > 0) return false;
+                if (accDue === 'owes' && due <= 0) return false;
+                
+                const tPrice = Number(s.totalPrice || 0);
+                if (accTotalMin && tPrice < Number(accTotalMin)) return false;
+                if (accTotalMax && tPrice > Number(accTotalMax)) return false;
+
                 const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
-                if (targetRoomType !== 'ALL') {
-                    const hasType = rList.some(r => { const hr = hotelRooms.find(x => x.id === r); return hr && hr.type === targetRoomType; });
-                    if (!hasType) return false;
+                if (accRooms.length > 0) {
+                    const wantsUnassigned = accRooms.includes('UNASSIGNED');
+                    const hasUnassigned = rList.length === 0 || rList.includes("");
+                    const hasType = rList.some(r => {
+                        const hr = hotelRooms.find(x => x.id === r);
+                        return hr && accRooms.includes(hr.type);
+                    });
+                    if (!hasType && (!wantsUnassigned || !hasUnassigned)) return false;
                 }
                 return true;
+            }).sort((a, b) => {
+                let vA = a[accSortKey], vB = b[accSortKey];
+                if (accSortKey === 'name') { vA = (a.firstName+' '+a.lastName).toUpperCase(); vB = (b.firstName+' '+b.lastName).toUpperCase(); }
+                if (accSortKey === 'totalPrice' || accSortKey === 'netPrice' || accSortKey === 'comm' || accSortKey === 'collected' || accSortKey === 'due') {
+                    vA = Number(vA||0); vB = Number(vB||0); 
+                    if(accSortKey === 'comm') { vA = Number(a.totalPrice||0) - Number(a.netPrice||0); vB = Number(b.totalPrice||0) - Number(b.netPrice||0); }
+                    if(accSortKey === 'due') { 
+                        vA = Number(a.totalPrice||0) - (a.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
+                        vB = Number(b.totalPrice||0) - (b.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
+                    }
+                    if(accSortKey === 'collected') {
+                        vA = 0; const nowA = Date.now(); const coutA = parseYMD(a.checkOut);
+                        (a.payments || []).forEach(p => { if (['bdc-pay', 'agoda-pay', 'airbnb-pay'].includes(p.method)) { if (coutA <= nowA) vA += Number(p.amt); } else if (!['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)) vA += Number(p.amt); });
+                        vB = 0; const nowB = Date.now(); const coutB = parseYMD(b.checkOut);
+                        (b.payments || []).forEach(p => { if (['bdc-pay', 'agoda-pay', 'airbnb-pay'].includes(p.method)) { if (coutB <= nowB) vB += Number(p.amt); } else if (!['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)) vB += Number(p.amt); });
+                    }
+                }
+                return accSortAsc ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
             });
 
             filtered.forEach(s => {
@@ -1294,12 +1395,14 @@
 
                 (s.payments || []).forEach(p => {
                     const amt = Number(p.amt || 0);
-                    if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp'].includes(p.method)) {
+                    if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)) {
                         paidComm += amt;
-                        if (coutTime <= nowTime) localCollected += amt; // OTA Money: Collected only after checkout
+                    } else if (['bdc-pay', 'agoda-pay', 'airbnb-pay'].includes(p.method)) {
+                        paidReal += amt; 
+                        if (coutTime <= nowTime) localCollected += amt; 
                     } else {
                         paidReal += amt;
-                        localCollected += amt; // Cash/Direct: Always collected instantly
+                        localCollected += amt; 
                     }
                 });
                 
@@ -1324,6 +1427,7 @@
                 
                 // Ledger Data
                 ledgerRows.push({
+                    id: s.id,
                     name: `${s.firstName||''} ${s.lastName||''}`.trim(),
                     in: s.checkIn ? s.checkIn.substr(5) : '--',
                     out: s.checkOut ? s.checkOut.substr(5) : '--',
@@ -1354,8 +1458,9 @@
             // Populate Ledger
             const lBody = document.getElementById('acc-ledger-body'); lBody.innerHTML = '';
             ledgerRows.forEach(lr => {
-                const tr = document.createElement('tr'); tr.className = "border-b border-slate-200 hover:bg-slate-50";
-                tr.innerHTML = `<td class="p-2 border-r border-slate-200">${lr.name}</td><td class="p-2 border-r border-slate-200 text-slate-500">${lr.in}</td><td class="p-2 border-r border-slate-200 text-slate-500">${lr.out}</td><td class="p-2 border-r border-slate-200 text-[10px]">${lr.src}</td><td class="p-2 border-r border-slate-200 text-right">${lr.gross}</td><td class="p-2 border-r border-slate-200 text-right">${lr.net}</td><td class="p-2 border-r border-slate-200 text-right text-red-400">${lr.comm}</td><td class="p-2 border-r border-slate-200 text-right text-emerald-600">${lr.coll}</td><td class="p-2 text-right text-amber-500">${lr.bal}</td>`;
+                const tr = document.createElement('tr'); tr.className = "border-b border-slate-200 hover:bg-slate-50 cursor-pointer";
+                tr.onclick = () => window.editStaff(lr.id);
+                tr.innerHTML = `<td class="p-2 border-r border-slate-200">${lr.name}</td><td class="p-2 border-r border-slate-200 text-[10px] uppercase">${lr.src}</td><td class="p-2 border-r border-slate-200 text-slate-500 text-xs">${lr.in} to ${lr.out}</td><td class="p-2 border-r border-slate-200 text-right">${lr.gross}</td><td class="p-2 border-r border-slate-200 text-right">${lr.net}</td><td class="p-2 border-r border-slate-200 text-right text-red-400">${lr.comm}</td><td class="p-2 border-r border-slate-200 text-right text-emerald-600">${lr.coll}</td><td class="p-2 text-right text-amber-500">${lr.bal}</td>`;
                 lBody.appendChild(tr);
             });
             
@@ -1368,7 +1473,8 @@
             };
         };
 
-        window.sortDatabase = (key) => { if(sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } renderDatabase(); };
+        window.sortDatabase = (key) => { if(sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } window.renderDatabase(); };
+        window.sortAccounting = (key) => { if(accSortKey === key) accSortAsc = !accSortAsc; else { accSortKey = key; accSortAsc = true; } window.renderAccounting(); };
         
         window.switchTab = (t) => { 
             document.getElementById('calendar-view').style.display = t === 'calendar' ? 'block' : 'none'; 
@@ -1394,7 +1500,6 @@
         window.prevPeriod = () => { viewStart.setDate(viewStart.getDate() - 7); window.render(); };
         window.nextPeriod = () => { viewStart.setDate(viewStart.getDate() + 7); window.render(); };
         window.goToday = () => { viewStart = new Date(); viewStart.setHours(12,0,0,0); window.render(); };
-        window.jumpToDate = (val) => { if(!val) return; viewStart = new Date(val + "T12:00:00"); document.getElementById('jump-date').value = ""; window.render(); };
         
         window.updateHeaderName = () => {
             const f = document.getElementById('first-name').value.trim().toUpperCase();
@@ -1606,7 +1711,7 @@
             setMulti('email-confirm-btn', 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
             setMulti('email-prepost-btn', 0, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
             setMulti('email-special-btn', 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400']);
-            setMulti('refund-btn', 0, ['NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400']);
+            setMulti('refund-btn', 0, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
             setMulti('upgrade-btn', 0, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
             setMulti('rating-btn', 0, ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
 
@@ -1699,7 +1804,7 @@
                 return `${yr}-${mth}-${day}`;
             };
 
-            let src = '', gName = '', checkIn = '', checkOut = '', pax = 1, phone = '', email = '', total = 0, comm = 0, bId = '', notes = '', bType = '', bDate = '', countryCode = '';
+            let src = '', gName = '', checkIn = '', checkOut = '', pax = 1, phone = '', email = '', total = 0, comm = 0, bId = '', notes = '', bType = '', bDate = '', countryCode = '', refundability = 0;
 
             if (text.includes('Booking.com') && text.includes('Reservation Details')) {
                 src = 'booking.com';
@@ -1714,19 +1819,20 @@
                 comm = cleanMoney(extract(/Commission and charges:\s*\nTHB ([\d,.]+)/));
                 phone = extract(/(\+[\d\s]+)/);
                 email = extract(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/);
-                notes = extract(/BED PREFERENCE:(.*)/);
+                
+                let extractedNotes = extract(/BED PREFERENCE:(.*)/);
+                if (extractedNotes) notes = "BED PREFERENCE: " + extractedNotes;
                 
                 const bTypeRaw = extract(/(.*?)\nTHB/); 
                 const parenMatch = bTypeRaw.match(/\((.*?)\)/);
                 bType = parenMatch ? parenMatch[1] : bTypeRaw;
-
-                window.openStaffModal();
                 
-                if (text.includes('Payment is facilitated through')) {
-                    if (comm > 0) window.addPaymentRow(checkIn, comm, 'bdc-kp', true);
-                    if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'bdc-pay', true);
+                if (text.includes('charged the total price of the reservation if they cancel anytime') || text.includes('Non-refundable')) {
+                    refundability = 1;
+                } else if (text.includes('Cancellation') && text.includes('free of charge')) {
+                    refundability = 2;
                 }
-                
+
             } else if (text.includes('Airbnb') && text.includes('Reservation confirmed')) {
                 src = 'airbnb';
                 gName = extract(/Reservation confirmed - (.*?) arrives/);
@@ -1742,41 +1848,75 @@
                 bType = extract(/(.*?)\nRoom\nCheck-in/);
                 notes = extract(/Identity verified.*?\n\n(.*?)\n/m);
                 
-                window.openStaffModal();
-                
-                if (comm > 0) window.addPaymentRow(checkIn, comm, 'airbnb-kp', true);
-                if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'airbnb-pay', true);
+                const policyMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i);
+                if (policyMatch) {
+                    const pol = policyMatch[1].toLowerCase();
+                    if (pol.includes('strict') || pol.includes('firm') || pol.includes('non-refundable')) refundability = 1;
+                    else refundability = 2;
+                }
                 
             } else {
                 window.showAlert("Could not recognize this text format. Ensure you pasted the entire confirmation block.");
                 return;
             }
-
-            document.getElementById('booking-source').value = src;
-            document.getElementById('check-in').value = checkIn;
-            document.getElementById('check-out').value = checkOut;
-            document.getElementById('pax-count').value = pax;
-            document.getElementById('total-price').value = total;
-            document.getElementById('booking-id').value = bId;
-            document.getElementById('booking-date').value = bDate;
-            document.getElementById('phone').value = phone;
-            document.getElementById('email').value = email;
-            document.getElementById('staff-notes').value = notes;
-            document.getElementById('booked-type').value = bType;
             
-            if(countryCode) {
-                const mapKey = countryCode.toLowerCase().trim();
-                if(rawCountryMap[mapKey]) document.getElementById('staff-country').value = rawCountryMap[mapKey];
-            }
+            // Check for existing booking
+            let existingBooking = staff.find(s => s.bookId && s.bookId === bId);
             
-            let last = gName.trim(), first = "";
-            const parts = gName.split(' ');
-            if (parts.length > 1) {
-                first = parts[0].trim();
-                last = parts.slice(1).join(' ').trim();
+            if (existingBooking) {
+                window.editStaff(existingBooking.id);
+                // Override empty values with parsed email values
+                if (email && !document.getElementById('email').value) document.getElementById('email').value = email;
+                if (phone && !document.getElementById('phone').value) document.getElementById('phone').value = phone;
+                if (countryCode && document.getElementById('staff-country').value === "[UNKNOWN]") {
+                    const mapKey = countryCode.toLowerCase().trim();
+                    if(rawCountryMap[mapKey]) document.getElementById('staff-country').value = rawCountryMap[mapKey];
+                }
+                if (notes && !document.getElementById('staff-notes').value.includes(notes)) {
+                    const existingNotes = document.getElementById('staff-notes').value;
+                    document.getElementById('staff-notes').value = existingNotes ? existingNotes + "\n" + notes : notes;
+                }
+                if (refundability > 0 && document.getElementById('refund-btn').dataset.state == 0) {
+                    setMulti('refund-btn', refundability, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
+                }
+            } else {
+                window.openStaffModal();
+                
+                document.getElementById('booking-source').value = src;
+                document.getElementById('check-in').value = checkIn;
+                document.getElementById('check-out').value = checkOut;
+                document.getElementById('pax-count').value = pax;
+                document.getElementById('total-price').value = total;
+                document.getElementById('booking-id').value = bId;
+                document.getElementById('booking-date').value = bDate;
+                document.getElementById('phone').value = phone;
+                document.getElementById('email').value = email;
+                document.getElementById('staff-notes').value = notes;
+                document.getElementById('booked-type').value = bType;
+                setMulti('refund-btn', refundability, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
+                
+                if(countryCode) {
+                    const mapKey = countryCode.toLowerCase().trim();
+                    if(rawCountryMap[mapKey]) document.getElementById('staff-country').value = rawCountryMap[mapKey];
+                }
+                
+                let last = gName.trim(), first = "";
+                const parts = gName.split(' ');
+                if (parts.length > 1) {
+                    first = parts[0].trim();
+                    last = parts.slice(1).join(' ').trim();
+                }
+                document.getElementById('first-name').value = first.toUpperCase();
+                document.getElementById('last-name').value = last.toUpperCase();
+                
+                if (src === 'booking.com' && text.includes('Payment is facilitated through')) {
+                    if (comm > 0) window.addPaymentRow(checkIn, comm, 'bdc-kp', true);
+                    if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'bdc-pay', true);
+                } else if (src === 'airbnb') {
+                    if (comm > 0) window.addPaymentRow(checkIn, comm, 'airbnb-kp', true);
+                    if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'airbnb-pay', true);
+                }
             }
-            document.getElementById('first-name').value = first.toUpperCase();
-            document.getElementById('last-name').value = last.toUpperCase();
             
             window.updateHeaderName();
             window.checkEmailProxy(email);
@@ -1895,7 +2035,7 @@
                 const id = Math.random().toString(36).substr(2, 9);
                 const entry = {
                     id, firstName: first.toUpperCase(), lastName: last.toUpperCase(), status: statusClean, room: newRoom, rooms: roomsArr,
-                    checkIn: cin, checkOut: parseDate(safeStr(idx.out, r)), pax: parseInt(safeStr(idx.pax, r)) || 1, source: sourceClean, bookDate: parseDate(safeStr(idx.bookDate, r)), bookId: rawBId, phone: safeStr(idx.phone, r), email: safeStr(idx.email, r), totalPrice: total, netOverride: false, netPrice: total, payments: payments, badCC: false, refundability: 'non-ref', upgrade: 'none', rating: 'none', emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: linkCode, country: parsedCountry, notes: remarksTxt, bookedType: safeStr(idx.roomType, r), createdAt: now, createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null
+                    checkIn: cin, checkOut: parseDate(safeStr(idx.out, r)), pax: parseInt(safeStr(idx.pax, r)) || 1, source: sourceClean, bookDate: parseDate(safeStr(idx.bookDate, r)), bookId: rawBId, phone: safeStr(idx.phone, r), email: safeStr(idx.email, r), totalPrice: total, netOverride: false, netPrice: total - comm, payments: payments, badCC: false, refundability: 'non-ref', upgrade: 'none', rating: 'none', emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: linkCode, country: parsedCountry, notes: remarksTxt, bookedType: safeStr(idx.roomType, r), createdAt: now, createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null
                 };
                 
                 if (rawBId) existingImportedMap[rawBId] = entry;
@@ -1938,8 +2078,12 @@
             const existing = staff.find(s => s.id === id); const now = new Date().toISOString();
             const allRoomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value);
 
+            let refState = 'unknown';
+            if(refBtn == 1) refState = 'non-ref';
+            else if(refBtn == 2) refState = 'ref';
+
             const entry = { 
-                id, firstName: document.getElementById('first-name').value.trim().toUpperCase(), lastName: document.getElementById('last-name').value.trim().toUpperCase(), status: status, bookedType: document.getElementById('booked-type').value, room: allRoomsList[0] || "", rooms: allRoomsList, checkIn: cin, checkOut: cout, pax: parseInt(document.getElementById('pax-count').value) || 1, country: document.getElementById('staff-country').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value, source: document.getElementById('booking-source').value, bookDate: document.getElementById('booking-date').value, bookId: document.getElementById('booking-id').value, linkedId: document.getElementById('link-code').value.trim().toUpperCase(), totalPrice: Number(document.getElementById('total-price').value) || 0, netPrice: Number(document.getElementById('net-price').value) || 0, netOverride: document.getElementById('net-price').dataset.override === 'true', badCC: document.getElementById('bad-cc-box').dataset.bad === 'true', payments: payments, emailConfirm: parseInt(emailBtn) === 1, emailPrePost: parseInt(preBtn) > 0 ? (parseInt(preBtn) === 1 ? 'sent' : 'confirmed') : false, emailSpecial: parseInt(specBtn) === 1, refundability: parseInt(refBtn) === 1 ? 'ref' : 'non-ref', upgrade: parseInt(upBtn) > 0 ? (parseInt(upBtn) === 1 ? 'free' : 'paid') : 'none', rating: parseInt(rateBtn) > 0 ? (parseInt(rateBtn) === 1 ? 'good' : 'bad') : 'none', notes: document.getElementById('staff-notes').value, createdAt: existing?.createdAt || now, createdBy: existing?.createdBy || currentUserEmail, lastEditedAt: now, lastEditedBy: currentUserEmail
+                id, firstName: document.getElementById('first-name').value.trim().toUpperCase(), lastName: document.getElementById('last-name').value.trim().toUpperCase(), status: status, bookedType: document.getElementById('booked-type').value, room: allRoomsList[0] || "", rooms: allRoomsList, checkIn: cin, checkOut: cout, pax: parseInt(document.getElementById('pax-count').value) || 1, country: document.getElementById('staff-country').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value, source: document.getElementById('booking-source').value, bookDate: document.getElementById('booking-date').value, bookId: document.getElementById('booking-id').value, linkedId: document.getElementById('link-code').value.trim().toUpperCase(), totalPrice: Number(document.getElementById('total-price').value) || 0, netPrice: Number(document.getElementById('net-price').value) || 0, netOverride: document.getElementById('net-price').dataset.override === 'true', badCC: document.getElementById('bad-cc-box').dataset.bad === 'true', payments: payments, emailConfirm: parseInt(emailBtn) === 1, emailPrePost: parseInt(preBtn) > 0 ? (parseInt(preBtn) === 1 ? 'sent' : 'confirmed') : false, emailSpecial: parseInt(specBtn) === 1, refundability: refState, upgrade: parseInt(upBtn) > 0 ? (parseInt(upBtn) === 1 ? 'free' : 'paid') : 'none', rating: parseInt(rateBtn) > 0 ? (parseInt(rateBtn) === 1 ? 'good' : 'bad') : 'none', notes: document.getElementById('staff-notes').value, createdAt: existing?.createdAt || now, createdBy: existing?.createdBy || currentUserEmail, lastEditedAt: now, lastEditedBy: currentUserEmail
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
             window.closeStaffModal();
@@ -1976,7 +2120,12 @@
             setMulti('email-confirm-btn', s.emailConfirm ? 1 : 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
             setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='sent'?1:2), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
             setMulti('email-special-btn', s.emailSpecial ? 1 : 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400']);
-            setMulti('refund-btn', s.refundability === 'ref' ? 1 : 0, ['NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400']);
+            
+            let refState = 0;
+            if (s.refundability === 'non-ref') refState = 1;
+            else if (s.refundability === 'ref') refState = 2;
+            setMulti('refund-btn', refState, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
+            
             setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade==='free'?1:2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
             setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating==='good'?1:2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
 
