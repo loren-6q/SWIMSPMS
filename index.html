@@ -16,10 +16,7 @@
         
         body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; overflow-x: hidden; font-size: 1.2rem; }
         
-        /* Protect UI elements from accidental dragging */
         .unselectable { user-select: none; -webkit-user-select: none; }
-        
-        /* Allow text selection universally inside the modal so staff can copy/paste easily */
         .modal-content * { user-select: auto !important; }
         input, textarea, select, [contenteditable] { user-select: auto !important; }
 
@@ -31,34 +28,22 @@
         .timeline-grid { display: grid; grid-template-columns: var(--sidebar-w) repeat(var(--days), minmax(40px, 1fr)); width: max-content; min-width: 100%; }
         .zoom-wide-mode .timeline-grid { grid-template-columns: var(--sidebar-w) repeat(var(--days), minmax(140px, 1fr)); }
 
-        .day-column { border-right: 1px solid #e2e8f0; height: 100%; position: relative; cursor: cell; }
+        .day-column { border-right: 1px solid #e2e8f0; height: 100%; position: relative; cursor: cell; transition: background-color 0.1s; }
         .bed-row { height: 28px; border-bottom: 1px solid #cbd5e1; position: relative; }
         
-        /* Transparent overlay system to preserve explicit background colors while highlighting */
-        .day-column::after { content: ''; position: absolute; inset: 0; pointer-events: none; transition: background-color 0.1s; z-index: 5; }
-        .hover-col::after { background-color: rgba(0, 0, 0, 0.08); }
-        .bed-row:hover .day-column::after { background-color: rgba(0, 0, 0, 0.04); }
-        
+        .hover-col { background-color: rgba(0, 0, 0, 0.06) !important; }
         .day-fmp-dark { background-color: rgba(225, 29, 72, 0.4) !important; }
         .day-fmp-medium { background-color: rgba(249, 115, 22, 0.25) !important; }
         .day-today { background-color: rgba(219, 234, 254, 0.8); }
         
-        .staff-bar {
-            position: absolute; height: 22px; top: 3px; border-radius: 4px;
-            display: flex; align-items: center; cursor: pointer; z-index: 10;
-            font-size: 0.85rem; font-weight: 700; 
-            text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;
-            transition: all 0.2s;
-        }
+        .staff-bar { position: absolute; height: 22px; top: 3px; border-radius: 4px; display: flex; align-items: center; cursor: pointer; z-index: 10; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; transition: all 0.2s; }
 
-        /* Pastel Status Colors */
         .status-future { background-color: #dbeafe; color: #1e3a8a; border: 1px solid #93c5fd; } 
         .status-here { background-color: #dcfce7; color: #14532d; border: 1px solid #86efac; }   
         .status-left { background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
         .status-unconfirmed { background-color: #f3e8ff; color: #581c87; border: 1px solid #d8b4fe; }
         .status-cancelled, .status-noshow { background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; opacity: 0.8; }
         
-        /* Transparent Overlay */
         .modal-overlay { display: none; position: fixed; inset: 0; background: transparent; pointer-events: none; z-index: 100; align-items: flex-start; justify-content: center; padding-top: 5vh; padding-bottom: 5vh; }
         .modal-overlay.active { display: flex; }
         .modal-content { pointer-events: auto; width: 512px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
@@ -72,110 +57,98 @@
         input, select, textarea { font-size: 1rem !important; padding: 2px 6px !important; border-radius: 4px !important; border: 1px solid #cbd5e1 !important; font-weight: 700 !important; }
         .field-label { font-size: 12px; font-weight: 900; color: #64748b; text-transform: uppercase; display: block; margin-bottom: -2px; }
 
-        .date-input-box { position: relative; width: 100%; height: 32px; display: flex; align-items: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; }
-        .date-input-box .display-text { font-weight: 900; color: #2563eb; margin-left: 10px; flex: 1; pointer-events: none; z-index: 5; font-size: 0.9rem; }
+        .date-input-box { position: relative; width: 100%; height: 28px; display: flex; align-items: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; }
+        .date-input-box .display-text { font-weight: 900; color: #2563eb; margin-left: 8px; flex: 1; pointer-events: none; z-index: 5; font-size: 0.8rem; }
         .date-input-box input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2; display: block; }
-        .date-input-box .cal-icon { margin-right: 10px; color: #94a3b8; pointer-events: none; z-index: 5; }
 
-        .tab-btn { padding: 6px 16px; font-weight: 900; font-size: 0.85rem; text-transform: uppercase; border-radius: 6px; transition: all 0.2s; border: 2px solid transparent; color: #64748b; }
+        .tab-btn { padding: 4px 12px; font-weight: 900; font-size: 0.85rem; text-transform: uppercase; border-radius: 6px; transition: all 0.2s; border: 2px solid transparent; color: #64748b; }
         .tab-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        #database-view { display: none; }
         
         .loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
         .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .logo-box { width: 40px; height: 40px; position: relative; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; }
+        .logo-box { width: 32px; height: 32px; position: relative; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; }
 
         .unassigned-header { border-top: 4px solid #cbd5e1; }
         
         .smart-notes { transition: height 0.2s ease; height: 50px; resize: none; overflow: hidden; }
         .smart-notes:focus { height: 120px; overflow-y: auto; }
         
-        #calendar-scroll-container { max-height: calc(100vh - 180px); overflow-y: auto; overflow-x: auto; position: relative; }
+        #calendar-scroll-container { max-height: calc(100vh - 120px); overflow-y: auto; overflow-x: auto; position: relative; }
         
         .multi-state-btn { cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-        
         .link-glow { box-shadow: 0 0 0 3px #fbbf24 !important; z-index: 40 !important; filter: brightness(1.1); }
         
-        /* Custom Tooltip */
         #custom-tooltip { position: fixed; z-index: 99999; pointer-events: none; background: rgba(15, 23, 42, 0.95); color: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); font-size: 13px; font-family: 'Roboto Condensed', sans-serif; display: none; white-space: pre-wrap; transform: translate(10px, 10px); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px); }
         
         .month-divider { border-left: 3px solid white; display: flex; align-items: center; justify-content: center; height: 100%; }
         select option:disabled { color: #94a3b8; font-style: italic; }
         
-        /* Collapsible Section Styling */
         .section-header { background: #e2e8f0; padding: 6px 8px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #475569; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; transition: background 0.2s; }
         .section-header:hover { background: #cbd5e1; }
+        
+        /* Custom Multi-select Dropdowns */
+        .multi-select-container { position: relative; display: inline-block; width: 100%; }
+        .multi-select-dropdown { position: absolute; background-color: #1e293b; color: white; z-index: 50; width: max-content; min-width: 100%; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); max-height: 250px; overflow-y: auto; border-radius: 4px; display: none; font-size: 0.75rem; }
+        .multi-select-dropdown label { display: block; padding: 6px 8px; cursor: pointer; text-transform: uppercase; border-bottom: 1px solid #334155; }
+        .multi-select-dropdown label:hover { background-color: #334155; }
     </style>
 </head>
-<body class="p-1 lg:p-2">
+<body class="bg-slate-100 p-0 sm:p-2">
 
     <div id="boot-loader" class="loading-overlay"><div class="spinner"></div><div class="mt-4 font-black text-slate-800 uppercase tracking-widest text-center px-4"><span id="sync-status">Authenticating...</span></div></div>
 
     <div class="max-w-[1950px] mx-auto unselectable">
-        <div class="bg-white p-2 rounded-lg shadow-sm border border-slate-200 mb-1">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
-                <div class="flex items-center gap-3">
+        <!-- Compact Header -->
+        <div class="bg-white px-2 py-1.5 rounded-none sm:rounded-lg shadow-sm border-b sm:border border-slate-200 mb-1 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2">
+            
+            <div class="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-start">
+                <div class="flex items-center gap-2">
                     <div class="logo-box">
                         <img src="apple-touch-icon.png" alt="SWIMS Logo" class="w-full h-full object-contain">
                     </div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tighter leading-none uppercase">SWIMS PMS</h1>
+                    <div class="flex bg-slate-100 rounded-lg p-1">
+                        <button id="tab-cal" onclick="window.switchTab('calendar')" class="tab-btn active"><span class="hidden sm:inline">Calendar</span><span class="sm:hidden">CAL</span></button>
+                        <button id="tab-db" onclick="window.switchTab('database')" class="tab-btn"><span class="hidden sm:inline">Database</span><span class="sm:hidden">DB</span></button>
+                        <button id="tab-acc" onclick="window.switchTab('accounting')" class="tab-btn hidden"><span class="hidden sm:inline">Accounting</span><span class="sm:hidden">ACCT</span></button>
+                    </div>
                 </div>
-                <div class="flex bg-slate-100 rounded-lg p-1 w-full sm:w-auto justify-between">
-                    <button id="tab-cal" onclick="window.switchTab('calendar')" class="tab-btn active w-1/2 sm:w-auto py-1">Calendar</button>
-                    <button id="tab-db" onclick="window.switchTab('database')" class="tab-btn w-1/2 sm:w-auto py-1">Database</button>
+            </div>
+
+            <div class="flex items-center gap-2 w-full lg:w-auto overflow-x-auto no-scrollbar justify-between lg:justify-end">
+                <div class="flex items-center bg-slate-100 p-0.5 rounded border border-slate-200 shrink-0">
+                    <button onclick="window.prevPeriod()" class="p-1 hover:bg-white rounded"><i data-lucide="chevron-left" size="16"></i></button>
+                    <div class="date-input-box mx-1 w-[100px] sm:w-[110px]">
+                        <span id="current-jump-display" class="display-text tracking-tighter">--</span>
+                        <input type="date" id="jump-date" onchange="window.jumpToDate(this.value)">
+                    </div>
+                    <button onclick="window.nextPeriod()" class="p-1 hover:bg-white rounded"><i data-lucide="chevron-right" size="16"></i></button>
+                </div>
+                
+                <button onclick="window.goToday()" class="px-2 py-1 bg-white border border-slate-300 rounded font-bold text-xs uppercase hover:bg-slate-50 shrink-0">Today</button>
+                
+                <div class="flex gap-1 shrink-0">
+                    <button onclick="window.openCSVModal()" class="px-2 py-1 bg-indigo-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-indigo-700 active:scale-95"><i data-lucide="sheet" size="14"></i> <span class="hidden sm:inline">Bulk Import</span></button>
+                    <button onclick="window.openEmailParserModal()" class="px-2 py-1 bg-purple-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-purple-700 active:scale-95"><i data-lucide="mail" size="14"></i> <span class="hidden sm:inline">Single Import</span></button>
+                </div>
+
+                <div class="relative group shrink-0 w-32 sm:w-40">
+                    <i data-lucide="search" class="absolute left-2 top-1.5 text-slate-400" size="14"></i>
+                    <input type="text" id="staff-search" placeholder="FIND NAME..." oninput="window.handleSearch(this.value)" class="pl-7 pr-7 py-1 w-full bg-white border border-slate-200 rounded font-black text-xs uppercase outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="window.clearSearch()" class="absolute right-2 top-1.5 text-slate-400 hover:text-slate-600"><i data-lucide="x" size="14"></i></button>
                 </div>
             </div>
             
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <div class="flex flex-wrap items-center gap-2">
-                    <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
-                        <button onclick="window.prevPeriod()" class="p-1 hover:bg-white rounded"><i data-lucide="chevron-left" size="18"></i></button>
-                        <div class="date-input-box mx-1" style="width: 120px; height: 28px;">
-                            <span id="current-jump-display" class="display-text" style="font-size: 0.8rem">--</span>
-                            <input type="date" id="jump-date" onchange="window.jumpToDate(this.value)">
-                        </div>
-                        <button onclick="window.nextPeriod()" class="p-1 hover:bg-white rounded"><i data-lucide="chevron-right" size="18"></i></button>
-                    </div>
-                    <button onclick="window.goToday()" class="px-3 py-1 bg-white border border-slate-300 rounded font-bold text-xs uppercase hover:bg-slate-50">Today</button>
-                    <div class="flex gap-1 ml-1">
-                        <button onclick="window.openCSVModal()" class="px-3 py-1 bg-indigo-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-indigo-700 active:scale-95"><i data-lucide="clipboard-paste" size="14"></i> Import CSV</button>
-                        <button onclick="window.openEmailParserModal()" class="px-3 py-1 bg-purple-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-purple-700 active:scale-95"><i data-lucide="mail" size="14"></i> Parse Email</button>
-                        <button onclick="window.openStaffModal()" class="px-3 py-1 bg-blue-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-blue-700 active:scale-95"><i data-lucide="plus" size="14"></i> Add</button>
-                    </div>
-                </div>
-                
-                <div class="flex flex-wrap items-center gap-2 w-full xl:w-auto mt-1 xl:mt-0">
-                    <div id="search-jump-btn" onclick="window.jumpToSearchMatch()" class="hidden bg-orange-100 text-orange-700 px-3 py-1 rounded-lg font-black text-xs uppercase cursor-pointer hover:bg-orange-200"><span id="match-counter">Match?</span></div>
-                    <div class="flex flex-wrap sm:flex-nowrap items-center bg-slate-100 p-1 rounded-lg border border-slate-200 gap-1 w-full xl:w-auto">
-                        <select id="status-filter" onchange="window.handleSearch(document.getElementById('staff-search').value)" class="!bg-transparent !border-none text-xs font-black uppercase text-slate-500 cursor-pointer outline-none w-full sm:w-auto mb-1 sm:mb-0">
-                            <option value="ALL">ALL STATUS</option>
-                            <option value="future">FUTURE</option>
-                            <option value="here">HERE</option>
-                            <option value="left">LEFT</option>
-                            <option value="unconfirmed">UNCONFIRMED</option>
-                            <option value="cancelled">CANCELLED</option>
-                            <option value="noshow">NO-SHOW</option>
-                        </select>
-                        <div class="hidden sm:block h-4 w-px bg-slate-300 mx-1"></div>
-                        <div class="relative group w-full sm:w-auto">
-                            <i data-lucide="search" class="absolute left-2 top-1.5 text-slate-400" size="14"></i>
-                            <input type="text" id="staff-search" placeholder="FIND NAME..." oninput="window.handleSearch(this.value)" class="pl-7 pr-7 py-1 w-full sm:w-40 bg-white border border-slate-200 rounded-md font-black text-xs uppercase outline-none focus:ring-2 focus:ring-blue-500">
-                            <button onclick="window.clearSearch()" class="absolute right-2 top-1.5 text-slate-400 hover:text-slate-600"><i data-lucide="x" size="14"></i></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <div id="calendar-view" class="unselectable">
-            <div id="calendar-scroll-container" class="bg-white rounded shadow border border-slate-300">
+        <div id="calendar-view" class="unselectable block">
+            <div id="calendar-scroll-container" class="bg-white sm:rounded shadow border-y sm:border border-slate-300">
                 <div class="timeline-grid sticky top-0 z-40 bg-slate-800 shadow-sm border-b border-slate-700 h-[26px] box-border">
                     <div class="border-r border-slate-700 flex items-center justify-center h-full sticky left-0 z-50 bg-slate-800 w-[var(--sidebar-w)]">
-                        <button id="zoom-toggle-btn" onclick="window.toggleZoom()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1 transition-colors"><i data-lucide="zoom-in" size="12"></i> ZOOM: WIDE</button>
+                        <button id="zoom-toggle-btn" onclick="window.toggleZoom()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1 transition-colors"><i data-lucide="zoom-in" size="12"></i> ZOOM WIDE</button>
                     </div>
                     <div id="month-labels" class="contents text-white text-[11px] font-bold uppercase tracking-widest"></div>
                 </div>
@@ -188,7 +161,7 @@
                 <div id="timeline-body" class="relative pb-2"></div>
             </div>
 
-            <footer class="mt-2 bg-white p-2 rounded-lg border border-slate-200 flex flex-col md:flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-[10px] md:text-[11px]">
+            <footer class="mt-2 bg-white p-2 sm:rounded-lg border border-slate-200 flex flex-col md:flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-[10px] md:text-[11px]">
                 <div class="flex flex-wrap items-center justify-center gap-3">
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-blue-200 border border-blue-400"></span> FUTURE</div>
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-green-200 border border-green-400"></span> HERE</div>
@@ -218,29 +191,189 @@
             </footer>
         </div>
 
-        <div id="database-view" class="bg-white rounded shadow border border-slate-300 overflow-hidden">
+        <div id="database-view" class="bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden unselectable hidden">
             <div class="p-2 bg-slate-100 border-b border-slate-300 flex justify-between items-center">
                 <h2 class="font-black text-slate-700 uppercase tracking-widest text-sm">Database Editor</h2>
                 <button id="admin-bulk-delete" onclick="window.bulkDelete()" class="hidden px-4 py-1.5 bg-orange-600 text-white rounded font-black text-xs uppercase items-center gap-1 hover:bg-orange-700 shadow-md"><i data-lucide="list-x" size="14"></i> BULK DELETE VISIBLE</button>
             </div>
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-800 text-white text-[12px] font-black uppercase tracking-widest cursor-pointer">
-                        <th onclick="window.sortDatabase('lastName')" class="p-2 border-r border-slate-700 hover:bg-slate-700">Guest Name</th>
-                        <th onclick="window.sortDatabase('source')" class="p-2 border-r border-slate-700 hover:bg-slate-700">Source</th>
-                        <th onclick="window.sortDatabase('checkIn')" class="p-2 border-r border-slate-700 hover:bg-slate-700">Stay Dates</th>
-                        <th onclick="window.sortDatabase('room')" class="p-2 border-r border-slate-700 hover:bg-slate-700">Rooms</th>
-                        <th class="p-2 border-r border-slate-700 text-right">Total</th>
-                        <th class="p-2 border-r border-slate-700 text-right">Due</th>
-                        <th onclick="window.sortDatabase('status')" class="p-2 hover:bg-slate-700">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="database-body" class="text-sm font-bold text-slate-700"></tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[800px]">
+                    <thead>
+                        <tr class="bg-slate-800 text-white text-base font-black uppercase tracking-widest cursor-pointer">
+                            <th onclick="window.sortDatabase('lastName')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[16%]">Guest Name <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                            <th onclick="window.sortDatabase('source')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[12%]">Source <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                            <th onclick="window.sortDatabase('checkIn')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[18%]">Stay Dates <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                            <th onclick="window.sortDatabase('room')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[12%]">Rooms <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                            <th onclick="window.sortDatabase('totalPrice')" class="p-2 border-r border-slate-700 text-right hover:bg-slate-700 w-[14%]">Total <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                            <th onclick="window.sortDatabase('due')" class="p-2 border-r border-slate-700 text-right hover:bg-slate-700 w-[14%]">Due <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                            <th onclick="window.sortDatabase('status')" class="p-2 hover:bg-slate-700 w-[14%]">Status <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                        </tr>
+                        <tr class="bg-slate-700 text-slate-300 text-xs uppercase">
+                            <th class="p-1 border-r border-slate-600 font-normal"><input type="text" id="db-filter-name" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-xs" placeholder="FILTER NAME..." oninput="window.renderDatabase()"></th>
+                            <th class="p-1 border-r border-slate-600 font-normal">
+                                <div class="relative multi-select-container w-full text-left">
+                                    <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-xs" onclick="window.toggleMultiSelect('db-source-dropdown')">
+                                        <span id="db-source-label" class="truncate">ALL SOURCES</span><span class="text-[8px] ml-1">▼</span>
+                                    </div>
+                                    <div id="db-source-dropdown" class="multi-select-dropdown hidden absolute top-full left-0 mt-1 bg-slate-800 border border-slate-600 rounded shadow-xl z-50 min-w-[120px] max-h-48 overflow-y-auto text-xs text-white">
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="booking.com" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> BDC</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="agoda" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> AGODA</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="airbnb" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> AIRBNB</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="hostelworld" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> HW</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="direct" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> DIRECT</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="walkin" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> WALK-IN</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="other" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> OTHER</label>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="p-1 border-r border-slate-600 font-normal"><input type="month" id="db-filter-month" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-xs" onchange="window.renderDatabase()"></th>
+                            <th class="p-1 border-r border-slate-600 font-normal">
+                                <div class="relative multi-select-container w-full text-left">
+                                    <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-xs" onclick="window.toggleMultiSelect('db-room-dropdown')">
+                                        <span id="db-room-label" class="truncate">ALL ROOMS</span><span class="text-[8px] ml-1">▼</span>
+                                    </div>
+                                    <div id="db-room-dropdown" class="multi-select-dropdown hidden absolute top-full left-0 mt-1 bg-slate-800 border border-slate-600 rounded shadow-xl z-50 min-w-[140px] max-h-48 overflow-y-auto text-xs text-white">
+                                        <!-- Populated dynamically by JS -->
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="p-1 border-r border-slate-600 font-normal flex gap-1"><input type="number" id="db-filter-min" placeholder="MIN ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-xs" oninput="window.renderDatabase()"><input type="number" id="db-filter-max" placeholder="MAX ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-xs" oninput="window.renderDatabase()"></th>
+                            <th class="p-1 border-r border-slate-600 font-normal"><select id="db-filter-due" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-xs" onchange="window.renderDatabase()"><option value="">ALL</option><option value="zero">PAID</option><option value="owes">OWES</option></select></th>
+                            <th class="p-1 font-normal">
+                                <div class="relative multi-select-container w-full text-left">
+                                    <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-xs" onclick="window.toggleMultiSelect('db-status-dropdown')">
+                                        <span id="db-status-label" class="truncate">ALL STATUS</span><span class="text-[8px] ml-1">▼</span>
+                                    </div>
+                                    <div id="db-status-dropdown" class="multi-select-dropdown hidden absolute top-full right-0 mt-1 bg-slate-800 border border-slate-600 rounded shadow-xl z-50 min-w-[120px] max-h-48 overflow-y-auto text-xs text-white">
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="future" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> FUTURE</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="here" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> HERE</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="left" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> LEFT</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="unconfirmed" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> UNCONFIRMED</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="cancelled" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CANCELLED</label>
+                                        <label class="flex items-center p-1.5 hover:bg-slate-700 cursor-pointer"><input type="checkbox" value="noshow" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> NO-SHOW</label>
+                                    </div>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="database-body" class="text-sm font-bold text-slate-700"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="accounting-view" class="bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden unselectable hidden">
+            <div class="p-4 bg-slate-100 border-b border-slate-300">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-black text-slate-800 uppercase tracking-tighter text-xl"><i data-lucide="bar-chart-3" class="inline-block mr-2 text-blue-600"></i>Financial Accounting & KPIs</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-3 bg-white p-3 rounded border border-slate-200 shadow-sm">
+                    <div class="flex flex-col"><label class="field-label mb-1">Date Range Start</label><input type="date" id="acc-date-start" onchange="window.renderAccounting()" class="w-full text-sm"></div>
+                    <div class="flex flex-col"><label class="field-label mb-1">Date Range End</label><input type="date" id="acc-date-end" onchange="window.renderAccounting()" class="w-full text-sm"></div>
+                    <div class="flex flex-col"><label class="field-label mb-1">Status Group</label>
+                        <select id="acc-status" onchange="window.renderAccounting()" class="w-full text-sm uppercase">
+                            <option value="ALL">All (Inc. Cancels)</option>
+                            <option value="ACTIVE" selected>Active & Departed</option>
+                            <option value="DEPARTED">Only Departed</option>
+                            <option value="DEAD">Cancelled & No-Show</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col"><label class="field-label mb-1">Source</label>
+                        <div class="relative multi-select-container w-full text-left">
+                            <div class="w-full bg-white text-slate-800 px-2 py-1 rounded border border-slate-300 outline-none cursor-pointer flex justify-between items-center text-sm font-bold uppercase" onclick="window.toggleMultiSelect('acc-source-dropdown')">
+                                <span id="acc-source-label" class="truncate">ALL SOURCES</span><span class="text-[10px] ml-1">▼</span>
+                            </div>
+                            <div id="acc-source-dropdown" class="multi-select-dropdown hidden absolute top-full left-0 mt-1 bg-white border border-slate-300 rounded shadow-xl z-50 min-w-[150px] max-h-48 overflow-y-auto text-sm font-bold text-slate-800">
+                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="booking.com" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> BOOKING.COM</label>
+                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="agoda" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> AGODA</label>
+                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="airbnb" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> AIRBNB</label>
+                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="hostelworld" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> HOSTELWORLD</label>
+                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="direct" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> DIRECT</label>
+                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200"><input type="checkbox" value="walkin" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> WALK-IN</label>
+                                <label class="flex items-center p-2 hover:bg-slate-100 cursor-pointer"><input type="checkbox" value="other" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-2"> OTHER</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col"><label class="field-label mb-1">Room Type</label>
+                        <select id="acc-room-type" onchange="window.renderAccounting()" class="w-full text-sm uppercase"><option value="ALL">ALL TYPES</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-6 bg-white">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm">
+                        <i data-lucide="calculator" class="text-blue-400 mb-1" size="20"></i>
+                        <span class="text-blue-500 font-black text-xs uppercase tracking-widest mb-1">Gross Booked</span>
+                        <span id="acc-gross" class="text-2xl lg:text-3xl font-black text-blue-900 tracking-tighter">฿0</span>
+                    </div>
+                    <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm">
+                        <i data-lucide="receipt" class="text-slate-400 mb-1" size="20"></i>
+                        <span class="text-slate-500 font-black text-xs uppercase tracking-widest mb-1">Net Expected</span>
+                        <span id="acc-net" class="text-2xl lg:text-3xl font-black text-slate-800 tracking-tighter">฿0</span>
+                    </div>
+                    <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm">
+                        <i data-lucide="landmark" class="text-red-400 mb-1" size="20"></i>
+                        <span class="text-red-500 font-black text-xs uppercase tracking-widest mb-1">OTA Comm & Fees</span>
+                        <span id="acc-comm" class="text-2xl lg:text-3xl font-black text-red-700 tracking-tighter">฿0</span>
+                    </div>
+                    <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden">
+                        <i data-lucide="clock" class="text-amber-400 mb-1" size="20"></i>
+                        <span class="text-amber-600 font-black text-xs uppercase tracking-widest mb-1">Unpaid Balance</span>
+                        <span id="acc-balance" class="text-2xl lg:text-3xl font-black text-amber-700 tracking-tighter">฿0</span>
+                    </div>
+                    <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transform scale-105">
+                        <div class="absolute top-0 right-0 bg-emerald-400 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg uppercase tracking-widest shadow">Real Money</div>
+                        <i data-lucide="wallet" class="text-emerald-500 mb-1 mt-1" size="24"></i>
+                        <span class="text-emerald-600 font-black text-xs uppercase tracking-widest mb-1">Actual Collected</span>
+                        <span id="acc-collected" class="text-3xl lg:text-4xl font-black text-emerald-800 tracking-tighter">฿0</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1">
+                        <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm mb-3 border-b border-slate-200 pb-2">Bed Configuration Popularity</h3>
+                        <table class="w-full text-left border-collapse border border-slate-300 rounded-lg overflow-hidden shadow-sm">
+                            <thead class="bg-slate-800 text-white">
+                                <tr class="text-xs uppercase tracking-widest font-black">
+                                    <th class="p-2 border-r border-slate-600">Bed Setup</th>
+                                    <th class="p-2 border-r border-slate-600 text-right">Bookings</th>
+                                    <th class="p-2 text-right">Room Nights</th>
+                                </tr>
+                            </thead>
+                            <tbody id="acc-bed-body" class="text-sm font-bold text-slate-700 bg-white"></tbody>
+                        </table>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <div class="flex justify-between items-end border-b border-slate-200 pb-2 mb-3">
+                            <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm">Filtered Ledger</h3>
+                            <button onclick="window.exportLedgerCSV()" class="text-[10px] font-black uppercase bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded flex items-center gap-1"><i data-lucide="download" size="12"></i> Export CSV</button>
+                        </div>
+                        <div class="overflow-x-auto max-h-[400px] border border-slate-300 rounded-lg shadow-sm">
+                            <table class="w-full text-left border-collapse text-xs min-w-[700px]" id="acc-ledger-table">
+                                <thead class="bg-slate-800 text-white sticky top-0 font-black uppercase tracking-wider">
+                                    <tr>
+                                        <th class="p-2 border-r border-slate-600">Name</th>
+                                        <th class="p-2 border-r border-slate-600">In</th>
+                                        <th class="p-2 border-r border-slate-600">Out</th>
+                                        <th class="p-2 border-r border-slate-600">Src</th>
+                                        <th class="p-2 border-r border-slate-600 text-right">Gross</th>
+                                        <th class="p-2 border-r border-slate-600 text-right">Net</th>
+                                        <th class="p-2 border-r border-slate-600 text-right">Comm</th>
+                                        <th class="p-2 border-r border-slate-600 text-right text-emerald-300">Coll.</th>
+                                        <th class="p-2 text-right text-amber-300">Bal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="acc-ledger-body" class="bg-white text-slate-700 font-bold"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Draggable Floating Modal -->
+    <!-- Draggable Floating Staff Modal -->
     <div id="staff-modal" class="modal-overlay">
         <div id="staff-modal-content" class="modal-content bg-white rounded-xl shadow-2xl border-2 border-slate-800">
             
@@ -262,7 +395,7 @@
 
                 <!-- Collapsible Guest Profile -->
                 <div class="section-header rounded-t-md mt-1 unselectable" onclick="window.toggleSection('guest-profile-section', 'profile-chevron')">
-                    <span>Guest Profile</span>
+                    <span>Guest</span>
                     <i data-lucide="chevron-down" id="profile-chevron" size="16" class="transition-transform duration-200"></i>
                 </div>
                 <div id="guest-profile-section" class="bg-slate-50 p-2 border-x border-b border-slate-200 rounded-b-md space-y-2 mt-0" style="display: block;">
@@ -307,7 +440,7 @@
                             <label class="field-label text-blue-600 mb-0">Assigned</label>
                             <button type="button" onclick="window.addRoomSelect()" class="text-[10px] font-black uppercase text-blue-600 bg-blue-100 px-1.5 py-1 leading-none rounded hover:bg-blue-200">+ ADD</button>
                         </div>
-                        <div id="assigned-rooms-container" class="max-h-24 overflow-x-hidden overflow-y-auto no-scrollbar border border-slate-200 rounded p-1 bg-slate-50 flex flex-col gap-1">
+                        <div id="assigned-rooms-container" class="max-h-24 overflow-x-hidden overflow-y-auto no-scrollbar border border-slate-200 rounded p-1 bg-slate-50 flex flex-col gap-1 w-full">
                             <!-- Selects dynamically injected here -->
                         </div>
                     </div>
@@ -322,10 +455,10 @@
 
                 <!-- Collapsible Financials -->
                 <div class="section-header rounded-t-md unselectable" onclick="window.toggleSection('fin-section', 'fin-chevron')">
-                    <span>Financials</span>
-                    <i data-lucide="chevron-down" id="fin-chevron" size="16" class="transition-transform duration-200" style="transform: rotate(-90deg)"></i>
+                    <span>Payments</span>
+                    <i data-lucide="chevron-down" id="fin-chevron" size="16" class="transition-transform duration-200"></i>
                 </div>
-                <div id="fin-section" class="bg-slate-100 p-2 border-x border-b border-slate-200 rounded-b-md mt-0" style="display: none;">
+                <div id="fin-section" class="bg-slate-100 p-2 border-x border-b border-slate-200 rounded-b-md mt-0" style="display: block;">
                     <div class="flex justify-between items-end mb-2 pb-2 border-b-2 border-slate-200">
                         <div class="flex gap-2 items-end">
                             <div><label class="field-label">Total Price</label>
@@ -351,10 +484,10 @@
 
                 <!-- Collapsible Meta/Source -->
                 <div class="section-header rounded-t-md unselectable" onclick="window.toggleSection('meta-section', 'meta-chevron')">
-                    <span>Source & Meta</span>
-                    <i data-lucide="chevron-down" id="meta-chevron" size="16" class="transition-transform duration-200" style="transform: rotate(-90deg)"></i>
+                    <span>More</span>
+                    <i data-lucide="chevron-down" id="meta-chevron" size="16" class="transition-transform duration-200"></i>
                 </div>
-                <div id="meta-section" class="bg-slate-50 p-2 border-x border-b border-slate-200 rounded-b-md mt-0" style="display: none;">
+                <div id="meta-section" class="bg-slate-50 p-2 border-x border-b border-slate-200 rounded-b-md mt-0" style="display: block;">
                     <textarea id="staff-notes" class="smart-notes w-full bg-white border border-slate-300 font-bold text-sm p-2 mb-2 rounded" placeholder="NOTES..."></textarea>
                     <div class="grid grid-cols-3 gap-2">
                         <div class="flex flex-col"><label class="field-label">Source</label>
@@ -406,8 +539,8 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
             <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm"><span>Parse Confirmation Email</span><button type="button" onclick="document.getElementById('email-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div>
             <div class="p-4 flex flex-col gap-3">
-                <p class="text-sm font-bold text-slate-500 leading-tight">Paste the text of an AirBnB or Booking.com confirmation directly from the web or email!</p>
-                <textarea id="email-textarea" rows="8" class="w-full bg-slate-50 border border-slate-300 font-mono text-[10px] p-2 rounded outline-none focus:ring-2 focus:ring-purple-500 whitespace-pre" placeholder="Paste email or web text here..."></textarea>
+                <p class="text-sm font-bold text-slate-500 leading-tight">Paste the text of an AirBnB or Hostelworld confirmation email here.</p>
+                <textarea id="email-textarea" rows="8" class="w-full bg-slate-50 border border-slate-300 font-mono text-[10px] p-2 rounded outline-none focus:ring-2 focus:ring-purple-500 whitespace-pre" placeholder="Paste email text here..."></textarea>
                 <div class="flex gap-2 justify-end mt-2">
                     <button onclick="document.getElementById('email-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button>
                     <button onclick="window.parseEmail()" class="px-8 py-2 bg-purple-600 text-white rounded-lg font-black text-sm uppercase flex items-center gap-1"><i data-lucide="zap" size="16"></i> Extract</button>
@@ -546,7 +679,13 @@
         ];
 
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
-        const to15MAR = d => !d || isNaN(d.getTime()) ? "---" : `${d.getDate()}${mNames[d.getMonth()]}${d.getFullYear().toString().substr(-2)}`;
+
+        // Format dates correctly (24 JUN 2026)
+        const toDisplayDate = (d) => {
+            if (!d || isNaN(d.getTime())) return "---";
+            const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            return `${String(d.getDate()).padStart(2, '0')} ${mNames[d.getMonth()]} ${d.getFullYear()}`;
+        };
 
         // Dragging Logic
         let isDragging = false;
@@ -558,7 +697,6 @@
             const modal = document.getElementById('staff-modal-content');
             const rect = modal.getBoundingClientRect();
             
-            // Switch to fixed positioning if relative so dragging is perfectly aligned
             if(modal.style.position !== 'fixed') {
                 modal.style.position = 'fixed';
                 modal.style.margin = '0';
@@ -576,7 +714,6 @@
             let newLeft = e.clientX - dragOffsetX;
             let newTop = e.clientY - dragOffsetY;
             
-            // Basic constraints so it's never fully dragged off-screen
             if (newTop < 0) newTop = 0;
             if (newTop > window.innerHeight - 50) newTop = window.innerHeight - 50;
             
@@ -590,7 +727,6 @@
             }
         });
 
-        // Toggle Generic Modal Sections
         window.toggleSection = (secId, iconId, forceState = null) => {
             const sec = document.getElementById(secId);
             const icon = document.getElementById(iconId);
@@ -605,6 +741,43 @@
                 if(icon) icon.style.transform = 'rotate(-90deg)';
             }
         };
+
+        // Multi-Select Helpers
+        window.toggleMultiSelect = (id) => {
+            const el = document.getElementById(id);
+            const isHidden = el.style.display === 'none' || el.classList.contains('hidden');
+            document.querySelectorAll('.multi-select-dropdown').forEach(d => {
+                d.style.display = 'none';
+                d.classList.add('hidden');
+            });
+            if(isHidden) {
+                el.style.display = 'block';
+                el.classList.remove('hidden');
+            }
+        };
+
+        window.updateMultiLabel = (dropId, labelId, defaultText) => {
+            const checked = document.querySelectorAll(`#${dropId} input[type="checkbox"]:checked`);
+            const label = document.getElementById(labelId);
+            if(checked.length === 0) label.innerText = defaultText;
+            else if(checked.length === 1) label.innerText = checked[0].parentNode.textContent.trim().toUpperCase();
+            else label.innerText = checked.length + ' SELECTED';
+        };
+
+        window.getMultiValues = (id) => {
+            const drop = document.getElementById(id);
+            if(!drop) return [];
+            return Array.from(drop.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+        };
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.multi-select-container')) {
+                document.querySelectorAll('.multi-select-dropdown').forEach(d => {
+                    d.style.display = 'none';
+                    d.classList.add('hidden');
+                });
+            }
+        });
 
         const parseYMD = (dateStr) => {
             if (!dateStr || typeof dateStr !== 'string') return 0;
@@ -648,7 +821,9 @@
                     await signInAnonymously(auth);
                     currentUserRole = 'admin'; currentUserEmail = 'Admin (Test)';
                     document.getElementById('boot-loader').style.display = 'none';
-                    const bulkBtn = document.getElementById('admin-bulk-delete'); if(bulkBtn) bulkBtn.classList.replace('hidden', 'flex');
+                    document.getElementById('tab-acc').classList.remove('hidden');
+                    document.getElementById('admin-bulk-delete').classList.remove('hidden');
+                    
                     onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => { staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.render(); });
                 } catch (error) { console.error("Auth Error:", error); document.getElementById('sync-status').innerText = "Auth Error"; }
             } else {
@@ -663,13 +838,11 @@
                         const loginUI = document.getElementById('login-ui'); if(loginUI) loginUI.style.display = 'none';
                         document.getElementById('boot-loader').style.display = 'none';
                         
-                        if (currentUserRole === 'staff') {
-                            const importBtn = document.querySelector('button[onclick="window.openCSVModal()"]');
-                            if(importBtn) importBtn.style.display = 'none';
-                        }
                         if (currentUserRole === 'admin') {
-                            const bulkBtn = document.getElementById('admin-bulk-delete'); if(bulkBtn) bulkBtn.classList.replace('hidden', 'flex');
+                            document.getElementById('tab-acc').classList.remove('hidden');
+                            document.getElementById('admin-bulk-delete').classList.remove('hidden');
                         }
+                        
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => { staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); window.render(); });
                     } else { document.getElementById('boot-loader').style.display = 'none'; createLoginUI(); }
                 });
@@ -677,6 +850,27 @@
 
             const cSel = document.getElementById('staff-country');
             countries.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; cSel.appendChild(opt); });
+            
+            const dbRoomDrop = document.getElementById('db-room-dropdown');
+            const accRoomDrop = document.getElementById('acc-room-type');
+            if (dbRoomDrop) {
+                roomTypes.forEach(t => { 
+                    const lbl = document.createElement('label');
+                    lbl.className = 'flex items-center p-2 hover:bg-slate-700 cursor-pointer uppercase border-b border-slate-600 text-white';
+                    lbl.innerHTML = `<input type="checkbox" value="${t}" onchange="window.updateMultiLabel('db-room-dropdown', 'db-room-label', 'ALL ROOMS'); window.renderDatabase();" class="mr-2"> ${t}`;
+                    dbRoomDrop.appendChild(lbl);
+                    
+                    if(accRoomDrop) {
+                        const opt = document.createElement('option');
+                        opt.value = t; opt.innerText = t;
+                        accRoomDrop.appendChild(opt);
+                    }
+                });
+                const lbl = document.createElement('label');
+                lbl.className = 'flex items-center p-2 hover:bg-slate-700 cursor-pointer uppercase text-amber-400 font-black';
+                lbl.innerHTML = `<input type="checkbox" value="UNASSIGNED" onchange="window.updateMultiLabel('db-room-dropdown', 'db-room-label', 'ALL ROOMS'); window.renderDatabase();" class="mr-2"> UNASSIGNED`;
+                dbRoomDrop.appendChild(lbl);
+            }
 
             window.addEventListener('resize', window.render);
             lucide.createIcons();
@@ -688,20 +882,12 @@
             const btn = document.getElementById('zoom-toggle-btn');
             if(isZoomWide) {
                 container.classList.add('zoom-wide-mode');
-                btn.innerHTML = `<i data-lucide="zoom-out" size="12"></i> ZOOM: FIT`;
+                btn.innerHTML = `<i data-lucide="zoom-out" size="12"></i> ZOOM FIT`;
             } else {
                 container.classList.remove('zoom-wide-mode');
-                btn.innerHTML = `<i data-lucide="zoom-in" size="12"></i> ZOOM: WIDE`;
+                btn.innerHTML = `<i data-lucide="zoom-in" size="12"></i> ZOOM WIDE`;
             }
             lucide.createIcons();
-        };
-        
-        window.toggleGroup = (groupClass) => {
-            const rows = document.querySelectorAll(`.group-${groupClass}`);
-            const icon = document.getElementById(`icon-${groupClass}`);
-            let isHidden = rows[0] && rows[0].style.display === 'none';
-            rows.forEach(r => r.style.display = isHidden ? '' : 'none');
-            if(icon) icon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
         };
 
         const getFloorIcon = (f) => {
@@ -709,16 +895,6 @@
             if(f === 2) return `<i data-lucide="arrow-up" class="text-green-500 shrink-0" size="12" stroke-width="3" title="2nd Floor"></i>`;
             if(f === 3) return `<i data-lucide="chevrons-up" class="text-purple-500 shrink-0" size="12" stroke-width="3" title="3rd Floor"></i>`;
             return '';
-        };
-
-        window.render = () => {
-            const width = window.innerWidth;
-            let daysToShow = width >= 1150 ? 35 : width >= 950 ? 28 : width >= 650 ? 21 : 14;
-            document.documentElement.style.setProperty('--days', daysToShow);
-            document.getElementById('current-jump-display').innerText = to15MAR(viewStart);
-            renderTimeline(daysToShow);
-            if (document.getElementById('database-view').style.display === 'block') renderDatabase();
-            lucide.createIcons();
         };
 
         const getFMPShade = (date) => {
@@ -730,10 +906,24 @@
             return '';
         };
 
+        window.render = () => {
+            const width = window.innerWidth;
+            let daysToShow = width >= 1150 ? 35 : width >= 950 ? 28 : width >= 650 ? 21 : 14;
+            document.documentElement.style.setProperty('--days', daysToShow);
+            document.getElementById('current-jump-display').innerText = toDisplayDate(viewStart);
+            renderTimeline(daysToShow);
+            
+            if (document.getElementById('database-view').style.display === 'block') window.renderDatabase();
+            if (document.getElementById('accounting-view').style.display === 'block') window.renderAccounting();
+            
+            lucide.createIcons();
+        };
+
         const renderTimeline = (daysToShow) => {
             const header = document.getElementById('timeline-header'), body = document.getElementById('timeline-body'), monthLabels = document.getElementById('month-labels');
             header.innerHTML = monthLabels.innerHTML = body.innerHTML = '';
             const days = [];
+            const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
             for (let i = 0; i < daysToShow; i++) { const d = new Date(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate() + i, 12, 0, 0); days.push(d); }
             
             let currentMonth = -1, currentSpan = 0;
@@ -840,7 +1030,7 @@
                     headerHtml = `<span class="text-[11px] font-black text-amber-700">${rowDef.label}</span>`;
                 }
                 
-                row.innerHTML = `<div class="border-r border-slate-300 ${rowDef.isUnassigned ? 'bg-amber-100' : 'bg-slate-50'} flex items-center justify-center uppercase overflow-hidden shrink-0 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.05)]">${headerHtml}</div>`;
+                row.innerHTML = `<div class="border-r border-slate-300 ${rowDef.isUnassigned ? 'bg-amber-100' : 'bg-slate-50'} flex items-center justify-center uppercase overflow-hidden shrink-0 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.05)] unselectable">${headerHtml}</div>`;
                 
                 for(let i=0; i<daysToShow; i++) {
                     const cell = document.createElement('div'); 
@@ -917,9 +1107,9 @@
 
                         bar.innerHTML = barHtml;
 
-                        // Tooltip Construction
+                        const mNamesStr = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
                         const formatDateShort = (dStr) => {
-                            if(!dStr) return ''; const p = dStr.split('-'); return `${p[2]}${mNames[parseInt(p[1])-1]}`;
+                            if(!dStr) return ''; const p = dStr.split('-'); return `${p[2]} ${mNamesStr[parseInt(p[1])-1]}`;
                         };
                         
                         let metaTags = [];
@@ -969,31 +1159,230 @@
             });
         };
 
-        const renderDatabase = () => {
-            const body = document.getElementById('database-body'); body.innerHTML = '';
-            const selStatus = document.getElementById('status-filter').value;
+        window.renderDatabase = () => {
+            const body = document.getElementById('database-body'); 
+            if (!body) return;
+            
+            body.innerHTML = '';
+            
+            const nameFilterEl = document.getElementById('db-filter-name');
+            const dbName = nameFilterEl ? nameFilterEl.value.trim().toUpperCase() : '';
+            const dbSources = window.getMultiValues('db-source-dropdown') || [];
+            
+            const monthFilterEl = document.getElementById('db-filter-month');
+            const dbMonth = monthFilterEl ? monthFilterEl.value : '';
+            
+            const dbRooms = window.getMultiValues('db-room-dropdown') || [];
+            
+            const minFilterEl = document.getElementById('db-filter-min');
+            const dbTotalMin = minFilterEl ? minFilterEl.value : '';
+            const maxFilterEl = document.getElementById('db-filter-max');
+            const dbTotalMax = maxFilterEl ? maxFilterEl.value : '';
+            
+            const dueFilterEl = document.getElementById('db-filter-due');
+            const dbDue = dueFilterEl ? dueFilterEl.value : '';
+            
+            const dbStatuses = window.getMultiValues('db-status-dropdown') || [];
+
             const filtered = staff.filter(s => {
-                const nameMatch = !searchTerm || (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm);
-                const statusMatch = selStatus === 'ALL' || s.status === selStatus;
-                return nameMatch && statusMatch;
+                const fullName = (s.firstName+' '+s.lastName).toUpperCase();
+                
+                if (searchTerm && !fullName.includes(searchTerm)) return false;
+                if (dbName && !fullName.includes(dbName)) return false;
+                if (dbSources.length > 0 && !dbSources.includes(s.source)) return false;
+                if (dbStatuses.length > 0 && !dbStatuses.includes(s.status)) return false;
+                
+                // Advanced Month Filter (Checking Overlap)
+                if (dbMonth) {
+                    const [mYear, mMonth] = dbMonth.split('-');
+                    const monthStart = Date.UTC(mYear, mMonth - 1, 1);
+                    const monthEnd = Date.UTC(mYear, mMonth, 1); 
+                    const cin = parseYMD(s.checkIn);
+                    const cout = parseYMD(s.checkOut);
+                    if (!(cin < monthEnd && cout > monthStart)) return false;
+                }
+                
+                const due = Number(((s.totalPrice || 0) - (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0)).toFixed(2));
+                if (dbDue === 'zero' && due > 0) return false;
+                if (dbDue === 'owes' && due <= 0) return false;
+                
+                const tPrice = Number(s.totalPrice || 0);
+                if (dbTotalMin && tPrice < Number(dbTotalMin)) return false;
+                if (dbTotalMax && tPrice > Number(dbTotalMax)) return false;
+
+                const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                if (dbRooms.length > 0) {
+                    const wantsUnassigned = dbRooms.includes('UNASSIGNED');
+                    const hasUnassigned = rList.length === 0 || rList.includes("");
+                    const hasType = rList.some(r => {
+                        const hr = hotelRooms.find(x => x.id === r);
+                        return hr && dbRooms.includes(hr.type);
+                    });
+                    if (!hasType && (!wantsUnassigned || !hasUnassigned)) return false;
+                }
+
+                return true;
             }).sort((a, b) => {
                 let vA = a[sortKey], vB = b[sortKey];
                 if (sortKey === 'room') { vA = (a.rooms && a.rooms[0]) || a.room || 'ZZZ'; vB = (b.rooms && b.rooms[0]) || b.room || 'ZZZ'; }
                 return sortAsc ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
             });
+            
             filtered.forEach(s => {
                 const due = Number(((s.totalPrice || 0) - (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0)).toFixed(2));
                 const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
                 const assignedStr = rList.filter(Boolean).length > 0 ? rList.filter(Boolean).join(', ') : '--';
 
                 const tr = document.createElement('tr'); tr.className = "border-b hover:bg-slate-50 cursor-pointer"; tr.onclick = () => window.editStaff(s.id);
+                tr.dataset.recordId = s.id;
+                
                 tr.innerHTML = `<td class="p-2 border-r">${s.firstName||''} ${s.lastName||''}</td><td class="p-2 border-r uppercase">${s.source||''}</td><td class="p-2 border-r">${s.checkIn?s.checkIn.substr(5):''} to ${s.checkOut?s.checkOut.substr(5):''}</td><td class="p-2 border-r font-black">${assignedStr}</td><td class="p-2 border-r text-right font-black">฿${Number(s.totalPrice||0).toFixed(2)}</td><td class="p-2 border-r text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due.toFixed(2)}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`;
                 body.appendChild(tr);
             });
         };
+        
+        window.bulkDelete = () => {
+            if(currentUserRole !== 'admin') return;
+            const rows = document.querySelectorAll('#database-body tr');
+            if(rows.length === 0) { window.showAlert("Nothing to delete. Please filter some records first."); return; }
+            window.showAlert(`PERMANENTLY DELETE ${rows.length} RECORDS?\n\nThis will instantly wipe all bookings currently visible in your Database table. You cannot undo this!`, true, async () => {
+                document.getElementById('boot-loader').style.display = 'flex';
+                document.getElementById('sync-status').innerText = `DELETING ${rows.length}...`;
+                const promises = Array.from(rows).map(tr => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', tr.dataset.recordId)));
+                await Promise.all(promises);
+                document.getElementById('boot-loader').style.display = 'none'; window.closeAlert();
+            });
+        };
+
+        window.renderAccounting = () => {
+            const startStr = document.getElementById('acc-date-start').value;
+            const endStr = document.getElementById('acc-date-end').value;
+            const targetStatus = document.getElementById('acc-status').value;
+            const activeSources = window.getMultiValues('acc-source-dropdown');
+            const targetRoomType = document.getElementById('acc-room-type').value;
+
+            let totalGross = 0; let totalNet = 0; let totalCollected = 0; let totalBalance = 0; let totalComm = 0;
+            let bedStats = {};
+            const ledgerRows = [];
+
+            const filtered = staff.filter(s => {
+                if (startStr && s.checkOut < startStr) return false;
+                if (endStr && s.checkIn > endStr) return false;
+                
+                if (targetStatus === 'ACTIVE') { if (s.status === 'cancelled' || s.status === 'noshow') return false; } 
+                else if (targetStatus === 'DEPARTED') { if (s.status !== 'left') return false; } 
+                else if (targetStatus === 'DEAD') { if (s.status !== 'cancelled' && s.status !== 'noshow') return false; }
+                
+                if (activeSources.length > 0 && !activeSources.includes(s.source)) return false;
+                
+                const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                if (targetRoomType !== 'ALL') {
+                    const hasType = rList.some(r => { const hr = hotelRooms.find(x => x.id === r); return hr && hr.type === targetRoomType; });
+                    if (!hasType) return false;
+                }
+                return true;
+            });
+
+            filtered.forEach(s => {
+                const tPrice = Number(s.totalPrice || 0);
+                const nPrice = Number(s.netPrice || 0);
+                totalGross += tPrice; totalNet += nPrice; totalComm += (tPrice - nPrice);
+                
+                let paidReal = 0; let paidComm = 0; let localCollected = 0;
+                const nowTime = Date.now();
+                const coutTime = parseYMD(s.checkOut);
+
+                (s.payments || []).forEach(p => {
+                    const amt = Number(p.amt || 0);
+                    if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp'].includes(p.method)) {
+                        paidComm += amt;
+                        if (coutTime <= nowTime) localCollected += amt; // OTA Money: Collected only after checkout
+                    } else {
+                        paidReal += amt;
+                        localCollected += amt; // Cash/Direct: Always collected instantly
+                    }
+                });
+                
+                totalCollected += localCollected;
+                const localBalance = Number((tPrice - (paidReal + paidComm)).toFixed(2));
+                totalBalance += localBalance;
+
+                // Bed Stats
+                const cinTime = parseYMD(s.checkIn);
+                let nights = 0;
+                if (cinTime && coutTime && coutTime > cinTime) nights = Math.round((coutTime - cinTime) / 86400000);
+
+                const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                rList.forEach(r => {
+                    if (!r) return;
+                    const hr = hotelRooms.find(x => x.id === r);
+                    if (hr && hr.bed) {
+                        if (!bedStats[hr.bed]) bedStats[hr.bed] = { count: 0, nights: 0 };
+                        bedStats[hr.bed].count += 1; bedStats[hr.bed].nights += nights;
+                    }
+                });
+                
+                // Ledger Data
+                ledgerRows.push({
+                    name: `${s.firstName||''} ${s.lastName||''}`.trim(),
+                    in: s.checkIn ? s.checkIn.substr(5) : '--',
+                    out: s.checkOut ? s.checkOut.substr(5) : '--',
+                    src: (s.source||'').toUpperCase(),
+                    gross: tPrice.toFixed(2),
+                    net: nPrice.toFixed(2),
+                    comm: (tPrice - nPrice).toFixed(2),
+                    coll: localCollected.toFixed(2),
+                    bal: localBalance.toFixed(2)
+                });
+            });
+
+            document.getElementById('acc-gross').innerText = `฿${totalGross.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+            document.getElementById('acc-net').innerText = `฿${totalNet.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+            document.getElementById('acc-comm').innerText = `฿${totalComm.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+            document.getElementById('acc-balance').innerText = `฿${totalBalance.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+            document.getElementById('acc-collected').innerText = `฿${totalCollected.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+
+            // Populate Bed Table
+            const tBody = document.getElementById('acc-bed-body'); tBody.innerHTML = '';
+            const sortedBeds = Object.keys(bedStats).sort((a, b) => bedStats[b].count - bedStats[a].count);
+            sortedBeds.forEach(bed => {
+                const tr = document.createElement('tr'); tr.className = "border-b border-slate-200 hover:bg-slate-50";
+                tr.innerHTML = `<td class="p-2 border-r border-slate-200 font-black uppercase text-slate-800">${bed}</td><td class="p-2 border-r border-slate-200 text-right font-black text-slate-600">${bedStats[bed].count}</td><td class="p-2 text-right font-black text-blue-600">${bedStats[bed].nights}</td>`;
+                tBody.appendChild(tr);
+            });
+            
+            // Populate Ledger
+            const lBody = document.getElementById('acc-ledger-body'); lBody.innerHTML = '';
+            ledgerRows.forEach(lr => {
+                const tr = document.createElement('tr'); tr.className = "border-b border-slate-200 hover:bg-slate-50";
+                tr.innerHTML = `<td class="p-2 border-r border-slate-200">${lr.name}</td><td class="p-2 border-r border-slate-200 text-slate-500">${lr.in}</td><td class="p-2 border-r border-slate-200 text-slate-500">${lr.out}</td><td class="p-2 border-r border-slate-200 text-[10px]">${lr.src}</td><td class="p-2 border-r border-slate-200 text-right">${lr.gross}</td><td class="p-2 border-r border-slate-200 text-right">${lr.net}</td><td class="p-2 border-r border-slate-200 text-right text-red-400">${lr.comm}</td><td class="p-2 border-r border-slate-200 text-right text-emerald-600">${lr.coll}</td><td class="p-2 text-right text-amber-500">${lr.bal}</td>`;
+                lBody.appendChild(tr);
+            });
+            
+            window.exportLedgerCSV = () => {
+                let csv = "Guest Name,Check In,Check Out,Source,Gross Booked,Net Expected,Commission,Actual Collected,Balance\n";
+                ledgerRows.forEach(lr => { csv += `"${lr.name}","${lr.in}","${lr.out}","${lr.src}",${lr.gross},${lr.net},${lr.comm},${lr.coll},${lr.bal}\n`; });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a"); a.href = url; a.download = "SWIMS_Ledger.csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            };
+        };
 
         window.sortDatabase = (key) => { if(sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } renderDatabase(); };
-        window.switchTab = (t) => { document.getElementById('calendar-view').style.display = t === 'calendar' ? 'block' : 'none'; document.getElementById('database-view').style.display = t === 'database' ? 'block' : 'none'; document.getElementById('tab-cal').classList.toggle('active', t === 'calendar'); document.getElementById('tab-db').classList.toggle('active', t === 'database'); if (t === 'database') renderDatabase(); };
+        
+        window.switchTab = (t) => { 
+            document.getElementById('calendar-view').style.display = t === 'calendar' ? 'block' : 'none'; 
+            document.getElementById('database-view').style.display = t === 'database' ? 'block' : 'none'; 
+            document.getElementById('accounting-view').style.display = t === 'accounting' ? 'block' : 'none'; 
+            
+            document.getElementById('tab-cal').classList.toggle('active', t === 'calendar'); 
+            document.getElementById('tab-db').classList.toggle('active', t === 'database'); 
+            document.getElementById('tab-acc').classList.toggle('active', t === 'accounting'); 
+            
+            if (t === 'database') window.renderDatabase(); 
+            if (t === 'accounting') window.renderAccounting();
+        };
+
         window.handleSearch = (val) => { searchTerm = val.trim().toUpperCase(); searchMatchIndex = 0; const jumpBtn = document.getElementById('search-jump-btn'); const matches = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (searchTerm && matches.length > 0) { jumpBtn.classList.remove('hidden'); document.getElementById('match-counter').innerText = `Match ${searchMatchIndex + 1} of ${matches.length}`; } else jumpBtn.classList.add('hidden'); window.render(); };
         window.clearSearch = () => { document.getElementById('staff-search').value = ""; window.handleSearch(""); };
         window.jumpToSearchMatch = () => { const matches = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (matches.length > 0) { const match = matches[searchMatchIndex % matches.length]; const d = new Date(match.checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; document.getElementById('match-counter').innerText = `Match ${(searchMatchIndex % matches.length) + 1} of ${matches.length}`; window.render(); } };
@@ -1011,14 +1400,6 @@
             const f = document.getElementById('first-name').value.trim().toUpperCase();
             const l = document.getElementById('last-name').value.trim().toUpperCase();
             document.getElementById('modal-guest-name-display').innerText = f || l ? `${f} ${l}` : "NEW BOOKING";
-        };
-
-        window.toggleGuestProfile = (forceState = null) => {
-            const sec = document.getElementById('guest-profile-section');
-            const icon = document.getElementById('profile-chevron');
-            const isVis = sec.style.display !== 'none';
-            if (forceState === true || (!isVis && forceState === null)) { sec.style.display = 'block'; icon.style.transform = 'rotate(0deg)'; } 
-            else if (forceState === false || (isVis && forceState === null)) { sec.style.display = 'none'; icon.style.transform = 'rotate(-90deg)'; }
         };
 
         window.checkEmailProxy = (val) => {
@@ -1238,10 +1619,9 @@
             window.updateHeaderName();
             window.checkEmailProxy('');
             
-            // Reset collapsible sections to "Mini Mode"
             window.toggleSection('guest-profile-section', 'profile-chevron', true);
-            window.toggleSection('fin-section', 'fin-chevron', false);
-            window.toggleSection('meta-section', 'meta-chevron', false);
+            window.toggleSection('fin-section', 'fin-chevron', true);
+            window.toggleSection('meta-section', 'meta-chevron', true);
             
             document.getElementById('staff-modal').style.display = 'flex'; 
             window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms();
@@ -1278,18 +1658,9 @@
             const updatedRecord = { ...s, checkOut: splitDate, linkedId: linkCode };
             const newId = Math.random().toString(36).substr(2, 9);
             
-            // Zero-Balance Split Logic
             const newRecord = { 
-                ...s, 
-                id: newId, 
-                checkIn: splitDate, 
-                room: "", 
-                rooms: [""], 
-                linkedId: linkCode, 
-                totalPrice: 0, 
-                netPrice: 0, 
-                payments: [], 
-                notes: "Split segment for mid-stay room change. Master folio kept on original booking.\n" + (s.notes || "")
+                ...s, id: newId, checkIn: splitDate, room: "", rooms: [""], linkedId: linkCode, 
+                totalPrice: 0, netPrice: 0, payments: [], notes: "Split segment for mid-stay room change. Master folio kept on original booking.\n" + (s.notes || "")
             };
             
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), updatedRecord); 
@@ -1298,196 +1669,139 @@
         };
 
         window.openCSVModal = () => { document.getElementById('import-textarea').value = ''; document.getElementById('import-modal').style.display = 'flex'; };
-        
         window.openEmailParserModal = () => { document.getElementById('email-textarea').value = ''; document.getElementById('email-modal').style.display = 'flex'; };
         
         window.parseEmail = () => {
-            const text = document.getElementById('email-textarea').value.trim();
-            if(!text) return;
+            const text = document.getElementById('email-textarea').value;
+            if(!text || text.trim() === '') return;
             
-            let source = 'other', name = '', cin = '', cout = '', pax = 1, total = 0, comm = 0, bookId = '', phone = '', email = '', notes = '', bookedType = '', bookDate = '', country = '[UNKNOWN]';
-
-            const parseAirBnbDate = (str) => {
-                let d = new Date(str + ", " + new Date().getFullYear());
-                if(d.getMonth() > new Date().getMonth() + 6) d.setFullYear(d.getFullYear() - 1);
-                else if (d.getMonth() < new Date().getMonth() - 6) d.setFullYear(d.getFullYear() + 1);
-                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            const extract = (regex, defaultVal = '') => { const match = text.match(regex); return match ? match[1].trim() : defaultVal; };
+            const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
+            const parseDateStr = (dateStr) => {
+                if(!dateStr) return '';
+                const mths = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+                let parts = dateStr.replace(/,/g, '').split(' ');
+                let day, mth, yr;
+                
+                if (parts.length === 3 && isNaN(parts[2])) {
+                    mth = mths[parts[1].toLowerCase().substring(0,3)];
+                    day = parts[2].padStart(2, '0');
+                    const now = new Date();
+                    yr = now.getFullYear();
+                    const testDate = new Date(`${yr}-${mth}-${day}`);
+                    if(testDate < now && testDate.getMonth() < now.getMonth()) yr++; 
+                } else if (parts.length >= 4) {
+                    mth = mths[parts[1].toLowerCase().substring(0,3)];
+                    day = parts[2].padStart(2, '0');
+                    yr = parts[3];
+                } else return '';
+                
+                return `${yr}-${mth}-${day}`;
             };
 
-            function parseDateStr(dStr) {
-                try {
-                    const d = new Date(dStr);
-                    if(isNaN(d)) return "";
-                    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                } catch(e) { return ""; }
-            }
+            let src = '', gName = '', checkIn = '', checkOut = '', pax = 1, phone = '', email = '', total = 0, comm = 0, bId = '', notes = '', bType = '', bDate = '', countryCode = '';
 
-            if (text.includes('Reservation Details') && text.includes('Booking.com')) {
-                source = 'booking.com';
+            if (text.includes('Booking.com') && text.includes('Reservation Details')) {
+                src = 'booking.com';
+                gName = extract(/Guest name:\s*\n(.*?)\n/);
+                countryCode = extract(/Guest name:\s*\n.*?\n\s*([a-zA-Z]{2})\s*\n/);
+                checkIn = parseDateStr(extract(/Check-in\s*\n(.*?)\n/));
+                checkOut = parseDateStr(extract(/Check-out\s*\n(.*?)\n/));
+                bId = extract(/Booking number:\s*\n(\d+)/);
+                bDate = parseDateStr(extract(/Received\s*\n(.*?)\n/));
+                const paxStr = extract(/Total guests:\s*\n(\d+)/); if(paxStr) pax = parseInt(paxStr);
+                total = cleanMoney(extract(/Total price\s*\nTHB ([\d,.]+)/));
+                comm = cleanMoney(extract(/Commission and charges:\s*\nTHB ([\d,.]+)/));
+                phone = extract(/(\+[\d\s]+)/);
+                email = extract(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/);
+                notes = extract(/BED PREFERENCE:(.*)/);
                 
-                const nameMatch = text.match(/Guest name:\s*\n([^\n]+)/i);
-                if(nameMatch) name = nameMatch[1].trim();
-                
-                const countryMatch = text.match(/Guest name:\s*\n[^\n]+\s*\n\s*([a-zA-Z]{2})\s*\n/);
-                if(countryMatch && rawCountryMap[countryMatch[1].toLowerCase()]) country = rawCountryMap[countryMatch[1].toLowerCase()];
-                
-                const emailMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/);
-                if(emailMatch) email = emailMatch[1];
-                
-                const phoneMatch = text.match(/(\+\d[\d\s]+)/); 
-                if(phoneMatch) phone = phoneMatch[1].trim();
+                const bTypeRaw = extract(/(.*?)\nTHB/); 
+                const parenMatch = bTypeRaw.match(/\((.*?)\)/);
+                bType = parenMatch ? parenMatch[1] : bTypeRaw;
 
-                const cinMatch = text.match(/Check-in\s*\n(?:[A-Za-z]+,\s*)?([A-Za-z]+\s+\d+,\s*\d{4})/i);
-                if(cinMatch) cin = parseDateStr(cinMatch[1]);
+                window.openStaffModal();
                 
-                const coutMatch = text.match(/Check-out\s*\n(?:[A-Za-z]+,\s*)?([A-Za-z]+\s+\d+,\s*\d{4})/i);
-                if(coutMatch) cout = parseDateStr(coutMatch[1]);
-
-                const recMatch = text.match(/Received\s*\n(?:[A-Za-z]+,\s*)?([A-Za-z]+\s+\d+,\s*\d{4})/i);
-                if(recMatch) bookDate = parseDateStr(recMatch[1]);
-                
-                const typeMatch = text.match(/\((.*)\)\s*\n\s*[A-Z]{3}\s*[\d,.]+/i);
-                if(typeMatch) bookedType = typeMatch[1].trim();
-
-                const paxMatch = text.match(/Total guests:\s*\n(\d+)/i);
-                if(paxMatch) pax = parseInt(paxMatch[1]);
-                
-                const totalMatch = text.match(/Total price\s*\n[^\d]*([\d,.]+)/i);
-                if(totalMatch) total = parseFloat(totalMatch[1].replace(/,/g, ''));
-                
-                const commMatch = text.match(/Commission and charges:\s*\n[^\d]*([\d,.]+)/i);
-                if(commMatch) comm = parseFloat(commMatch[1].replace(/,/g, ''));
-                
-                const idMatch = text.match(/Booking number:\s*\n(\d+)/i);
-                if(idMatch) bookId = idMatch[1];
-
-                const bedPrefMatch = text.match(/BED PREFERENCE:([^\n]+)/i);
-                if (bedPrefMatch) notes += "BED PREF: " + bedPrefMatch[1].trim() + "\n";
-            }
-            else if (text.includes('Airbnb') || text.includes('Confirmation code')) {
-                source = 'airbnb';
-                
-                const nameMatch = text.match(/Reservation\s*confirmed\s*-\s*([^\n]+) arrives/i) || text.match(/([A-Za-z\s]+)\nIdentity verified/i);
-                if(nameMatch) name = nameMatch[1].trim();
-                
-                const airbnbDateMatch = text.match(/Airbnb\s*\n\s*(?:[A-Za-z]+,\s*)?([A-Za-z]+\s+\d+)/i);
-                if (airbnbDateMatch) bookDate = parseAirBnbDate(airbnbDateMatch[1]);
-
-                const typeMatch = text.match(/([^\n]+)\s*\n\s*Room\s*\n\s*Check-in/i);
-                if (typeMatch) bookedType = typeMatch[1].trim();
-
-                const notesMatch = text.match(/Identity verified(?:[^\n]*)\s*\n+([^\n]+)/i);
-                if (notesMatch && !notesMatch[1].includes('Messages from guest') && !notesMatch[1].includes('Send ')) {
-                    notes += notesMatch[1].trim() + "\n";
+                if (text.includes('Payment is facilitated through')) {
+                    if (comm > 0) window.addPaymentRow(checkIn, comm, 'bdc-kp', true);
+                    if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'bdc-pay', true);
                 }
-
-                const cinMatch = text.match(/Check-in\s*\n[A-Za-z]+, ([A-Za-z]+ \d+)/i);
-                if(cinMatch) cin = parseAirBnbDate(cinMatch[1]);
                 
-                const coutMatch = text.match(/Checkout\s*\n[A-Za-z]+, ([A-Za-z]+ \d+)/i);
-                if(coutMatch) cout = parseAirBnbDate(coutMatch[1]);
+            } else if (text.includes('Airbnb') && text.includes('Reservation confirmed')) {
+                src = 'airbnb';
+                gName = extract(/Reservation confirmed - (.*?) arrives/);
+                checkIn = parseDateStr(extract(/Check-in\s*\n(.*?)\n/));
+                checkOut = parseDateStr(extract(/Checkout\s*\n(.*?)\n/));
+                bId = extract(/Confirmation code\s*\n([A-Z0-9]+)/);
+                bDate = parseDateStr(extract(/Airbnb\s*\n(.*?)\n/));
+                const paxStr = extract(/Guests\s*\n(\d+)/); if(paxStr) pax = parseInt(paxStr);
+                total = cleanMoney(extract(/Guest paid\s*.*?\n฿([\d,.]+)/m));
+                const payout = cleanMoney(extract(/You earn\s*\n฿([\d,.]+)/));
+                comm = Number((total - payout).toFixed(2));
                 
-                const paxMatch = text.match(/Guests\s*\n(\d+)/i) || text.match(/(\d+) adult/i);
-                if(paxMatch) pax = parseInt(paxMatch[1]);
+                bType = extract(/(.*?)\nRoom\nCheck-in/);
+                notes = extract(/Identity verified.*?\n\n(.*?)\n/m);
                 
-                const idMatch = text.match(/Confirmation\s*code\s*\n([A-Z0-9]+)/i);
-                if(idMatch) bookId = idMatch[1];
+                window.openStaffModal();
                 
-                const totalMatch = text.match(/Total \([A-Z]+\)\s*\n[^\d]*([\d,.]+)/i);
-                if(totalMatch) total = parseFloat(totalMatch[1].replace(/,/g, ''));
+                if (comm > 0) window.addPaymentRow(checkIn, comm, 'airbnb-kp', true);
+                if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'airbnb-pay', true);
                 
-                const earnMatch = text.match(/You earn\s*\n[^\d]*([\d,.]+)/i);
-                if(earnMatch && total) {
-                    const earn = parseFloat(earnMatch[1].replace(/,/g, ''));
-                    comm = total - earn;
-                }
             } else {
-                window.showAlert("Could not recognize this format. Please ensure you paste the full text from Booking.com or AirBnB.");
+                window.showAlert("Could not recognize this text format. Ensure you pasted the entire confirmation block.");
                 return;
             }
 
-            window.openStaffModal();
-            document.getElementById('email-modal').style.display = 'none';
-
-            const nameParts = name.split(' ');
-            document.getElementById('first-name').value = nameParts[0] || '';
-            document.getElementById('last-name').value = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-            
-            if(cin) document.getElementById('check-in').value = cin;
-            if(cout) document.getElementById('check-out').value = cout;
+            document.getElementById('booking-source').value = src;
+            document.getElementById('check-in').value = checkIn;
+            document.getElementById('check-out').value = checkOut;
             document.getElementById('pax-count').value = pax;
-            
-            document.getElementById('booking-source').value = source;
-            document.getElementById('booking-date').value = bookDate;
-            document.getElementById('booking-id').value = bookId;
+            document.getElementById('total-price').value = total;
+            document.getElementById('booking-id').value = bId;
+            document.getElementById('booking-date').value = bDate;
             document.getElementById('phone').value = phone;
             document.getElementById('email').value = email;
-            document.getElementById('staff-country').value = country;
-            document.getElementById('booked-type').value = bookedType;
-            document.getElementById('staff-notes').value = notes.trim();
+            document.getElementById('staff-notes').value = notes;
+            document.getElementById('booked-type').value = bType;
             
-            document.getElementById('total-price').value = Number(total || 0).toFixed(2);
-            
-            document.getElementById('payments-list').innerHTML = '';
-            if(comm > 0) {
-                window.addPaymentRow(cin, comm.toFixed(2), source === 'airbnb' ? 'airbnb-kp' : 'bdc-kp');
-                if (total - comm > 0 && source !== 'airbnb') {
-                    if (text.includes("Payment is facilitated through Payments by Booking.com")) {
-                        window.addPaymentRow(cin, (total - comm).toFixed(2), 'bdc-pay');
-                    }
-                } else if (source === 'airbnb' && total - comm > 0) {
-                     window.addPaymentRow(cin, (total - comm).toFixed(2), 'airbnb-pay');
-                }
+            if(countryCode) {
+                const mapKey = countryCode.toLowerCase().trim();
+                if(rawCountryMap[mapKey]) document.getElementById('staff-country').value = rawCountryMap[mapKey];
             }
             
-            window.calcFinancials();
+            let last = gName.trim(), first = "";
+            const parts = gName.split(' ');
+            if (parts.length > 1) {
+                first = parts[0].trim();
+                last = parts.slice(1).join(' ').trim();
+            }
+            document.getElementById('first-name').value = first.toUpperCase();
+            document.getElementById('last-name').value = last.toUpperCase();
+            
             window.updateHeaderName();
             window.checkEmailProxy(email);
+            window.calcFinancials();
             window.syncLabels();
-            window.updateAvailableRooms();
-        };
+            document.getElementById('email-modal').style.display = 'none';
+        }
 
         window.processCSV = async () => {
             const text = document.getElementById('import-textarea').value.trim(); if (!text) return;
-            
             const delimiter = text.indexOf('\t') !== -1 ? '\t' : ',';
             
             const parseCSVData = (csvText, delim) => {
-                const rows = [];
-                let currentRow = [];
-                let currentCell = '';
-                let inQuotes = false;
-                
+                const rows = []; let currentRow = []; let currentCell = ''; let inQuotes = false;
                 for (let i = 0; i < csvText.length; i++) {
-                    const c = csvText[i];
-                    const nextC = csvText[i+1];
-                    
+                    const c = csvText[i], nextC = csvText[i+1];
                     if (c === '"') {
-                        if (inQuotes && nextC === '"') {
-                            currentCell += '"'; 
-                            i++; 
-                        } else {
-                            inQuotes = !inQuotes; 
-                        }
-                    } else if (c === delim && !inQuotes) {
-                        currentRow.push(currentCell);
-                        currentCell = '';
+                        if (inQuotes && nextC === '"') { currentCell += '"'; i++; } else { inQuotes = !inQuotes; }
+                    } else if (c === delim && !inQuotes) { currentRow.push(currentCell); currentCell = '';
                     } else if ((c === '\n' || c === '\r') && !inQuotes) {
                         if (c === '\r' && nextC === '\n') i++; 
-                        currentRow.push(currentCell);
-                        if (currentRow.join('').trim() !== '') {
-                            rows.push(currentRow);
-                        }
-                        currentRow = [];
-                        currentCell = '';
-                    } else {
-                        currentCell += c;
-                    }
+                        currentRow.push(currentCell); if (currentRow.join('').trim() !== '') { rows.push(currentRow); } currentRow = []; currentCell = '';
+                    } else { currentCell += c; }
                 }
-                if (currentCell || currentRow.length > 0) {
-                    currentRow.push(currentCell);
-                    if (currentRow.join('').trim() !== '') rows.push(currentRow);
-                }
+                if (currentCell || currentRow.length > 0) { currentRow.push(currentCell); if (currentRow.join('').trim() !== '') rows.push(currentRow); }
                 return rows;
             };
 
@@ -1495,176 +1809,96 @@
             if (rows.length < 2) { window.showAlert("Please include the header row and at least one data row."); return; }
 
             const headers = rows[0].map(h => h.trim().toLowerCase());
-            
-            const getIdx = (keywords) => {
-                for(let kw of keywords) {
-                    const index = headers.findIndex(h => h.includes(kw));
-                    if(index > -1) return index;
-                }
-                return -1;
-            };
+            const getIdx = (keywords) => { for(let kw of keywords) { const index = headers.findIndex(h => h.includes(kw)); if(index > -1) return index; } return -1; };
             
             const idx = {
-                in: getIdx(['check-in', 'arrival', 'checkin', 'in']), 
-                out: getIdx(['check-out', 'departure', 'checkout', 'out']),
-                name: getIdx(['guest name', 'guest']), 
-                room: headers.findIndex(h => h === 'room'),
-                roomType: getIdx(['unit type', 'room type']),
-                source: getIdx(['source']), 
-                bookDate: getIdx(['booked on', 'booking date']),
-                bookId: getIdx(['book number', 'reservation number', 'booking id']), 
-                pax: getIdx(['people', 'guests', 'adults']),
-                total: getIdx(['price', 'total', 'amount']), 
-                comm: getIdx(['commission amount', 'commission']),
-                payStatus: getIdx(['payment status']),
-                address: getIdx(['address']),
-                roomsCount: getIdx(['number of rooms', 'rooms']),
-                country: getIdx(['booker country', 'country']),
-                phone: getIdx(['phone number', 'mobile', 'phone']), 
-                email: headers.findIndex(h => h.includes('email') && !h.includes('details')),
-                status: getIdx(['status']),
-                notes: getIdx(['remarks', 'notes', 'comments', 'special comments'])
+                in: getIdx(['check-in', 'arrival', 'checkin', 'in']), out: getIdx(['check-out', 'departure', 'checkout', 'out']), name: getIdx(['guest name', 'guest']), room: headers.findIndex(h => h === 'room'), roomType: getIdx(['unit type', 'room type']), source: getIdx(['source']), bookDate: getIdx(['booked on', 'booking date']), bookId: getIdx(['book number', 'reservation number', 'booking id']), pax: getIdx(['people', 'guests', 'adults']), total: getIdx(['price', 'total', 'amount']), comm: getIdx(['commission amount', 'commission']), payStatus: getIdx(['payment status']), address: getIdx(['address']), roomsCount: getIdx(['number of rooms', 'rooms']), country: getIdx(['booker country', 'country']), phone: getIdx(['phone number', 'mobile', 'phone']), email: headers.findIndex(h => h.includes('email') && !h.includes('details')), status: getIdx(['status']), notes: getIdx(['remarks', 'notes', 'comments', 'special comments'])
             };
-
-            if (idx.in === -1 && idx.name === -1 && idx.bookId === -1 && idx.status === -1) {
-                window.showAlert("IMPORT ERROR:\n\nThis does not look like a valid spreadsheet. No standard headers (Check-in, Guest Name, etc.) were found.\n\nPlease make sure you are pasting a spreadsheet with the header row included.");
-                return;
+            
+            if(idx.name === -1 && idx.in === -1 && idx.out === -1 && idx.bookId === -1) {
+                window.showAlert("ERROR: Invalid CSV format.\n\nCould not find required column headers. Did you accidentally paste an email or plain text instead of a spreadsheet?"); return;
             }
 
             const safeStr = (i, r) => (i > -1 && r[i] != null) ? String(r[i]).replace(/^"|"$/g, '').trim() : "";
-
             const parseDate = (str) => {
-                if(!str) return "";
-                const dClean = str.split(' ')[0];
-                const parts = dClean.split(/[-/]/);
-                if (parts.length !== 3) return dClean; 
-                
+                if(!str) return ""; const dClean = str.split(' ')[0]; const parts = dClean.split(/[-/]/); if (parts.length !== 3) return dClean; 
                 const mMap = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
                 if (isNaN(parts[1])) return `${parts[0]}-${mMap[parts[1].toLowerCase()] || '01'}-${parts[2].padStart(2, '0')}`;
                 else if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`; 
                 else if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
                 return dClean;
             };
-            
             const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
 
             let importCount = 0;
             const currentUserEmail = auth.currentUser ? auth.currentUser.email : 'admin';
             const now = new Date().toISOString();
-            
             const existingImportedMap = {};
-
-            // Detect Legacy Friendly Resort Export format
             const isFriendlyResort = getIdx(['folio no.', 'swims status']) > -1;
 
             for (let i = 1; i < rows.length; i++) {
-                const r = rows[i];
-                if (r.join('').trim() === '') continue;
+                const r = rows[i]; if (r.join('').trim() === '') continue;
                 
-                let rawBId = safeStr(idx.bookId, r).replace(/\.0$/, '');
-                let newRoom = safeStr(idx.room, r).toUpperCase();
-                
-                // If it's already in the DB, just append the room to the existing array
+                let rawBId = safeStr(idx.bookId, r).replace(/\.0$/, ''); let newRoom = safeStr(idx.room, r).toUpperCase();
                 let dbStaff = rawBId ? staff.find(s => s.bookId === rawBId) : null;
+                
                 if (dbStaff) {
                     if (!dbStaff.rooms) dbStaff.rooms = dbStaff.room ? [dbStaff.room] : [];
                     let emptyIndex = dbStaff.rooms.findIndex(rid => !rid);
-                    if (emptyIndex > -1) dbStaff.rooms[emptyIndex] = newRoom;
-                    else dbStaff.rooms.push(newRoom);
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', dbStaff.id), dbStaff);
-                    continue; 
+                    if (emptyIndex > -1) dbStaff.rooms[emptyIndex] = newRoom; else dbStaff.rooms.push(newRoom);
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', dbStaff.id), dbStaff); continue; 
                 }
-
-                // If it's already in the CURRENT import batch, append the room to the array
                 if (rawBId && existingImportedMap[rawBId]) {
                     let existingEntry = existingImportedMap[rawBId];
                     let emptyIndex = existingEntry.rooms.findIndex(rid => !rid);
-                    if (emptyIndex > -1) existingEntry.rooms[emptyIndex] = newRoom;
-                    else existingEntry.rooms.push(newRoom);
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', existingEntry.id), existingEntry);
-                    continue;
+                    if (emptyIndex > -1) existingEntry.rooms[emptyIndex] = newRoom; else existingEntry.rooms.push(newRoom);
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', existingEntry.id), existingEntry); continue;
                 }
                 
-                let fullName = safeStr(idx.name, r) || "UNKNOWN";
-                let last = fullName, first = "";
-                if (fullName.includes(',')) {
-                    const parts = fullName.split(',');
-                    last = parts[0].trim();
-                    first = parts.slice(1).join(',').trim();
-                } else {
-                    const parts = fullName.split(' ');
-                    first = parts[0].trim(); 
-                    last = parts.length > 1 ? parts.slice(1).join(' ').trim() : "";
-                }
+                let fullName = safeStr(idx.name, r) || "UNKNOWN"; let last = fullName, first = "";
+                if (fullName.includes(',')) { const parts = fullName.split(','); last = parts[0].trim(); first = parts.slice(1).join(',').trim();
+                } else { const parts = fullName.split(' '); first = parts[0].trim(); last = parts.length > 1 ? parts.slice(1).join(' ').trim() : ""; }
                 
-                let payStatusTxt = safeStr(idx.payStatus, r);
-                let remarksTxt = safeStr(idx.notes, r);
+                let payStatusTxt = safeStr(idx.payStatus, r); let remarksTxt = safeStr(idx.notes, r);
                 let isBdcPaid = payStatusTxt.includes('Payment through Booking.com') || remarksTxt.includes('Payment through Booking.com') || payStatusTxt.includes('Paid online') || remarksTxt.includes('Paid online');
 
-                let addressTxt = safeStr(idx.address, r);
-                let sourceClean = "other";
-                
-                if (addressTxt.includes("Prudential Tower")) {
-                    sourceClean = 'agoda';
-                } else if (isBdcPaid || (idx.bookId > -1 && headers[idx.bookId].includes('reservation number')) || (idx.bookId > -1 && headers[idx.bookId].includes('book number'))) {
-                    sourceClean = 'booking.com';
+                let addressTxt = safeStr(idx.address, r); let sourceClean = "other";
+                if (addressTxt.includes("Prudential Tower")) { sourceClean = 'agoda';
+                } else if (isBdcPaid || (idx.bookId > -1 && headers[idx.bookId].includes('reservation number')) || (idx.bookId > -1 && headers[idx.bookId].includes('book number'))) { sourceClean = 'booking.com';
                 } else {
                     const s = safeStr(idx.source, r).toLowerCase();
-                    if(s.includes('booking')) sourceClean = 'booking.com'; 
-                    else if(s.includes('agoda')) sourceClean = 'agoda'; 
-                    else if(s.includes('hostelworld')) sourceClean = 'hostelworld'; 
-                    else if(s.includes('airbnb')) sourceClean = 'airbnb'; 
-                    else if(s.includes('direct') || s.includes('walk')) sourceClean = 'direct';
+                    if(s.includes('booking')) sourceClean = 'booking.com'; else if(s.includes('agoda')) sourceClean = 'agoda'; else if(s.includes('hostelworld')) sourceClean = 'hostelworld'; else if(s.includes('airbnb')) sourceClean = 'airbnb'; else if(s.includes('direct') || s.includes('walk')) sourceClean = 'direct';
                 }
 
-                let statusClean = "future";
-                const sStatus = safeStr(idx.status, r).toLowerCase();
+                let statusClean = "future"; const sStatus = safeStr(idx.status, r).toLowerCase();
                 if(sStatus.includes('cancel')) statusClean = "cancelled";
 
-                const total = cleanMoney(safeStr(idx.total, r));
-                const comm = cleanMoney(safeStr(idx.comm, r));
-                
-                let count = 1;
-                const rCountStr = safeStr(idx.roomsCount, r);
-                if(rCountStr) count = parseInt(rCountStr) || 1;
-                
+                const total = cleanMoney(safeStr(idx.total, r)); const comm = cleanMoney(safeStr(idx.comm, r));
+                let count = 1; const rCountStr = safeStr(idx.roomsCount, r); if(rCountStr) count = parseInt(rCountStr) || 1;
                 let linkCode = count > 1 ? last.replace(/[^a-zA-Z]/g, '').substr(0, 4).toUpperCase() : "";
                 if (linkCode.length === 0 && count > 1) linkCode = Math.random().toString(36).substr(2, 4).toUpperCase();
 
                 let cCode = safeStr(idx.country, r).toLowerCase();
-                let parsedCountry = rawCountryMap[cCode] || (cCode.length === 2 ? cCode.toUpperCase() : "Thailand");
+                let parsedCountry = rawCountryMap[cCode] || (cCode.length === 2 ? cCode.toUpperCase() : "[UNKNOWN]");
                 if (cCode.length > 2) parsedCountry = safeStr(idx.country, r); 
 
-                const payments = [];
-                const cin = parseDate(safeStr(idx.in, r));
+                const payments = []; const cin = parseDate(safeStr(idx.in, r));
                 
-                if (isFriendlyResort) {
-                    statusClean = 'unconfirmed';
-                    remarksTxt = "FRIENDLY RESORT BOOKING\n" + remarksTxt;
+                if (isFriendlyResort) { statusClean = 'unconfirmed'; remarksTxt = "FRIENDLY RESORT BOOKING\n" + remarksTxt;
                 } else if (isBdcPaid) {
                     let prefix = sourceClean === 'agoda' ? 'agoda' : 'bdc';
                     if (comm > 0) payments.push({ date: cin, amt: comm, method: `${prefix}-kp` });
                     if (total - comm > 0) payments.push({ date: cin, amt: Number((total - comm).toFixed(2)), method: `${prefix}-pay` });
                 }
 
-                let roomsArr = Array(count).fill("");
-                if (newRoom) roomsArr[0] = newRoom;
-
+                let roomsArr = Array(count).fill(""); if (newRoom) roomsArr[0] = newRoom;
                 const id = Math.random().toString(36).substr(2, 9);
                 const entry = {
                     id, firstName: first.toUpperCase(), lastName: last.toUpperCase(), status: statusClean, room: newRoom, rooms: roomsArr,
-                    checkIn: cin, checkOut: parseDate(safeStr(idx.out, r)), pax: parseInt(safeStr(idx.pax, r)) || 1,
-                    source: sourceClean, bookDate: parseDate(safeStr(idx.bookDate, r)), bookId: rawBId,
-                    phone: safeStr(idx.phone, r), email: safeStr(idx.email, r),
-                    totalPrice: total, netOverride: false, netPrice: total, payments: payments, badCC: false,
-                    refundability: 'non-ref', upgrade: 'none', rating: 'none',
-                    emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: linkCode,
-                    country: parsedCountry, notes: remarksTxt, bookedType: safeStr(idx.roomType, r),
-                    createdAt: now, createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null
+                    checkIn: cin, checkOut: parseDate(safeStr(idx.out, r)), pax: parseInt(safeStr(idx.pax, r)) || 1, source: sourceClean, bookDate: parseDate(safeStr(idx.bookDate, r)), bookId: rawBId, phone: safeStr(idx.phone, r), email: safeStr(idx.email, r), totalPrice: total, netOverride: false, netPrice: total, payments: payments, badCC: false, refundability: 'non-ref', upgrade: 'none', rating: 'none', emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: linkCode, country: parsedCountry, notes: remarksTxt, bookedType: safeStr(idx.roomType, r), createdAt: now, createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null
                 };
                 
                 if (rawBId) existingImportedMap[rawBId] = entry;
-                
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
                 importCount++;
             }
@@ -1678,73 +1912,34 @@
             
             const id = document.getElementById('staff-id').value || Math.random().toString(36).substr(2, 9);
             const status = document.getElementById('staff-status').value;
-            const startUTC = parseYMD(cin);
-            const endUTC = parseYMD(cout);
+            const startUTC = parseYMD(cin); const endUTC = parseYMD(cout);
             const roomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
 
             if (status !== 'unconfirmed' && status !== 'cancelled' && status !== 'noshow') {
                 for (let s of staff) {
                     if (s.id === id) continue;
                     if (s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed') continue;
-                    const sStart = parseYMD(s.checkIn);
-                    const sEnd = parseYMD(s.checkOut);
+                    const sStart = parseYMD(s.checkIn); const sEnd = parseYMD(s.checkOut);
                     if(startUTC < sEnd && sStart < endUTC) {
                         const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
                         for (let r of roomsList) {
-                            if (rList.includes(r)) {
-                                window.showAlert(`ROOM OVERLAP ERROR:\n\nRoom ${r} is already assigned to ${s.firstName} ${s.lastName} during these dates.`);
-                                return;
-                            }
+                            if (rList.includes(r)) { window.showAlert(`ROOM OVERLAP ERROR:\n\nRoom ${r} is already assigned to ${s.firstName} ${s.lastName} during these dates.`); return; }
                         }
                     }
                 }
             }
 
             const payments = [];
-            document.querySelectorAll('.payment-row').forEach(row => {
-                payments.push({ date: row.querySelector('.pay-date').value, amt: Number(row.querySelector('.pay-amt').value) || 0, method: row.querySelector('.pay-method').value });
-            });
-
-            const emailBtn = document.getElementById('email-confirm-btn').dataset.state;
-            const preBtn = document.getElementById('email-prepost-btn').dataset.state;
-            const specBtn = document.getElementById('email-special-btn').dataset.state;
-            const refBtn = document.getElementById('refund-btn').dataset.state;
-            const upBtn = document.getElementById('upgrade-btn').dataset.state;
-            const rateBtn = document.getElementById('rating-btn').dataset.state;
-
-            const existing = staff.find(s => s.id === id);
-            const now = new Date().toISOString();
+            document.querySelectorAll('.payment-row').forEach(row => { payments.push({ date: row.querySelector('.pay-date').value, amt: Number(row.querySelector('.pay-amt').value) || 0, method: row.querySelector('.pay-method').value }); });
             
+            const emailBtn = document.getElementById('email-confirm-btn').dataset.state; const preBtn = document.getElementById('email-prepost-btn').dataset.state; const specBtn = document.getElementById('email-special-btn').dataset.state;
+            const refBtn = document.getElementById('refund-btn').dataset.state; const upBtn = document.getElementById('upgrade-btn').dataset.state; const rateBtn = document.getElementById('rating-btn').dataset.state;
+            
+            const existing = staff.find(s => s.id === id); const now = new Date().toISOString();
             const allRoomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value);
 
             const entry = { 
-                id, 
-                firstName: document.getElementById('first-name').value.trim().toUpperCase(), 
-                lastName: document.getElementById('last-name').value.trim().toUpperCase(), 
-                status: status, 
-                bookedType: document.getElementById('booked-type').value,
-                room: allRoomsList[0] || "", 
-                rooms: allRoomsList,
-                checkIn: cin, checkOut: cout, pax: parseInt(document.getElementById('pax-count').value) || 1,
-                country: document.getElementById('staff-country').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value, 
-                source: document.getElementById('booking-source').value, bookDate: document.getElementById('booking-date').value, bookId: document.getElementById('booking-id').value,
-                linkedId: document.getElementById('link-code').value.trim().toUpperCase(),
-                totalPrice: Number(document.getElementById('total-price').value) || 0,
-                netPrice: Number(document.getElementById('net-price').value) || 0,
-                netOverride: document.getElementById('net-price').dataset.override === 'true',
-                badCC: document.getElementById('bad-cc-box').dataset.bad === 'true',
-                payments: payments,
-                emailConfirm: parseInt(emailBtn) === 1,
-                emailPrePost: parseInt(preBtn) > 0 ? (parseInt(preBtn) === 1 ? 'sent' : 'confirmed') : false,
-                emailSpecial: parseInt(specBtn) === 1,
-                refundability: parseInt(refBtn) === 1 ? 'ref' : 'non-ref',
-                upgrade: parseInt(upBtn) > 0 ? (parseInt(upBtn) === 1 ? 'free' : 'paid') : 'none',
-                rating: parseInt(rateBtn) > 0 ? (parseInt(rateBtn) === 1 ? 'good' : 'bad') : 'none',
-                notes: document.getElementById('staff-notes').value,
-                createdAt: existing?.createdAt || now,
-                createdBy: existing?.createdBy || currentUserEmail,
-                lastEditedAt: now,
-                lastEditedBy: currentUserEmail
+                id, firstName: document.getElementById('first-name').value.trim().toUpperCase(), lastName: document.getElementById('last-name').value.trim().toUpperCase(), status: status, bookedType: document.getElementById('booked-type').value, room: allRoomsList[0] || "", rooms: allRoomsList, checkIn: cin, checkOut: cout, pax: parseInt(document.getElementById('pax-count').value) || 1, country: document.getElementById('staff-country').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value, source: document.getElementById('booking-source').value, bookDate: document.getElementById('booking-date').value, bookId: document.getElementById('booking-id').value, linkedId: document.getElementById('link-code').value.trim().toUpperCase(), totalPrice: Number(document.getElementById('total-price').value) || 0, netPrice: Number(document.getElementById('net-price').value) || 0, netOverride: document.getElementById('net-price').dataset.override === 'true', badCC: document.getElementById('bad-cc-box').dataset.bad === 'true', payments: payments, emailConfirm: parseInt(emailBtn) === 1, emailPrePost: parseInt(preBtn) > 0 ? (parseInt(preBtn) === 1 ? 'sent' : 'confirmed') : false, emailSpecial: parseInt(specBtn) === 1, refundability: parseInt(refBtn) === 1 ? 'ref' : 'non-ref', upgrade: parseInt(upBtn) > 0 ? (parseInt(upBtn) === 1 ? 'free' : 'paid') : 'none', rating: parseInt(rateBtn) > 0 ? (parseInt(rateBtn) === 1 ? 'good' : 'bad') : 'none', notes: document.getElementById('staff-notes').value, createdAt: existing?.createdAt || now, createdBy: existing?.createdBy || currentUserEmail, lastEditedAt: now, lastEditedBy: currentUserEmail
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
             window.closeStaffModal();
@@ -1752,18 +1947,12 @@
 
         window.editStaff = (id) => {
             const s = staff.find(x => x.id === id); if (!s) return;
-            
             const modalContent = document.getElementById('staff-modal-content');
-            modalContent.style.position = 'relative';
-            modalContent.style.left = 'auto';
-            modalContent.style.top = 'auto';
-            modalContent.style.margin = 'auto';
+            modalContent.style.position = 'relative'; modalContent.style.left = 'auto'; modalContent.style.top = 'auto'; modalContent.style.margin = '0';
             
             document.getElementById('staff-id').value = s.id; 
-            document.getElementById('first-name').value = s.firstName || ""; 
-            document.getElementById('last-name').value = s.lastName || ""; 
-            document.getElementById('phone').value = s.phone || ""; 
-            document.getElementById('email').value = s.email || ""; 
+            document.getElementById('first-name').value = s.firstName || ""; document.getElementById('last-name').value = s.lastName || ""; 
+            document.getElementById('phone').value = s.phone || ""; document.getElementById('email').value = s.email || ""; 
             document.getElementById('staff-country').value = s.country || "Thailand"; 
             document.getElementById('staff-status').value = s.status; window.updateStatusColor(document.getElementById('staff-status'));
             document.getElementById('booked-type').value = s.bookedType || ""; 
@@ -1774,21 +1963,15 @@
             rList.forEach(r => window.addRoomSelect(r));
             
             document.getElementById('total-price').value = Number(s.totalPrice || 0).toFixed(2);
-            document.getElementById('net-price').value = Number(s.netPrice || 0).toFixed(2);
-            document.getElementById('net-price').dataset.override = s.netOverride ? 'true' : 'false';
+            document.getElementById('net-price').value = Number(s.netPrice || 0).toFixed(2); document.getElementById('net-price').dataset.override = s.netOverride ? 'true' : 'false';
             
             const bcc = document.getElementById('bad-cc-box'); bcc.dataset.bad = s.badCC ? 'true' : 'false';
-            if(s.badCC){ bcc.innerHTML = '<span class="text-white text-[10px] font-black">X</span>'; bcc.classList.remove('border-slate-300'); bcc.classList.add('bg-red-500', 'border-red-600'); }
-            else { bcc.innerHTML = ''; bcc.classList.remove('bg-red-500', 'border-red-600'); bcc.classList.add('border-slate-300'); }
+            if(s.badCC){ bcc.innerHTML = '<span class="text-white text-[10px] font-black">X</span>'; bcc.classList.remove('border-slate-300'); bcc.classList.add('bg-red-500', 'border-red-600'); } else { bcc.innerHTML = ''; bcc.classList.remove('bg-red-500', 'border-red-600'); bcc.classList.add('border-slate-300'); }
 
             document.getElementById('payments-list').innerHTML = '';
             if(s.payments) s.payments.forEach(p => window.addPaymentRow(p.date, Number(p.amt || 0).toFixed(2), p.method, true));
 
-            document.getElementById('booking-source').value = s.source || 'direct';
-            document.getElementById('booking-date').value = s.bookDate || "";
-            document.getElementById('booking-id').value = s.bookId || "";
-            document.getElementById('link-code').value = s.linkedId || "";
-            document.getElementById('staff-notes').value = s.notes || "";
+            document.getElementById('booking-source').value = s.source || 'direct'; document.getElementById('booking-date').value = s.bookDate || ""; document.getElementById('booking-id').value = s.bookId || ""; document.getElementById('link-code').value = s.linkedId || ""; document.getElementById('staff-notes').value = s.notes || "";
 
             setMulti('email-confirm-btn', s.emailConfirm ? 1 : 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
             setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='sent'?1:2), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
@@ -1797,52 +1980,24 @@
             setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade==='free'?1:2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
             setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating==='good'?1:2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
 
-            window.updateHeaderName(); 
-            window.checkEmailProxy(s.email || ""); 
-            window.calcFinancials(); 
-            window.syncLabels(); 
+            window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms();
             
-            // Mini Mode: Collapse all 3 sections on open so it takes up less space
-            window.toggleSection('guest-profile-section', 'profile-chevron', false);
-            window.toggleSection('fin-section', 'fin-chevron', false);
-            window.toggleSection('meta-section', 'meta-chevron', false);
-            
-            window.updateAvailableRooms();
+            // Expanded by default
+            window.toggleSection('guest-profile-section', 'profile-chevron', true);
+            window.toggleSection('fin-section', 'fin-chevron', true);
+            window.toggleSection('meta-section', 'meta-chevron', true);
             
             document.getElementById('delete-btn').style.visibility = 'visible'; document.getElementById('split-btn').style.visibility = 'visible'; document.getElementById('dup-btn').style.visibility = 'visible';
-            
             const logStr = `CREATED BY ${s.createdBy||'UNKNOWN'} ON ${s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-GB').slice(0,5) : '--'}` + (s.lastEditedBy ? ` | LAST EDIT: ${s.lastEditedBy} ON ${new Date(s.lastEditedAt).toLocaleDateString('en-GB').slice(0,5)}` : '');
             document.getElementById('audit-log').innerText = logStr;
 
-            if(currentUserRole === 'staff') {
-                document.getElementById('delete-btn').style.visibility = 'hidden'; document.getElementById('split-btn').style.visibility = 'hidden'; document.querySelector('#save-btn').style.display = 'none';
-            }
+            if(currentUserRole === 'staff') { document.getElementById('delete-btn').style.visibility = 'hidden'; document.getElementById('split-btn').style.visibility = 'hidden'; document.querySelector('#save-btn').style.display = 'none'; }
             document.getElementById('staff-modal').style.display = 'flex';
         };
 
         window.requestDelete = () => {
             if(currentUserRole === 'staff') return;
             window.showAlert(`Permanently delete this record?`, true, async () => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', document.getElementById('staff-id').value)); window.closeStaffModal(); });
-        };
-        
-        window.bulkDelete = () => {
-            if(currentUserRole !== 'admin') { window.showAlert("Admin access required."); return; }
-            
-            const selStatus = document.getElementById('status-filter').value;
-            const filtered = staff.filter(s => {
-                const nameMatch = !searchTerm || (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm);
-                const statusMatch = selStatus === 'ALL' || s.status === selStatus;
-                return nameMatch && statusMatch;
-            });
-
-            if (filtered.length === 0) { window.showAlert("No records match your current search criteria."); return; }
-
-            window.showAlert(`BULK DELETE WARNING:\n\nYou are about to permanently delete the ${filtered.length} bookings currently visible in the list below.\n\nThis cannot be undone!`, true, async () => { 
-                document.getElementById('boot-loader').style.display = 'flex'; document.getElementById('sync-status').innerText = 'DELETING...';
-                const promises = filtered.map(s => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id)));
-                await Promise.all(promises); 
-                document.getElementById('boot-loader').style.display = 'none'; window.closeAlert(); 
-            });
         };
 
         window.showAlert = (msg, isConfirm = false, onConfirm = null) => {
