@@ -1773,8 +1773,8 @@
             document.getElementById('split-modal').style.display = 'none'; window.closeStaffModal();
         };
 
-        window.openCSVModal = () => { document.getElementById('import-textarea').value = ''; document.getElementById('import-modal').style.display = 'flex'; };
-        window.openEmailParserModal = () => { document.getElementById('email-textarea').value = ''; document.getElementById('email-modal').style.display = 'flex'; };
+        window.openCSVModal = () => { document.getElementById('import-textarea').value = ''; document.getElementById('import-modal').style.display = 'flex'; setTimeout(() => document.getElementById('import-textarea').focus(), 50); };
+        window.openEmailParserModal = () => { document.getElementById('email-textarea').value = ''; document.getElementById('email-modal').style.display = 'flex'; setTimeout(() => document.getElementById('email-textarea').focus(), 50); };
         
         window.parseEmail = () => {
             const text = document.getElementById('email-textarea').value;
@@ -1824,8 +1824,8 @@
                 if (extractedNotes) notes = "BED PREFERENCE: " + extractedNotes;
                 
                 const bTypeRaw = extract(/(.*?)\nTHB/); 
-                const parenMatch = bTypeRaw.match(/\((.*?)\)/);
-                bType = parenMatch ? parenMatch[1] : bTypeRaw;
+                const parenMatch = bTypeRaw.match(/\((.*)\)/);
+                bType = parenMatch ? parenMatch[1].trim() : bTypeRaw;
                 
                 if (text.includes('charged the total price of the reservation if they cancel anytime') || text.includes('Non-refundable')) {
                     refundability = 1;
