@@ -102,9 +102,9 @@
 
     <div id="boot-loader" class="loading-overlay"><div class="spinner"></div><div class="mt-4 font-black text-slate-800 uppercase tracking-widest text-center px-4"><span id="sync-status">Authenticating...</span></div></div>
 
-    <div class="max-w-[1950px] mx-auto unselectable">
+    <div class="max-w-[1950px] mx-auto">
         <!-- Globally Sticky Compact Header -->
-        <div class="bg-white px-2 py-1.5 rounded-none sm:rounded-lg shadow-sm border-b sm:border border-slate-200 mb-1 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2 sticky top-0 z-50">
+        <div class="bg-white px-2 py-1.5 rounded-none sm:rounded-lg shadow-sm border-b sm:border border-slate-200 mb-1 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2 sticky top-0 z-50 unselectable">
             
             <div class="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-start">
                 <div class="flex items-center gap-2">
@@ -197,14 +197,14 @@
         </div>
 
         <!-- DATABASE TAB -->
-        <div id="database-view" class="bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden unselectable hidden">
-            <div class="p-2 bg-slate-100 border-b border-slate-300 flex justify-between items-center">
+        <div id="database-view" class="bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden hidden">
+            <div class="p-2 bg-slate-100 border-b border-slate-300 flex justify-between items-center unselectable">
                 <h2 class="font-black text-slate-700 uppercase tracking-widest text-sm">Database Editor</h2>
                 <button id="admin-bulk-delete" onclick="window.bulkDelete()" class="hidden px-3 py-1 bg-orange-600 text-white rounded shadow text-xs font-black uppercase items-center gap-1 hover:bg-orange-700 active:scale-95 whitespace-nowrap"><i data-lucide="list-x" size="14"></i> Delete Visible</button>
             </div>
             <div class="overflow-x-auto min-h-[400px]">
                 <table class="w-full text-left border-collapse min-w-[900px]">
-                    <thead>
+                    <thead class="unselectable">
                         <tr class="bg-slate-800 text-white text-base font-black uppercase tracking-widest cursor-pointer">
                             <th onclick="window.sortDatabase('lastName')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[18%]">Guest Name <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
                             <th onclick="window.sortDatabase('source')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[12%]">Source <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
@@ -242,8 +242,8 @@
         </div>
 
         <!-- ACCOUNTING TAB -->
-        <div id="accounting-view" class="bg-slate-100 sm:bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden unselectable hidden">
-            <div class="p-4 bg-slate-100 border-b border-slate-300 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+        <div id="accounting-view" class="bg-slate-100 sm:bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden hidden">
+            <div class="p-4 bg-slate-100 border-b border-slate-300 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center unselectable">
                 <h2 class="font-black text-slate-800 uppercase tracking-tighter text-xl shrink-0"><i data-lucide="bar-chart-3" class="inline-block mr-2 text-blue-600"></i>Financial KPIs</h2>
                 
                 <div class="flex items-center gap-2 bg-white p-1 rounded border border-slate-300 shadow-sm w-full md:w-auto overflow-hidden">
@@ -255,7 +255,7 @@
             </div>
 
             <div class="p-4 sm:p-6 bg-white">
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8 unselectable">
                     <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
                         <i data-lucide="calculator" class="absolute -bottom-4 -right-4 text-blue-500 opacity-10 w-24 h-24"></i>
                         <span class="text-blue-500 font-black text-xs uppercase tracking-widest mb-1 z-10">Gross Booked</span>
@@ -286,9 +286,9 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     <div class="lg:col-span-1 border border-slate-300 rounded-lg overflow-hidden shadow-sm self-start">
-                        <div class="bg-slate-800 text-white p-2 font-black uppercase tracking-widest text-xs border-b border-slate-700 text-center">Bed Popularity</div>
+                        <div class="bg-slate-800 text-white p-2 font-black uppercase tracking-widest text-xs border-b border-slate-700 text-center unselectable">Bed Popularity</div>
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-100">
+                            <thead class="bg-slate-100 unselectable">
                                 <tr class="text-[10px] uppercase tracking-widest font-bold text-slate-500">
                                     <th class="p-2 border-r border-slate-200">Bed Setup</th>
                                     <th class="p-2 border-r border-slate-200 text-right" title="Bookings">Bks</th>
@@ -301,12 +301,12 @@
                     
                     <div class="lg:col-span-3">
                         <div class="flex justify-between items-end border-b border-slate-200 pb-2 mb-3">
-                            <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm">Filtered Ledger</h3>
-                            <button onclick="window.exportLedgerCSV()" class="text-[10px] font-black uppercase bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded flex items-center gap-1 shadow-sm transition-colors"><i data-lucide="download" size="12"></i> Export CSV</button>
+                            <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm unselectable">Filtered Ledger</h3>
+                            <button onclick="window.exportLedgerCSV()" class="text-[10px] font-black uppercase bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded flex items-center gap-1 shadow-sm transition-colors unselectable"><i data-lucide="download" size="12"></i> Export CSV</button>
                         </div>
                         <div class="overflow-x-auto min-h-[300px] max-h-[500px] border border-slate-300 rounded-lg shadow-sm">
                             <table class="w-full text-left border-collapse text-sm min-w-[800px]" id="acc-ledger-table">
-                                <thead class="bg-slate-800 text-white sticky top-0 z-10">
+                                <thead class="bg-slate-800 text-white sticky top-0 z-10 unselectable">
                                     <tr class="font-black uppercase tracking-wider text-sm cursor-pointer">
                                         <th onclick="window.sortAccounting('name')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[16%]">Guest Name <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
                                         <th onclick="window.sortAccounting('source')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[10%]">Source <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
@@ -543,10 +543,21 @@
     <!-- Email Parser Modal -->
     <div id="email-modal" class="alert-modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
-            <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm"><span>Parse Confirmation Email</span><button type="button" onclick="document.getElementById('email-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div>
+            <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm">
+                <span>Single Import</span>
+                <button type="button" onclick="document.getElementById('email-modal').style.display='none'"><i data-lucide="x" size="18"></i></button>
+            </div>
             <div class="p-4 flex flex-col gap-3">
-                <p class="text-sm font-bold text-slate-500 leading-tight">Paste the text of a Booking.com, AirBnB, or Hostelworld confirmation email here.</p>
-                <textarea id="email-textarea" rows="8" class="w-full bg-slate-50 border border-slate-300 font-mono text-[10px] p-2 rounded outline-none focus:ring-2 focus:ring-purple-500 whitespace-pre" placeholder="Paste email text here..."></textarea>
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Select Source Format</label>
+                    <select id="import-format-select" class="w-full bg-slate-50 border border-slate-300 font-bold text-sm p-2 rounded outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer">
+                        <option value="bdc-extranet">Booking.com (Extranet Dashboard)</option>
+                        <option value="airbnb-email">Airbnb (Confirmation Email)</option>
+                        <option value="hw-web">Hostelworld (Web Dashboard)</option>
+                        <option value="hw-email">Hostelworld (Confirmation Email)</option>
+                    </select>
+                </div>
+                <textarea id="email-textarea" rows="8" class="w-full bg-slate-50 border border-slate-300 font-mono text-[10px] p-2 rounded outline-none focus:ring-2 focus:ring-purple-500 whitespace-pre" placeholder="Paste text here..."></textarea>
                 <div class="flex gap-2 justify-end mt-2">
                     <button onclick="document.getElementById('email-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button>
                     <button onclick="window.parseEmail()" class="px-8 py-2 bg-purple-600 text-white rounded-lg font-black text-sm uppercase flex items-center gap-1"><i data-lucide="zap" size="16"></i> Extract</button>
@@ -1799,9 +1810,18 @@
             const text = document.getElementById('email-textarea').value;
             if(!text || text.trim() === '') return;
             
-            const extract = (regex, defaultVal = '') => { const match = text.match(regex); return match ? match[1].trim() : defaultVal; };
+            const format = document.getElementById('import-format-select').value;
+            const extract = (regex, source = text) => { const match = source.match(regex); return match ? match[1].trim() : ''; };
             const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
-            const parseDateStr = (dateStr, isPast = false) => {
+            
+            const formatStrictDate = (dateStr) => {
+                if(!dateStr) return '';
+                const d = new Date(dateStr + " 12:00:00Z");
+                if(isNaN(d.getTime())) return '';
+                return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+            };
+
+            const parseDateRelative = (dateStr, isPast = false) => {
                 if(!dateStr) return '';
                 const mths = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
                 let cleanStr = dateStr.replace(/,/g, '').replace(/(st|nd|rd|th)\b/gi, '').replace(/['´`’]/g, '').replace(/\s+/g, ' ').trim();
@@ -1813,26 +1833,17 @@
                         mthIndex = i; break;
                     }
                 }
-                
                 if (mthIndex === -1) return '';
-                
                 let mth = mths[parts[mthIndex].toLowerCase().substring(0,3)];
-                let dayVal = 1;
-                let yrVal = 0;
+                let dayVal = 1; let yrVal = 0;
                 
-                if (mthIndex > 0 && !isNaN(parseInt(parts[mthIndex - 1]))) {
-                    dayVal = parseInt(parts[mthIndex - 1]);
-                    if (mthIndex + 1 < parts.length) {
-                        let yStr = parts[mthIndex + 1];
-                        if (/^\d{4}$/.test(yStr)) yrVal = parseInt(yStr);
-                        else if (/^\d{2}$/.test(yStr)) yrVal = 2000 + parseInt(yStr);
-                    }
-                } else if (mthIndex + 1 < parts.length && !isNaN(parseInt(parts[mthIndex + 1]))) {
-                    dayVal = parseInt(parts[mthIndex + 1]);
-                    if (mthIndex + 2 < parts.length) {
-                        let yStr = parts[mthIndex + 2];
-                        if (/^\d{4}$/.test(yStr)) yrVal = parseInt(yStr);
-                        else if (/^\d{2}$/.test(yStr)) yrVal = 2000 + parseInt(yStr);
+                let candidates = parts.filter((p, i) => i !== mthIndex && /^\d+$/.test(p));
+                if (candidates.length > 0) {
+                    dayVal = parseInt(candidates[0]);
+                    if (candidates.length > 1) {
+                        let y = parseInt(candidates[1]);
+                        if (y < 100) yrVal = 2000 + y;
+                        else if (y >= 2000) yrVal = y;
                     }
                 }
                 
@@ -1849,75 +1860,147 @@
             };
 
             let src = '', gName = '', checkIn = '', checkOut = '', pax = 1, phone = '', email = '', total = 0, comm = 0, bId = '', notes = '', bType = '', bDate = '', countryCode = '', refundability = 0;
+            let hasBdcPayment = false;
 
-            if (text.includes('Booking.com') && text.includes('Reservation Details')) {
-                src = 'booking.com';
-                gName = extract(/Guest name:[\s\S]*?\n(.*?)\n/i) || extract(/Guest name:\s*([^\n]+)/i);
-                countryCode = extract(/Guest name:[\s\S]*?\n.*?\n\s*([a-zA-Z]{2})\s*\n/);
-                checkIn = parseDateStr(extract(/Check-in[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
-                checkOut = parseDateStr(extract(/Check-out[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
-                bId = extract(/Booking number:[\s\S]*?(\d+)/i);
-                bDate = parseDateStr(extract(/Received[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true);
-                const paxStr = extract(/Total guests:[\s\S]*?(\d+)/i); if(paxStr) pax = parseInt(paxStr);
-                
-                total = cleanMoney(extract(/Total price[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i)) || cleanMoney(extract(/Total price[\s\S]{0,15}?([\d,.]+)/i));
-                comm = cleanMoney(extract(/Commission and charges:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i)) || cleanMoney(extract(/Commission and charges:[\s\S]{0,15}?([\d,.]+)/i));
-                
-                phone = extract(/(\+[\d\s]+)/);
-                email = extract(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/);
-                
-                let extractedNotes = extract(/BED PREFERENCE:(.*)/i);
-                if (extractedNotes) notes = "BED PREFERENCE: " + extractedNotes;
-                
-                const bTypeRaw = extract(/([^\n]+?)\s*THB\s*[\d,.]+/i); 
-                const parenMatch = bTypeRaw ? bTypeRaw.match(/\((.*)\)/) : null;
-                bType = parenMatch ? parenMatch[1].trim() : bTypeRaw;
-                
-                if (text.includes('charged the total price of the reservation if they cancel anytime') || text.includes('Non-refundable')) {
-                    refundability = 1;
-                } else if (text.includes('Cancellation') && text.includes('free of charge')) {
-                    refundability = 2;
-                }
-
-            } else if (text.includes('Airbnb') && text.includes('Reservation confirmed')) {
-                src = 'airbnb';
-                gName = extract(/Reservation confirmed - (.*?)\s+arrives/i);
-                if(!gName) gName = extract(/welcome\s+(.*?)\./i);
-                checkIn = parseDateStr(extract(/Check-in[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
-                checkOut = parseDateStr(extract(/Checkout[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
-                bId = extract(/Confirmation code[\s\S]*?([A-Z0-9]+)/i);
-                bDate = parseDateStr(extract(/Airbnb[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true);
-                const paxStr = extract(/Guests[\s\S]*?(\d+)/i); if(paxStr) pax = parseInt(paxStr);
-                
-                let totalStr = extract(/Total\s*(?:\([A-Z]+\))?[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
-                if (!totalStr) totalStr = extract(/Guest paid[\s\S]{0,60}?nights[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
-                total = cleanMoney(totalStr);
-                
-                const payout = cleanMoney(extract(/You earn[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
-                comm = Number((total - payout).toFixed(2));
-                
-                bType = extract(/([^\n]+?)\s*Room\s*Check-in/i);
-                
-                notes = extract(/Identity verified[\s\S]*?\n([^\n]+)\n\s*Send.*?a Message/i);
-                if(!notes || notes.includes('Translated') || notes.includes('Add guest')) notes = ""; 
-                
-                const policyMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i);
-                if (policyMatch) {
-                    const pol = policyMatch[1].toLowerCase();
-                    if (pol.includes('strict') || pol.includes('firm') || pol.includes('non-refundable')) refundability = 1;
-                    else refundability = 2;
-                }
-                
-            } else if (text.includes('Hostelworld') || text.includes('hostelworld.com')) {
-                src = 'hostelworld';
-                
-                if (text.includes('Booking Details') && text.includes('Reference')) {
-                    // FORMAT 2: Webpage "Booking Details"
-                    bId = extract(/Reference\s*\n\s*([\d-]+)/i);
-                    bDate = parseDateStr(extract(/Booked\s*\n\s*([^\n]+)/i), true);
-                    checkIn = parseDateStr(extract(/Arriving\s*\n\s*([^\n]+)/i), false);
+            switch (format) {
+                case 'bdc-extranet':
+                    src = 'booking.com';
+                    let lines = text.split(/[\n\r]+/).map(l => l.trim().replace(/\xa0/g, ' ')).filter(Boolean);
                     
-                    let regexRefBlock = new RegExp(`Reference\\s*\\n\\s*${bId}\\s*\\n\\s*([^\\n]+)\\s*\\n\\s*([^\\n]+)\\s*\\n\\s*([^\\n]+)`, 'i');
+                    let getLineData = (keywords) => {
+                        let idx = lines.findIndex(l => keywords.some(k => l.toLowerCase() === k.toLowerCase() || l.toLowerCase().startsWith(k.toLowerCase())));
+                        if (idx > -1) {
+                            let match = keywords.find(k => lines[idx].toLowerCase().startsWith(k.toLowerCase()));
+                            let remainder = lines[idx].substring(match.length).trim();
+                            if (remainder) return remainder;
+                            if (idx + 1 < lines.length) return lines[idx + 1];
+                        }
+                        return "";
+                    };
+
+                    checkIn = formatStrictDate(parseDateRelative(getLineData(['Check-in'])));
+                    checkOut = formatStrictDate(parseDateRelative(getLineData(['Check-out'])));
+                    bDate = formatStrictDate(parseDateRelative(getLineData(['Received', 'Booked on']), true));
+                    
+                    bId = getLineData(['Booking number:']);
+                    pax = parseInt(getLineData(['Total guests:'])) || 1;
+                    total = cleanMoney(getLineData(['Total price']));
+                    comm = cleanMoney(getLineData(['Commission and charges:', 'Commissionable amount:']));
+
+                    let guestIdx = lines.findIndex(l => l.toLowerCase().startsWith('guest name:'));
+                    if (guestIdx > -1) {
+                        let remainder = lines[guestIdx].substring('guest name:'.length).trim();
+                        if (remainder) {
+                            gName = remainder;
+                            email = extract(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/, lines[guestIdx]);
+                            phone = extract(/(\+[\d\s]+)/, lines[guestIdx]);
+                            let ccMatch = lines[guestIdx].replace(email, '').replace(phone, '').match(/\s+([a-zA-Z]{2})$/);
+                            if (ccMatch) countryCode = ccMatch[1].toUpperCase();
+                            gName = gName.replace(email, '').replace(phone, '').replace(/\s+[a-zA-Z]{2}$/, '').trim();
+                        } else {
+                            gName = lines[guestIdx + 1];
+                            for (let i = guestIdx + 2; i < guestIdx + 6; i++) {
+                                if (!lines[i] || lines[i].includes('Preferred language') || lines[i].includes('Channel:')) break;
+                                if (lines[i].length === 2 && !countryCode) countryCode = lines[i].toUpperCase();
+                                else if (lines[i].includes('@') && !email) email = lines[i];
+                                else if (lines[i].includes('+') && !phone) phone = lines[i];
+                            }
+                        }
+                    }
+
+                    let bTypeIdx = -1;
+                    for (let i = 0; i < lines.length; i++) {
+                        // Find the line that starts with a day of the week (e.g., "Sat 27 Jun")
+                        if (/^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\d{1,2}\s+[A-Za-z]{3}/i.test(lines[i]) && i >= 2) {
+                            // Ensure the line immediately above it is a price
+                            if (/(?:THB|฿|\$|€|£|[A-Z]{3})[\s]*[\d,.]+/i.test(lines[i-1])) {
+                                bTypeIdx = i - 2;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Fallback just in case
+                    if (bTypeIdx === -1) {
+                        let policyIdx = lines.findIndex(l => l.toLowerCase().endsWith('cancellation policy.'));
+                        if (policyIdx > -1 && policyIdx + 1 < lines.length) bTypeIdx = policyIdx + 1;
+                    }
+
+                    if (bTypeIdx > -1) {
+                        let bTypeRaw = lines[bTypeIdx];
+                        let parenMatch = bTypeRaw.match(/\(([^)]+)\)$/);
+                        bType = parenMatch ? parenMatch[1].trim() : bTypeRaw;
+                    }
+
+                    if (text.match(/cancel at any time|cancel anytime|Non-refundable|charged the total price/i)) refundability = 1;
+                    else if (text.match(/free of charge/i)) refundability = 2;
+
+                    if (text.includes('Payment is facilitated') || text.includes('Booking.com will collect')) hasBdcPayment = true;
+
+                    break;
+                    
+                case 'airbnb-email':
+                    src = 'airbnb';
+                    gName = extract(/Reservation confirmed - (.*?)\s+arrives/i);
+                    if(!gName) gName = extract(/welcome\s+(.*?)\./i);
+                    checkIn = parseDateRelative(extract(/Check-in[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
+                    checkOut = parseDateRelative(extract(/Checkout[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
+                    bId = extract(/Confirmation code[\s\S]*?([A-Z0-9]+)/i);
+                    bDate = parseDateRelative(extract(/Airbnb[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true);
+                    pax = parseInt(extract(/Guests[\s\S]*?(\d+)/i)) || 1;
+                    
+                    let totalStr = extract(/Total\s*(?:\([A-Z]+\))?[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
+                    if (!totalStr) totalStr = extract(/Guest paid[\s\S]{0,60}?nights[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
+                    total = cleanMoney(totalStr);
+                    
+                    const payout = cleanMoney(extract(/You earn[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
+                    comm = Number((total - payout).toFixed(2));
+                    bType = extract(/([^\n]+?)\s*Room\s*Check-in/i);
+                    notes = extract(/Identity verified[\s\S]*?\n([^\n]+)\n\s*Send.*?a Message/i);
+                    if(!notes || notes.includes('Translated') || notes.includes('Add guest')) notes = ""; 
+                    
+                    const policyMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i);
+                    if (policyMatch) {
+                        const pol = policyMatch[1].toLowerCase();
+                        if (pol.includes('strict') || pol.includes('firm') || pol.includes('non-refundable')) refundability = 1;
+                        else refundability = 2;
+                    }
+                    break;
+
+                case 'hw-email':
+                    src = 'hostelworld';
+                    bId = extract(/\(ref:\s*([\d-]+)\)/i);
+                    bDate = parseDateRelative(extract(/made on\s*([^\n]+?)\s*by/i), true);
+                    gName = extract(/by the customer[\s\S]*?:\s*\n+([^\n]+)/i);
+                    checkIn = parseDateRelative(extract(/Arrival:\s*([^\n]+)/i), false);
+                    
+                    let nightsStrE = extract(/Nights:\s*(\d+)/i);
+                    if (checkIn && nightsStrE) {
+                        let n = parseInt(nightsStrE);
+                        let d = new Date(checkIn + "T12:00:00Z");
+                        d.setUTCDate(d.getUTCDate() + n);
+                        checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+                    }
+                    
+                    pax = parseInt(extract(/Guests:\s*(\d+)/i)) || 1;
+                    total = cleanMoney(extract(/Total Price:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
+                    comm = cleanMoney(extract(/Deposit Paid:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
+                    bType = extract(/Beds? reserved in\s+([^\n]+)/i);
+                    if (bType) {
+                        if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)';
+                        else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; 
+                    }
+                    if (text.includes('Non-refundable') || text.includes('Non Refundable')) refundability = 1;
+                    else refundability = 2;
+                    break;
+
+                case 'hw-web':
+                    src = 'hostelworld';
+                    bId = extract(/Reference\s*\n*\s*([\d-]+)/i);
+                    bDate = parseDateRelative(extract(/Booked\s*\n*\s*([^\n]+)/i), true);
+                    checkIn = parseDateRelative(extract(/Arriving\s*\n*\s*([^\n]+)/i), false);
+                    
+                    let regexRefBlock = new RegExp(`Reference\\s*\\n*\\s*${bId}\\s*\\n*\\s*([^\\n]+)\\s*\\n*\\s*([^\\n]+)`, 'i');
                     let matchBlock = text.match(regexRefBlock);
                     if (matchBlock) {
                         gName = matchBlock[1].trim();
@@ -1928,63 +2011,37 @@
                     email = allEmails.find(e => !e.toLowerCase().includes('hostelworld')) || '';
                     phone = extract(/(\+[\d\s]+)/);
                     
-                    let nightsStr = extract(/(\d+)\s*Nights/i);
-                    if (checkIn && nightsStr) {
-                        let n = parseInt(nightsStr);
+                    let nightsStrW = extract(/(\d+)\s*Nights/i);
+                    if (checkIn && nightsStrW) {
+                        let n = parseInt(nightsStrW);
                         let d = new Date(checkIn + "T12:00:00Z");
                         d.setUTCDate(d.getUTCDate() + n);
                         checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
                     }
                     
-                    total = cleanMoney(extract(/Subtotal\s*\n\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
-                    comm = cleanMoney(extract(/Hostelworld Deposit\s*\n\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
+                    total = cleanMoney(extract(/Subtotal\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
+                    comm = cleanMoney(extract(/Hostelworld Deposit\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
                     
-                    bType = extract(/Price\s*\n\s*[^\n]+\s*\n\s*([^\n]+)/i);
-                    if(bType) bType = bType.replace(/Promo/i, '').trim();
-                    
-                    let paxMatch = text.match(new RegExp(`${(bType || '').replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}[\\s\\S]*?\\n\\s*(\\d+)`, 'i'));
-                    if (paxMatch) pax = parseInt(paxMatch[1]);
-                    
-                } else if (text.includes('ref:')) {
-                    // FORMAT 1: Confirmation Email
-                    bId = extract(/\(ref:\s*([\d-]+)\)/i);
-                    bDate = parseDateStr(extract(/made on\s*([^\n]+?)\s*by/i), true);
-                    gName = extract(/by the customer[\s\S]*?:\s*\n+([^\n]+)/i);
-                    checkIn = parseDateStr(extract(/Arrival:\s*([^\n]+)/i), false);
-                    
-                    let nightsStr = extract(/Nights:\s*(\d+)/i);
-                    if (checkIn && nightsStr) {
-                        let n = parseInt(nightsStr);
-                        let d = new Date(checkIn + "T12:00:00Z");
-                        d.setUTCDate(d.getUTCDate() + n);
-                        checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+                    let rowMatch = text.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*\n*\s*([\s\S]+?)(?:\s+Promo)?\s*\n*\s*(\d+)\s*\n*\s*\d+\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})\s*[\d,.]+/i);
+                    if (rowMatch) {
+                        bType = rowMatch[1].replace(/^FMP\s+/i, '').trim();
+                        pax = parseInt(rowMatch[2]);
                     }
-                    
-                    const paxStr = extract(/Guests:\s*(\d+)/i); if(paxStr) pax = parseInt(paxStr);
-                    total = cleanMoney(extract(/Total Price:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
-                    comm = cleanMoney(extract(/Deposit Paid:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
-                    
-                    phone = '';
-                    email = '';
-                    
-                    bType = extract(/Beds? reserved in\s+([^\n]+)/i);
-                }
-                
-                if (bType) {
-                    const btLower = bType.toLowerCase();
-                    if (btLower.includes('2 bed private ensuite')) {
-                        bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)';
-                    } else if (btLower.includes('3 bed') && !btLower.includes('dorm')) {
-                        bType = 'Triple Room'; 
+                    if (bType) {
+                        if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)';
+                        else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; 
                     }
+                    if (text.includes('Non-refundable') || text.includes('Non Refundable')) refundability = 1;
+                    else refundability = 2;
+                    break;
+            }
+            
+            // SMART 7-DAY REFUNDABILITY OVERRIDE
+            if (checkIn) {
+                let cinDate = new Date(checkIn + "T12:00:00Z");
+                if ((cinDate.getTime() - Date.now()) <= 7 * 86400000) {
+                    refundability = 1; // Force 1 (Non-Refundable)
                 }
-                
-                if (text.includes('Non-refundable') || text.includes('Non Refundable')) refundability = 1;
-                else refundability = 2;
-
-            } else {
-                window.showAlert("Could not recognize this text format. Ensure you pasted the entire confirmation block.");
-                return;
             }
             
             // Check for existing booking
@@ -1995,6 +2052,9 @@
                 // Override empty values with parsed email values
                 if (email && !document.getElementById('email').value) document.getElementById('email').value = email;
                 if (phone && !document.getElementById('phone').value) document.getElementById('phone').value = phone;
+                if (checkIn && !document.getElementById('check-in').value) document.getElementById('check-in').value = checkIn;
+                if (checkOut && !document.getElementById('check-out').value) document.getElementById('check-out').value = checkOut;
+                if (bType && !document.getElementById('booked-type').value) document.getElementById('booked-type').value = bType;
                 
                 if (countryCode && document.getElementById('staff-country').value === "[UNKNOWN]") {
                     const mapKey = countryCode.toLowerCase().trim();
@@ -2054,13 +2114,13 @@
                 document.getElementById('first-name').value = first.toUpperCase();
                 document.getElementById('last-name').value = last.toUpperCase();
                 
-                if (src === 'booking.com' && text.includes('Payment is facilitated through')) {
+                if (format === 'bdc-extranet' && hasBdcPayment) {
                     if (comm > 0) window.addPaymentRow(checkIn, comm, 'bdc-kp', true);
                     if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'bdc-pay', true);
-                } else if (src === 'airbnb') {
+                } else if (format === 'airbnb-email') {
                     if (comm > 0) window.addPaymentRow(checkIn, comm, 'airbnb-kp', true);
                     if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'airbnb-pay', true);
-                } else if (src === 'hostelworld') {
+                } else if (format === 'hw-email' || format === 'hw-web') {
                     if (comm > 0) window.addPaymentRow(checkIn, comm, 'hw-kp', true);
                 }
             }
