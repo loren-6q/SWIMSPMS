@@ -545,7 +545,7 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
             <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm"><span>Parse Confirmation Email</span><button type="button" onclick="document.getElementById('email-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div>
             <div class="p-4 flex flex-col gap-3">
-                <p class="text-sm font-bold text-slate-500 leading-tight">Paste the text of a Booking.com or AirBnB confirmation email here.</p>
+                <p class="text-sm font-bold text-slate-500 leading-tight">Paste the text of a Booking.com, AirBnB, or Hostelworld confirmation email here.</p>
                 <textarea id="email-textarea" rows="8" class="w-full bg-slate-50 border border-slate-300 font-mono text-[10px] p-2 rounded outline-none focus:ring-2 focus:ring-purple-500 whitespace-pre" placeholder="Paste email text here..."></textarea>
                 <div class="flex gap-2 justify-end mt-2">
                     <button onclick="document.getElementById('email-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button>
@@ -596,7 +596,7 @@
         const fmpDates = ["2026-01-03", "2026-02-02", "2026-03-03", "2026-04-02", "2026-05-01", "2026-06-01", "2026-06-29", "2026-07-31", "2026-08-28", "2026-09-26", "2026-10-27", "2026-11-24", "2026-12-24", "2026-12-31"];
         
         const rawCountryMap = {
-            'af': 'Afghanistan', 'al': 'Albania', 'dz': 'Algeria', 'as': 'American Samoa', 'ad': 'Andorra', 'ao': 'Angola', 'ai': 'Anguilla', 'aq': 'Antarctica', 'ag': 'Antigua and Barbuda', 'ar': 'Argentina', 'am': 'Armenia', 'aw': 'Aruba', 'au': 'Australia', 'at': 'Austria', 'az': 'Azerbaijan', 'bs': 'Bahamas', 'bh': 'Bahrain', 'bd': 'Bangladesh', 'bb': 'Barbados', 'by': 'Belarus', 'be': 'Belgium', 'bz': 'Belize', 'bj': 'Benin', 'bm': 'Bermuda', 'bt': 'Bhutan', 'bo': 'Bolivia', 'bq': 'Bonaire', 'ba': 'Bosnia and Herzegovina', 'bw': 'Botswana', 'bv': 'Bouvet Island', 'br': 'Brazil', 'io': 'British Indian Ocean Territory', 'bn': 'Brunei', 'bg': 'Bulgaria', 'bf': 'Burkina Faso', 'bi': 'Burundi', 'cv': 'Cabo Verde', 'kh': 'Cambodia', 'cm': 'Cameroon', 'ca': 'Canada', 'ky': 'Cayman Islands', 'cf': 'Central African Republic', 'td': 'Chad', 'cl': 'Chile', 'cn': 'China', 'cx': 'Christmas Island', 'cc': 'Cocos Islands', 'co': 'Colombia', 'km': 'Comoros', 'cd': 'Congo (DRC)', 'cg': 'Congo', 'ck': 'Cook Islands', 'cr': 'Costa Rica', 'hr': 'Croatia', 'cu': 'Cuba', 'cw': 'Curaçao', 'cy': 'Cyprus', 'cz': 'Czechia', 'ci': "Côte d'Ivoire", 'dk': 'Denmark', 'dj': 'Djibouti', 'dm': 'Dominica', 'do': 'Dominican Republic', 'ec': 'Ecuador', 'eg': 'Egypt', 'sv': 'El Salvador', 'gq': 'Equatorial Guinea', 'er': 'Eritrea', 'ee': 'Estonia', 'sz': 'Eswatini', 'et': 'Ethiopia', 'fk': 'Falkland Islands', 'fo': 'Faroe Islands', 'fj': 'Fiji', 'fi': 'Finland', 'fr': 'France', 'gf': 'French Guiana', 'pf': 'French Polynesia', 'tf': 'French Southern Territories', 'ga': 'Gabon', 'gm': 'Gambia', 'ge': 'Georgia', 'de': 'Germany', 'gh': 'Ghana', 'gi': 'Gibraltar', 'gr': 'Greece', 'gl': 'Greenland', 'gd': 'Grenada', 'gp': 'Guadeloupe', 'gu': 'Guam', 'gt': 'Guatemala', 'gg': 'Guernsey', 'gn': 'Guinea', 'gw': 'Guinea-Bissau', 'gy': 'Guyana', 'ht': 'Haiti', 'hm': 'Heard Island', 'va': 'Holy See', 'hn': 'Honduras', 'hk': 'Hong Kong', 'hu': 'Hungary', 'is': 'Iceland', 'in': 'India', 'id': 'Indonesia', 'ir': 'Iran', 'iq': 'Iraq', 'ie': 'Ireland', 'im': 'Isle of Man', 'il': 'Israel', 'it': 'Italy', 'jm': 'Jamaica', 'jp': 'Japan', 'jo': 'Jordan', 'kz': 'Kazakhstan', 'ke': 'Kenya', 'ki': 'Kiribati', 'kp': 'North Korea', 'kr': 'South Korea', 'kw': 'Kuwait', 'kg': 'Kyrgyzstan', 'la': 'Laos', 'lv': 'Latvia', 'lb': 'Lebanon', 'ls': 'Lesotho', 'lr': 'Liberia', 'ly': 'Libya', 'li': 'Liechtenstein', 'lt': 'Lithuania', 'lu': 'Luxembourg', 'mo': 'Macao', 'mg': 'Madagascar', 'mw': 'Malawi', 'my': 'Malaysia', 'mv': 'Maldives', 'ml': 'Mali', 'mt': 'Malta', 'mh': 'Marshall Islands', 'mq': 'Martinique', 'mr': 'Mauritania', 'mu': 'Mauritius', 'yt': 'Mayotte', 'mx': 'Mexico', 'fm': 'Micronesia', 'md': 'Moldova', 'mc': 'Monaco', 'mn': 'Mongolia', 'me': 'Montenegro', 'ms': 'Montserrat', 'ma': 'Morocco', 'mz': 'Mozambique', 'mm': 'Myanmar', 'na': 'Namibia', 'nr': 'Nauru', 'np': 'Nepal', 'nl': 'Netherlands', 'nc': 'New Caledonia', 'nz': 'New Zealand', 'ni': 'Nicaragua', 'ne': 'Niger', 'ng': 'Nigeria', 'nu': 'Niue', 'nf': 'Norfolk Island', 'mp': 'Northern Mariana Islands', 'no': 'Norway', 'om': 'Oman', 'pk': 'Pakistan', 'pw': 'Palau', 'ps': 'Palestine', 'pa': 'Panama', 'pg': 'Papua Guinea', 'py': 'Paraguay', 'pe': 'Peru', 'ph': 'Philippines', 'pn': 'Pitcairn', 'pl': 'Poland', 'pt': 'Portugal', 'pr': 'Puerto Rico', 'qa': 'Qatar', 'mk': 'North Macedonia', 'ro': 'Romania', 'ru': 'Russia', 'rw': 'Rwanda', 're': 'Réunion', 'bl': 'Saint Barthélemy', 'sh': 'Saint Helena', 'kn': 'Saint Kitts and Nevis', 'lc': 'Saint Lucia', 'mf': 'Saint Martin', 'pm': 'Saint Pierre and Miquelon', 'vc': 'Saint Vincent', 'ws': 'Samoa', 'sm': 'San Marino', 'st': 'Sao Tome and Principe', 'sa': 'Saudi Arabia', 'sn': 'Senegal', 'rs': 'Serbia', 'sc': 'Seychelles', 'sl': 'Sierra Leone', 'sg': 'Singapore', 'sx': 'Sint Maarten', 'sk': 'Slovakia', 'si': 'Slovenia', 'sb': 'Solomon Islands', 'so': 'Somalia', 'za': 'South Africa', 'gs': 'South Georgia', 'ss': 'South Sudan', 'es': 'Spain', 'lk': 'Sri Lanka', 'sd': 'Sudan', 'sr': 'Suriname', 'sj': 'Svalbard', 'se': 'Sweden', 'ch': 'Switzerland', 'sy': 'Syria', 'tw': 'Taiwan', 'tj': 'Tajikistan', 'tz': 'Tanzania', 'tl': 'Timor-Leste', 'tg': 'Togo', 'tk': 'Tokelau', 'to': 'Tonga', 'tt': 'Trinidad and Tobago', 'tn': 'Tunisia', 'tr': 'Turkey', 'tm': 'Turkmenistan', 'tc': 'Turks and Caicos Islands', 'tv': 'Tuvalu', 'ug': 'Uganda', 'ua': 'Ukraine', 'ae': 'United Arab Emirates', 'gb': 'United Kingdom', 'um': 'U.S. Outlying Islands', 'us': 'United States', 'uy': 'Uruguay', 'uz': 'Uzbekistan', 'vu': 'Vanuatu', 've': 'Venezuela', 'vn': 'Vietnam', 'ye': 'Yemen', 'zm': 'Zambia', 'zw': 'Zimbabwe', 'ax': 'Åland Islands'
+            'af': 'Afghanistan', 'al': 'Albania', 'dz': 'Algeria', 'as': 'American Samoa', 'ad': 'Andorra', 'ao': 'Angola', 'ai': 'Anguilla', 'aq': 'Antarctica', 'ag': 'Antigua and Barbuda', 'ar': 'Argentina', 'am': 'Armenia', 'aw': 'Aruba', 'au': 'Australia', 'at': 'Austria', 'az': 'Azerbaijan', 'bs': 'Bahamas', 'bh': 'Bahrain', 'bd': 'Bangladesh', 'bb': 'Barbados', 'by': 'Belarus', 'be': 'Belgium', 'bz': 'Belize', 'bj': 'Benin', 'bm': 'Bermuda', 'bt': 'Bhutan', 'bo': 'Bolivia', 'bq': 'Bonaire', 'ba': 'Bosnia and Herzegovina', 'bw': 'Botswana', 'bv': 'Bouvet Island', 'br': 'Brazil', 'io': 'British Indian Ocean Territory', 'bn': 'Brunei', 'bg': 'Bulgaria', 'bf': 'Burkina Faso', 'bi': 'Burundi', 'cv': 'Cabo Verde', 'kh': 'Cambodia', 'cm': 'Cameroon', 'ca': 'Canada', 'ky': 'Cayman Islands', 'cf': 'Central African Republic', 'td': 'Chad', 'cl': 'Chile', 'cn': 'China', 'cx': 'Christmas Island', 'cc': 'Cocos Islands', 'co': 'Colombia', 'km': 'Comoros', 'cd': 'Congo (DRC)', 'cg': 'Congo', 'ck': 'Cook Islands', 'cr': 'Costa Rica', 'hr': 'Croatia', 'cu': 'Cuba', 'cw': 'Curaçao', 'cy': 'Cyprus', 'cz': 'Czechia', 'ci': "Côte d'Ivoire", 'dk': 'Denmark', 'dj': 'Djibouti', 'dm': 'Dominica', 'do': 'Dominican Republic', 'ec': 'Ecuador', 'eg': 'Egypt', 'sv': 'El Salvador', 'gq': 'Equatorial Guinea', 'er': 'Eritrea', 'ee': 'Estonia', 'sz': 'Eswatini', 'et': 'Ethiopia', 'fk': 'Falkland Islands', 'fo': 'Faroe Islands', 'fj': 'Fiji', 'fi': 'Finland', 'fr': 'France', 'gf': 'French Guiana', 'pf': 'French Polynesia', 'tf': 'French Southern Territories', 'ga': 'Gabon', 'gm': 'Gambia', 'ge': 'Georgia', 'de': 'Germany', 'gh': 'Ghana', 'gi': 'Gibraltar', 'gr': 'Greece', 'gl': 'Greenland', 'gd': 'Grenada', 'gp': 'Guadeloupe', 'gu': 'Guam', 'gt': 'Guatemala', 'gg': 'Guernsey', 'gn': 'Guinea', 'gw': 'Guinea-Bissau', 'gy': 'Guyana', 'ht': 'Haiti', 'hm': 'Heard Island', 'va': 'Holy See', 'hn': 'Honduras', 'hk': 'Hong Kong', 'hu': 'Hungary', 'is': 'Iceland', 'in': 'India', 'id': 'Indonesia', 'ir': 'Iran', 'iq': 'Iraq', 'ie': 'Ireland', 'im': 'Isle of Man', 'il': 'Israel', 'it': 'Italy', 'jm': 'Jamaica', 'jp': 'Japan', 'jo': 'Jordan', 'kz': 'Kazakhstan', 'ke': 'Kenya', 'ki': 'Kiribati', 'kp': 'North Korea', 'kr': 'South Korea', 'kw': 'Kuwait', 'kg': 'Kyrgyzstan', 'la': 'Laos', 'lv': 'Latvia', 'lb': 'Lebanon', 'ls': 'Lesotho', 'lr': 'Liberia', 'ly': 'Libya', 'li': 'Liechtenstein', 'lt': 'Lithuania', 'lu': 'Luxembourg', 'mo': 'Macao', 'mg': 'Madagascar', 'mw': 'Malawi', 'my': 'Malaysia', 'mv': 'Maldives', 'ml': 'Mali', 'mt': 'Malta', 'mh': 'Marshall Islands', 'mq': 'Martinique', 'mr': 'Mauritania', 'mu': 'Mauritius', 'yt': 'Mayotte', 'mx': 'Mexico', 'fm': 'Micronesia', 'md': 'Moldova', 'mc': 'Monaco', 'mn': 'Mongolia', 'me': 'Montenegro', 'ms': 'Montserrat', 'ma': 'Morocco', 'mz': 'Mozambique', 'mm': 'Myanmar', 'na': 'Namibia', 'nr': 'Nauru', 'np': 'Nepal', 'nl': 'Netherlands', 'nc': 'New Caledonia', 'nz': 'New Zealand', 'ni': 'Nicaragua', 'ne': 'Niger', 'ng': 'Nigeria', 'nu': 'Niue', 'nf': 'Norfolk Island', 'mp': 'Northern Mariana Islands', 'no': 'Norway', 'om': 'Oman', 'pk': 'Pakistan', 'pw': 'Palau', 'ps': 'Palestine', 'pa': 'Panama', 'pg': 'Papua New Guinea', 'py': 'Paraguay', 'pe': 'Peru', 'ph': 'Philippines', 'pn': 'Pitcairn', 'pl': 'Poland', 'pt': 'Portugal', 'pr': 'Puerto Rico', 'qa': 'Qatar', 'mk': 'North Macedonia', 'ro': 'Romania', 'ru': 'Russia', 'rw': 'Rwanda', 're': 'Réunion', 'bl': 'Saint Barthélemy', 'sh': 'Saint Helena', 'kn': 'Saint Kitts and Nevis', 'lc': 'Saint Lucia', 'mf': 'Saint Martin', 'pm': 'Saint Pierre and Miquelon', 'vc': 'Saint Vincent', 'ws': 'Samoa', 'sm': 'San Marino', 'st': 'Sao Tome and Principe', 'sa': 'Saudi Arabia', 'sn': 'Senegal', 'rs': 'Serbia', 'sc': 'Seychelles', 'sl': 'Sierra Leone', 'sg': 'Singapore', 'sx': 'Sint Maarten', 'sk': 'Slovakia', 'si': 'Slovenia', 'sb': 'Solomon Islands', 'so': 'Somalia', 'za': 'South Africa', 'gs': 'South Georgia', 'ss': 'South Sudan', 'es': 'Spain', 'lk': 'Sri Lanka', 'sd': 'Sudan', 'sr': 'Suriname', 'sj': 'Svalbard', 'se': 'Sweden', 'ch': 'Switzerland', 'sy': 'Syria', 'tw': 'Taiwan', 'tj': 'Tajikistan', 'tz': 'Tanzania', 'tl': 'Timor-Leste', 'tg': 'Togo', 'tk': 'Tokelau', 'to': 'Tonga', 'tt': 'Trinidad and Tobago', 'tn': 'Tunisia', 'tr': 'Turkey', 'tm': 'Turkmenistan', 'tc': 'Turks and Caicos Islands', 'tv': 'Tuvalu', 'ug': 'Uganda', 'ua': 'Ukraine', 'ae': 'United Arab Emirates', 'gb': 'United Kingdom', 'um': 'U.S. Outlying Islands', 'us': 'United States', 'uy': 'Uruguay', 'uz': 'Uzbekistan', 'vu': 'Vanuatu', 've': 'Venezuela', 'vn': 'Vietnam', 'ye': 'Yemen', 'zm': 'Zambia', 'zw': 'Zimbabwe', 'ax': 'Åland Islands'
         };
         const uniqueCountries = [...new Set(Object.values(rawCountryMap))].filter(c => c !== 'Thailand').sort();
         const countries = ["[UNKNOWN]", "Thailand", ...uniqueCountries];
@@ -1804,7 +1804,7 @@
             const parseDateStr = (dateStr, isPast = false) => {
                 if(!dateStr) return '';
                 const mths = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-                let cleanStr = dateStr.replace(/,/g, '').replace(/\s+/g, ' ').trim();
+                let cleanStr = dateStr.replace(/,/g, '').replace(/(st|nd|rd|th)\b/gi, '').replace(/['´`’]/g, '').replace(/\s+/g, ' ').trim();
                 let parts = cleanStr.split(' ');
                 
                 let mthIndex = -1;
@@ -1814,17 +1814,33 @@
                     }
                 }
                 
-                if (mthIndex === -1 || mthIndex + 1 >= parts.length) return '';
+                if (mthIndex === -1) return '';
                 
                 let mth = mths[parts[mthIndex].toLowerCase().substring(0,3)];
-                let day = parseInt(parts[mthIndex + 1]).toString().padStart(2, '0');
+                let dayVal = 1;
+                let yrVal = 0;
                 
+                if (mthIndex > 0 && !isNaN(parseInt(parts[mthIndex - 1]))) {
+                    dayVal = parseInt(parts[mthIndex - 1]);
+                    if (mthIndex + 1 < parts.length) {
+                        let yStr = parts[mthIndex + 1];
+                        if (/^\d{4}$/.test(yStr)) yrVal = parseInt(yStr);
+                        else if (/^\d{2}$/.test(yStr)) yrVal = 2000 + parseInt(yStr);
+                    }
+                } else if (mthIndex + 1 < parts.length && !isNaN(parseInt(parts[mthIndex + 1]))) {
+                    dayVal = parseInt(parts[mthIndex + 1]);
+                    if (mthIndex + 2 < parts.length) {
+                        let yStr = parts[mthIndex + 2];
+                        if (/^\d{4}$/.test(yStr)) yrVal = parseInt(yStr);
+                        else if (/^\d{2}$/.test(yStr)) yrVal = 2000 + parseInt(yStr);
+                    }
+                }
+                
+                let day = dayVal.toString().padStart(2, '0');
                 let now = new Date();
-                let yr = now.getFullYear();
+                let yr = yrVal > 0 ? yrVal : now.getFullYear();
                 
-                if (mthIndex + 2 < parts.length && /^\d{4}$/.test(parts[mthIndex + 2])) {
-                    yr = parseInt(parts[mthIndex + 2]);
-                } else {
+                if (yrVal === 0) {
                     let testDate = new Date(`${yr}-${mth}-${day}`);
                     if (isPast && testDate > now) yr--;
                     else if (!isPast && testDate.getMonth() < now.getMonth() && testDate < now) yr++;
@@ -1892,6 +1908,80 @@
                     else refundability = 2;
                 }
                 
+            } else if (text.includes('Hostelworld') || text.includes('hostelworld.com')) {
+                src = 'hostelworld';
+                
+                if (text.includes('Booking Details') && text.includes('Reference')) {
+                    // FORMAT 2: Webpage "Booking Details"
+                    bId = extract(/Reference\s*\n\s*([\d-]+)/i);
+                    bDate = parseDateStr(extract(/Booked\s*\n\s*([^\n]+)/i), true);
+                    checkIn = parseDateStr(extract(/Arriving\s*\n\s*([^\n]+)/i), false);
+                    
+                    let regexRefBlock = new RegExp(`Reference\\s*\\n\\s*${bId}\\s*\\n\\s*([^\\n]+)\\s*\\n\\s*([^\\n]+)\\s*\\n\\s*([^\\n]+)`, 'i');
+                    let matchBlock = text.match(regexRefBlock);
+                    if (matchBlock) {
+                        gName = matchBlock[1].trim();
+                        countryCode = matchBlock[2].trim();
+                    }
+                    
+                    let allEmails = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/g) || [];
+                    email = allEmails.find(e => !e.toLowerCase().includes('hostelworld')) || '';
+                    phone = extract(/(\+[\d\s]+)/);
+                    
+                    let nightsStr = extract(/(\d+)\s*Nights/i);
+                    if (checkIn && nightsStr) {
+                        let n = parseInt(nightsStr);
+                        let d = new Date(checkIn + "T12:00:00Z");
+                        d.setUTCDate(d.getUTCDate() + n);
+                        checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+                    }
+                    
+                    total = cleanMoney(extract(/Subtotal\s*\n\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
+                    comm = cleanMoney(extract(/Hostelworld Deposit\s*\n\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
+                    
+                    bType = extract(/Price\s*\n\s*[^\n]+\s*\n\s*([^\n]+)/i);
+                    if(bType) bType = bType.replace(/Promo/i, '').trim();
+                    
+                    let paxMatch = text.match(new RegExp(`${(bType || '').replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}[\\s\\S]*?\\n\\s*(\\d+)`, 'i'));
+                    if (paxMatch) pax = parseInt(paxMatch[1]);
+                    
+                } else if (text.includes('ref:')) {
+                    // FORMAT 1: Confirmation Email
+                    bId = extract(/\(ref:\s*([\d-]+)\)/i);
+                    bDate = parseDateStr(extract(/made on\s*([^\n]+?)\s*by/i), true);
+                    gName = extract(/by the customer[\s\S]*?:\s*\n+([^\n]+)/i);
+                    checkIn = parseDateStr(extract(/Arrival:\s*([^\n]+)/i), false);
+                    
+                    let nightsStr = extract(/Nights:\s*(\d+)/i);
+                    if (checkIn && nightsStr) {
+                        let n = parseInt(nightsStr);
+                        let d = new Date(checkIn + "T12:00:00Z");
+                        d.setUTCDate(d.getUTCDate() + n);
+                        checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+                    }
+                    
+                    const paxStr = extract(/Guests:\s*(\d+)/i); if(paxStr) pax = parseInt(paxStr);
+                    total = cleanMoney(extract(/Total Price:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
+                    comm = cleanMoney(extract(/Deposit Paid:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
+                    
+                    phone = '';
+                    email = '';
+                    
+                    bType = extract(/Beds? reserved in\s+([^\n]+)/i);
+                }
+                
+                if (bType) {
+                    const btLower = bType.toLowerCase();
+                    if (btLower.includes('2 bed private ensuite')) {
+                        bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)';
+                    } else if (btLower.includes('3 bed') && !btLower.includes('dorm')) {
+                        bType = 'Triple Room'; 
+                    }
+                }
+                
+                if (text.includes('Non-refundable') || text.includes('Non Refundable')) refundability = 1;
+                else refundability = 2;
+
             } else {
                 window.showAlert("Could not recognize this text format. Ensure you pasted the entire confirmation block.");
                 return;
@@ -1905,10 +1995,20 @@
                 // Override empty values with parsed email values
                 if (email && !document.getElementById('email').value) document.getElementById('email').value = email;
                 if (phone && !document.getElementById('phone').value) document.getElementById('phone').value = phone;
+                
                 if (countryCode && document.getElementById('staff-country').value === "[UNKNOWN]") {
                     const mapKey = countryCode.toLowerCase().trim();
-                    if(rawCountryMap[mapKey]) document.getElementById('staff-country').value = rawCountryMap[mapKey];
+                    if(rawCountryMap[mapKey]) {
+                        document.getElementById('staff-country').value = rawCountryMap[mapKey];
+                    } else {
+                        const matchedFull = countries.find(c => c.toLowerCase() === mapKey);
+                        if (matchedFull) document.getElementById('staff-country').value = matchedFull;
+                        else if (['england', 'scotland', 'wales', 'great britain'].includes(mapKey)) {
+                            document.getElementById('staff-country').value = 'United Kingdom';
+                        }
+                    }
                 }
+                
                 if (notes && !document.getElementById('staff-notes').value.includes(notes)) {
                     const existingNotes = document.getElementById('staff-notes').value;
                     document.getElementById('staff-notes').value = existingNotes ? existingNotes + "\n" + notes : notes;
@@ -1934,7 +2034,15 @@
                 
                 if(countryCode) {
                     const mapKey = countryCode.toLowerCase().trim();
-                    if(rawCountryMap[mapKey]) document.getElementById('staff-country').value = rawCountryMap[mapKey];
+                    if(rawCountryMap[mapKey]) {
+                        document.getElementById('staff-country').value = rawCountryMap[mapKey];
+                    } else {
+                        const matchedFull = countries.find(c => c.toLowerCase() === mapKey);
+                        if (matchedFull) document.getElementById('staff-country').value = matchedFull;
+                        else if (['england', 'scotland', 'wales', 'great britain'].includes(mapKey)) {
+                            document.getElementById('staff-country').value = 'United Kingdom';
+                        }
+                    }
                 }
                 
                 let last = gName.trim(), first = "";
@@ -1952,6 +2060,8 @@
                 } else if (src === 'airbnb') {
                     if (comm > 0) window.addPaymentRow(checkIn, comm, 'airbnb-kp', true);
                     if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'airbnb-pay', true);
+                } else if (src === 'hostelworld') {
+                    if (comm > 0) window.addPaymentRow(checkIn, comm, 'hw-kp', true);
                 }
             }
             
