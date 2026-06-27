@@ -578,8 +578,10 @@
         import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const REQUIRE_LOGIN = false; // KILL SWITCH for testing
-        const ADMIN_EMAILS = ['loren@wildandwandering.com']; 
-        const STAFF_EMAILS = ['wetkpg@gmail.com']; 
+        
+        // UPGRADED wetkpg@gmail.com TO ADMIN TO ALLOW DELETING
+        const ADMIN_EMAILS = ['loren@wildandwandering.com', 'wetkpg@gmail.com']; 
+        const STAFF_EMAILS = []; 
 
         const firebaseConfig = {
             apiKey: "AIzaSyCyz--TlQZf_d-YNxhtGCV29LuFoRBfEeU",
@@ -643,9 +645,9 @@
             { id: "B16", type: "Superior", bed: "TWIN", floor: 2, order: 422 },
             { id: "B17", type: "Superior", bed: "KING", floor: 1, order: 423 },
             { id: "B18", type: "Superior", bed: "TWIN", floor: 2, order: 424 },
-            { id: "B19", type: "Superior", bed: "", floor: 1, order: 425 },
+            { id: "B19", type: "Superior", bed: "KING", floor: 1, order: 425 },
             { id: "B20", type: "Superior", bed: "TWIN", floor: 2, order: 426 },
-            { id: "B21", type: "Superior", bed: "", floor: 1, order: 427 },
+            { id: "B21", type: "Superior", bed: "KING", floor: 1, order: 427 },
             { id: "B22", type: "Superior", bed: "", floor: 2, order: 428 },
             { id: "206", type: "OV Standard", bed: "KING", floor: 2, order: 501 },
             { id: "212", type: "OV Standard", bed: "TWIN", floor: 2, order: 502 },
@@ -654,16 +656,16 @@
             { id: "101", type: "Standard", bed: "", floor: 1, order: 601 },
             { id: "102", type: "Standard", bed: "", floor: 1, order: 602 },
             { id: "103", type: "Standard", bed: "", floor: 1, order: 603 },
-            { id: "201", type: "Standard", bed: "TWIN", floor: 2, order: 604 },
-            { id: "202", type: "Standard", bed: "TWIN", floor: 2, order: 605 },
-            { id: "203", type: "Standard", bed: "TWIN", floor: 2, order: 606 },
-            { id: "204", type: "Standard", bed: "TWIN", floor: 2, order: 607 },
-            { id: "205", type: "Standard", bed: "TWIN", floor: 2, order: 608 },
-            { id: "207", type: "Standard", bed: "KING", floor: 2, order: 609 },
-            { id: "208", type: "Standard", bed: "KING", floor: 2, order: 610 },
-            { id: "209", type: "Standard", bed: "KING", floor: 2, order: 611 },
-            { id: "210", type: "Standard", bed: "KING", floor: 2, order: 612 },
-            { id: "211", type: "Standard", bed: "KING", floor: 2, order: 613 },
+            { id: "201", type: "Standard", bed: "KING", floor: 2, order: 604 },
+            { id: "202", type: "Standard", bed: "KING", floor: 2, order: 605 },
+            { id: "203", type: "Standard", bed: "KING", floor: 2, order: 606 },
+            { id: "204", type: "Standard", bed: "KING", floor: 2, order: 607 },
+            { id: "205", type: "Standard", bed: "KING", floor: 2, order: 608 },
+            { id: "207", type: "Standard", bed: "TWIN", floor: 2, order: 609 },
+            { id: "208", type: "Standard", bed: "TWIN", floor: 2, order: 610 },
+            { id: "209", type: "Standard", bed: "TWIN", floor: 2, order: 611 },
+            { id: "210", type: "Standard", bed: "TWIN", floor: 2, order: 612 },
+            { id: "211", type: "Standard", bed: "TWIN", floor: 2, order: 613 },
             { id: "305", type: "Standard", bed: "K+T", floor: 3, order: 614 },
             { id: "307", type: "Standard", bed: "BUNK+T", floor: 3, order: 615 },
             { id: "308", type: "Standard", bed: "BUNK+T", floor: 3, order: 616 },
@@ -1885,7 +1887,7 @@
                     bId = getLineData(['Booking number:']);
                     pax = parseInt(getLineData(['Total guests:'])) || 1;
                     total = cleanMoney(getLineData(['Total price']));
-                    comm = cleanMoney(getLineData(['Commission and charges:', 'Commissionable amount:']));
+                    comm = cleanMoney(getLineData(['Commission and charges:']));
 
                     let guestIdx = lines.findIndex(l => l.toLowerCase().startsWith('guest name:'));
                     if (guestIdx > -1) {
@@ -1910,9 +1912,7 @@
 
                     let bTypeIdx = -1;
                     for (let i = 0; i < lines.length; i++) {
-                        // Find the line that starts with a day of the week (e.g., "Sat 27 Jun")
                         if (/^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\d{1,2}\s+[A-Za-z]{3}/i.test(lines[i]) && i >= 2) {
-                            // Ensure the line immediately above it is a price
                             if (/(?:THB|฿|\$|€|£|[A-Z]{3})[\s]*[\d,.]+/i.test(lines[i-1])) {
                                 bTypeIdx = i - 2;
                                 break;
@@ -1920,20 +1920,49 @@
                         }
                     }
 
-                    // Fallback just in case
                     if (bTypeIdx === -1) {
-                        let policyIdx = lines.findIndex(l => l.toLowerCase().endsWith('cancellation policy.'));
+                        let policyIdx = lines.findIndex(l => l.toLowerCase().endsWith('cancellation policy.') || l.toLowerCase().includes('bank transfer payout'));
                         if (policyIdx > -1 && policyIdx + 1 < lines.length) bTypeIdx = policyIdx + 1;
                     }
 
                     if (bTypeIdx > -1) {
                         let bTypeRaw = lines[bTypeIdx];
-                        let parenMatch = bTypeRaw.match(/\(([^)]+)\)$/);
-                        bType = parenMatch ? parenMatch[1].trim() : bTypeRaw;
+                        let firstParen = bTypeRaw.indexOf('(');
+                        let lastParen = bTypeRaw.lastIndexOf(')');
+                        if (firstParen > -1 && lastParen > firstParen) {
+                            bType = bTypeRaw.substring(firstParen + 1, lastParen).trim();
+                        } else {
+                            bType = bTypeRaw.trim();
+                        }
                     }
 
-                    if (text.match(/cancel at any time|cancel anytime|Non-refundable|charged the total price/i)) refundability = 1;
-                    else if (text.match(/free of charge/i)) refundability = 2;
+                    // Strict Refundability Check
+                    let cancelIdx = lines.findIndex(l => l.toLowerCase() === 'cancellation');
+                    if (cancelIdx > -1) {
+                        let cancelText = lines.slice(cancelIdx + 1, cancelIdx + 4).join(' ').toLowerCase();
+                        if (cancelText.includes('free of charge until') || cancelText.includes('free cancellation')) {
+                            refundability = 2; // Refundable
+                        } else if (cancelText.includes('cancel at any time') || cancelText.includes('non-refundable')) {
+                            refundability = 1; // Non-Refundable
+                        }
+                    } else {
+                        if (text.match(/cancel at any time|cancel anytime|Non-refundable|charged the total price/i)) refundability = 1;
+                        else if (text.match(/free of charge/i)) refundability = 2;
+                    }
+
+                    // Conversation / Notes Extraction
+                    let convoIdx = lines.findIndex(l => l.toLowerCase() === 'conversation with guest');
+                    if (convoIdx > -1) {
+                        let msgLines = [];
+                        for (let i = convoIdx + 1; i < lines.length; i++) {
+                            let l = lines[i];
+                            if (l.toLowerCase().includes('protect your account security') || l.toLowerCase() === 'images' || l.toLowerCase() === 'templates') break;
+                            if (l.toLowerCase() === 'no messages' || l.toLowerCase().includes('conversations with your guests will appear')) break;
+                            if (/^(?:Today|Yesterday|[A-Z][a-z]{2}, \d{1,2} [A-Z][a-z]{2}), \d{2}:\d{2}$/i.test(l)) continue; // skip date/time line
+                            if (l.trim()) msgLines.push(l.trim());
+                        }
+                        if (msgLines.length > 0) notes = "GUEST MSG: " + msgLines.join(" ");
+                    }
 
                     if (text.includes('Payment is facilitated') || text.includes('Booking.com will collect')) hasBdcPayment = true;
 
@@ -1956,8 +1985,9 @@
                     const payout = cleanMoney(extract(/You earn[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
                     comm = Number((total - payout).toFixed(2));
                     bType = extract(/([^\n]+?)\s*Room\s*Check-in/i);
-                    notes = extract(/Identity verified[\s\S]*?\n([^\n]+)\n\s*Send.*?a Message/i);
-                    if(!notes || notes.includes('Translated') || notes.includes('Add guest')) notes = ""; 
+                    
+                    let abnbNotes = extract(/Identity verified[\s\S]*?\n([^\n]+)\n\s*Send.*?a Message/i);
+                    if(abnbNotes && !abnbNotes.includes('Translated') && !abnbNotes.includes('Add guest')) notes = abnbNotes; 
                     
                     const policyMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i);
                     if (policyMatch) {
@@ -2049,12 +2079,16 @@
             
             if (existingBooking) {
                 window.editStaff(existingBooking.id);
-                // Override empty values with parsed email values
+                
+                // Aggressive Override of Blank/Missing Fields
                 if (email && !document.getElementById('email').value) document.getElementById('email').value = email;
                 if (phone && !document.getElementById('phone').value) document.getElementById('phone').value = phone;
-                if (checkIn && !document.getElementById('check-in').value) document.getElementById('check-in').value = checkIn;
-                if (checkOut && !document.getElementById('check-out').value) document.getElementById('check-out').value = checkOut;
+                if (checkIn && (!document.getElementById('check-in').value || document.getElementById('check-in').value === '--')) document.getElementById('check-in').value = checkIn;
+                if (checkOut && (!document.getElementById('check-out').value || document.getElementById('check-out').value === '--')) document.getElementById('check-out').value = checkOut;
                 if (bType && !document.getElementById('booked-type').value) document.getElementById('booked-type').value = bType;
+                
+                if (total > 0 && Number(document.getElementById('total-price').value) === 0) document.getElementById('total-price').value = total;
+                if (bDate && !document.getElementById('booking-date').value) document.getElementById('booking-date').value = bDate;
                 
                 if (countryCode && document.getElementById('staff-country').value === "[UNKNOWN]") {
                     const mapKey = countryCode.toLowerCase().trim();
@@ -2076,6 +2110,21 @@
                 if (refundability > 0 && document.getElementById('refund-btn').dataset.state == 0) {
                     setMulti('refund-btn', refundability, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
                 }
+                
+                // Only add financial rows if there aren't any yet
+                const existingPayments = document.querySelectorAll('.payment-row').length;
+                if (existingPayments === 0) {
+                    if (format === 'bdc-extranet' && hasBdcPayment) {
+                        if (comm > 0) window.addPaymentRow(checkIn, comm, 'bdc-kp', true);
+                        if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'bdc-pay', true);
+                    } else if (format === 'airbnb-email') {
+                        if (comm > 0) window.addPaymentRow(checkIn, comm, 'airbnb-kp', true);
+                        if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'airbnb-pay', true);
+                    } else if (format === 'hw-email' || format === 'hw-web') {
+                        if (comm > 0) window.addPaymentRow(checkIn, comm, 'hw-kp', true);
+                    }
+                }
+
             } else {
                 window.openStaffModal();
                 
