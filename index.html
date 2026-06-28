@@ -1977,10 +1977,13 @@
 
                     // BED PREFERENCES & NOTES Extraction
                     let allNotes = [];
-                    let bedPrefIdx = lines.findIndex(l => l.toUpperCase().includes('BED PREFERENCE:'));
-                    if (bedPrefIdx > -1) {
-                        allNotes.push(lines[bedPrefIdx]);
-                    }
+                    lines.forEach(l => {
+                        let lUp = l.toUpperCase();
+                        if (lUp.includes('BED PREFERENCE:') || lUp.includes('BED-PREFERENCE REQUEST:')) {
+                            // Strip the word "Reply" if it gets accidentally glued to the end of the string
+                            allNotes.push(l.replace(/Reply$/i, '').trim());
+                        }
+                    });
 
                     // Conversation / Notes Extraction
                     let convoIdx = lines.findIndex(l => l.toLowerCase() === 'conversation with guest');
@@ -1989,9 +1992,14 @@
                         for (let i = convoIdx + 1; i < lines.length; i++) {
                             let l = lines[i];
                             let lLow = l.toLowerCase();
-                            if (lLow.includes('protect your account security') || lLow === 'images' || lLow === 'templates' || lLow.includes('important information about this guest')) break;
+                            
+                            // Stop parsing if we hit a new section
+                            if (lLow.includes('protect your account security') || lLow === 'images' || lLow === 'templates' || lLow.includes('important information about this guest') || lLow === 'cancellation') break;
                             if (lLow === 'no messages' || lLow.includes('conversations with your guests will appear')) break;
-                            if (/^(?:Today|Yesterday|[A-Za-z]+,?\s*\d{1,2}\s*[A-Za-z]*),\s*\d{1,2}:\d{2}/i.test(l) || /^\d{1,2}:\d{2}$/.test(l)) continue; // skip date/time line
+                            
+                            // Skip timestamps and raw "Reply" buttons
+                            if (/^(?:Today|Yesterday|[A-Za-z]+,?\s*\d{1,2}\s*[A-Za-z]*),\s*\d{1,2}:\d{2}/i.test(l) || /^\d{1,2}:\d{2}$/.test(l) || lLow === 'reply') continue; 
+                            
                             if (l.trim()) msgLines.push(l.trim());
                         }
                         if (msgLines.length > 0) {
@@ -2075,7 +2083,18 @@
                     
                     let allEmails = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/g) || [];
                     email = allEmails.find(e => !e.toLowerCase().includes('hostelworld')) || '';
-                    phone = extract(/(\+[\d\s]+)/);
+                    
+                    phone = extract(/(\+[\d\s-]+)/);
+                    if (!phone && email) {
+                        let emailIdx = text.indexOf(email);
+                        let afterEmail = text.substring(emailIdx + email.length);
+                        let phoneMatch = afterEmail.match(/^\s*[\n\r]+\s*([\d\s-]{8,20})/);
+                        if (phoneMatch) phone = phoneMatch[1].trim();
+                    }
+                    if (!phone) {
+                         let digitMatch = text.match(/(?:^|[^\d])(\d[\d\s-]{8,20}\d)(?:[^\d]|$)/);
+                         if (digitMatch && bId && !digitMatch[1].includes(bId.replace(/[^\d]/g, ''))) phone = digitMatch[1].trim();
+                    }
                     
                     let nightsStrW = extract(/(\d+)\s*Nights/i);
                     if (checkIn && nightsStrW) {
@@ -2085,14 +2104,28 @@
                         checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
                     }
                     
+                    let paxMatch = text.match(/[\n\r]\s*(\d+)\s*[\n\r]\s*\d+\s*Nights/i);
+                    if (paxMatch) pax = parseInt(paxMatch[1]);
+                    
                     total = cleanMoney(extract(/Subtotal\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
                     comm = cleanMoney(extract(/Hostelworld Deposit\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
                     
-                    let rowMatch = text.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*\n*\s*([\s\S]+?)(?:\s+Promo)?\s*\n*\s*(\d+)\s*\n*\s*\d+\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})\s*[\d,.]+/i);
-                    if (rowMatch) {
-                        bType = rowMatch[1].replace(/^FMP\s+/i, '').trim();
-                        pax = parseInt(rowMatch[2]);
+                    let hwTableIdx = text.toLowerCase().lastIndexOf('room type');
+                    if (hwTableIdx > -1) {
+                        let tableText = text.substring(hwTableIdx);
+                        let rMatch = tableText.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*([^\n\r]+?)(?:\s*Non-?refundable|\s*Promo|\n|\r|$)/i);
+                        if (rMatch) {
+                            bType = rMatch[1].replace(/^FMP\s+/i, '').trim();
+                        }
                     }
+                    if (!bType) {
+                        let rowMatch = text.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*\n*\s*([\s\S]+?)(?:\s+Promo)?\s*\n*\s*(\d+)\s*\n*\s*\d+\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})\s*[\d,.]+/i);
+                        if (rowMatch) {
+                            bType = rowMatch[1].replace(/^FMP\s+/i, '').trim();
+                            if (!pax) pax = parseInt(rowMatch[2]);
+                        }
+                    }
+
                     if (bType) {
                         if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)';
                         else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; 
