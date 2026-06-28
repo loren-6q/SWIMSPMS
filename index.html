@@ -1628,6 +1628,16 @@
             
             if (!date) { const t = new Date(); date = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
             
+            if (amt === '') {
+                const total = Number(document.getElementById('total-price').value) || 0;
+                let paid = 0;
+                document.querySelectorAll('.payment-row').forEach(row => {
+                    paid += Number(row.querySelector('.pay-amt').value) || 0;
+                });
+                const due = total - paid;
+                if (due > 0) amt = Number(due.toFixed(2));
+            }
+            
             div.innerHTML = `
                 <input type="date" class="pay-date w-24 text-xs p-1!" value="${date}" ${isLocked ? 'disabled' : ''}>
                 <input type="number" class="pay-amt w-20 text-xs p-1! font-black" value="${amt}" placeholder="0" oninput="window.calcFinancials()" ${isLocked ? 'disabled' : ''}>
@@ -2372,47 +2382,103 @@
 
         window.saveBooking = async () => {
             if(currentUserRole === 'staff') return; 
-            const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value;
-            if (cin >= cout) { window.showAlert("INVALID DATES:\nDeparture must be after arrival."); return; }
             
-            const id = document.getElementById('staff-id').value || Math.random().toString(36).substr(2, 9);
-            const status = document.getElementById('staff-status').value;
-            const startUTC = parseYMD(cin); const endUTC = parseYMD(cout);
-            const roomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
+            const saveBtn = document.getElementById('save-btn');
+            const originalBtnHtml = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<div class="spinner border-2 border-white border-t-transparent w-4 h-4 mr-2" style="border-width: 2px;"></div> SAVING...';
 
-            if (status !== 'unconfirmed' && status !== 'cancelled' && status !== 'noshow') {
-                for (let s of staff) {
-                    if (s.id === id) continue;
-                    if (s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed') continue;
-                    const sStart = parseYMD(s.checkIn); const sEnd = parseYMD(s.checkOut);
-                    if(startUTC < sEnd && sStart < endUTC) {
-                        const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
-                        for (let r of roomsList) {
-                            if (rList.includes(r)) { window.showAlert(`ROOM OVERLAP ERROR:\n\nRoom ${r} is already assigned to ${s.firstName} ${s.lastName} during these dates.`); return; }
+            try {
+                const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value;
+                if (cin >= cout) { window.showAlert("INVALID DATES:\nDeparture must be after arrival."); return; }
+                
+                const idInput = document.getElementById('staff-id');
+                const id = idInput.value || Math.random().toString(36).substr(2, 9);
+                idInput.value = id; // Lock the ID to prevent double-click overlap errors
+                
+                const status = document.getElementById('staff-status').value;
+                const startUTC = parseYMD(cin); const endUTC = parseYMD(cout);
+                const roomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
+
+                if (status !== 'unconfirmed' && status !== 'cancelled' && status !== 'noshow') {
+                    for (let s of staff) {
+                        if (s.id === id) continue;
+                        if (s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed') continue;
+                        const sStart = parseYMD(s.checkIn); const sEnd = parseYMD(s.checkOut);
+                        if(startUTC < sEnd && sStart < endUTC) {
+                            const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                            for (let r of roomsList) {
+                                if (rList.includes(r)) { window.showAlert(`ROOM OVERLAP ERROR:\n\nRoom ${r} is already assigned to ${s.firstName} ${s.lastName} during these dates.`); return; }
+                            }
                         }
                     }
                 }
+
+                const payments = [];
+                document.querySelectorAll('.payment-row').forEach(row => { payments.push({ date: row.querySelector('.pay-date').value, amt: Number(row.querySelector('.pay-amt').value) || 0, method: row.querySelector('.pay-method').value }); });
+                
+                const emailBtn = document.getElementById('email-confirm-btn')?.dataset?.state || 0;
+                const preBtn = document.getElementById('email-prepost-btn')?.dataset?.state || 0;
+                const specBtn = document.getElementById('email-special-btn')?.dataset?.state || 0;
+                const refBtn = document.getElementById('refund-btn')?.dataset?.state || 0;
+                const upBtn = document.getElementById('upgrade-btn')?.dataset?.state || 0;
+                const rateBtn = document.getElementById('rating-btn')?.dataset?.state || 0;
+                const extBtn = document.getElementById('ext-btn')?.dataset?.state || 0;
+                
+                const existing = staff.find(s => s.id === id); const now = new Date().toISOString();
+                const allRoomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value);
+
+                let refState = 'unknown';
+                if(refBtn == 1) refState = 'non-ref';
+                else if(refBtn == 2) refState = 'ref';
+
+                const entry = { 
+                    id, 
+                    firstName: document.getElementById('first-name').value.trim().toUpperCase(), 
+                    lastName: document.getElementById('last-name').value.trim().toUpperCase(), 
+                    status: status, 
+                    bookedType: document.getElementById('booked-type').value, 
+                    room: allRoomsList[0] || "", 
+                    rooms: allRoomsList, 
+                    checkIn: cin, 
+                    checkOut: cout, 
+                    pax: parseInt(document.getElementById('pax-count').value) || 1, 
+                    country: document.getElementById('staff-country').value, 
+                    phone: document.getElementById('phone').value, 
+                    email: document.getElementById('email').value, 
+                    source: document.getElementById('booking-source').value, 
+                    bookDate: document.getElementById('booking-date').value, 
+                    bookId: document.getElementById('booking-id').value, 
+                    linkedId: document.getElementById('link-code').value.trim().toUpperCase(), 
+                    totalPrice: Number(document.getElementById('total-price').value) || 0, 
+                    netPrice: Number(document.getElementById('net-price').value) || 0, 
+                    netOverride: document.getElementById('net-price').dataset.override === 'true', 
+                    badCC: document.getElementById('bad-cc-box').dataset.bad === 'true', 
+                    payments: payments, 
+                    emailConfirm: parseInt(emailBtn) === 1, 
+                    emailPrePost: parseInt(preBtn) > 0 ? (parseInt(preBtn) === 1 ? 'sent' : 'confirmed') : false, 
+                    emailSpecial: parseInt(specBtn) === 1, 
+                    refundability: refState, 
+                    upgrade: parseInt(upBtn) > 0 ? (parseInt(upBtn) === 1 ? 'free' : 'paid') : 'none', 
+                    rating: parseInt(rateBtn) > 0 ? (parseInt(rateBtn) === 1 ? 'good' : 'bad') : 'none', 
+                    extended: parseInt(extBtn) === 1, 
+                    notes: document.getElementById('staff-notes').value, 
+                    createdAt: existing?.createdAt || now, 
+                    createdBy: existing?.createdBy || currentUserEmail, 
+                    lastEditedAt: now, 
+                    lastEditedBy: currentUserEmail
+                };
+                
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
+                window.closeStaffModal();
+            } catch (err) {
+                console.error("Save Error:", err);
+                window.showAlert("Save process timed out or encountered an error. Please verify connection.");
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalBtnHtml;
+                lucide.createIcons();
             }
-
-            const payments = [];
-            document.querySelectorAll('.payment-row').forEach(row => { payments.push({ date: row.querySelector('.pay-date').value, amt: Number(row.querySelector('.pay-amt').value) || 0, method: row.querySelector('.pay-method').value }); });
-            
-            const emailBtn = document.getElementById('email-confirm-btn').dataset.state; const preBtn = document.getElementById('email-prepost-btn').dataset.state; const specBtn = document.getElementById('email-special-btn').dataset.state;
-            const refBtn = document.getElementById('refund-btn').dataset.state; const upBtn = document.getElementById('upgrade-btn').dataset.state; const rateBtn = document.getElementById('rating-btn').dataset.state;
-            const extBtn = document.getElementById('ext-btn').dataset.state;
-            
-            const existing = staff.find(s => s.id === id); const now = new Date().toISOString();
-            const allRoomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value);
-
-            let refState = 'unknown';
-            if(refBtn == 1) refState = 'non-ref';
-            else if(refBtn == 2) refState = 'ref';
-
-            const entry = { 
-                id, firstName: document.getElementById('first-name').value.trim().toUpperCase(), lastName: document.getElementById('last-name').value.trim().toUpperCase(), status: status, bookedType: document.getElementById('booked-type').value, room: allRoomsList[0] || "", rooms: allRoomsList, checkIn: cin, checkOut: cout, pax: parseInt(document.getElementById('pax-count').value) || 1, country: document.getElementById('staff-country').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value, source: document.getElementById('booking-source').value, bookDate: document.getElementById('booking-date').value, bookId: document.getElementById('booking-id').value, linkedId: document.getElementById('link-code').value.trim().toUpperCase(), totalPrice: Number(document.getElementById('total-price').value) || 0, netPrice: Number(document.getElementById('net-price').value) || 0, netOverride: document.getElementById('net-price').dataset.override === 'true', badCC: document.getElementById('bad-cc-box').dataset.bad === 'true', payments: payments, emailConfirm: parseInt(emailBtn) === 1, emailPrePost: parseInt(preBtn) > 0 ? (parseInt(preBtn) === 1 ? 'sent' : 'confirmed') : false, emailSpecial: parseInt(specBtn) === 1, refundability: refState, upgrade: parseInt(upBtn) > 0 ? (parseInt(upBtn) === 1 ? 'free' : 'paid') : 'none', rating: parseInt(rateBtn) > 0 ? (parseInt(rateBtn) === 1 ? 'good' : 'bad') : 'none', extended: parseInt(extBtn) === 1, notes: document.getElementById('staff-notes').value, createdAt: existing?.createdAt || now, createdBy: existing?.createdBy || currentUserEmail, lastEditedAt: now, lastEditedBy: currentUserEmail
-            };
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
-            window.closeStaffModal();
         };
 
         window.editStaff = (id) => {
