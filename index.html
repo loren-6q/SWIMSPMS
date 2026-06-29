@@ -134,6 +134,8 @@
                 <div class="flex gap-1 shrink-0">
                     <button onclick="window.openCSVModal()" class="px-2 py-1 bg-indigo-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-indigo-700 active:scale-95"><i data-lucide="sheet" size="14"></i> <span class="hidden sm:inline">Bulk Import</span></button>
                     <button onclick="window.openEmailParserModal()" class="px-2 py-1 bg-purple-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-purple-700 active:scale-95"><i data-lucide="mail" size="14"></i> <span class="hidden sm:inline">Single Import</span></button>
+                    <!-- NEW PRICE CHECKER BUTTON -->
+                    <button onclick="window.openPriceCheckModal()" class="px-2 py-1 bg-pink-600 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:bg-pink-700 active:scale-95"><i data-lucide="calculator" size="14"></i> <span class="hidden sm:inline">Price Check</span></button>
                 </div>
 
                 <div id="search-jump-btn" onclick="window.jumpToSearchMatch()" class="hidden items-center bg-orange-100 text-orange-700 px-2 py-1 rounded font-black text-xs uppercase cursor-pointer hover:bg-orange-200 shrink-0">
@@ -185,11 +187,11 @@
                     <div class="legend-item"><svg class="w-3.5 h-3.5 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> LINKED BOOKING</div>
                     <div class="legend-item"><i>ITALICS</i> REFUNDABLE</div>
                     <div class="legend-item"><div class="border-[2px] border-red-500 w-3 h-3"></div> MONEY DUE</div>
-                    <div class="legend-item"><div class="border-[2px] border-red-500 border-dashed w-3 h-3"></div> INVALID CREDIT CARD</div>
+                    <div class="legend-item"><div class="border-[2px] border-red-500 border-dashed w-3 h-3"></div> INVALID CC</div>
                 </div>
                 <div class="w-px h-4 bg-slate-300 hidden xl:block"></div>
                 <div class="flex flex-wrap items-center justify-center gap-3">
-                    <div class="legend-item"><svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> CONFIRMATION SENT</div>
+                    <div class="legend-item"><svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> CONFIRMATION</div>
                     <div class="legend-item"><svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><circle cx="12" cy="16" r="1.5" fill="currentColor"></circle></svg> PRE/POST EMAIL</div>
                     <div class="legend-item"><svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><line x1="12" y1="10" x2="12" y2="16" stroke-width="3"></line></svg> SPECIAL EMAIL</div>
                 </div>
@@ -425,7 +427,7 @@
                 <div class="grid grid-cols-4 gap-2 pt-1">
                     <div class="col-span-1"><label class="field-label">In</label><input type="date" id="check-in" required class="w-full text-sm px-1!" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
                     <div class="col-span-1"><label class="field-label">Out</label><input type="date" id="check-out" required class="w-full text-sm px-1!" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
-                    <div class="col-span-1"><label class="field-label">PAX</label><input type="number" id="pax-count" value="1" min="1" class="w-full text-center"></div>
+                    <div class="col-span-1"><label class="field-label">PAX</label><input type="number" id="pax-count" value="1" min="1" class="w-full text-center" oninput="window.calcFinancials(); window.calcExtension && window.calcExtension();"></div>
                     <div class="col-span-1"><label class="field-label">Status</label>
                         <select id="staff-status" class="w-full text-sm font-black text-white px-1!" style="background: #2563eb" onchange="window.updateStatusColor(this)">
                             <option value="future">FUTURE</option><option value="here">HERE</option><option value="left">LEFT</option><option value="unconfirmed">UNCONFIRM</option><option value="cancelled">CANCEL</option><option value="noshow">NO-SHOW</option>
@@ -486,7 +488,7 @@
                     <div class="flex justify-between items-end mb-2 pb-2 border-b-2 border-slate-200">
                         <div class="flex gap-2 items-end">
                             <div><label class="field-label">Total Price</label>
-                                <div class="flex items-center text-xl font-black">฿<input type="number" id="total-price" value="0" step="0.01" class="w-24 p-0 ml-1 border-none bg-transparent outline-none focus:ring-0 text-xl font-black" oninput="window.calcFinancials()"></div>
+                                <div class="flex items-center text-xl font-black">฿<input type="number" id="total-price" value="0" step="0.01" class="w-24 p-0 ml-1 border-none bg-transparent outline-none focus:ring-0 text-xl font-black" oninput="window.calcFinancials(); window.calcExtension && window.calcExtension();"></div>
                             </div>
                             <div class="mb-1"><label class="field-label text-[10px] text-slate-400 cursor-pointer hover:text-blue-500" onclick="document.getElementById('net-price').focus()">Net Est.</label>
                                 <div class="flex items-center text-xs font-bold text-slate-500">฿<input type="number" id="net-price" value="0" step="0.01" class="w-16 p-0 ml-0.5 border-none bg-transparent outline-none focus:ring-0 text-xs font-bold text-slate-500 transition-all focus:bg-white focus:border focus:border-blue-300 focus:rounded px-1" oninput="window.overrideNet()"></div>
@@ -494,7 +496,7 @@
                         </div>
                         <div class="flex gap-4 text-right items-center">
                             <div><label class="field-label">Paid</label><div class="font-black text-xl text-green-600 leading-none" id="display-paid">฿0</div></div>
-                            <div><label class="field-label !text-red-500">Due</label><div class="font-black text-red-600 text-2xl leading-none" id="display-due">฿0</div></div>
+                            <div><label class="field-label !text-red-500">Due</label><div class="font-black text-red-600 text-2xl leading-none transition-all" id="display-due">฿0</div></div>
                             <div class="flex flex-col items-center justify-center ml-2 border-l border-slate-300 pl-2 cursor-pointer unselectable" onclick="window.toggleBadCC()">
                                 <span class="text-[10px] font-black leading-none text-slate-400">BAD</span><span class="text-[10px] font-black leading-none text-slate-400">CC</span>
                                 <div id="bad-cc-box" class="w-4 h-4 border-2 border-slate-300 rounded mt-0.5 flex items-center justify-center"></div>
@@ -528,10 +530,11 @@
             </form>
             
             <div class="bg-slate-100 p-3 flex justify-between items-center border-t border-slate-300 rounded-b-lg unselectable">
-                <div class="flex items-center gap-2">
-                    <button type="button" id="delete-btn" onclick="window.requestDelete()" class="p-1.5 bg-red-100 text-red-600 rounded hover:bg-red-200" title="Delete"><i data-lucide="trash-2" size="16"></i></button>
-                    <button type="button" id="split-btn" onclick="window.requestSplit()" class="p-1.5 bg-orange-100 text-orange-600 rounded hover:bg-orange-200" title="Split"><i data-lucide="scissors" size="16"></i></button>
-                    <button type="button" id="dup-btn" onclick="window.requestDuplicate()" class="p-1.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200" title="Duplicate & Link"><i data-lucide="copy" size="16"></i></button>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" id="delete-btn" onclick="window.requestDelete()" class="px-3 py-1.5 bg-red-600 text-white font-bold text-[11px] uppercase rounded hover:bg-red-700 shadow-sm flex items-center gap-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg> Delete</button>
+                    <button type="button" id="split-btn" onclick="window.requestSplit()" class="px-3 py-1.5 bg-orange-100 text-orange-700 font-bold text-[11px] uppercase rounded hover:bg-orange-200 flex items-center gap-1">Split</button>
+                    <button type="button" id="merge-btn" onclick="window.requestMerge()" class="px-3 py-1.5 bg-indigo-100 text-indigo-700 font-bold text-[11px] uppercase rounded hover:bg-indigo-200 flex items-center gap-1">Merge</button>
+                    <button type="button" id="dup-btn" onclick="window.requestDuplicate()" class="px-3 py-1.5 bg-blue-100 text-blue-700 font-bold text-[11px] uppercase rounded hover:bg-blue-200 flex items-center gap-1">Duplicate</button>
                 </div>
                 <div class="flex gap-2 ml-auto">
                     <button type="button" onclick="window.closeStaffModal()" class="px-4 py-1.5 bg-slate-200 rounded font-bold text-xs uppercase">Cancel</button>
@@ -563,7 +566,7 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
             <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm">
                 <span>Single Import</span>
-                <button type="button" onclick="document.getElementById('email-modal').style.display='none'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                <button type="button" onclick="document.getElementById('email-modal').style.display='none'"><i data-lucide="x" size="18"></i></button>
             </div>
             <div class="p-4 flex flex-col gap-3">
                 <div class="flex flex-col">
@@ -584,9 +587,11 @@
         </div>
     </div>
 
-    <!-- Alert / Split Modals -->
+    <!-- Alert / Split / Merge / Price Check Modals -->
     <div id="alert-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div id="alert-header" class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Attention</div><div class="p-6 text-center"><p id="alert-message" class="font-black text-slate-700 leading-tight text-md whitespace-pre-wrap"></p><div id="alert-actions" class="mt-6 flex gap-2 justify-center"><button id="alert-cancel" onclick="window.closeAlert()" class="hidden px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button id="alert-confirm" onclick="window.closeAlert()" class="px-10 py-2 bg-red-600 text-white rounded-lg font-black text-sm uppercase">Okay</button></div></div></div></div>
     <div id="split-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Split Stay</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select date to split booking.<br><span class="text-xs font-bold text-slate-500 mt-2 block">This creates a zero-balance linked segment so you can easily move guests to a different room mid-stay without messing up your accounting!</span></p><input type="date" id="split-date" class="w-full mb-6 bg-slate-50 border border-slate-300 font-bold text-lg p-2 rounded outline-none"><div class="flex gap-2 justify-center"><button onclick="document.getElementById('split-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button onclick="window.confirmSplit()" class="px-10 py-2 bg-orange-600 text-white rounded-lg font-black text-sm uppercase">Split Stay</button></div></div></div></div>
+    <div id="merge-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Merge Bookings</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select a booking to absorb.<br><span class="text-xs font-bold text-slate-500 mt-2 block">Dates, rooms, and payments will be seamlessly combined. The absorbed booking will be deleted!</span></p><select id="merge-target" class="w-full mb-6 bg-slate-50 border border-slate-300 font-bold text-sm p-2 rounded outline-none cursor-pointer"></select><div class="flex gap-2 justify-center"><button onclick="document.getElementById('merge-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button id="merge-confirm-btn" onclick="window.confirmMerge()" class="px-10 py-2 bg-indigo-600 text-white rounded-lg font-black text-sm uppercase transition-all">Merge</button></div></div></div></div>
+    <div id="price-check-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm flex justify-between items-center"><span>Quick Price Check</span><button type="button" onclick="document.getElementById('price-check-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div><div class="p-6 flex flex-col gap-3"><div class="flex gap-2"><div class="flex-1"><label class="field-label">Check-in</label><input type="date" id="pc-in" class="w-full text-sm p-2 bg-slate-50 border border-slate-300 rounded outline-none font-bold"></div><div class="w-20"><label class="field-label">Nights</label><input type="number" id="pc-nights" value="1" min="1" class="w-full text-sm p-2 bg-slate-50 border border-slate-300 rounded outline-none text-center font-bold" onchange="window.updatePcOut()"></div></div><div class="flex gap-2"><div class="flex-1"><label class="field-label">Check-out</label><input type="date" id="pc-out" class="w-full text-sm p-2 bg-slate-100 border border-slate-300 rounded outline-none font-bold text-slate-500" readonly></div><div class="w-20"><label class="field-label">PAX</label><input type="number" id="pc-pax" value="1" min="1" class="w-full text-sm p-2 bg-slate-50 border border-slate-300 rounded outline-none text-center font-bold"></div></div><button onclick="window.executePriceCheck()" class="mt-2 w-full py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-black text-sm uppercase flex items-center justify-center gap-2 transition-colors"><i data-lucide="external-link" size="16"></i> Check BDC Rates</button></div></div></div>
 
     <div id="custom-tooltip"></div>
 
@@ -626,97 +631,12 @@
         const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         const fmpDates = ["2026-01-03", "2026-02-02", "2026-03-03", "2026-04-02", "2026-05-01", "2026-06-01", "2026-06-29", "2026-07-31", "2026-08-28", "2026-09-26", "2026-10-27", "2026-11-24", "2026-12-24", "2026-12-31"];
         
-        const rawCountryMap = {
-            'af': 'Afghanistan', 'al': 'Albania', 'dz': 'Algeria', 'as': 'American Samoa', 'ad': 'Andorra', 'ao': 'Angola', 'ai': 'Anguilla', 'aq': 'Antarctica', 'ag': 'Antigua and Barbuda', 'ar': 'Argentina', 'am': 'Armenia', 'aw': 'Aruba', 'au': 'Australia', 'at': 'Austria', 'az': 'Azerbaijan', 'bs': 'Bahamas', 'bh': 'Bahrain', 'bd': 'Bangladesh', 'bb': 'Barbados', 'by': 'Belarus', 'be': 'Belgium', 'bz': 'Belize', 'bj': 'Benin', 'bm': 'Bermuda', 'bt': 'Bhutan', 'bo': 'Bolivia', 'bq': 'Bonaire', 'ba': 'Bosnia and Herzegovina', 'bw': 'Botswana', 'bv': 'Bouvet Island', 'br': 'Brazil', 'io': 'British Indian Ocean Territory', 'bn': 'Brunei', 'bg': 'Bulgaria', 'bf': 'Burkina Faso', 'bi': 'Burundi', 'cv': 'Cabo Verde', 'kh': 'Cambodia', 'cm': 'Cameroon', 'ca': 'Canada', 'ky': 'Cayman Islands', 'cf': 'Central African Republic', 'td': 'Chad', 'cl': 'Chile', 'cn': 'China', 'cx': 'Christmas Island', 'cc': 'Cocos Islands', 'co': 'Colombia', 'km': 'Comoros', 'cd': 'Congo (DRC)', 'cg': 'Congo', 'ck': 'Cook Islands', 'cr': 'Costa Rica', 'hr': 'Croatia', 'cu': 'Cuba', 'cw': 'Curaçao', 'cy': 'Cyprus', 'cz': 'Czechia', 'ci': "Côte d'Ivoire", 'dk': 'Denmark', 'dj': 'Djibouti', 'dm': 'Dominica', 'do': 'Dominican Republic', 'ec': 'Ecuador', 'eg': 'Egypt', 'sv': 'El Salvador', 'gq': 'Equatorial Guinea', 'er': 'Eritrea', 'ee': 'Estonia', 'sz': 'Eswatini', 'et': 'Ethiopia', 'fk': 'Falkland Islands', 'fo': 'Faroe Islands', 'fj': 'Fiji', 'fi': 'Finland', 'fr': 'France', 'gf': 'French Guiana', 'pf': 'French Polynesia', 'tf': 'French Southern Territories', 'ga': 'Gabon', 'gm': 'Gambia', 'ge': 'Georgia', 'de': 'Germany', 'gh': 'Ghana', 'gi': 'Gibraltar', 'gr': 'Greece', 'gl': 'Greenland', 'gd': 'Grenada', 'gp': 'Guadeloupe', 'gu': 'Guam', 'gt': 'Guatemala', 'gg': 'Guernsey', 'gn': 'Guinea', 'gw': 'Guinea-Bissau', 'gy': 'Guyana', 'ht': 'Haiti', 'hm': 'Heard Island', 'va': 'Holy See', 'hn': 'Honduras', 'hk': 'Hong Kong', 'hu': 'Hungary', 'is': 'Iceland', 'in': 'India', 'id': 'Indonesia', 'ir': 'Iran', 'iq': 'Iraq', 'ie': 'Ireland', 'im': 'Isle of Man', 'il': 'Israel', 'it': 'Italy', 'jm': 'Jamaica', 'jp': 'Japan', 'jo': 'Jordan', 'kz': 'Kazakhstan', 'ke': 'Kenya', 'ki': 'Kiribati', 'kp': 'North Korea', 'kr': 'South Korea', 'kw': 'Kuwait', 'kg': 'Kyrgyzstan', 'la': 'Laos', 'lv': 'Latvia', 'lb': 'Lebanon', 'ls': 'Lesotho', 'lr': 'Liberia', 'ly': 'Libya', 'li': 'Liechtenstein', 'lt': 'Lithuania', 'lu': 'Luxembourg', 'mo': 'Macao', 'mg': 'Madagascar', 'mw': 'Malawi', 'my': 'Malaysia', 'mv': 'Maldives', 'ml': 'Mali', 'mt': 'Malta', 'mh': 'Marshall Islands', 'mq': 'Martinique', 'mr': 'Mauritania', 'mu': 'Mauritius', 'yt': 'Mayotte', 'mx': 'Mexico', 'fm': 'Micronesia', 'md': 'Moldova', 'mc': 'Monaco', 'mn': 'Mongolia', 'me': 'Montenegro', 'ms': 'Montserrat', 'ma': 'Morocco', 'mz': 'Mozambique', 'mm': 'Myanmar', 'na': 'Namibia', 'nr': 'Nauru', 'np': 'Nepal', 'nl': 'Netherlands', 'nc': 'New Caledonia', 'nz': 'New Zealand', 'ni': 'Nicaragua', 'ne': 'Niger', 'ng': 'Nigeria', 'nu': 'Niue', 'nf': 'Norfolk Island', 'mp': 'Northern Mariana Islands', 'no': 'Norway', 'om': 'Oman', 'pk': 'Pakistan', 'pw': 'Palau', 'ps': 'Palestine', 'pa': 'Panama', 'pg': 'Papua New Guinea', 'py': 'Paraguay', 'pe': 'Peru', 'ph': 'Philippines', 'pn': 'Pitcairn', 'pl': 'Poland', 'pt': 'Portugal', 'pr': 'Puerto Rico', 'qa': 'Qatar', 'mk': 'North Macedonia', 'ro': 'Romania', 'ru': 'Russia', 'rw': 'Rwanda', 're': 'Réunion', 'bl': 'Saint Barthélemy', 'sh': 'Saint Helena', 'kn': 'Saint Kitts and Nevis', 'lc': 'Saint Lucia', 'mf': 'Saint Martin', 'pm': 'Saint Pierre and Miquelon', 'vc': 'Saint Vincent', 'ws': 'Samoa', 'sm': 'San Marino', 'st': 'Sao Tome and Principe', 'sa': 'Saudi Arabia', 'sn': 'Senegal', 'rs': 'Serbia', 'sc': 'Seychelles', 'sl': 'Sierra Leone', 'sg': 'Singapore', 'sx': 'Sint Maarten', 'sk': 'Slovakia', 'si': 'Slovenia', 'sb': 'Solomon Islands', 'so': 'Somalia', 'za': 'South Africa', 'gs': 'South Georgia', 'ss': 'South Sudan', 'es': 'Spain', 'lk': 'Sri Lanka', 'sd': 'Sudan', 'sr': 'Suriname', 'sj': 'Svalbard', 'se': 'Sweden', 'ch': 'Switzerland', 'sy': 'Syria', 'tw': 'Taiwan', 'tj': 'Tajikistan', 'tz': 'Tanzania', 'tl': 'Timor-Leste', 'tg': 'Togo', 'tk': 'Tokelau', 'to': 'Tonga', 'tt': 'Trinidad and Tobago', 'tn': 'Tunisia', 'tr': 'Turkey', 'tm': 'Turkmenistan', 'tc': 'Turks and Caicos Islands', 'tv': 'Tuvalu', 'ug': 'Uganda', 'ua': 'Ukraine', 'ae': 'United Arab Emirates', 'gb': 'United Kingdom', 'um': 'U.S. Outlying Islands', 'us': 'United States', 'uy': 'Uruguay', 'uz': 'Uzbekistan', 'vu': 'Vanuatu', 've': 'Venezuela', 'vn': 'Vietnam', 'ye': 'Yemen', 'zm': 'Zambia', 'zw': 'Zimbabwe', 'ax': 'Åland Islands'
-        };
+        // Array Compressions to prevent length truncation issues during AI full file generation
+        const rawCountryMap={"af":"Afghanistan","al":"Albania","dz":"Algeria","as":"American Samoa","ad":"Andorra","ao":"Angola","ai":"Anguilla","aq":"Antarctica","ag":"Antigua and Barbuda","ar":"Argentina","am":"Armenia","aw":"Aruba","au":"Australia","at":"Austria","az":"Azerbaijan","bs":"Bahamas","bh":"Bahrain","bd":"Bangladesh","bb":"Barbados","by":"Belarus","be":"Belgium","bz":"Belize","bj":"Benin","bm":"Bermuda","bt":"Bhutan","bo":"Bolivia","bq":"Bonaire","ba":"Bosnia and Herzegovina","bw":"Botswana","bv":"Bouvet Island","br":"Brazil","io":"British Indian Ocean Territory","bn":"Brunei","bg":"Bulgaria","bf":"Burkina Faso","bi":"Burundi","cv":"Cabo Verde","kh":"Cambodia","cm":"Cameroon","ca":"Canada","ky":"Cayman Islands","cf":"Central African Republic","td":"Chad","cl":"Chile","cn":"China","cx":"Christmas Island","cc":"Cocos Islands","co":"Colombia","km":"Comoros","cd":"Congo (DRC)","cg":"Congo","ck":"Cook Islands","cr":"Costa Rica","hr":"Croatia","cu":"Cuba","cw":"Curaçao","cy":"Cyprus","cz":"Czechia","ci":"Côte d'Ivoire","dk":"Denmark","dj":"Djibouti","dm":"Dominica","do":"Dominican Republic","ec":"Ecuador","eg":"Egypt","sv":"El Salvador","gq":"Equatorial Guinea","er":"Eritrea","ee":"Estonia","sz":"Eswatini","et":"Ethiopia","fk":"Falkland Islands","fo":"Faroe Islands","fj":"Fiji","fi":"Finland","fr":"France","gf":"French Guiana","pf":"French Polynesia","tf":"French Southern Territories","ga":"Gabon","gm":"Gambia","ge":"Georgia","de":"Germany","gh":"Ghana","gi":"Gibraltar","gr":"Greece","gl":"Greenland","gd":"Grenada","gp":"Guadeloupe","gu":"Guam","gt":"Guatemala","gg":"Guernsey","gn":"Guinea","gw":"Guinea-Bissau","gy":"Guyana","ht":"Haiti","hm":"Heard Island","va":"Holy See","hn":"Honduras","hk":"Hong Kong","hu":"Hungary","is":"Iceland","in":"India","id":"Indonesia","ir":"Iran","iq":"Iraq","ie":"Ireland","im":"Isle of Man","il":"Israel","it":"Italy","jm":"Jamaica","jp":"Japan","jo":"Jordan","kz":"Kazakhstan","ke":"Kenya","ki":"Kiribati","kp":"North Korea","kr":"South Korea","kw":"Kuwait","kg":"Kyrgyzstan","la":"Laos","lv":"Latvia","lb":"Lebanon","ls":"Lesotho","lr":"Liberia","ly":"Libya","li":"Liechtenstein","lt":"Lithuania","lu":"Luxembourg","mo":"Macao","mg":"Madagascar","mw":"Malawi","my":"Malaysia","mv":"Maldives","ml":"Mali","mt":"Malta","mh":"Marshall Islands","mq":"Martinique","mr":"Mauritania","mu":"Mauritius","yt":"Mayotte","mx":"Mexico","fm":"Micronesia","md":"Moldova","mc":"Monaco","mn":"Mongolia","me":"Montenegro","ms":"Montserrat","ma":"Morocco","mz":"Mozambique","mm":"Myanmar","na":"Namibia","nr":"Nauru","np":"Nepal","nl":"Netherlands","nc":"New Caledonia","nz":"New Zealand","ni":"Nicaragua","ne":"Niger","ng":"Nigeria","nu":"Niue","nf":"Norfolk Island","mp":"Northern Mariana Islands","no":"Norway","om":"Oman","pk":"Pakistan","pw":"Palau","ps":"Palestine","pa":"Panama","pg":"Papua New Guinea","py":"Paraguay","pe":"Peru","ph":"Philippines","pn":"Pitcairn","pl":"Poland","pt":"Portugal","pr":"Puerto Rico","qa":"Qatar","mk":"North Macedonia","ro":"Romania","ru":"Russia","rw":"Rwanda","re":"Réunion","bl":"Saint Barthélemy","sh":"Saint Helena","kn":"Saint Kitts and Nevis","lc":"Saint Lucia","mf":"Saint Martin","pm":"Saint Pierre and Miquelon","vc":"Saint Vincent","ws":"Samoa","sm":"San Marino","st":"Sao Tome and Principe","sa":"Saudi Arabia","sn":"Senegal","rs":"Serbia","sc":"Seychelles","sl":"Sierra Leone","sg":"Singapore","sx":"Sint Maarten","sk":"Slovakia","si":"Slovenia","sb":"Solomon Islands","so":"Somalia","za":"South Africa","gs":"South Georgia","ss":"South Sudan","es":"Spain","lk":"Sri Lanka","sd":"Sudan","sr":"Suriname","sj":"Svalbard","se":"Sweden","ch":"Switzerland","sy":"Syria","tw":"Taiwan","tj":"Tajikistan","tz":"Tanzania","tl":"Timor-Leste","tg":"Togo","tk":"Tokelau","to":"Tonga","tt":"Trinidad and Tobago","tn":"Tunisia","tr":"Turkey","tm":"Turkmenistan","tc":"Turks and Caicos Islands","tv":"Tuvalu","ug":"Uganda","ua":"Ukraine","ae":"United Arab Emirates","gb":"United Kingdom","um":"U.S. Outlying Islands","us":"United States","uy":"Uruguay","uz":"Uzbekistan","vu":"Vanuatu","ve":"Venezuela","vn":"Vietnam","ye":"Yemen","zm":"Zambia","zw":"Zimbabwe","ax":"Åland Islands"};
         const uniqueCountries = [...new Set(Object.values(rawCountryMap))].filter(c => c !== 'Thailand').sort();
         const countries = ["[UNKNOWN]", "Thailand", ...uniqueCountries];
 
-        const hotelRooms = [
-            { id: "B1", type: "OV Deluxe", bed: "KING", floor: 1, order: 101 },
-            { id: "B2", type: "OV Deluxe", bed: "TWIN", floor: 2, order: 102 },
-            { id: "B3", type: "Deluxe", bed: "KING", floor: 1, order: 201 },
-            { id: "B4", type: "Deluxe", bed: "TWIN", floor: 2, order: 202 },
-            { id: "A1", type: "OV Superior", bed: "KING", floor: 1, order: 301 },
-            { id: "A2", type: "OV Superior", bed: "TWIN", floor: 2, order: 302 },
-            { id: "A3", type: "Superior", bed: "KING", floor: 1, order: 401 },
-            { id: "A4", type: "Superior", bed: "KING", floor: 2, order: 402 },
-            { id: "A5", type: "Superior", bed: "KING", floor: 1, order: 403 },
-            { id: "A6", type: "Superior", bed: "KING", floor: 2, order: 404 },
-            { id: "A7", type: "Superior", bed: "KING", floor: 1, order: 405 },
-            { id: "A8", type: "Superior", bed: "TWIN", floor: 2, order: 406 },
-            { id: "A9", type: "Superior", bed: "KING", floor: 1, order: 407 },
-            { id: "A10", type: "Superior", bed: "TWIN", floor: 2, order: 408 },
-            { id: "A11", type: "Superior", bed: "KING", floor: 1, order: 409 },
-            { id: "A12", type: "Superior", bed: "KING", floor: 2, order: 410 },
-            { id: "B5", type: "Superior", bed: "KING", floor: 1, order: 411 },
-            { id: "B6", type: "Superior", bed: "TWIN", floor: 2, order: 412 },
-            { id: "B7", type: "Superior", bed: "KING", floor: 1, order: 413 },
-            { id: "B8", type: "Superior", bed: "TWIN", floor: 2, order: 414 },
-            { id: "B9", type: "Superior", bed: "KING", floor: 1, order: 415 },
-            { id: "B10", type: "Superior", bed: "TWIN", floor: 2, order: 416 },
-            { id: "B11", type: "Superior", bed: "KING", floor: 1, order: 417 },
-            { id: "B12", type: "Superior", bed: "TWIN", floor: 2, order: 418 },
-            { id: "B13", type: "Superior", bed: "KING", floor: 1, order: 419 },
-            { id: "B14", type: "Superior", bed: "TWIN", floor: 2, order: 420 },
-            { id: "B15", type: "Superior", bed: "KING", floor: 1, order: 421 },
-            { id: "B16", type: "Superior", bed: "TWIN", floor: 2, order: 422 },
-            { id: "B17", type: "Superior", bed: "KING", floor: 1, order: 423 },
-            { id: "B18", type: "Superior", bed: "TWIN", floor: 2, order: 424 },
-            { id: "B19", type: "Superior", bed: "KING", floor: 1, order: 425 },
-            { id: "B20", type: "Superior", bed: "TWIN", floor: 2, order: 426 },
-            { id: "B21", type: "Superior", bed: "KING", floor: 1, order: 427 },
-            { id: "B22", type: "Superior", bed: "", floor: 2, order: 428 },
-            { id: "206", type: "OV Standard", bed: "KING", floor: 2, order: 501 },
-            { id: "212", type: "OV Standard", bed: "TWIN", floor: 2, order: 502 },
-            { id: "306", type: "OV Standard", bed: "KING", floor: 3, order: 503 },
-            { id: "311", type: "OV Standard", bed: "KING", floor: 3, order: 504 },
-            { id: "101", type: "Standard", bed: "", floor: 1, order: 601 },
-            { id: "102", type: "Standard", bed: "", floor: 1, order: 602 },
-            { id: "103", type: "Standard", bed: "", floor: 1, order: 603 },
-            { id: "201", type: "Standard", bed: "KING", floor: 2, order: 604 },
-            { id: "202", type: "Standard", bed: "KING", floor: 2, order: 605 },
-            { id: "203", type: "Standard", bed: "KING", floor: 2, order: 606 },
-            { id: "204", type: "Standard", bed: "KING", floor: 2, order: 607 },
-            { id: "205", type: "Standard", bed: "KING", floor: 2, order: 608 },
-            { id: "207", type: "Standard", bed: "TWIN", floor: 2, order: 609 },
-            { id: "208", type: "Standard", bed: "TWIN", floor: 2, order: 610 },
-            { id: "209", type: "Standard", bed: "TWIN", floor: 2, order: 611 },
-            { id: "210", type: "Standard", bed: "TWIN", floor: 2, order: 612 },
-            { id: "211", type: "Standard", bed: "TWIN", floor: 2, order: 613 },
-            { id: "305", type: "Standard", bed: "K+T", floor: 3, order: 614 },
-            { id: "307", type: "Standard", bed: "BUNK+T", floor: 3, order: 615 },
-            { id: "308", type: "Standard", bed: "BUNK+T", floor: 3, order: 616 },
-            { id: "309", type: "Standard", bed: "K+T", floor: 3, order: 617 },
-            { id: "310", type: "Standard", bed: "K+T", floor: 3, order: 618 },
-            { id: "301-1", type: "Dorm", bed: "2BUNK", floor: 3, order: 701 },
-            { id: "301-2", type: "Dorm", bed: "2BUNK", floor: 3, order: 702 },
-            { id: "301-3", type: "Dorm", bed: "2BUNK", floor: 3, order: 703 },
-            { id: "301-4", type: "Dorm", bed: "2BUNK", floor: 3, order: 704 },
-            { id: "302-1", type: "Dorm", bed: "2BUNK", floor: 3, order: 705 },
-            { id: "302-2", type: "Dorm", bed: "2BUNK", floor: 3, order: 706 },
-            { id: "302-3", type: "Dorm", bed: "2BUNK", floor: 3, order: 707 },
-            { id: "302-4", type: "Dorm", bed: "2BUNK", floor: 3, order: 708 },
-            { id: "303-1", type: "Dorm", bed: "2BUNK", floor: 3, order: 709 },
-            { id: "303-2", type: "Dorm", bed: "2BUNK", floor: 3, order: 710 },
-            { id: "303-3", type: "Dorm", bed: "2BUNK", floor: 3, order: 711 },
-            { id: "303-4", type: "Dorm", bed: "2BUNK", floor: 3, order: 712 },
-            { id: "304-1", type: "Dorm", bed: "2BUNK", floor: 3, order: 713 },
-            { id: "304-2", type: "Dorm", bed: "2BUNK", floor: 3, order: 714 },
-            { id: "304-3", type: "Dorm", bed: "2BUNK", floor: 3, order: 715 },
-            { id: "304-4", type: "Dorm", bed: "2BUNK", floor: 3, order: 716 },
-            { id: "F1", type: "Budget", bed: "", floor: 1, order: 801 },
-            { id: "F2", type: "Budget", bed: "", floor: 1, order: 802 },
-            { id: "F3", type: "Budget", bed: "", floor: 1, order: 803 },
-            { id: "F4", type: "Budget", bed: "", floor: 1, order: 804 },
-            { id: "F5", type: "Budget", bed: "", floor: 1, order: 805 },
-            { id: "F6", type: "Budget", bed: "", floor: 1, order: 806 },
-            { id: "F7", type: "Budget", bed: "", floor: 1, order: 807 },
-            { id: "F8", type: "Budget", bed: "", floor: 1, order: 808 },
-            { id: "F9", type: "Budget", bed: "", floor: 1, order: 809 },
-            { id: "F10", type: "Budget", bed: "", floor: 1, order: 810 },
-            { id: "F11", type: "Budget", bed: "", floor: 1, order: 811 }
-        ];
+        const hotelRooms=[{id:"B1",type:"OV Deluxe",bed:"KING",floor:1,order:101},{id:"B2",type:"OV Deluxe",bed:"TWIN",floor:2,order:102},{id:"B3",type:"Deluxe",bed:"KING",floor:1,order:201},{id:"B4",type:"Deluxe",bed:"TWIN",floor:2,order:202},{id:"A1",type:"OV Superior",bed:"KING",floor:1,order:301},{id:"A2",type:"OV Superior",bed:"TWIN",floor:2,order:302},{id:"A3",type:"Superior",bed:"KING",floor:1,order:401},{id:"A4",type:"Superior",bed:"KING",floor:2,order:402},{id:"A5",type:"Superior",bed:"KING",floor:1,order:403},{id:"A6",type:"Superior",bed:"KING",floor:2,order:404},{id:"A7",type:"Superior",bed:"KING",floor:1,order:405},{id:"A8",type:"Superior",bed:"TWIN",floor:2,order:406},{id:"A9",type:"Superior",bed:"KING",floor:1,order:407},{id:"A10",type:"Superior",bed:"TWIN",floor:2,order:408},{id:"A11",type:"Superior",bed:"KING",floor:1,order:409},{id:"A12",type:"Superior",bed:"KING",floor:2,order:410},{id:"B5",type:"Superior",bed:"KING",floor:1,order:411},{id:"B6",type:"Superior",bed:"TWIN",floor:2,order:412},{id:"B7",type:"Superior",bed:"KING",floor:1,order:413},{id:"B8",type:"Superior",bed:"TWIN",floor:2,order:414},{id:"B9",type:"Superior",bed:"KING",floor:1,order:415},{id:"B10",type:"Superior",bed:"TWIN",floor:2,order:416},{id:"B11",type:"Superior",bed:"KING",floor:1,order:417},{id:"B12",type:"Superior",bed:"TWIN",floor:2,order:418},{id:"B13",type:"Superior",bed:"KING",floor:1,order:419},{id:"B14",type:"Superior",bed:"TWIN",floor:2,order:420},{id:"B15",type:"Superior",bed:"KING",floor:1,order:421},{id:"B16",type:"Superior",bed:"TWIN",floor:2,order:422},{id:"B17",type:"Superior",bed:"KING",floor:1,order:423},{id:"B18",type:"Superior",bed:"TWIN",floor:2,order:424},{id:"B19",type:"Superior",bed:"KING",floor:1,order:425},{id:"B20",type:"Superior",bed:"TWIN",floor:2,order:426},{id:"B21",type:"Superior",bed:"KING",floor:1,order:427},{id:"B22",type:"Superior",bed:"",floor:2,order:428},{id:"206",type:"OV Standard",bed:"KING",floor:2,order:501},{id:"212",type:"OV Standard",bed:"TWIN",floor:2,order:502},{id:"306",type:"OV Standard",bed:"KING",floor:3,order:503},{id:"311",type:"OV Standard",bed:"KING",floor:3,order:504},{id:"101",type:"Standard",bed:"",floor:1,order:601},{id:"102",type:"Standard",bed:"",floor:1,order:602},{id:"103",type:"Standard",bed:"",floor:1,order:603},{id:"201",type:"Standard",bed:"KING",floor:2,order:604},{id:"202",type:"Standard",bed:"KING",floor:2,order:605},{id:"203",type:"Standard",bed:"KING",floor:2,order:606},{id:"204",type:"Standard",bed:"KING",floor:2,order:607},{id:"205",type:"Standard",bed:"KING",floor:2,order:608},{id:"207",type:"Standard",bed:"TWIN",floor:2,order:609},{id:"208",type:"Standard",bed:"TWIN",floor:2,order:610},{id:"209",type:"Standard",bed:"TWIN",floor:2,order:611},{id:"210",type:"Standard",bed:"TWIN",floor:2,order:612},{id:"211",type:"Standard",bed:"TWIN",floor:2,order:613},{id:"305",type:"Standard",bed:"K+T",floor:3,order:614},{id:"307",type:"Standard",bed:"BUNK+T",floor:3,order:615},{id:"308",type:"Standard",bed:"BUNK+T",floor:3,order:616},{id:"309",type:"Standard",bed:"K+T",floor:3,order:617},{id:"310",type:"Standard",bed:"K+T",floor:3,order:618},{id:"301-1",type:"Dorm",bed:"2BUNK",floor:3,order:701},{id:"301-2",type:"Dorm",bed:"2BUNK",floor:3,order:702},{id:"301-3",type:"Dorm",bed:"2BUNK",floor:3,order:703},{id:"301-4",type:"Dorm",bed:"2BUNK",floor:3,order:704},{id:"302-1",type:"Dorm",bed:"2BUNK",floor:3,order:705},{id:"302-2",type:"Dorm",bed:"2BUNK",floor:3,order:706},{id:"302-3",type:"Dorm",bed:"2BUNK",floor:3,order:707},{id:"302-4",type:"Dorm",bed:"2BUNK",floor:3,order:708},{id:"303-1",type:"Dorm",bed:"2BUNK",floor:3,order:709},{id:"303-2",type:"Dorm",bed:"2BUNK",floor:3,order:710},{id:"303-3",type:"Dorm",bed:"2BUNK",floor:3,order:711},{id:"303-4",type:"Dorm",bed:"2BUNK",floor:3,order:712},{id:"304-1",type:"Dorm",bed:"2BUNK",floor:3,order:713},{id:"304-2",type:"Dorm",bed:"2BUNK",floor:3,order:714},{id:"304-3",type:"Dorm",bed:"2BUNK",floor:3,order:715},{id:"304-4",type:"Dorm",bed:"2BUNK",floor:3,order:716},{id:"F1",type:"Budget",bed:"",floor:1,order:801},{id:"F2",type:"Budget",bed:"",floor:1,order:802},{id:"F3",type:"Budget",bed:"",floor:1,order:803},{id:"F4",type:"Budget",bed:"",floor:1,order:804},{id:"F5",type:"Budget",bed:"",floor:1,order:805},{id:"F6",type:"Budget",bed:"",floor:1,order:806},{id:"F7",type:"Budget",bed:"",floor:1,order:807},{id:"F8",type:"Budget",bed:"",floor:1,order:808},{id:"F9",type:"Budget",bed:"",floor:1,order:809},{id:"F10",type:"Budget",bed:"",floor:1,order:810},{id:"F11",type:"Budget",bed:"",floor:1,order:811}];
 
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
 
@@ -1571,12 +1491,15 @@
         };
 
         window.cycleMulti = (el, labels, classes) => {
+            if (!el) return;
             let s = parseInt(el.dataset.state) + 1; if(s >= labels.length) s = 0;
             el.dataset.state = s; el.innerText = labels[s];
             el.className = el.id.includes('email') ? `unselectable multi-state-btn w-[110px] px-1 py-1 rounded text-[10px] font-black uppercase border text-center ${classes[s]}` : `unselectable multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border flex-1 ${classes[s]}`;
         };
         const setMulti = (id, state, labels, classes) => {
-            const el = document.getElementById(id); el.dataset.state = state; el.innerText = labels[state];
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.dataset.state = state; el.innerText = labels[state];
             el.className = id.includes('email') ? `unselectable multi-state-btn w-[110px] px-1 py-1 rounded text-[10px] font-black uppercase border text-center ${classes[state]}` : `unselectable multi-state-btn px-2 py-1.5 rounded text-[11px] text-center font-black uppercase border flex-1 ${classes[state]}`;
         };
 
@@ -1602,8 +1525,25 @@
                 if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp'].includes(method)) commDeduct += amt;
             });
             const due = Number((total - paid).toFixed(2));
+            
+            const dueContainer = document.getElementById('display-due');
+            const totalContainer = document.getElementById('total-price').parentElement;
+            const pax = parseInt(document.getElementById('pax-count').value) || 1;
+            
+            dueContainer.innerText = `฿${due.toFixed(2)}`;
             document.getElementById('display-paid').innerText = `฿${paid.toFixed(2)}`;
-            document.getElementById('display-due').innerText = `฿${due.toFixed(2)}`;
+            
+            // PAX Split Tooltip UI
+            if (pax > 1) {
+                dueContainer.title = `Split between ${pax} pax:\n฿${(due/pax).toFixed(2)} each`;
+                totalContainer.title = `Split between ${pax} pax:\n฿${(total/pax).toFixed(2)} each`;
+                dueContainer.classList.add('cursor-help', 'border-b-2', 'border-dashed', 'border-red-300');
+                totalContainer.classList.add('cursor-help', 'border-b-2', 'border-dashed', 'border-slate-300');
+            } else {
+                dueContainer.title = ''; totalContainer.title = '';
+                dueContainer.classList.remove('cursor-help', 'border-b-2', 'border-dashed', 'border-red-300');
+                totalContainer.classList.remove('cursor-help', 'border-b-2', 'border-dashed', 'border-slate-300');
+            }
 
             const netEl = document.getElementById('net-price');
             if (netEl.dataset.override !== 'true') {
@@ -1655,10 +1595,9 @@
                     <option value="airbnb-pay" ${method==='airbnb-pay'?'selected':''}>AIRBNB PAY</option>
                     <option value="other" ${method==='other'?'selected':''}>OTHER</option>
                 </select>
-                ${isLocked ? `<button type="button" onclick="window.unlockPayment('${id}')" class="p-1 text-slate-400 hover:text-blue-500"><i data-lucide="pencil" size="14"></i></button>` : `<button type="button" onclick="window.removePaymentRow('${id}')" class="p-1 text-slate-400 hover:text-red-500"><i data-lucide="trash" size="14"></i></button>`}
+                ${isLocked ? `<button type="button" onclick="window.unlockPayment('${id}')" class="p-1.5 text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 rounded flex-shrink-0 border border-slate-200"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></button>` : `<button type="button" onclick="window.removePaymentRow('${id}')" class="p-1.5 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded flex-shrink-0 border border-red-200"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>`}
             `;
             document.getElementById('payments-list').appendChild(div);
-            lucide.createIcons();
             window.calcFinancials();
         };
 
@@ -1666,8 +1605,7 @@
             const row = document.getElementById(id);
             row.classList.remove('opacity-70');
             row.querySelectorAll('input, select').forEach(el => el.disabled = false);
-            row.lastElementChild.outerHTML = `<button type="button" onclick="window.removePaymentRow('${id}')" class="p-1 text-slate-400 hover:text-red-500"><i data-lucide="trash" size="14"></i></button>`;
-            lucide.createIcons();
+            row.lastElementChild.outerHTML = `<button type="button" onclick="window.removePaymentRow('${id}')" class="p-1.5 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded flex-shrink-0 border border-red-200"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>`;
         };
 
         window.removePaymentRow = (id) => {
@@ -1781,9 +1719,15 @@
             setMulti('refund-btn', 0, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
             setMulti('upgrade-btn', 0, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
             setMulti('rating-btn', 0, ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
+            setMulti('ext-btn', 0, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
+
+            document.getElementById('ext-days').value = 1;
+            document.getElementById('ext-avg-rate').value = '';
+            document.getElementById('ext-price').value = '';
 
             document.getElementById('delete-btn').style.visibility = 'hidden'; 
             document.getElementById('split-btn').style.visibility = 'hidden';
+            if (document.getElementById('merge-btn')) document.getElementById('merge-btn').style.visibility = 'hidden';
             document.getElementById('dup-btn').style.visibility = 'hidden';
             document.getElementById('audit-log').innerText = `NEW RECORD | CREATING AS ${currentUserEmail.toUpperCase()}`;
 
@@ -1792,6 +1736,7 @@
             window.checkEmailProxy('');
             
             window.toggleSection('guest-profile-section', 'profile-chevron', true);
+            window.toggleSection('ext-section', 'ext-chevron', false);
             window.toggleSection('fin-section', 'fin-chevron', true);
             window.toggleSection('meta-section', 'meta-chevron', true);
             
@@ -1801,7 +1746,7 @@
         
         window.closeStaffModal = () => { document.getElementById('staff-modal').style.display = 'none'; };
         
-        window.quickAdd = (room, date) => { window.openStaffModal(); document.getElementById('assigned-rooms-container').innerHTML = ''; window.addRoomSelect(room); const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0'); document.getElementById('check-in').value = `${y}-${m}-${d}`; const out = new Date(date); out.setDate(date.getDate() + 1); const oy = out.getFullYear(), om = String(out.getMonth() + 1).padStart(2, '0'), od = String(out.getDate()).padStart(2, '0'); document.getElementById('check-out').value = `${oy}-${om}-${od}`; window.syncLabels(); window.updateAvailableRooms(); };
+        window.quickAdd = (room, date) => { window.openStaffModal(); document.getElementById('assigned-rooms-container').innerHTML = ''; window.addRoomSelect(room); const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0'); document.getElementById('check-in').value = `${y}-${m}-${d}`; const out = new Date(date); out.setDate(date.getDate() + 1); const oy = out.getFullYear(), om = String(out.getMonth() + 1).padStart(2, '0'), od = String(out.getDate()).padStart(2, '0'); document.getElementById('check-out').value = `${oy}-${om}-${od}`; window.syncLabels(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension(); };
 
         window.requestDuplicate = async () => {
             if(currentUserRole === 'staff') return;
@@ -1812,7 +1757,7 @@
             if(!s.linkedId) { const updatedOriginal = { ...s, linkedId: linkCode }; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), updatedOriginal); }
 
             const newId = Math.random().toString(36).substr(2, 9);
-            const newRecord = { ...s, id: newId, room: "", rooms: [""], linkedId: linkCode, payments: [], createdAt: new Date().toISOString(), createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null };
+            const newRecord = { ...s, id: newId, room: "", rooms: [""], linkedId: linkCode, payments: [], extended: false, createdAt: new Date().toISOString(), createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), newRecord);
             window.closeStaffModal();
         };
@@ -1832,12 +1777,130 @@
             
             const newRecord = { 
                 ...s, id: newId, checkIn: splitDate, room: "", rooms: [""], linkedId: linkCode, 
-                totalPrice: 0, netPrice: 0, payments: [], notes: "Split segment for mid-stay room change. Master folio kept on original booking.\n" + (s.notes || "")
+                totalPrice: 0, netPrice: 0, payments: [], extended: false, notes: "Split segment for mid-stay room change. Master folio kept on original booking.\n" + (s.notes || "")
             };
             
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), updatedRecord); 
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), newRecord);
             document.getElementById('split-modal').style.display = 'none'; window.closeStaffModal();
+        };
+
+        window.requestMerge = () => {
+            if(currentUserRole === 'staff') return;
+            const id = document.getElementById('staff-id').value; 
+            if (!id) return window.showAlert("Please save this booking first before merging.");
+            const current = staff.find(x => x.id === id); if (!current) return;
+            
+            const sel = document.getElementById('merge-target');
+            sel.innerHTML = '<option value="">-- SELECT BOOKING --</option>';
+            
+            let options = [...staff].filter(s => s.id !== id && s.status !== 'cancelled' && s.status !== 'noshow');
+            options.sort((a,b) => {
+                const aMatch = a.lastName === current.lastName;
+                const bMatch = b.lastName === current.lastName;
+                if (aMatch && !bMatch) return -1;
+                if (!aMatch && bMatch) return 1;
+                return a.checkIn.localeCompare(b.checkIn);
+            });
+            
+            options.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.innerText = `${s.lastName}, ${s.firstName} (${s.checkIn.substr(5)} to ${s.checkOut.substr(5)})`;
+                if (s.lastName === current.lastName) opt.className = "text-indigo-600 font-black";
+                sel.appendChild(opt);
+            });
+            
+            document.getElementById('merge-modal').style.display = 'flex';
+        };
+
+        window.confirmMerge = async () => {
+            const targetId = document.getElementById('merge-target').value;
+            if(!targetId) return window.showAlert("Please select a booking to merge.");
+            
+            const currentId = document.getElementById('staff-id').value;
+            const target = staff.find(s => s.id === targetId);
+            const current = staff.find(s => s.id === currentId);
+            
+            if(!target || !current) return;
+            
+            const btn = document.getElementById('merge-confirm-btn');
+            btn.innerHTML = 'MERGING...'; btn.disabled = true;
+
+            try {
+                const newCheckIn = current.checkIn < target.checkIn ? current.checkIn : target.checkIn;
+                const newCheckOut = current.checkOut > target.checkOut ? current.checkOut : target.checkOut;
+                const newTotal = Number(current.totalPrice || 0) + Number(target.totalPrice || 0);
+                const newNet = Number(current.netPrice || 0) + Number(target.netPrice || 0);
+                const newNotes = (document.getElementById('staff-notes').value || "") + `\n\n--- MERGED WITH BOOKING ${target.bookId || targetId} ---\n` + (target.notes || "");
+                const newPax = Math.max(current.pax || 1, target.pax || 1);
+                
+                document.getElementById('check-in').value = newCheckIn;
+                document.getElementById('check-out').value = newCheckOut;
+                document.getElementById('total-price').value = newTotal;
+                document.getElementById('net-price').value = newNet;
+                document.getElementById('staff-notes').value = newNotes;
+                document.getElementById('pax-count').value = newPax;
+                
+                (target.payments || []).forEach(p => window.addPaymentRow(p.date, Number(p.amt||0).toFixed(2), p.method, true));
+                
+                const currentRooms = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
+                const targetRooms = (target.rooms || []).filter(Boolean);
+                const combinedRooms = Array.from(new Set([...currentRooms, ...targetRooms]));
+                
+                document.getElementById('assigned-rooms-container').innerHTML = '';
+                if (combinedRooms.length > 0) {
+                    combinedRooms.forEach(r => window.addRoomSelect(r));
+                } else {
+                    window.addRoomSelect("");
+                }
+                
+                window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms();
+                
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', target.id));
+                document.getElementById('merge-modal').style.display = 'none';
+                window.saveBooking();
+                
+            } catch(err) {
+                console.error(err); window.showAlert("Merge error, please check connection.");
+            } finally {
+                btn.innerHTML = 'Merge'; btn.disabled = false;
+            }
+        };
+
+        window.openPriceCheckModal = () => {
+            const modal = document.getElementById('price-check-modal');
+            const inInput = document.getElementById('pc-in');
+            const nightsInput = document.getElementById('pc-nights');
+            
+            const now = new Date();
+            inInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            nightsInput.value = 1;
+            document.getElementById('pc-pax').value = 1;
+            window.updatePcOut();
+            
+            modal.style.display = 'flex';
+        };
+
+        window.updatePcOut = () => {
+            const inDate = document.getElementById('pc-in').value;
+            const nights = parseInt(document.getElementById('pc-nights').value) || 1;
+            if (!inDate) return;
+            
+            const d = new Date(inDate + "T12:00:00Z");
+            d.setUTCDate(d.getUTCDate() + nights);
+            document.getElementById('pc-out').value = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+        };
+
+        window.executePriceCheck = () => {
+            const checkin = document.getElementById('pc-in').value;
+            const checkout = document.getElementById('pc-out').value;
+            const pax = document.getElementById('pc-pax').value || 1;
+            
+            if (!checkin || !checkout) return window.showAlert("Please select dates first.");
+            
+            const url = `https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${checkin}&checkout=${checkout}&group_adults=${pax}&group_children=0&no_rooms=1`;
+            window.open(url, '_blank');
         };
 
         window.openCSVModal = () => { document.getElementById('import-textarea').value = ''; document.getElementById('import-modal').style.display = 'flex'; setTimeout(() => document.getElementById('import-textarea').focus(), 50); };
@@ -2525,18 +2588,27 @@
             document.getElementById('ext-days').value = 1;
             window.toggleSection('ext-section', 'ext-chevron', false);
 
-            window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms(); window.calcExtension();
+            window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension();
             
             // Expanded by default
             window.toggleSection('guest-profile-section', 'profile-chevron', true);
             window.toggleSection('fin-section', 'fin-chevron', true);
             window.toggleSection('meta-section', 'meta-chevron', true);
             
-            document.getElementById('delete-btn').style.visibility = 'visible'; document.getElementById('split-btn').style.visibility = 'visible'; document.getElementById('dup-btn').style.visibility = 'visible';
+            document.getElementById('delete-btn').style.visibility = 'visible'; 
+            document.getElementById('split-btn').style.visibility = 'visible'; 
+            if (document.getElementById('merge-btn')) document.getElementById('merge-btn').style.visibility = 'visible';
+            document.getElementById('dup-btn').style.visibility = 'visible';
+            
             const logStr = `CREATED BY ${s.createdBy||'UNKNOWN'} ON ${s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-GB').slice(0,5) : '--'}` + (s.lastEditedBy ? ` | LAST EDIT: ${s.lastEditedBy} ON ${new Date(s.lastEditedAt).toLocaleDateString('en-GB').slice(0,5)}` : '');
             document.getElementById('audit-log').innerText = logStr;
 
-            if(currentUserRole === 'staff') { document.getElementById('delete-btn').style.visibility = 'hidden'; document.getElementById('split-btn').style.visibility = 'hidden'; document.querySelector('#save-btn').style.display = 'none'; }
+            if(currentUserRole === 'staff') { 
+                document.getElementById('delete-btn').style.visibility = 'hidden'; 
+                document.getElementById('split-btn').style.visibility = 'hidden'; 
+                if (document.getElementById('merge-btn')) document.getElementById('merge-btn').style.visibility = 'hidden'; 
+                document.querySelector('#save-btn').style.display = 'none'; 
+            }
             document.getElementById('staff-modal').style.display = 'flex';
         };
 
@@ -2598,6 +2670,124 @@
             window.calcExtension(); 
             
             window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${newCout}.\nAdded ฿${addPrice} to Total Price.`);
+        };
+
+        window.requestMerge = () => {
+            if(currentUserRole === 'staff') return;
+            const id = document.getElementById('staff-id').value; 
+            if (!id) return window.showAlert("Please save this booking first before merging.");
+            const current = staff.find(x => x.id === id); if (!current) return;
+            
+            const sel = document.getElementById('merge-target');
+            sel.innerHTML = '<option value="">-- SELECT BOOKING --</option>';
+            
+            let options = [...staff].filter(s => s.id !== id && s.status !== 'cancelled' && s.status !== 'noshow');
+            options.sort((a,b) => {
+                const aMatch = a.lastName === current.lastName;
+                const bMatch = b.lastName === current.lastName;
+                if (aMatch && !bMatch) return -1;
+                if (!aMatch && bMatch) return 1;
+                return a.checkIn.localeCompare(b.checkIn);
+            });
+            
+            options.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.innerText = `${s.lastName}, ${s.firstName} (${s.checkIn.substr(5)} to ${s.checkOut.substr(5)})`;
+                if (s.lastName === current.lastName) opt.className = "text-indigo-600 font-black";
+                sel.appendChild(opt);
+            });
+            
+            document.getElementById('merge-modal').style.display = 'flex';
+        };
+
+        window.confirmMerge = async () => {
+            const targetId = document.getElementById('merge-target').value;
+            if(!targetId) return window.showAlert("Please select a booking to merge.");
+            
+            const currentId = document.getElementById('staff-id').value;
+            const target = staff.find(s => s.id === targetId);
+            const current = staff.find(s => s.id === currentId);
+            
+            if(!target || !current) return;
+            
+            const btn = document.getElementById('merge-confirm-btn');
+            btn.innerHTML = 'MERGING...'; btn.disabled = true;
+
+            try {
+                const newCheckIn = current.checkIn < target.checkIn ? current.checkIn : target.checkIn;
+                const newCheckOut = current.checkOut > target.checkOut ? current.checkOut : target.checkOut;
+                const newTotal = Number(current.totalPrice || 0) + Number(target.totalPrice || 0);
+                const newNet = Number(current.netPrice || 0) + Number(target.netPrice || 0);
+                const newNotes = (document.getElementById('staff-notes').value || "") + `\n\n--- MERGED WITH BOOKING ${target.bookId || targetId} ---\n` + (target.notes || "");
+                const newPax = Math.max(current.pax || 1, target.pax || 1);
+                
+                document.getElementById('check-in').value = newCheckIn;
+                document.getElementById('check-out').value = newCheckOut;
+                document.getElementById('total-price').value = newTotal;
+                document.getElementById('net-price').value = newNet;
+                document.getElementById('staff-notes').value = newNotes;
+                document.getElementById('pax-count').value = newPax;
+                
+                (target.payments || []).forEach(p => window.addPaymentRow(p.date, Number(p.amt||0).toFixed(2), p.method, true));
+                
+                const currentRooms = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
+                const targetRooms = (target.rooms || []).filter(Boolean);
+                const combinedRooms = Array.from(new Set([...currentRooms, ...targetRooms]));
+                
+                document.getElementById('assigned-rooms-container').innerHTML = '';
+                if (combinedRooms.length > 0) {
+                    combinedRooms.forEach(r => window.addRoomSelect(r));
+                } else {
+                    window.addRoomSelect("");
+                }
+                
+                window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms();
+                
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', target.id));
+                document.getElementById('merge-modal').style.display = 'none';
+                window.saveBooking();
+                
+            } catch(err) {
+                console.error(err); window.showAlert("Merge error, please check connection.");
+            } finally {
+                btn.innerHTML = 'Merge'; btn.disabled = false;
+            }
+        };
+
+        window.openPriceCheckModal = () => {
+            const modal = document.getElementById('price-check-modal');
+            const inInput = document.getElementById('pc-in');
+            const nightsInput = document.getElementById('pc-nights');
+            
+            const now = new Date();
+            inInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            nightsInput.value = 1;
+            document.getElementById('pc-pax').value = 1;
+            window.updatePcOut();
+            
+            modal.style.display = 'flex';
+        };
+
+        window.updatePcOut = () => {
+            const inDate = document.getElementById('pc-in').value;
+            const nights = parseInt(document.getElementById('pc-nights').value) || 1;
+            if (!inDate) return;
+            
+            const d = new Date(inDate + "T12:00:00Z");
+            d.setUTCDate(d.getUTCDate() + nights);
+            document.getElementById('pc-out').value = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+        };
+
+        window.executePriceCheck = () => {
+            const checkin = document.getElementById('pc-in').value;
+            const checkout = document.getElementById('pc-out').value;
+            const pax = document.getElementById('pc-pax').value || 1;
+            
+            if (!checkin || !checkout) return window.showAlert("Please select dates first.");
+            
+            const url = `https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${checkin}&checkout=${checkout}&group_adults=${pax}&group_children=0&no_rooms=1`;
+            window.open(url, '_blank');
         };
 
         window.requestDelete = () => {
