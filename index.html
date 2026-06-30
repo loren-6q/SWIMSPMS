@@ -260,84 +260,144 @@
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8 unselectable">
                     <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
                         <i data-lucide="calculator" class="absolute -bottom-4 -right-4 text-blue-500 opacity-10 w-24 h-24"></i>
-                        <span class="text-blue-500 font-black text-xs uppercase tracking-widest mb-1 z-10">Gross Booked</span>
-                        <span id="acc-gross" class="text-2xl lg:text-3xl font-black text-blue-900 tracking-tighter z-10">฿0</span>
+                        <span class="text-blue-500 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Active Gross Booked</span>
+                        <span id="acc-active-gross" class="text-2xl lg:text-3xl font-black text-blue-900 tracking-tighter z-10">฿0</span>
+                        <span class="text-blue-400 font-bold text-[9px] uppercase mt-1 z-10">Future, Here, Left</span>
                     </div>
-                    <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
-                        <i data-lucide="receipt" class="absolute -bottom-4 -right-4 text-slate-500 opacity-10 w-24 h-24"></i>
-                        <span class="text-slate-500 font-black text-xs uppercase tracking-widest mb-1 z-10">Net Expected</span>
-                        <span id="acc-net" class="text-2xl lg:text-3xl font-black text-slate-800 tracking-tighter z-10">฿0</span>
-                    </div>
-                    <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
-                        <i data-lucide="landmark" class="absolute -bottom-4 -right-4 text-red-500 opacity-10 w-24 h-24"></i>
-                        <span class="text-red-500 font-black text-xs uppercase tracking-widest mb-1 z-10">OTA Comm & Fees</span>
-                        <span id="acc-comm" class="text-2xl lg:text-3xl font-black text-red-700 tracking-tighter z-10">฿0</span>
+                    <div class="bg-emerald-500 border-2 border-emerald-400 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transform scale-105 h-28">
+                        <div class="absolute top-0 right-0 bg-emerald-400 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg uppercase tracking-widest shadow z-20">Real Money</div>
+                        <i data-lucide="wallet" class="absolute -bottom-4 -right-4 text-emerald-800 opacity-20 w-24 h-24"></i>
+                        <span class="text-emerald-100 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Realized Income</span>
+                        <span id="acc-actual-collected" class="text-3xl lg:text-4xl font-black text-white tracking-tighter z-10">฿0</span>
+                        <span class="text-emerald-200 font-bold text-[9px] uppercase mt-1 z-10">All Settled Payments</span>
                     </div>
                     <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
                         <i data-lucide="clock" class="absolute -bottom-4 -right-4 text-amber-500 opacity-10 w-24 h-24"></i>
-                        <span class="text-amber-600 font-black text-xs uppercase tracking-widest mb-1 z-10">Unpaid Balance</span>
-                        <span id="acc-balance" class="text-2xl lg:text-3xl font-black text-amber-700 tracking-tighter z-10">฿0</span>
+                        <span class="text-amber-600 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Pending Receivables</span>
+                        <span id="acc-pending-ar" class="text-2xl lg:text-3xl font-black text-amber-700 tracking-tighter z-10">฿0</span>
+                        <span class="text-amber-500 font-bold text-[9px] uppercase mt-1 z-10">Due Balances & Future OTA</span>
                     </div>
-                    <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transform scale-105 h-28">
-                        <div class="absolute top-0 right-0 bg-emerald-400 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg uppercase tracking-widest shadow z-20">Real Money</div>
-                        <i data-lucide="wallet" class="absolute -bottom-4 -right-4 text-emerald-600 opacity-10 w-24 h-24"></i>
-                        <span class="text-emerald-600 font-black text-xs uppercase tracking-widest mb-1 z-10">Actual Collected</span>
-                        <span id="acc-collected" class="text-3xl lg:text-4xl font-black text-emerald-800 tracking-tighter z-10">฿0</span>
+                    <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
+                        <i data-lucide="alert-triangle" class="absolute -bottom-4 -right-4 text-red-500 opacity-10 w-24 h-24"></i>
+                        <span class="text-red-500 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Bad Debt</span>
+                        <span id="acc-bad-debt" class="text-2xl lg:text-3xl font-black text-red-700 tracking-tighter z-10">฿0</span>
+                        <span class="text-red-400 font-bold text-[9px] uppercase mt-1 z-10">Unpaid No-Shows & Left</span>
+                    </div>
+                    <div class="bg-slate-100 border-2 border-slate-300 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
+                        <i data-lucide="ban" class="absolute -bottom-4 -right-4 text-slate-500 opacity-10 w-24 h-24"></i>
+                        <span class="text-slate-500 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Lost Revenue</span>
+                        <span id="acc-lost-cancel" class="text-2xl lg:text-3xl font-black text-slate-700 tracking-tighter z-10">฿0</span>
+                        <span class="text-slate-400 font-bold text-[9px] uppercase mt-1 z-10">Unpaid Cancellations</span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <div class="lg:col-span-1 border border-slate-300 rounded-lg overflow-hidden shadow-sm self-start">
-                        <div class="bg-slate-800 text-white p-2 font-black uppercase tracking-widest text-xs border-b border-slate-700 text-center unselectable">Bed Popularity</div>
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-100 unselectable">
-                                <tr class="text-[10px] uppercase tracking-widest font-bold text-slate-500">
-                                    <th class="p-2 border-r border-slate-200">Bed Setup</th>
-                                    <th class="p-2 border-r border-slate-200 text-right" title="Bookings">Bks</th>
-                                    <th class="p-2 text-right">Nights</th>
+                <!-- NEW DAILY OPERATIONS REPORT -->
+                <div class="mb-8 bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 shadow-sm unselectable">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-4 pb-2 border-b border-indigo-200">
+                        <h3 class="font-black text-indigo-900 uppercase tracking-widest flex items-center gap-2"><i data-lucide="calendar-clock" size="18"></i> Daily Operations Report</h3>
+                        <div class="flex items-center gap-2 mt-2 sm:mt-0">
+                            <label class="text-[10px] font-black uppercase text-indigo-600">Select Date:</label>
+                            <input type="date" id="daily-rep-date" class="text-xs border border-indigo-300 rounded p-1 font-bold text-indigo-800 bg-white shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer" onchange="window.renderDailyReport()">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white rounded-lg p-3 border border-indigo-100 shadow-sm text-center">
+                            <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Check-Ins Expected Value</div>
+                            <div id="rep-checkins" class="text-xl font-black text-slate-800">฿0</div>
+                            <div id="rep-checkins-count" class="text-[9px] font-bold text-slate-400 uppercase mt-0.5">0 Bookings</div>
+                        </div>
+                        <div class="bg-emerald-500 rounded-lg p-3 border border-emerald-600 shadow-sm text-center text-white relative overflow-hidden">
+                            <i data-lucide="banknote" class="absolute -right-2 -bottom-2 opacity-20 w-12 h-12"></i>
+                            <div class="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-1">Real Money Collected</div>
+                            <div id="rep-real-money" class="text-xl font-black text-white relative z-10">฿0</div>
+                            <div class="text-[9px] font-bold text-emerald-200 uppercase mt-0.5 relative z-10">Cash, Card, Scan</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-indigo-100 shadow-sm text-center">
+                            <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Virtual / OTA Pay</div>
+                            <div id="rep-ota-pay" class="text-xl font-black text-blue-600">฿0</div>
+                            <div class="text-[9px] font-bold text-slate-400 uppercase mt-0.5">Agoda, BDC, Airbnb Pay</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-indigo-100 shadow-sm text-center">
+                            <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">OTA Comm. Withheld</div>
+                            <div id="rep-ota-kp" class="text-xl font-black text-red-500">฿0</div>
+                            <div class="text-[9px] font-bold text-slate-400 uppercase mt-0.5">HW, Agoda, BDC KP</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtered Ledger (Now Full Width) -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-end border-b border-slate-200 pb-2 mb-3">
+                        <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm unselectable">Filtered Ledger</h3>
+                        <button onclick="window.exportLedgerCSV()" class="text-[10px] font-black uppercase bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded flex items-center gap-1 shadow-sm transition-colors unselectable"><i data-lucide="download" size="12"></i> Export CSV</button>
+                    </div>
+                    <div class="overflow-x-auto min-h-[300px] max-h-[500px] border border-slate-300 rounded-lg shadow-sm">
+                        <table class="w-full text-left border-collapse text-sm min-w-[800px]" id="acc-ledger-table">
+                            <thead class="bg-slate-800 text-white sticky top-0 z-10 unselectable">
+                                <tr class="font-black uppercase tracking-wider text-sm cursor-pointer">
+                                    <th onclick="window.sortAccounting('name')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[16%]">Guest Name <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                    <th onclick="window.sortAccounting('source')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[10%]">Source <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                    <th onclick="window.sortAccounting('checkIn')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[20%]">Dates <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                    <th onclick="window.sortAccounting('totalPrice')" class="p-2 border-r border-slate-600 text-right hover:bg-slate-700 w-[12%]">Gross <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                    <th onclick="window.sortAccounting('netPrice')" class="p-2 border-r border-slate-600 text-right hover:bg-slate-700 w-[12%]">Net <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                    <th onclick="window.sortAccounting('comm')" class="p-2 border-r border-slate-600 text-right text-red-300 hover:bg-slate-700 w-[10%]">Comm <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                    <th onclick="window.sortAccounting('collected')" class="p-2 border-r border-slate-600 text-right text-emerald-300 hover:bg-slate-700 w-[10%]">Coll. <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                    <th onclick="window.sortAccounting('due')" class="p-2 text-right text-amber-300 hover:bg-slate-700 w-[10%]">Bal <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                </tr>
+                                <tr class="bg-slate-700 text-slate-300 text-[10px] uppercase font-normal">
+                                    <th class="p-1 border-r border-slate-600"><input type="text" id="acc-filter-name" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" placeholder="FILTER NAME..." oninput="window.renderAccounting()"></th>
+                                    <th class="p-1 border-r border-slate-600">
+                                        <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-[10px]" onclick="window.toggleMultiSelect('acc-source-dropdown', this)">
+                                            <span id="acc-source-label" class="truncate">ALL SOURCES</span><span class="text-[8px] ml-1">▼</span>
+                                        </div>
+                                    </th>
+                                    <th class="p-1 border-r border-slate-600"><select id="acc-filter-month" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderAccounting()"></select></th>
+                                    <th class="p-1 border-r border-slate-600 flex gap-1"><input type="number" id="acc-filter-min" placeholder="MIN ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderAccounting()"><input type="number" id="acc-filter-max" placeholder="MAX ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderAccounting()"></th>
+                                    <th class="p-1 border-r border-slate-600"></th>
+                                    <th class="p-1 border-r border-slate-600"></th>
+                                    <th class="p-1 border-r border-slate-600"></th>
+                                    <th class="p-1"><select id="acc-filter-due" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderAccounting()"><option value="">ALL</option><option value="zero">PAID</option><option value="owes">OWES</option></select></th>
                                 </tr>
                             </thead>
-                            <tbody id="acc-bed-body" class="text-xs font-bold text-slate-700 bg-white"></tbody>
+                            <tbody id="acc-ledger-body" class="bg-white text-slate-700 font-bold text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Lower Analytics Modules Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    
+                    <!-- Bed Popularity Module -->
+                    <div class="border border-slate-300 rounded-lg overflow-hidden shadow-sm self-start">
+                        <div class="bg-slate-800 text-white p-1.5 font-black uppercase tracking-widest text-[10px] border-b border-slate-700 text-center unselectable flex justify-center items-center gap-1.5"><i data-lucide="bed-double" size="12"></i> Bed Popularity</div>
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-100 unselectable">
+                                <tr class="text-[9px] uppercase tracking-widest font-bold text-slate-500">
+                                    <th class="p-1.5 border-r border-slate-200">Bed Setup</th>
+                                    <th class="p-1.5 border-r border-slate-200 text-right" title="Bookings">Bks</th>
+                                    <th class="p-1.5 text-right">Nights</th>
+                                </tr>
+                            </thead>
+                            <tbody id="acc-bed-body" class="text-[10px] font-bold text-slate-700 bg-white"></tbody>
                         </table>
                     </div>
                     
-                    <div class="lg:col-span-3">
-                        <div class="flex justify-between items-end border-b border-slate-200 pb-2 mb-3">
-                            <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm unselectable">Filtered Ledger</h3>
-                            <button onclick="window.exportLedgerCSV()" class="text-[10px] font-black uppercase bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded flex items-center gap-1 shadow-sm transition-colors unselectable"><i data-lucide="download" size="12"></i> Export CSV</button>
-                        </div>
-                        <div class="overflow-x-auto min-h-[300px] max-h-[500px] border border-slate-300 rounded-lg shadow-sm">
-                            <table class="w-full text-left border-collapse text-sm min-w-[800px]" id="acc-ledger-table">
-                                <thead class="bg-slate-800 text-white sticky top-0 z-10 unselectable">
-                                    <tr class="font-black uppercase tracking-wider text-sm cursor-pointer">
-                                        <th onclick="window.sortAccounting('name')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[16%]">Guest Name <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                                        <th onclick="window.sortAccounting('source')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[10%]">Source <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                                        <th onclick="window.sortAccounting('checkIn')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[20%]">Dates <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                                        <th onclick="window.sortAccounting('totalPrice')" class="p-2 border-r border-slate-600 text-right hover:bg-slate-700 w-[12%]">Gross <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                                        <th onclick="window.sortAccounting('netPrice')" class="p-2 border-r border-slate-600 text-right hover:bg-slate-700 w-[12%]">Net <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                                        <th onclick="window.sortAccounting('comm')" class="p-2 border-r border-slate-600 text-right text-red-300 hover:bg-slate-700 w-[10%]">Comm <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                                        <th onclick="window.sortAccounting('collected')" class="p-2 border-r border-slate-600 text-right text-emerald-300 hover:bg-slate-700 w-[10%]">Coll. <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                                        <th onclick="window.sortAccounting('due')" class="p-2 text-right text-amber-300 hover:bg-slate-700 w-[10%]">Bal <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                                    </tr>
-                                    <tr class="bg-slate-700 text-slate-300 text-[10px] uppercase font-normal">
-                                        <th class="p-1 border-r border-slate-600"><input type="text" id="acc-filter-name" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" placeholder="FILTER NAME..." oninput="window.renderAccounting()"></th>
-                                        <th class="p-1 border-r border-slate-600">
-                                            <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-[10px]" onclick="window.toggleMultiSelect('acc-source-dropdown', this)">
-                                                <span id="acc-source-label" class="truncate">ALL SOURCES</span><span class="text-[8px] ml-1">▼</span>
-                                            </div>
-                                        </th>
-                                        <th class="p-1 border-r border-slate-600"><select id="acc-filter-month" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderAccounting()"></select></th>
-                                        <th class="p-1 border-r border-slate-600 flex gap-1"><input type="number" id="acc-filter-min" placeholder="MIN ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderAccounting()"><input type="number" id="acc-filter-max" placeholder="MAX ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderAccounting()"></th>
-                                        <th class="p-1 border-r border-slate-600"></th>
-                                        <th class="p-1 border-r border-slate-600"></th>
-                                        <th class="p-1 border-r border-slate-600"></th>
-                                        <th class="p-1"><select id="acc-filter-due" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderAccounting()"><option value="">ALL</option><option value="zero">PAID</option><option value="owes">OWES</option></select></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="acc-ledger-body" class="bg-white text-slate-700 font-bold text-xs"></tbody>
-                            </table>
-                        </div>
+                    <!-- Cash Flow / Income Module -->
+                    <div class="border border-emerald-300 rounded-lg overflow-hidden shadow-sm self-start lg:col-span-2">
+                        <div class="bg-emerald-700 text-white p-1.5 font-black uppercase tracking-widest text-[10px] border-b border-emerald-800 text-center unselectable flex justify-center items-center gap-1.5"><i data-lucide="arrow-down-to-line" size="12"></i> Income & Cash Flow (By Payment Date)</div>
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-emerald-50 unselectable">
+                                <tr class="text-[9px] uppercase tracking-widest font-bold text-emerald-700">
+                                    <th class="p-1.5 border-r border-emerald-200">Payment Category</th>
+                                    <th class="p-1.5 text-right border-r border-emerald-200" title="Number of Transactions">Txns</th>
+                                    <th class="p-1.5 text-right">Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="acc-cashflow-body" class="text-[10px] font-bold text-slate-700 bg-white"></tbody>
+                            <tfoot id="acc-cashflow-foot" class="bg-emerald-100 text-[11px] font-black text-emerald-900 border-t-2 border-emerald-300"></tfoot>
+                        </table>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -712,6 +772,22 @@
             }
         };
 
+        window.toggleGroup = (groupName) => {
+            const rows = document.querySelectorAll(`.group-${groupName}`);
+            const icon = document.getElementById(`icon-${groupName}`);
+            if (rows.length === 0) return;
+            
+            const isHidden = rows[0].style.display === 'none';
+            
+            rows.forEach(row => {
+                row.style.display = isHidden ? '' : 'none';
+            });
+            
+            if (icon) {
+                icon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+            }
+        };
+
         window.toggleMultiSelect = (id, btnEventEl) => {
             event.stopPropagation();
             const drop = document.getElementById(id);
@@ -963,16 +1039,21 @@
             
             const timelineRows = [];
 
-            const unconfirmed = activeStaff.flatMap(s => {
-                if (parseYMD(s.checkIn) > viewEndUTC || parseYMD(s.checkOut) < viewStartUTC) return [];
+            // Robust Unconfirmed/Unassigned Extraction (Fixes mobile browser compatibility)
+            const unconfirmed = [];
+            activeStaff.forEach(s => {
+                const cin = parseYMD(s.checkIn);
+                const cout = parseYMD(s.checkOut);
+                if (cin > viewEndUTC || cout < viewStartUTC) return;
+                
                 const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : [""]);
+                
                 if (s.status === 'unconfirmed') {
-                    return Array(rList.length).fill(s);
+                    for(let i=0; i < Math.max(1, rList.length); i++) unconfirmed.push(s);
                 } else {
                     const unassignedCount = rList.filter(rid => !rid).length;
-                    if (unassignedCount > 0) return Array(unassignedCount).fill(s);
+                    for(let i=0; i < unassignedCount; i++) unconfirmed.push(s);
                 }
-                return [];
             });
 
             if(unconfirmed.length > 0) {
@@ -981,7 +1062,9 @@
                 unconfirmed.forEach(s => {
                     let placed = false;
                     for (let r of rows) {
-                        if (!r.some(existing => s.checkIn < existing.checkOut && existing.checkIn < s.checkOut)) { r.push(s); placed = true; break; }
+                        if (!r.some(existing => parseYMD(s.checkIn) < parseYMD(existing.checkOut) && parseYMD(existing.checkIn) < parseYMD(s.checkOut))) { 
+                            r.push(s); placed = true; break; 
+                        }
                     }
                     if (!placed) rows.push([s]);
                 });
@@ -1166,7 +1249,7 @@
                             tooltip.style.display = 'none';
                         };
                         
-                        bar.onclick = (e) => { e.stopPropagation(); tooltip.style.display = 'none'; window.editStaff(s.id); }; 
+                        bar.onclick = (e) => { e.stopPropagation(); tooltip.style.display = 'none'; if(typeof window.editStaff === 'function') window.editStaff(s.id); }; 
                         row.appendChild(bar);
                     }
                 });
@@ -1265,6 +1348,55 @@
             });
         };
 
+        window.renderDailyReport = () => {
+            const dateInput = document.getElementById('daily-rep-date');
+            if (!dateInput) return;
+            
+            if (!dateInput.value) {
+                const now = new Date();
+                dateInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            }
+            const targetDate = dateInput.value;
+            
+            let checkinsVal = 0;
+            let checkinsCount = 0;
+            let realMoney = 0;
+            let otaPay = 0;
+            let otaKp = 0;
+            
+            staff.forEach(s => {
+                const isActive = s.status !== 'cancelled' && s.status !== 'noshow';
+                
+                // Only count expected Check-In revenue for active bookings
+                if (isActive && s.checkIn === targetDate) {
+                    checkinsVal += Number(s.totalPrice || 0);
+                    checkinsCount++;
+                }
+                
+                // Count Payments for ALL bookings, including no-shows and non-ref cancellations
+                (s.payments || []).forEach(p => {
+                    if (p.date === targetDate) {
+                        const amt = Number(p.amt || 0);
+                        if (['cash', 'card', 'scan'].includes(p.method)) {
+                            realMoney += amt;
+                        } else if (['bdc-pay', 'agoda-pay', 'airbnb-pay'].includes(p.method)) {
+                            otaPay += amt;
+                        } else if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)) {
+                            otaKp += amt;
+                        } else {
+                            realMoney += amt; // other methods assumed as actual collections
+                        }
+                    }
+                });
+            });
+            
+            document.getElementById('rep-checkins').innerText = `฿${checkinsVal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('rep-checkins-count').innerText = `${checkinsCount} BOOKINGS ARRIVING`;
+            document.getElementById('rep-real-money').innerText = `฿${realMoney.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('rep-ota-pay').innerText = `฿${otaPay.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('rep-ota-kp').innerText = `฿${otaKp.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        };
+
         window.renderAccounting = () => {
             const startStr = document.getElementById('acc-date-start').value;
             const endStr = document.getElementById('acc-date-end').value;
@@ -1277,14 +1409,14 @@
             const accTotalMax = document.getElementById('acc-filter-max') ? document.getElementById('acc-filter-max').value : '';
             const accDue = document.getElementById('acc-filter-due') ? document.getElementById('acc-filter-due').value : '';
 
-            let totalGross = 0; let totalNet = 0; let totalCollected = 0; let totalBalance = 0; let totalComm = 0;
+            let activeGross = 0; let actualCollected = 0; let pendingAR = 0; let badDebt = 0; let lostCancel = 0;
             let bedStats = {};
             const ledgerRows = [];
 
             const filtered = staff.filter(s => {
+                // We no longer blindly ignore Cancelled/Noshow! We need them for exact accounting.
                 if (startStr && s.checkOut < startStr) return false;
                 if (endStr && s.checkIn > endStr) return false;
-                if (s.status === 'cancelled' || s.status === 'noshow') return false; 
                 
                 const fullName = (s.firstName+' '+s.lastName).toUpperCase();
                 if (searchTerm && !fullName.includes(searchTerm)) return false;
@@ -1346,46 +1478,60 @@
                 return accSortAsc ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
             });
 
+            const nowStr = new Date().toISOString().split('T')[0];
+
             filtered.forEach(s => {
                 const tPrice = Number(s.totalPrice || 0);
                 const nPrice = Number(s.netPrice || 0);
-                totalGross += tPrice; totalNet += nPrice; totalComm += (tPrice - nPrice);
                 
-                let paidReal = 0; let paidComm = 0; let localCollected = 0;
-                const nowTime = Date.now();
-                const coutTime = parseYMD(s.checkOut);
+                let paidRealized = 0; let paidPending = 0; let paidComm = 0;
 
                 (s.payments || []).forEach(p => {
                     const amt = Number(p.amt || 0);
                     if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)) {
                         paidComm += amt;
-                    } else if (['bdc-pay', 'agoda-pay', 'airbnb-pay'].includes(p.method)) {
-                        paidReal += amt; 
-                        if (coutTime <= nowTime) localCollected += amt; 
                     } else {
-                        paidReal += amt;
-                        localCollected += amt; 
+                        // Strict timeline split: Is the payment in the future?
+                        if (p.date > nowStr) paidPending += amt;
+                        else paidRealized += amt;
                     }
                 });
                 
-                totalCollected += localCollected;
-                const localBalance = Number((tPrice - (paidReal + paidComm)).toFixed(2));
-                totalBalance += localBalance;
+                const balance = Math.max(0, tPrice - (paidRealized + paidPending + paidComm));
+                
+                actualCollected += paidRealized;
+                pendingAR += paidPending; // Guaranteed future payouts
 
-                // Bed Stats
-                const cinTime = parseYMD(s.checkIn);
-                let nights = 0;
-                if (cinTime && coutTime && coutTime > cinTime) nights = Math.round((coutTime - cinTime) / 86400000);
+                if (s.status === 'cancelled') {
+                    lostCancel += balance;
+                } else if (s.status === 'noshow') {
+                    badDebt += balance;
+                } else if (s.status === 'left') {
+                    activeGross += tPrice;
+                    badDebt += balance;
+                } else {
+                    // Future, Here, Unconfirmed
+                    activeGross += tPrice;
+                    pendingAR += balance;
+                }
 
-                const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
-                rList.forEach(r => {
-                    if (!r) return;
-                    const hr = hotelRooms.find(x => x.id === r);
-                    if (hr && hr.bed) {
-                        if (!bedStats[hr.bed]) bedStats[hr.bed] = { count: 0, nights: 0 };
-                        bedStats[hr.bed].count += 1; bedStats[hr.bed].nights += nights;
-                    }
-                });
+                // Bed Stats (Only count active bookings for bed popularity)
+                if (s.status !== 'cancelled' && s.status !== 'noshow') {
+                    const cinTime = parseYMD(s.checkIn);
+                    const coutTime = parseYMD(s.checkOut);
+                    let nights = 0;
+                    if (cinTime && coutTime && coutTime > cinTime) nights = Math.round((coutTime - cinTime) / 86400000);
+
+                    const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
+                    rList.forEach(r => {
+                        if (!r) return;
+                        const hr = hotelRooms.find(x => x.id === r);
+                        if (hr && hr.bed) {
+                            if (!bedStats[hr.bed]) bedStats[hr.bed] = { count: 0, nights: 0 };
+                            bedStats[hr.bed].count += 1; bedStats[hr.bed].nights += nights;
+                        }
+                    });
+                }
                 
                 // Ledger Data
                 ledgerRows.push({
@@ -1396,43 +1542,94 @@
                     src: (s.source||'').toUpperCase(),
                     gross: tPrice.toFixed(2),
                     net: nPrice.toFixed(2),
-                    comm: (tPrice - nPrice).toFixed(2),
-                    coll: localCollected.toFixed(2),
-                    bal: localBalance.toFixed(2)
+                    comm: paidComm.toFixed(2),
+                    coll: paidRealized.toFixed(2),
+                    bal: balance.toFixed(2),
+                    status: s.status
                 });
             });
 
-            document.getElementById('acc-gross').innerText = `฿${totalGross.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
-            document.getElementById('acc-net').innerText = `฿${totalNet.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
-            document.getElementById('acc-comm').innerText = `฿${totalComm.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
-            document.getElementById('acc-balance').innerText = `฿${totalBalance.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
-            document.getElementById('acc-collected').innerText = `฿${totalCollected.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+            document.getElementById('acc-active-gross').innerText = `฿${activeGross.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('acc-actual-collected').innerText = `฿${actualCollected.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('acc-pending-ar').innerText = `฿${pendingAR.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('acc-bad-debt').innerText = `฿${badDebt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('acc-lost-cancel').innerText = `฿${lostCancel.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
 
             // Populate Bed Table
             const tBody = document.getElementById('acc-bed-body'); tBody.innerHTML = '';
             const sortedBeds = Object.keys(bedStats).sort((a, b) => bedStats[b].count - bedStats[a].count);
             sortedBeds.forEach(bed => {
                 const tr = document.createElement('tr'); tr.className = "border-b border-slate-200 hover:bg-slate-50";
-                tr.innerHTML = `<td class="p-2 border-r border-slate-200 font-black uppercase text-slate-800">${bed}</td><td class="p-2 border-r border-slate-200 text-right font-black text-slate-600">${bedStats[bed].count}</td><td class="p-2 text-right font-black text-blue-600">${bedStats[bed].nights}</td>`;
+                tr.innerHTML = `<td class="p-1.5 border-r border-slate-200 font-black uppercase text-slate-800">${bed}</td><td class="p-1.5 border-r border-slate-200 text-right font-black text-slate-600">${bedStats[bed].count}</td><td class="p-1.5 text-right font-black text-blue-600">${bedStats[bed].nights}</td>`;
                 tBody.appendChild(tr);
             });
             
+            // Cash Flow Report (By Payment Date)
+            const cfBody = document.getElementById('acc-cashflow-body');
+            const cfFoot = document.getElementById('acc-cashflow-foot');
+            if (cfBody && cfFoot) {
+                cfBody.innerHTML = ''; cfFoot.innerHTML = '';
+                let cfStart = startStr || '1970-01-01';
+                let cfEnd = endStr || '2099-12-31';
+
+                let cfStats = {
+                    cash: { label: 'Cash (In-House)', count: 0, amt: 0 },
+                    scan: { label: 'QR / Bank Transfer', count: 0, amt: 0 },
+                    card: { label: 'Credit Card (Stripe/Terminal)', count: 0, amt: 0 },
+                    otapay: { label: 'Virtual OTA Payouts', count: 0, amt: 0 },
+                    otakp: { label: 'OTA Comm. Withheld (Expense)', count: 0, amt: 0 },
+                    other: { label: 'Other', count: 0, amt: 0 }
+                };
+
+                let totalRealCash = 0; let totalWithheld = 0;
+
+                staff.forEach(s => {
+                    (s.payments || []).forEach(p => {
+                        if (p.date >= cfStart && p.date <= cfEnd) {
+                            let amt = Number(p.amt || 0);
+                            if (amt === 0) return;
+
+                            if (p.method === 'cash') { cfStats.cash.count++; cfStats.cash.amt += amt; totalRealCash += amt; }
+                            else if (p.method === 'scan') { cfStats.scan.count++; cfStats.scan.amt += amt; totalRealCash += amt; }
+                            else if (p.method === 'card') { cfStats.card.count++; cfStats.card.amt += amt; totalRealCash += amt; }
+                            else if (['bdc-pay', 'agoda-pay', 'airbnb-pay'].includes(p.method)) { cfStats.otapay.count++; cfStats.otapay.amt += amt; totalRealCash += amt; }
+                            else if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)) { cfStats.otakp.count++; cfStats.otakp.amt += amt; totalWithheld += amt; }
+                            else { cfStats.other.count++; cfStats.other.amt += amt; totalRealCash += amt; }
+                        }
+                    });
+                });
+
+                Object.keys(cfStats).forEach(k => {
+                    if (cfStats[k].count > 0) {
+                        const tr = document.createElement('tr'); tr.className = "border-b border-slate-200 hover:bg-emerald-50";
+                        tr.innerHTML = `<td class="p-1.5 border-r border-emerald-200 font-bold text-slate-700">${cfStats[k].label}</td><td class="p-1.5 border-r border-emerald-200 text-right text-slate-500">${cfStats[k].count}</td><td class="p-1.5 text-right font-black text-emerald-700">฿${cfStats[k].amt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>`;
+                        cfBody.appendChild(tr);
+                    }
+                });
+
+                cfFoot.innerHTML = `<tr><td colspan="2" class="p-2 border-r border-emerald-300 text-right uppercase tracking-widest">Net Income (Period):</td><td class="p-2 text-right text-[14px]">฿${totalRealCash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td></tr>`;
+            }
+
             // Populate Ledger
             const lBody = document.getElementById('acc-ledger-body'); lBody.innerHTML = '';
             ledgerRows.forEach(lr => {
-                const tr = document.createElement('tr'); tr.className = "border-b border-slate-200 hover:bg-slate-50 cursor-pointer";
+                const tr = document.createElement('tr'); 
+                const isDead = lr.status === 'cancelled' || lr.status === 'noshow';
+                tr.className = `border-b border-slate-200 hover:bg-slate-50 cursor-pointer ${isDead ? 'opacity-40 line-through decoration-slate-400 decoration-[1.5px]' : ''}`;
                 tr.onclick = () => window.editStaff(lr.id);
                 tr.innerHTML = `<td class="p-2 border-r border-slate-200">${lr.name}</td><td class="p-2 border-r border-slate-200 text-[10px] uppercase">${lr.src}</td><td class="p-2 border-r border-slate-200 text-slate-500 text-xs">${lr.in} to ${lr.out}</td><td class="p-2 border-r border-slate-200 text-right">${lr.gross}</td><td class="p-2 border-r border-slate-200 text-right">${lr.net}</td><td class="p-2 border-r border-slate-200 text-right text-red-400">${lr.comm}</td><td class="p-2 border-r border-slate-200 text-right text-emerald-600">${lr.coll}</td><td class="p-2 text-right text-amber-500">${lr.bal}</td>`;
                 lBody.appendChild(tr);
             });
             
             window.exportLedgerCSV = () => {
-                let csv = "Guest Name,Check In,Check Out,Source,Gross Booked,Net Expected,Commission,Actual Collected,Balance\n";
-                ledgerRows.forEach(lr => { csv += `"${lr.name}","${lr.in}","${lr.out}","${lr.src}",${lr.gross},${lr.net},${lr.comm},${lr.coll},${lr.bal}\n`; });
+                let csv = "Guest Name,Check In,Check Out,Source,Status,Gross Booked,Net Expected,Commission,Actual Collected,Balance\n";
+                ledgerRows.forEach(lr => { csv += `"${lr.name}","${lr.in}","${lr.out}","${lr.src}","${lr.status}",${lr.gross},${lr.net},${lr.comm},${lr.coll},${lr.bal}\n`; });
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a"); a.href = url; a.download = "SWIMS_Ledger.csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
             };
+
+            window.renderDailyReport();
         };
 
         window.sortDatabase = (key) => { if(sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } window.renderDatabase(); };
@@ -1694,6 +1891,74 @@
             window.updateAvailableRooms();
         };
 
+        window.editStaff = (id) => {
+            const s = staff.find(x => x.id === id); if (!s) return;
+            const modalContent = document.getElementById('staff-modal-content');
+            modalContent.style.position = 'relative'; modalContent.style.left = 'auto'; modalContent.style.top = 'auto'; modalContent.style.margin = '0';
+            
+            document.getElementById('staff-id').value = s.id; 
+            document.getElementById('first-name').value = s.firstName || ""; document.getElementById('last-name').value = s.lastName || ""; 
+            document.getElementById('phone').value = s.phone || ""; document.getElementById('email').value = s.email || ""; 
+            document.getElementById('staff-country').value = s.country || "Thailand"; 
+            document.getElementById('staff-status').value = s.status; window.updateStatusColor(document.getElementById('staff-status'));
+            document.getElementById('booked-type').value = s.bookedType || ""; 
+            document.getElementById('check-in').value = s.checkIn; document.getElementById('check-out').value = s.checkOut; document.getElementById('pax-count').value = s.pax || 1;
+            
+            document.getElementById('assigned-rooms-container').innerHTML = '';
+            const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : [""]);
+            rList.forEach(r => window.addRoomSelect(r));
+            
+            document.getElementById('total-price').value = Number(s.totalPrice || 0).toFixed(2);
+            document.getElementById('net-price').value = Number(s.netPrice || 0).toFixed(2); document.getElementById('net-price').dataset.override = s.netOverride ? 'true' : 'false';
+            
+            const bcc = document.getElementById('bad-cc-box'); bcc.dataset.bad = s.badCC ? 'true' : 'false';
+            if(s.badCC){ bcc.innerHTML = '<span class="text-white text-[10px] font-black">X</span>'; bcc.classList.remove('border-slate-300'); bcc.classList.add('bg-red-500', 'border-red-600'); } else { bcc.innerHTML = ''; bcc.classList.remove('bg-red-500', 'border-red-600'); bcc.classList.add('border-slate-300'); }
+
+            document.getElementById('payments-list').innerHTML = '';
+            if(s.payments) s.payments.forEach(p => window.addPaymentRow(p.date, Number(p.amt || 0).toFixed(2), p.method, true));
+
+            document.getElementById('booking-source').value = s.source || 'direct'; document.getElementById('booking-date').value = s.bookDate || ""; document.getElementById('booking-id').value = s.bookId || ""; document.getElementById('link-code').value = s.linkedId || ""; document.getElementById('staff-notes').value = s.notes || "";
+
+            setMulti('email-confirm-btn', s.emailConfirm ? 1 : 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
+            setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='sent'?1:2), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
+            setMulti('email-special-btn', s.emailSpecial ? 1 : 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400']);
+            
+            let refState = 0;
+            if (s.refundability === 'non-ref') refState = 1;
+            else if (s.refundability === 'ref') refState = 2;
+            setMulti('refund-btn', refState, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
+            
+            setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade === 'free' ? 1 : 2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
+            setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating === 'good' ? 1 : 2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
+            setMulti('ext-btn', s.extended ? 1 : 0, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
+
+            document.getElementById('ext-days').value = 1;
+            window.toggleSection('ext-section', 'ext-chevron', false);
+
+            window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension();
+            
+            // Expanded by default
+            window.toggleSection('guest-profile-section', 'profile-chevron', true);
+            window.toggleSection('fin-section', 'fin-chevron', true);
+            window.toggleSection('meta-section', 'meta-chevron', true);
+            
+            document.getElementById('delete-btn').style.visibility = 'visible'; 
+            document.getElementById('split-btn').style.visibility = 'visible'; 
+            if (document.getElementById('merge-btn')) document.getElementById('merge-btn').style.visibility = 'visible';
+            document.getElementById('dup-btn').style.visibility = 'visible';
+            
+            const logStr = `CREATED BY ${s.createdBy||'UNKNOWN'} ON ${s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-GB').slice(0,5) : '--'}` + (s.lastEditedBy ? ` | LAST EDIT: ${s.lastEditedBy} ON ${new Date(s.lastEditedAt).toLocaleDateString('en-GB').slice(0,5)}` : '');
+            document.getElementById('audit-log').innerText = logStr;
+
+            if(currentUserRole === 'staff') { 
+                document.getElementById('delete-btn').style.visibility = 'hidden'; 
+                document.getElementById('split-btn').style.visibility = 'hidden'; 
+                if (document.getElementById('merge-btn')) document.getElementById('merge-btn').style.visibility = 'hidden'; 
+                document.querySelector('#save-btn').style.display = 'none'; 
+            }
+            document.getElementById('staff-modal').style.display = 'flex';
+        };
+
         window.openStaffModal = () => { 
             const form = document.getElementById('staff-form'); if (form) form.reset(); 
             
@@ -1783,893 +2048,6 @@
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), updatedRecord); 
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), newRecord);
             document.getElementById('split-modal').style.display = 'none'; window.closeStaffModal();
-        };
-
-        window.requestMerge = () => {
-            if(currentUserRole === 'staff') return;
-            const id = document.getElementById('staff-id').value; 
-            if (!id) return window.showAlert("Please save this booking first before merging.");
-            const current = staff.find(x => x.id === id); if (!current) return;
-            
-            const sel = document.getElementById('merge-target');
-            sel.innerHTML = '<option value="">-- SELECT BOOKING --</option>';
-            
-            let options = [...staff].filter(s => s.id !== id && s.status !== 'cancelled' && s.status !== 'noshow');
-            options.sort((a,b) => {
-                const aMatch = a.lastName === current.lastName;
-                const bMatch = b.lastName === current.lastName;
-                if (aMatch && !bMatch) return -1;
-                if (!aMatch && bMatch) return 1;
-                return a.checkIn.localeCompare(b.checkIn);
-            });
-            
-            options.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.id;
-                opt.innerText = `${s.lastName}, ${s.firstName} (${s.checkIn.substr(5)} to ${s.checkOut.substr(5)})`;
-                if (s.lastName === current.lastName) opt.className = "text-indigo-600 font-black";
-                sel.appendChild(opt);
-            });
-            
-            document.getElementById('merge-modal').style.display = 'flex';
-        };
-
-        window.confirmMerge = async () => {
-            const targetId = document.getElementById('merge-target').value;
-            if(!targetId) return window.showAlert("Please select a booking to merge.");
-            
-            const currentId = document.getElementById('staff-id').value;
-            const target = staff.find(s => s.id === targetId);
-            const current = staff.find(s => s.id === currentId);
-            
-            if(!target || !current) return;
-            
-            const btn = document.getElementById('merge-confirm-btn');
-            btn.innerHTML = 'MERGING...'; btn.disabled = true;
-
-            try {
-                const newCheckIn = current.checkIn < target.checkIn ? current.checkIn : target.checkIn;
-                const newCheckOut = current.checkOut > target.checkOut ? current.checkOut : target.checkOut;
-                const newTotal = Number(current.totalPrice || 0) + Number(target.totalPrice || 0);
-                const newNet = Number(current.netPrice || 0) + Number(target.netPrice || 0);
-                const newNotes = (document.getElementById('staff-notes').value || "") + `\n\n--- MERGED WITH BOOKING ${target.bookId || targetId} ---\n` + (target.notes || "");
-                const newPax = Math.max(current.pax || 1, target.pax || 1);
-                
-                document.getElementById('check-in').value = newCheckIn;
-                document.getElementById('check-out').value = newCheckOut;
-                document.getElementById('total-price').value = newTotal;
-                document.getElementById('net-price').value = newNet;
-                document.getElementById('staff-notes').value = newNotes;
-                document.getElementById('pax-count').value = newPax;
-                
-                (target.payments || []).forEach(p => window.addPaymentRow(p.date, Number(p.amt||0).toFixed(2), p.method, true));
-                
-                const currentRooms = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
-                const targetRooms = (target.rooms || []).filter(Boolean);
-                const combinedRooms = Array.from(new Set([...currentRooms, ...targetRooms]));
-                
-                document.getElementById('assigned-rooms-container').innerHTML = '';
-                if (combinedRooms.length > 0) {
-                    combinedRooms.forEach(r => window.addRoomSelect(r));
-                } else {
-                    window.addRoomSelect("");
-                }
-                
-                window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms();
-                
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', target.id));
-                document.getElementById('merge-modal').style.display = 'none';
-                window.saveBooking();
-                
-            } catch(err) {
-                console.error(err); window.showAlert("Merge error, please check connection.");
-            } finally {
-                btn.innerHTML = 'Merge'; btn.disabled = false;
-            }
-        };
-
-        window.openPriceCheckModal = () => {
-            const modal = document.getElementById('price-check-modal');
-            const inInput = document.getElementById('pc-in');
-            const nightsInput = document.getElementById('pc-nights');
-            
-            const now = new Date();
-            inInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-            nightsInput.value = 1;
-            document.getElementById('pc-pax').value = 1;
-            window.updatePcOut();
-            
-            modal.style.display = 'flex';
-        };
-
-        window.updatePcOut = () => {
-            const inDate = document.getElementById('pc-in').value;
-            const nights = parseInt(document.getElementById('pc-nights').value) || 1;
-            if (!inDate) return;
-            
-            const d = new Date(inDate + "T12:00:00Z");
-            d.setUTCDate(d.getUTCDate() + nights);
-            document.getElementById('pc-out').value = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
-        };
-
-        window.executePriceCheck = () => {
-            const checkin = document.getElementById('pc-in').value;
-            const checkout = document.getElementById('pc-out').value;
-            const pax = document.getElementById('pc-pax').value || 1;
-            
-            if (!checkin || !checkout) return window.showAlert("Please select dates first.");
-            
-            const url = `https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${checkin}&checkout=${checkout}&group_adults=${pax}&group_children=0&no_rooms=1`;
-            window.open(url, '_blank');
-        };
-
-        window.openCSVModal = () => { document.getElementById('import-textarea').value = ''; document.getElementById('import-modal').style.display = 'flex'; setTimeout(() => document.getElementById('import-textarea').focus(), 50); };
-        window.openEmailParserModal = () => { document.getElementById('email-textarea').value = ''; document.getElementById('email-modal').style.display = 'flex'; setTimeout(() => document.getElementById('email-textarea').focus(), 50); };
-        
-        window.parseEmail = () => {
-            const text = document.getElementById('email-textarea').value;
-            if(!text || text.trim() === '') return;
-            
-            const format = document.getElementById('import-format-select').value;
-            const extract = (regex, source = text) => { const match = source.match(regex); return match ? match[1].trim() : ''; };
-            const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
-            
-            const formatStrictDate = (dateStr) => {
-                if(!dateStr) return '';
-                const d = new Date(dateStr + " 12:00:00Z");
-                if(isNaN(d.getTime())) return '';
-                return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
-            };
-
-            const parseDateRelative = (dateStr, isPast = false) => {
-                if(!dateStr) return '';
-                const mths = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-                let cleanStr = dateStr.replace(/,/g, '').replace(/(st|nd|rd|th)\b/gi, '').replace(/['´`’]/g, '').replace(/\s+/g, ' ').trim();
-                let parts = cleanStr.split(' ');
-                
-                let mthIndex = -1;
-                for (let i=0; i<parts.length; i++) {
-                    if (parts[i].length >= 3 && mths[parts[i].toLowerCase().substring(0,3)]) {
-                        mthIndex = i; break;
-                    }
-                }
-                if (mthIndex === -1) return '';
-                let mth = mths[parts[mthIndex].toLowerCase().substring(0,3)];
-                let dayVal = 1; let yrVal = 0;
-                
-                let candidates = parts.filter((p, i) => i !== mthIndex && /^\d+$/.test(p));
-                if (candidates.length > 0) {
-                    dayVal = parseInt(candidates[0]);
-                    if (candidates.length > 1) {
-                        let y = parseInt(candidates[1]);
-                        if (y < 100) yrVal = 2000 + y;
-                        else if (y >= 2000) yrVal = y;
-                    }
-                }
-                
-                let day = dayVal.toString().padStart(2, '0');
-                let now = new Date();
-                let yr = yrVal > 0 ? yrVal : now.getFullYear();
-                
-                if (yrVal === 0) {
-                    let testDate = new Date(`${yr}-${mth}-${day}`);
-                    if (isPast && testDate > now) yr--;
-                    else if (!isPast && testDate.getMonth() < now.getMonth() && testDate < now) yr++;
-                }
-                return `${yr}-${mth}-${day}`;
-            };
-
-            let src = '', gName = '', checkIn = '', checkOut = '', pax = 1, phone = '', email = '', total = 0, comm = 0, bId = '', notes = '', bType = '', bDate = '', countryCode = '', refundability = 0;
-            let hasBdcPayment = false;
-
-            switch (format) {
-                case 'bdc-extranet':
-                    src = 'booking.com';
-                    let lines = text.split(/[\n\r]+/).map(l => l.trim().replace(/\xa0/g, ' ')).filter(Boolean);
-                    
-                    let getLineData = (keywords) => {
-                        let idx = lines.findIndex(l => keywords.some(k => l.toLowerCase() === k.toLowerCase() || l.toLowerCase().startsWith(k.toLowerCase())));
-                        if (idx > -1) {
-                            let match = keywords.find(k => lines[idx].toLowerCase().startsWith(k.toLowerCase()));
-                            let remainder = lines[idx].substring(match.length).trim();
-                            if (remainder) return remainder;
-                            if (idx + 1 < lines.length) return lines[idx + 1];
-                        }
-                        return "";
-                    };
-
-                    checkIn = formatStrictDate(parseDateRelative(getLineData(['Check-in'])));
-                    checkOut = formatStrictDate(parseDateRelative(getLineData(['Check-out'])));
-                    bDate = formatStrictDate(parseDateRelative(getLineData(['Received', 'Booked on']), true));
-                    
-                    bId = getLineData(['Booking number:']);
-                    pax = parseInt(getLineData(['Total guests:'])) || 1;
-                    total = cleanMoney(getLineData(['Total price']));
-                    comm = cleanMoney(getLineData(['Commission and charges:']));
-
-                    let guestIdx = lines.findIndex(l => l.toLowerCase().startsWith('guest name:'));
-                    if (guestIdx > -1) {
-                        let remainder = lines[guestIdx].substring('guest name:'.length).trim();
-                        if (remainder) {
-                            gName = remainder;
-                            email = extract(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/, lines[guestIdx]);
-                            phone = extract(/(\+[\d\s]+)/, lines[guestIdx]);
-                            let ccMatch = lines[guestIdx].replace(email, '').replace(phone, '').match(/\s+([a-zA-Z]{2})$/);
-                            if (ccMatch) countryCode = ccMatch[1].toUpperCase();
-                            gName = gName.replace(email, '').replace(phone, '').replace(/\s+[a-zA-Z]{2}$/, '').trim();
-                        } else {
-                            gName = lines[guestIdx + 1];
-                            for (let i = guestIdx + 2; i < guestIdx + 6; i++) {
-                                if (!lines[i] || lines[i].includes('Preferred language') || lines[i].includes('Channel:')) break;
-                                if (lines[i].length === 2 && !countryCode) countryCode = lines[i].toUpperCase();
-                                else if (lines[i].includes('@') && !email) email = lines[i];
-                                else if (lines[i].includes('+') && !phone) phone = lines[i];
-                            }
-                        }
-                    }
-
-                    let bTypeIdx = -1;
-                    for (let i = 0; i < lines.length; i++) {
-                        if (/^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\d{1,2}\s+[A-Za-z]{3}/i.test(lines[i]) && i >= 2) {
-                            if (/(?:THB|฿|\$|€|£|[A-Z]{3})[\s]*[\d,.]+/i.test(lines[i-1])) {
-                                bTypeIdx = i - 2;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (bTypeIdx === -1) {
-                        let policyIdx = lines.findIndex(l => l.toLowerCase().endsWith('cancellation policy.') || l.toLowerCase().includes('bank transfer payout'));
-                        if (policyIdx > -1 && policyIdx + 1 < lines.length) bTypeIdx = policyIdx + 1;
-                    }
-
-                    if (bTypeIdx > -1) {
-                        let bTypeRaw = lines[bTypeIdx];
-                        let firstParen = bTypeRaw.indexOf('(');
-                        let lastParen = bTypeRaw.lastIndexOf(')');
-                        if (firstParen > -1 && lastParen > firstParen) {
-                            bType = bTypeRaw.substring(firstParen + 1, lastParen).trim();
-                        } else {
-                            bType = bTypeRaw.trim();
-                        }
-                    }
-
-                    // Strict Refundability Check
-                    let cancelIdx = lines.findIndex(l => l.toLowerCase().includes('cancellation'));
-                    if (cancelIdx > -1) {
-                        let cancelText = lines.slice(cancelIdx, cancelIdx + 4).join(' ').toLowerCase();
-                        if (cancelText.includes('free of charge until') || cancelText.includes('free cancellation')) {
-                            refundability = 2; // Refundable
-                        } else if (cancelText.includes('cancel at any time') || cancelText.includes('non-refundable') || cancelText.includes('charged the total price of the reservation if they cancel at any time')) {
-                            refundability = 1; // Non-Refundable
-                        }
-                    } else {
-                        if (text.match(/free of charge until/i) || text.match(/free cancellation/i)) refundability = 2;
-                        else if (text.match(/cancel at any time|cancel anytime|Non-refundable|charged the total price of the reservation if they cancel at any time/i)) refundability = 1;
-                    }
-
-                    // BED PREFERENCES & NOTES Extraction
-                    let allNotes = [];
-                    lines.forEach(l => {
-                        let lUp = l.toUpperCase();
-                        if (lUp.includes('BED PREFERENCE:') || lUp.includes('BED-PREFERENCE REQUEST:')) {
-                            // Strip the word "Reply" if it gets accidentally glued to the end of the string
-                            allNotes.push(l.replace(/Reply$/i, '').trim());
-                        }
-                    });
-
-                    // Conversation / Notes Extraction
-                    let convoIdx = lines.findIndex(l => l.toLowerCase() === 'conversation with guest');
-                    if (convoIdx > -1) {
-                        let msgLines = [];
-                        for (let i = convoIdx + 1; i < lines.length; i++) {
-                            let l = lines[i];
-                            let lLow = l.toLowerCase();
-                            
-                            // Stop parsing if we hit a new section
-                            if (lLow.includes('protect your account security') || lLow === 'images' || lLow === 'templates' || lLow.includes('important information about this guest') || lLow === 'cancellation') break;
-                            if (lLow === 'no messages' || lLow.includes('conversations with your guests will appear')) break;
-                            
-                            // Skip timestamps and raw "Reply" buttons
-                            if (/^(?:Today|Yesterday|[A-Za-z]+,?\s*\d{1,2}\s*[A-Za-z]*),\s*\d{1,2}:\d{2}/i.test(l) || /^\d{1,2}:\d{2}$/.test(l) || lLow === 'reply') continue; 
-                            
-                            if (l.trim()) msgLines.push(l.trim());
-                        }
-                        if (msgLines.length > 0) {
-                            allNotes.push("GUEST MSG: " + msgLines.join(" "));
-                        }
-                    }
-                    notes = allNotes.join('\n\n');
-
-                    if (text.includes('Payment is facilitated') || text.includes('Booking.com will collect')) hasBdcPayment = true;
-
-                    break;
-                    
-                case 'airbnb-email':
-                    src = 'airbnb';
-                    gName = extract(/Reservation confirmed - (.*?)\s+arrives/i);
-                    if(!gName) gName = extract(/welcome\s+(.*?)\./i);
-                    checkIn = parseDateRelative(extract(/Check-in[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
-                    checkOut = parseDateRelative(extract(/Checkout[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
-                    bId = extract(/Confirmation code[\s\S]*?([A-Z0-9]+)/i);
-                    bDate = parseDateRelative(extract(/Airbnb[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true);
-                    pax = parseInt(extract(/Guests[\s\S]*?(\d+)/i)) || 1;
-                    
-                    let totalStr = extract(/Total\s*(?:\([A-Z]+\))?[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
-                    if (!totalStr) totalStr = extract(/Guest paid[\s\S]{0,60}?nights[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
-                    total = cleanMoney(totalStr);
-                    
-                    const payout = cleanMoney(extract(/You earn[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
-                    comm = Number((total - payout).toFixed(2));
-                    bType = extract(/([^\n]+?)\s*Room\s*Check-in/i);
-                    
-                    let abnbNotes = extract(/Identity verified[\s\S]*?\n([^\n]+)\n\s*Send.*?a Message/i);
-                    if(abnbNotes && !abnbNotes.includes('Translated') && !abnbNotes.includes('Add guest')) notes = abnbNotes; 
-                    
-                    const policyMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i);
-                    if (policyMatch) {
-                        const pol = policyMatch[1].toLowerCase();
-                        if (pol.includes('strict') || pol.includes('firm') || pol.includes('non-refundable')) refundability = 1;
-                        else refundability = 2;
-                    }
-                    break;
-
-                case 'hw-email':
-                    src = 'hostelworld';
-                    bId = extract(/\(ref:\s*([\d-]+)\)/i);
-                    bDate = parseDateRelative(extract(/made on\s*([^\n]+?)\s*by/i), true);
-                    gName = extract(/by the customer[\s\S]*?:\s*\n+([^\n]+)/i);
-                    checkIn = parseDateRelative(extract(/Arrival:\s*([^\n]+)/i), false);
-                    
-                    let nightsStrE = extract(/Nights:\s*(\d+)/i);
-                    if (checkIn && nightsStrE) {
-                        let n = parseInt(nightsStrE);
-                        let d = new Date(checkIn + "T12:00:00Z");
-                        d.setUTCDate(d.getUTCDate() + n);
-                        checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
-                    }
-                    
-                    pax = parseInt(extract(/Guests:\s*(\d+)/i)) || 1;
-                    total = cleanMoney(extract(/Total Price:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
-                    comm = cleanMoney(extract(/Deposit Paid:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
-                    bType = extract(/Beds? reserved in\s+([^\n]+)/i);
-                    if (bType) {
-                        if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)';
-                        else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; 
-                    }
-                    if (text.includes('Non-refundable') || text.includes('Non Refundable')) refundability = 1;
-                    else refundability = 2;
-                    break;
-
-                case 'hw-web':
-                    src = 'hostelworld';
-                    bId = extract(/Reference\s*\n*\s*([\d-]+)/i);
-                    bDate = parseDateRelative(extract(/Booked\s*\n*\s*([^\n]+)/i), true);
-                    checkIn = parseDateRelative(extract(/Arriving\s*\n*\s*([^\n]+)/i), false);
-                    
-                    let regexRefBlock = new RegExp(`Reference\\s*\\n*\\s*${bId}\\s*\\n*\\s*([^\\n]+)\\s*\\n*\\s*([^\\n]+)`, 'i');
-                    let matchBlock = text.match(regexRefBlock);
-                    if (matchBlock) {
-                        gName = matchBlock[1].trim();
-                        countryCode = matchBlock[2].trim();
-                    }
-                    
-                    let allEmails = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/g) || [];
-                    email = allEmails.find(e => !e.toLowerCase().includes('hostelworld')) || '';
-                    
-                    phone = extract(/(\+[\d\s-]+)/);
-                    if (!phone && email) {
-                        let emailIdx = text.indexOf(email);
-                        let afterEmail = text.substring(emailIdx + email.length);
-                        let phoneMatch = afterEmail.match(/^\s*[\n\r]+\s*([\d\s-]{8,20})/);
-                        if (phoneMatch) phone = phoneMatch[1].trim();
-                    }
-                    if (!phone) {
-                         let digitMatch = text.match(/(?:^|[^\d])(\d[\d\s-]{8,20}\d)(?:[^\d]|$)/);
-                         if (digitMatch && bId && !digitMatch[1].includes(bId.replace(/[^\d]/g, ''))) phone = digitMatch[1].trim();
-                    }
-                    
-                    let nightsStrW = extract(/(\d+)\s*Nights/i);
-                    if (checkIn && nightsStrW) {
-                        let n = parseInt(nightsStrW);
-                        let d = new Date(checkIn + "T12:00:00Z");
-                        d.setUTCDate(d.getUTCDate() + n);
-                        checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
-                    }
-                    
-                    let paxMatch = text.match(/[\n\r]\s*(\d+)\s*[\n\r]\s*\d+\s*Nights/i);
-                    if (paxMatch) pax = parseInt(paxMatch[1]);
-                    
-                    total = cleanMoney(extract(/Subtotal\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
-                    comm = cleanMoney(extract(/Hostelworld Deposit\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
-                    
-                    let hwTableIdx = text.toLowerCase().lastIndexOf('room type');
-                    if (hwTableIdx > -1) {
-                        let tableText = text.substring(hwTableIdx);
-                        let rMatch = tableText.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*([^\n\r]+?)(?:\s*Non-?refundable|\s*Promo|\n|\r|$)/i);
-                        if (rMatch) {
-                            bType = rMatch[1].replace(/^FMP\s+/i, '').trim();
-                        }
-                    }
-                    if (!bType) {
-                        let rowMatch = text.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*\n*\s*([\s\S]+?)(?:\s+Promo)?\s*\n*\s*(\d+)\s*\n*\s*\d+\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})\s*[\d,.]+/i);
-                        if (rowMatch) {
-                            bType = rowMatch[1].replace(/^FMP\s+/i, '').trim();
-                            if (!pax) pax = parseInt(rowMatch[2]);
-                        }
-                    }
-
-                    if (bType) {
-                        if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)';
-                        else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; 
-                    }
-                    if (text.includes('Non-refundable') || text.includes('Non Refundable')) refundability = 1;
-                    else refundability = 2;
-                    break;
-            }
-            
-            // SMART 7-DAY REFUNDABILITY OVERRIDE
-            if (checkIn) {
-                let cinDate = new Date(checkIn + "T12:00:00Z");
-                if ((cinDate.getTime() - Date.now()) <= 7 * 86400000) {
-                    refundability = 1; // Force 1 (Non-Refundable)
-                }
-            }
-            
-            // Check for existing booking
-            let existingBooking = staff.find(s => s.bookId && s.bookId === bId);
-            
-            if (existingBooking) {
-                window.editStaff(existingBooking.id);
-                
-                // Aggressive Override of Blank/Missing Fields
-                if (email && !document.getElementById('email').value) document.getElementById('email').value = email;
-                if (phone && !document.getElementById('phone').value) document.getElementById('phone').value = phone;
-                if (checkIn && (!document.getElementById('check-in').value || document.getElementById('check-in').value === '--')) document.getElementById('check-in').value = checkIn;
-                if (checkOut && (!document.getElementById('check-out').value || document.getElementById('check-out').value === '--')) document.getElementById('check-out').value = checkOut;
-                if (bType && !document.getElementById('booked-type').value) document.getElementById('booked-type').value = bType;
-                
-                if (total > 0 && Number(document.getElementById('total-price').value) === 0) document.getElementById('total-price').value = total;
-                if (bDate && !document.getElementById('booking-date').value) document.getElementById('booking-date').value = bDate;
-                
-                if (countryCode && document.getElementById('staff-country').value === "[UNKNOWN]") {
-                    const mapKey = countryCode.toLowerCase().trim();
-                    if(rawCountryMap[mapKey]) {
-                        document.getElementById('staff-country').value = rawCountryMap[mapKey];
-                    } else {
-                        const matchedFull = countries.find(c => c.toLowerCase() === mapKey);
-                        if (matchedFull) document.getElementById('staff-country').value = matchedFull;
-                        else if (['england', 'scotland', 'wales', 'great britain'].includes(mapKey)) {
-                            document.getElementById('staff-country').value = 'United Kingdom';
-                        }
-                    }
-                }
-                
-                if (notes && !document.getElementById('staff-notes').value.includes(notes)) {
-                    const existingNotes = document.getElementById('staff-notes').value;
-                    document.getElementById('staff-notes').value = existingNotes ? existingNotes + "\n" + notes : notes;
-                }
-                if (refundability > 0 && document.getElementById('refund-btn').dataset.state == 0) {
-                    setMulti('refund-btn', refundability, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
-                }
-                
-                // Only add financial rows if there aren't any yet
-                const existingPayments = document.querySelectorAll('.payment-row').length;
-                if (existingPayments === 0) {
-                    if (format === 'bdc-extranet' && hasBdcPayment) {
-                        if (comm > 0) window.addPaymentRow(checkIn, comm, 'bdc-kp', true);
-                        if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'bdc-pay', true);
-                    } else if (format === 'airbnb-email') {
-                        if (comm > 0) window.addPaymentRow(checkIn, comm, 'airbnb-kp', true);
-                        if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'airbnb-pay', true);
-                    } else if (format === 'hw-email' || format === 'hw-web') {
-                        if (comm > 0) window.addPaymentRow(checkIn, comm, 'hw-kp', true);
-                    }
-                }
-
-            } else {
-                window.openStaffModal();
-                
-                document.getElementById('booking-source').value = src;
-                document.getElementById('check-in').value = checkIn;
-                document.getElementById('check-out').value = checkOut;
-                document.getElementById('pax-count').value = pax;
-                document.getElementById('total-price').value = total;
-                document.getElementById('booking-id').value = bId;
-                document.getElementById('booking-date').value = bDate;
-                document.getElementById('phone').value = phone;
-                document.getElementById('email').value = email;
-                document.getElementById('staff-notes').value = notes;
-                document.getElementById('booked-type').value = bType;
-                setMulti('refund-btn', refundability, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
-                
-                if(countryCode) {
-                    const mapKey = countryCode.toLowerCase().trim();
-                    if(rawCountryMap[mapKey]) {
-                        document.getElementById('staff-country').value = rawCountryMap[mapKey];
-                    } else {
-                        const matchedFull = countries.find(c => c.toLowerCase() === mapKey);
-                        if (matchedFull) document.getElementById('staff-country').value = matchedFull;
-                        else if (['england', 'scotland', 'wales', 'great britain'].includes(mapKey)) {
-                            document.getElementById('staff-country').value = 'United Kingdom';
-                        }
-                    }
-                }
-                
-                let last = gName.trim(), first = "";
-                const parts = gName.split(' ');
-                if (parts.length > 1) {
-                    first = parts[0].trim();
-                    last = parts.slice(1).join(' ').trim();
-                }
-                document.getElementById('first-name').value = first.toUpperCase();
-                document.getElementById('last-name').value = last.toUpperCase();
-                
-                if (format === 'bdc-extranet' && hasBdcPayment) {
-                    if (comm > 0) window.addPaymentRow(checkIn, comm, 'bdc-kp', true);
-                    if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'bdc-pay', true);
-                } else if (format === 'airbnb-email') {
-                    if (comm > 0) window.addPaymentRow(checkIn, comm, 'airbnb-kp', true);
-                    if (total - comm > 0) window.addPaymentRow(checkIn, total - comm, 'airbnb-pay', true);
-                } else if (format === 'hw-email' || format === 'hw-web') {
-                    if (comm > 0) window.addPaymentRow(checkIn, comm, 'hw-kp', true);
-                }
-            }
-            
-            window.updateHeaderName();
-            window.checkEmailProxy(email);
-            window.calcFinancials();
-            window.syncLabels();
-            document.getElementById('email-modal').style.display = 'none';
-        }
-
-        window.processCSV = async () => {
-            const text = document.getElementById('import-textarea').value.trim(); if (!text) return;
-            const delimiter = text.indexOf('\t') !== -1 ? '\t' : ',';
-            
-            const parseCSVData = (csvText, delim) => {
-                const rows = []; let currentRow = []; let currentCell = ''; let inQuotes = false;
-                for (let i = 0; i < csvText.length; i++) {
-                    const c = csvText[i], nextC = csvText[i+1];
-                    if (c === '"') {
-                        if (inQuotes && nextC === '"') { currentCell += '"'; i++; } else { inQuotes = !inQuotes; }
-                    } else if (c === delim && !inQuotes) { currentRow.push(currentCell); currentCell = '';
-                    } else if ((c === '\n' || c === '\r') && !inQuotes) {
-                        if (c === '\r' && nextC === '\n') i++; 
-                        currentRow.push(currentCell); if (currentRow.join('').trim() !== '') { rows.push(currentRow); } currentRow = []; currentCell = '';
-                    } else { currentCell += c; }
-                }
-                if (currentCell || currentRow.length > 0) { currentRow.push(currentCell); if (currentRow.join('').trim() !== '') rows.push(currentRow); }
-                return rows;
-            };
-
-            const rows = parseCSVData(text, delimiter);
-            if (rows.length < 2) { window.showAlert("Please include the header row and at least one data row."); return; }
-
-            const headers = rows[0].map(h => h.trim().toLowerCase());
-            const getIdx = (keywords) => { for(let kw of keywords) { const index = headers.findIndex(h => h.includes(kw)); if(index > -1) return index; } return -1; };
-            
-            const idx = {
-                in: getIdx(['check-in', 'arrival', 'checkin', 'in']), out: getIdx(['check-out', 'departure', 'checkout', 'out']), name: getIdx(['guest name', 'guest']), room: headers.findIndex(h => h === 'room'), roomType: getIdx(['unit type', 'room type']), source: getIdx(['source']), bookDate: getIdx(['booked on', 'booking date']), bookId: getIdx(['book number', 'reservation number', 'booking id']), pax: getIdx(['people', 'guests', 'adults']), total: getIdx(['price', 'total', 'amount']), comm: getIdx(['commission amount', 'commission']), payStatus: getIdx(['payment status']), address: getIdx(['address']), roomsCount: getIdx(['number of rooms', 'rooms']), country: getIdx(['booker country', 'country']), phone: getIdx(['phone number', 'mobile', 'phone']), email: headers.findIndex(h => h.includes('email') && !h.includes('details')), status: getIdx(['status']), notes: getIdx(['remarks', 'notes', 'comments', 'special comments'])
-            };
-            
-            if(idx.name === -1 && idx.in === -1 && idx.out === -1 && idx.bookId === -1) {
-                window.showAlert("ERROR: Invalid CSV format.\n\nCould not find required column headers. Did you accidentally paste an email or plain text instead of a spreadsheet?"); return;
-            }
-
-            const safeStr = (i, r) => (i > -1 && r[i] != null) ? String(r[i]).replace(/^"|"$/g, '').trim() : "";
-            const parseDate = (str) => {
-                if(!str) return ""; const dClean = str.split(' ')[0]; const parts = dClean.split(/[-/]/); if (parts.length !== 3) return dClean; 
-                const mMap = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-                if (isNaN(parts[1])) return `${parts[0]}-${mMap[parts[1].toLowerCase()] || '01'}-${parts[2].padStart(2, '0')}`;
-                else if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`; 
-                else if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-                return dClean;
-            };
-            const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
-
-            let importCount = 0;
-            const currentUserEmail = auth.currentUser ? auth.currentUser.email : 'admin';
-            const now = new Date().toISOString();
-            const existingImportedMap = {};
-            const isFriendlyResort = getIdx(['folio no.', 'swims status']) > -1;
-
-            for (let i = 1; i < rows.length; i++) {
-                const r = rows[i]; if (r.join('').trim() === '') continue;
-                
-                let rawBId = safeStr(idx.bookId, r).replace(/\.0$/, ''); let newRoom = safeStr(idx.room, r).toUpperCase();
-                let dbStaff = rawBId ? staff.find(s => s.bookId === rawBId) : null;
-                
-                if (dbStaff) {
-                    if (!dbStaff.rooms) dbStaff.rooms = dbStaff.room ? [dbStaff.room] : [];
-                    let emptyIndex = dbStaff.rooms.findIndex(rid => !rid);
-                    if (emptyIndex > -1) dbStaff.rooms[emptyIndex] = newRoom; else dbStaff.rooms.push(newRoom);
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', dbStaff.id), dbStaff); continue; 
-                }
-                if (rawBId && existingImportedMap[rawBId]) {
-                    let existingEntry = existingImportedMap[rawBId];
-                    let emptyIndex = existingEntry.rooms.findIndex(rid => !rid);
-                    if (emptyIndex > -1) existingEntry.rooms[emptyIndex] = newRoom; else existingEntry.rooms.push(newRoom);
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', existingEntry.id), existingEntry); continue;
-                }
-                
-                let fullName = safeStr(idx.name, r) || "UNKNOWN"; let last = fullName, first = "";
-                if (fullName.includes(',')) { const parts = fullName.split(','); last = parts[0].trim(); first = parts.slice(1).join(',').trim();
-                } else { const parts = fullName.split(' '); first = parts[0].trim(); last = parts.length > 1 ? parts.slice(1).join(' ').trim() : ""; }
-                
-                let payStatusTxt = safeStr(idx.payStatus, r); let remarksTxt = safeStr(idx.notes, r);
-                let isBdcPaid = payStatusTxt.includes('Payment through Booking.com') || remarksTxt.includes('Payment through Booking.com') || payStatusTxt.includes('Paid online') || remarksTxt.includes('Paid online');
-
-                let addressTxt = safeStr(idx.address, r); let sourceClean = "other";
-                if (addressTxt.includes("Prudential Tower")) { sourceClean = 'agoda';
-                } else if (isBdcPaid || (idx.bookId > -1 && headers[idx.bookId].includes('reservation number')) || (idx.bookId > -1 && headers[idx.bookId].includes('book number'))) { sourceClean = 'booking.com';
-                } else {
-                    const s = safeStr(idx.source, r).toLowerCase();
-                    if(s.includes('booking')) sourceClean = 'booking.com'; else if(s.includes('agoda')) sourceClean = 'agoda'; else if(s.includes('hostelworld')) sourceClean = 'hostelworld'; else if(s.includes('airbnb')) sourceClean = 'airbnb'; else if(s.includes('direct') || s.includes('walk')) sourceClean = 'direct';
-                }
-
-                let statusClean = "future"; const sStatus = safeStr(idx.status, r).toLowerCase();
-                if(sStatus.includes('cancel')) statusClean = "cancelled";
-
-                const total = cleanMoney(safeStr(idx.total, r)); const comm = cleanMoney(safeStr(idx.comm, r));
-                let count = 1; const rCountStr = safeStr(idx.roomsCount, r); if(rCountStr) count = parseInt(rCountStr) || 1;
-                let linkCode = count > 1 ? last.replace(/[^a-zA-Z]/g, '').substr(0, 4).toUpperCase() : "";
-                if (linkCode.length === 0 && count > 1) linkCode = Math.random().toString(36).substr(2, 4).toUpperCase();
-
-                let cCode = safeStr(idx.country, r).toLowerCase();
-                let parsedCountry = rawCountryMap[cCode] || (cCode.length === 2 ? cCode.toUpperCase() : "[UNKNOWN]");
-                if (cCode.length > 2) parsedCountry = safeStr(idx.country, r); 
-
-                const payments = []; const cin = parseDate(safeStr(idx.in, r));
-                
-                if (isFriendlyResort) { statusClean = 'unconfirmed'; remarksTxt = "FRIENDLY RESORT BOOKING\n" + remarksTxt;
-                } else if (isBdcPaid) {
-                    let prefix = sourceClean === 'agoda' ? 'agoda' : 'bdc';
-                    if (comm > 0) payments.push({ date: cin, amt: comm, method: `${prefix}-kp` });
-                    if (total - comm > 0) payments.push({ date: cin, amt: Number((total - comm).toFixed(2)), method: `${prefix}-pay` });
-                }
-
-                let roomsArr = Array(count).fill(""); if (newRoom) roomsArr[0] = newRoom;
-                const id = Math.random().toString(36).substr(2, 9);
-                const entry = {
-                    id, firstName: first.toUpperCase(), lastName: last.toUpperCase(), status: statusClean, room: newRoom, rooms: roomsArr,
-                    checkIn: cin, checkOut: parseDate(safeStr(idx.out, r)), pax: parseInt(safeStr(idx.pax, r)) || 1, source: sourceClean, bookDate: parseDate(safeStr(idx.bookDate, r)), bookId: rawBId, phone: safeStr(idx.phone, r), email: safeStr(idx.email, r), totalPrice: total, netOverride: false, netPrice: total - comm, payments: payments, badCC: false, refundability: 'non-ref', upgrade: 'none', rating: 'none', extended: false, emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: linkCode, country: parsedCountry, notes: remarksTxt, bookedType: safeStr(idx.roomType, r), createdAt: now, createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null
-                };
-                
-                if (rawBId) existingImportedMap[rawBId] = entry;
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
-                importCount++;
-            }
-            document.getElementById('import-modal').style.display = 'none'; window.showAlert(`Import Complete. Created ${importCount} booking records.`);
-        };
-
-        window.saveBooking = async () => {
-            if(currentUserRole === 'staff') return; 
-            
-            const saveBtn = document.getElementById('save-btn');
-            const originalBtnHtml = saveBtn.innerHTML;
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<div class="spinner border-2 border-white border-t-transparent w-4 h-4 mr-2" style="border-width: 2px;"></div> SAVING...';
-
-            try {
-                const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value;
-                if (cin >= cout) { window.showAlert("INVALID DATES:\nDeparture must be after arrival."); return; }
-                
-                const idInput = document.getElementById('staff-id');
-                const id = idInput.value || Math.random().toString(36).substr(2, 9);
-                idInput.value = id; // Lock the ID to prevent double-click overlap errors
-                
-                const status = document.getElementById('staff-status').value;
-                const startUTC = parseYMD(cin); const endUTC = parseYMD(cout);
-                const roomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
-
-                if (status !== 'unconfirmed' && status !== 'cancelled' && status !== 'noshow') {
-                    for (let s of staff) {
-                        if (s.id === id) continue;
-                        if (s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed') continue;
-                        const sStart = parseYMD(s.checkIn); const sEnd = parseYMD(s.checkOut);
-                        if(startUTC < sEnd && sStart < endUTC) {
-                            const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : []);
-                            for (let r of roomsList) {
-                                if (rList.includes(r)) { window.showAlert(`ROOM OVERLAP ERROR:\n\nRoom ${r} is already assigned to ${s.firstName} ${s.lastName} during these dates.`); return; }
-                            }
-                        }
-                    }
-                }
-
-                const payments = [];
-                document.querySelectorAll('.payment-row').forEach(row => { payments.push({ date: row.querySelector('.pay-date').value, amt: Number(row.querySelector('.pay-amt').value) || 0, method: row.querySelector('.pay-method').value }); });
-                
-                const emailBtn = document.getElementById('email-confirm-btn')?.dataset?.state || 0;
-                const preBtn = document.getElementById('email-prepost-btn')?.dataset?.state || 0;
-                const specBtn = document.getElementById('email-special-btn')?.dataset?.state || 0;
-                const refBtn = document.getElementById('refund-btn')?.dataset?.state || 0;
-                const upBtn = document.getElementById('upgrade-btn')?.dataset?.state || 0;
-                const rateBtn = document.getElementById('rating-btn')?.dataset?.state || 0;
-                const extBtn = document.getElementById('ext-btn')?.dataset?.state || 0;
-                
-                const existing = staff.find(s => s.id === id); const now = new Date().toISOString();
-                const allRoomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value);
-
-                let refState = 'unknown';
-                if(refBtn == 1) refState = 'non-ref';
-                else if(refBtn == 2) refState = 'ref';
-
-                const entry = { 
-                    id, 
-                    firstName: document.getElementById('first-name').value.trim().toUpperCase(), 
-                    lastName: document.getElementById('last-name').value.trim().toUpperCase(), 
-                    status: status, 
-                    bookedType: document.getElementById('booked-type').value, 
-                    room: allRoomsList[0] || "", 
-                    rooms: allRoomsList, 
-                    checkIn: cin, 
-                    checkOut: cout, 
-                    pax: parseInt(document.getElementById('pax-count').value) || 1, 
-                    country: document.getElementById('staff-country').value, 
-                    phone: document.getElementById('phone').value, 
-                    email: document.getElementById('email').value, 
-                    source: document.getElementById('booking-source').value, 
-                    bookDate: document.getElementById('booking-date').value, 
-                    bookId: document.getElementById('booking-id').value, 
-                    linkedId: document.getElementById('link-code').value.trim().toUpperCase(), 
-                    totalPrice: Number(document.getElementById('total-price').value) || 0, 
-                    netPrice: Number(document.getElementById('net-price').value) || 0, 
-                    netOverride: document.getElementById('net-price').dataset.override === 'true', 
-                    badCC: document.getElementById('bad-cc-box').dataset.bad === 'true', 
-                    payments: payments, 
-                    emailConfirm: parseInt(emailBtn) === 1, 
-                    emailPrePost: parseInt(preBtn) > 0 ? (parseInt(preBtn) === 1 ? 'sent' : 'confirmed') : false, 
-                    emailSpecial: parseInt(specBtn) === 1, 
-                    refundability: refState, 
-                    upgrade: parseInt(upBtn) > 0 ? (parseInt(upBtn) === 1 ? 'free' : 'paid') : 'none', 
-                    rating: parseInt(rateBtn) > 0 ? (parseInt(rateBtn) === 1 ? 'good' : 'bad') : 'none', 
-                    extended: parseInt(extBtn) === 1, 
-                    notes: document.getElementById('staff-notes').value, 
-                    createdAt: existing?.createdAt || now, 
-                    createdBy: existing?.createdBy || currentUserEmail, 
-                    lastEditedAt: now, 
-                    lastEditedBy: currentUserEmail
-                };
-                
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
-                window.closeStaffModal();
-            } catch (err) {
-                console.error("Save Error:", err);
-                window.showAlert("Save process timed out or encountered an error. Please verify connection.");
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = originalBtnHtml;
-                lucide.createIcons();
-            }
-        };
-
-        window.editStaff = (id) => {
-            const s = staff.find(x => x.id === id); if (!s) return;
-            const modalContent = document.getElementById('staff-modal-content');
-            modalContent.style.position = 'relative'; modalContent.style.left = 'auto'; modalContent.style.top = 'auto'; modalContent.style.margin = '0';
-            
-            document.getElementById('staff-id').value = s.id; 
-            document.getElementById('first-name').value = s.firstName || ""; document.getElementById('last-name').value = s.lastName || ""; 
-            document.getElementById('phone').value = s.phone || ""; document.getElementById('email').value = s.email || ""; 
-            document.getElementById('staff-country').value = s.country || "Thailand"; 
-            document.getElementById('staff-status').value = s.status; window.updateStatusColor(document.getElementById('staff-status'));
-            document.getElementById('booked-type').value = s.bookedType || ""; 
-            document.getElementById('check-in').value = s.checkIn; document.getElementById('check-out').value = s.checkOut; document.getElementById('pax-count').value = s.pax || 1;
-            
-            document.getElementById('assigned-rooms-container').innerHTML = '';
-            const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : [""]);
-            rList.forEach(r => window.addRoomSelect(r));
-            
-            document.getElementById('total-price').value = Number(s.totalPrice || 0).toFixed(2);
-            document.getElementById('net-price').value = Number(s.netPrice || 0).toFixed(2); document.getElementById('net-price').dataset.override = s.netOverride ? 'true' : 'false';
-            
-            const bcc = document.getElementById('bad-cc-box'); bcc.dataset.bad = s.badCC ? 'true' : 'false';
-            if(s.badCC){ bcc.innerHTML = '<span class="text-white text-[10px] font-black">X</span>'; bcc.classList.remove('border-slate-300'); bcc.classList.add('bg-red-500', 'border-red-600'); } else { bcc.innerHTML = ''; bcc.classList.remove('bg-red-500', 'border-red-600'); bcc.classList.add('border-slate-300'); }
-
-            document.getElementById('payments-list').innerHTML = '';
-            if(s.payments) s.payments.forEach(p => window.addPaymentRow(p.date, Number(p.amt || 0).toFixed(2), p.method, true));
-
-            document.getElementById('booking-source').value = s.source || 'direct'; document.getElementById('booking-date').value = s.bookDate || ""; document.getElementById('booking-id').value = s.bookId || ""; document.getElementById('link-code').value = s.linkedId || ""; document.getElementById('staff-notes').value = s.notes || "";
-
-            setMulti('email-confirm-btn', s.emailConfirm ? 1 : 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
-            setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='sent'?1:2), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
-            setMulti('email-special-btn', s.emailSpecial ? 1 : 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400']);
-            
-            let refState = 0;
-            if (s.refundability === 'non-ref') refState = 1;
-            else if (s.refundability === 'ref') refState = 2;
-            setMulti('refund-btn', refState, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
-            
-            setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade === 'free' ? 1 : 2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
-            setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating === 'good' ? 1 : 2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
-            setMulti('ext-btn', s.extended ? 1 : 0, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
-
-            document.getElementById('ext-days').value = 1;
-            window.toggleSection('ext-section', 'ext-chevron', false);
-
-            window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension();
-            
-            // Expanded by default
-            window.toggleSection('guest-profile-section', 'profile-chevron', true);
-            window.toggleSection('fin-section', 'fin-chevron', true);
-            window.toggleSection('meta-section', 'meta-chevron', true);
-            
-            document.getElementById('delete-btn').style.visibility = 'visible'; 
-            document.getElementById('split-btn').style.visibility = 'visible'; 
-            if (document.getElementById('merge-btn')) document.getElementById('merge-btn').style.visibility = 'visible';
-            document.getElementById('dup-btn').style.visibility = 'visible';
-            
-            const logStr = `CREATED BY ${s.createdBy||'UNKNOWN'} ON ${s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-GB').slice(0,5) : '--'}` + (s.lastEditedBy ? ` | LAST EDIT: ${s.lastEditedBy} ON ${new Date(s.lastEditedAt).toLocaleDateString('en-GB').slice(0,5)}` : '');
-            document.getElementById('audit-log').innerText = logStr;
-
-            if(currentUserRole === 'staff') { 
-                document.getElementById('delete-btn').style.visibility = 'hidden'; 
-                document.getElementById('split-btn').style.visibility = 'hidden'; 
-                if (document.getElementById('merge-btn')) document.getElementById('merge-btn').style.visibility = 'hidden'; 
-                document.querySelector('#save-btn').style.display = 'none'; 
-            }
-            document.getElementById('staff-modal').style.display = 'flex';
-        };
-
-        window.calcExtension = () => {
-            const cin = document.getElementById('check-in').value;
-            const cout = document.getElementById('check-out').value;
-            const total = Number(document.getElementById('total-price').value) || 0;
-            const days = parseInt(document.getElementById('ext-days').value) || 1;
-            
-            let avgRate = 0;
-            if(cin && cout) {
-                const ms = parseYMD(cout) - parseYMD(cin);
-                const nights = Math.round(ms / 86400000);
-                if(nights > 0) avgRate = total / nights;
-            }
-            document.getElementById('ext-avg-rate').value = Math.round(avgRate);
-            document.getElementById('ext-price').value = Math.round(avgRate * days);
-        };
-
-        window.checkBdcPrice = () => {
-            const cout = document.getElementById('check-out').value;
-            if(!cout) return window.showAlert("Please set a check-out date first.");
-            const days = parseInt(document.getElementById('ext-days').value) || 1;
-            
-            const startD = new Date(cout + "T12:00:00Z");
-            const endD = new Date(startD.getTime() + (days * 86400000));
-            
-            const startStr = `${startD.getUTCFullYear()}-${String(startD.getUTCMonth()+1).padStart(2,'0')}-${String(startD.getUTCDate()).padStart(2,'0')}`;
-            const endStr = `${endD.getUTCFullYear()}-${String(endD.getUTCMonth()+1).padStart(2,'0')}-${String(endD.getUTCDate()).padStart(2,'0')}`;
-            
-            const pax = document.getElementById('pax-count').value || 1;
-            const rooms = Array.from(document.querySelectorAll('.assigned-room-select')).filter(sel => sel.value !== "").length || 1;
-            
-            const url = `https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${startStr}&checkout=${endStr}&group_adults=${pax}&group_children=0&no_rooms=${rooms}`;
-            window.open(url, '_blank');
-        };
-
-        window.confirmExtension = () => {
-            const coutStr = document.getElementById('check-out').value;
-            if(!coutStr) return window.showAlert("Please set a check-out date first.");
-            
-            const days = parseInt(document.getElementById('ext-days').value) || 1;
-            const addPrice = Number(document.getElementById('ext-price').value) || 0;
-            
-            const coutDate = new Date(coutStr + "T12:00:00Z");
-            coutDate.setUTCDate(coutDate.getUTCDate() + days);
-            const newCout = `${coutDate.getUTCFullYear()}-${String(coutDate.getUTCMonth()+1).padStart(2,'0')}-${String(coutDate.getUTCDate()).padStart(2,'0')}`;
-            
-            document.getElementById('check-out').value = newCout;
-            
-            const currentTotal = Number(document.getElementById('total-price').value) || 0;
-            document.getElementById('total-price').value = (currentTotal + addPrice).toFixed(2);
-            
-            setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
-            
-            window.syncLabels();
-            window.updateAvailableRooms();
-            window.calcFinancials();
-            window.calcExtension(); 
-            
-            window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${newCout}.\nAdded ฿${addPrice} to Total Price.`);
         };
 
         window.requestMerge = () => {
