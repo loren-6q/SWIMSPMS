@@ -42,11 +42,11 @@
         
         .staff-bar { position: absolute; height: 22px; top: 3px; border-radius: 4px; display: flex; align-items: center; cursor: pointer; z-index: 10; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; transition: all 0.2s; }
 
-        .status-future { background-color: #3b82f6; color: #ffffff; border: 1px solid #2563eb; } 
+        .status-future { background-color: #7fc6f5; color: #1e293b; border: 1px solid #38bdf8; } 
         .status-here { background-color: #dcfce7; color: #14532d; border: 1px solid #86efac; }   
-        .status-left { background-color: #78716c; color: #ffffff; border: 1px solid #57534e; }
+        .status-left { background-color: #aba39d; color: #1e293b; border: 1px solid #78716c; }
         .status-unconfirmed { background-color: #f3e8ff; color: #581c87; border: 1px solid #d8b4fe; }
-        .status-cancelled, .status-noshow { background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; opacity: 0.8; }
+        .status-cancelled, .status-noshow { background-color: #e5e7eb; color: #1e293b; border: 1px solid #d1d5db; opacity: 0.8; }
         
         .modal-overlay { display: none; position: fixed; inset: 0; background: transparent; pointer-events: none; z-index: 100; align-items: flex-start; justify-content: center; padding-top: 5vh; padding-bottom: 5vh; }
         .modal-overlay.active { display: flex; }
@@ -172,9 +172,9 @@
 
             <footer class="mt-2 bg-white p-2 sm:rounded-lg border border-slate-200 flex flex-col md:flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-[10px] md:text-[11px]">
                 <div class="flex flex-wrap items-center justify-center gap-3">
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-blue-500 border border-blue-600"></span> FUTURE</div>
+                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#7fc6f5] border border-[#38bdf8]"></span> FUTURE</div>
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-green-200 border border-green-400"></span> HERE</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#78716c] border border-[#57534e]"></span> LEFT</div>
+                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#aba39d] border border-[#78716c]"></span> LEFT</div>
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-purple-200 border border-purple-400"></span> UNCONFIRMED</div>
                 </div>
                 <div class="w-px h-4 bg-slate-300 hidden md:block"></div>
@@ -491,7 +491,7 @@
                     <div class="col-span-1"><label class="field-label">Out</label><input type="date" id="check-out" required class="w-full text-sm px-1!" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
                     <div class="col-span-1"><label class="field-label">PAX</label><input type="number" id="pax-count" value="1" min="1" class="w-full text-center" oninput="window.calcFinancials(); window.calcExtension && window.calcExtension();"></div>
                     <div class="col-span-1"><label class="field-label">Status</label>
-                        <select id="staff-status" class="w-full text-sm font-black text-white px-1!" style="background: #2563eb" onchange="window.updateStatusColor(this)">
+                        <select id="staff-status" class="w-full text-sm font-black text-white px-1!" style="background: #7fc6f5; color: #1e293b;" onchange="window.updateStatusColor(this)">
                             <option value="future">FUTURE</option><option value="here">HERE</option><option value="left">LEFT</option><option value="unconfirmed">UNCONFIRM</option><option value="cancelled">CANCEL</option><option value="noshow">NO-SHOW</option>
                         </select>
                     </div>
@@ -1703,8 +1703,10 @@
         };
 
         window.updateStatusColor = (sel) => {
-            const c = { 'future': '#3b82f6', 'here': '#059669', 'left': '#78716c', 'cancelled': '#94a3b8', 'noshow': '#000', 'unconfirmed': '#8b5cf6' };
-            sel.style.background = c[sel.value] || '#3b82f6';
+            const bg = { 'future': '#7fc6f5', 'here': '#059669', 'left': '#aba39d', 'cancelled': '#94a3b8', 'noshow': '#000', 'unconfirmed': '#8b5cf6' };
+            const txt = { 'future': '#1e293b', 'here': '#ffffff', 'left': '#1e293b', 'cancelled': '#1e293b', 'noshow': '#ffffff', 'unconfirmed': '#ffffff' };
+            sel.style.background = bg[sel.value] || '#7fc6f5';
+            sel.style.color = txt[sel.value] || '#1e293b';
         };
 
         window.toggleBadCC = () => {
@@ -1891,6 +1893,66 @@
             container.appendChild(wrapper);
             
             window.updateAvailableRooms();
+        };
+
+        window.calcExtension = () => {
+            const cin = document.getElementById('check-in').value;
+            const cout = document.getElementById('check-out').value;
+            const total = Number(document.getElementById('total-price').value) || 0;
+            const days = parseInt(document.getElementById('ext-days').value) || 1;
+            
+            let avgRate = 0;
+            if(cin && cout) {
+                const ms = parseYMD(cout) - parseYMD(cin);
+                const nights = Math.round(ms / 86400000);
+                if(nights > 0) avgRate = total / nights;
+            }
+            document.getElementById('ext-avg-rate').value = Math.round(avgRate);
+            document.getElementById('ext-price').value = Math.round(avgRate * days);
+        };
+
+        window.checkBdcPrice = () => {
+            const cout = document.getElementById('check-out').value;
+            if(!cout) return window.showAlert("Please set a check-out date first.");
+            const days = parseInt(document.getElementById('ext-days').value) || 1;
+            
+            const startD = new Date(cout + "T12:00:00Z");
+            const endD = new Date(startD.getTime() + (days * 86400000));
+            
+            const startStr = `${startD.getUTCFullYear()}-${String(startD.getUTCMonth()+1).padStart(2,'0')}-${String(startD.getUTCDate()).padStart(2,'0')}`;
+            const endStr = `${endD.getUTCFullYear()}-${String(endD.getUTCMonth()+1).padStart(2,'0')}-${String(endD.getUTCDate()).padStart(2,'0')}`;
+            
+            const pax = document.getElementById('pax-count').value || 1;
+            const rooms = Array.from(document.querySelectorAll('.assigned-room-select')).filter(sel => sel.value !== "").length || 1;
+            
+            const url = `https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${startStr}&checkout=${endStr}&group_adults=${pax}&group_children=0&no_rooms=${rooms}`;
+            window.open(url, '_blank');
+        };
+
+        window.confirmExtension = () => {
+            const coutStr = document.getElementById('check-out').value;
+            if(!coutStr) return window.showAlert("Please set a check-out date first.");
+            
+            const days = parseInt(document.getElementById('ext-days').value) || 1;
+            const addPrice = Number(document.getElementById('ext-price').value) || 0;
+            
+            const coutDate = new Date(coutStr + "T12:00:00Z");
+            coutDate.setUTCDate(coutDate.getUTCDate() + days);
+            const newCout = `${coutDate.getUTCFullYear()}-${String(coutDate.getUTCMonth()+1).padStart(2,'0')}-${String(coutDate.getUTCDate()).padStart(2,'0')}`;
+            
+            document.getElementById('check-out').value = newCout;
+            
+            const currentTotal = Number(document.getElementById('total-price').value) || 0;
+            document.getElementById('total-price').value = (currentTotal + addPrice).toFixed(2);
+            
+            setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
+            
+            window.syncLabels();
+            window.updateAvailableRooms();
+            window.calcFinancials();
+            window.calcExtension(); 
+            
+            window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${newCout}.\nAdded ฿${addPrice} to Total Price.`);
         };
 
         window.editStaff = (id) => {
@@ -2271,9 +2333,476 @@
             window.open(url, '_blank');
         };
 
-        window.requestDelete = () => {
-            if(currentUserRole === 'staff') return;
-            window.showAlert(`Permanently delete this record?`, true, async () => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', document.getElementById('staff-id').value)); window.closeStaffModal(); });
+        window.processCSV = async () => {
+            const text = document.getElementById('import-textarea').value.trim(); if (!text) return;
+            const delimiter = text.indexOf('\t') !== -1 ? '\t' : ',';
+            
+            const parseCSVData = (csvText, delim) => {
+                const rows = []; let currentRow = []; let currentCell = ''; let inQuotes = false;
+                for (let i = 0; i < csvText.length; i++) {
+                    const c = csvText[i], nextC = csvText[i+1];
+                    if (c === '"') {
+                        if (inQuotes && nextC === '"') { currentCell += '"'; i++; } else { inQuotes = !inQuotes; }
+                    } else if (c === delim && !inQuotes) { currentRow.push(currentCell); currentCell = '';
+                    } else if ((c === '\n' || c === '\r') && !inQuotes) {
+                        if (c === '\r' && nextC === '\n') i++; 
+                        currentRow.push(currentCell); if (currentRow.join('').trim() !== '') { rows.push(currentRow); } currentRow = []; currentCell = '';
+                    } else { currentCell += c; }
+                }
+                if (currentCell || currentRow.length > 0) { currentRow.push(currentCell); if (currentRow.join('').trim() !== '') rows.push(currentRow); }
+                return rows;
+            };
+
+            const rows = parseCSVData(text, delimiter);
+            if (rows.length < 2) { window.showAlert("Please include the header row and at least one data row."); return; }
+
+            const headers = rows[0].map(h => h.trim().toLowerCase());
+            const getIdx = (keywords) => { for(let kw of keywords) { const index = headers.findIndex(h => h.includes(kw)); if(index > -1) return index; } return -1; };
+            
+            const idx = {
+                in: getIdx(['check-in', 'arrival', 'checkin', 'in']), out: getIdx(['check-out', 'departure', 'checkout', 'out']), name: getIdx(['guest name', 'guest']), room: headers.findIndex(h => h === 'room'), roomType: getIdx(['unit type', 'room type']), source: getIdx(['source']), bookDate: getIdx(['booked on', 'booking date']), bookId: getIdx(['book number', 'reservation number', 'booking id']), pax: getIdx(['people', 'guests', 'adults']), total: getIdx(['price', 'total', 'amount']), comm: getIdx(['commission amount', 'commission']), payStatus: getIdx(['payment status']), address: getIdx(['address']), roomsCount: getIdx(['number of rooms', 'rooms']), country: getIdx(['booker country', 'country']), phone: getIdx(['phone number', 'mobile', 'phone']), email: headers.findIndex(h => h.includes('email') && !h.includes('details')), status: getIdx(['status']), notes: getIdx(['remarks', 'notes', 'comments', 'special comments'])
+            };
+            
+            if(idx.name === -1 && idx.in === -1 && idx.out === -1 && idx.bookId === -1) {
+                window.showAlert("ERROR: Invalid CSV format.\n\nCould not find required column headers. Did you accidentally paste an email or plain text instead of a spreadsheet?"); return;
+            }
+
+            const safeStr = (i, r) => (i > -1 && r[i] != null) ? String(r[i]).replace(/^"|"$/g, '').trim() : "";
+            const parseDate = (str) => {
+                if(!str) return ""; const dClean = str.split(' ')[0]; const parts = dClean.split(/[-/]/); if (parts.length !== 3) return dClean; 
+                const mMap = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+                if (isNaN(parts[1])) return `${parts[0]}-${mMap[parts[1].toLowerCase()] || '01'}-${parts[2].padStart(2, '0')}`;
+                else if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`; 
+                else if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                return dClean;
+            };
+            const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
+
+            let importCount = 0;
+            const currentUserEmail = auth.currentUser ? auth.currentUser.email : 'admin';
+            const now = new Date().toISOString();
+            const existingImportedMap = {};
+            const isFriendlyResort = getIdx(['folio no.', 'swims status']) > -1;
+
+            for (let i = 1; i < rows.length; i++) {
+                const r = rows[i]; if (r.join('').trim() === '') continue;
+                
+                let rawBId = safeStr(idx.bookId, r).replace(/\.0$/, ''); let newRoom = safeStr(idx.room, r).toUpperCase();
+                let dbStaff = rawBId ? staff.find(s => s.bookId === rawBId) : null;
+                
+                if (dbStaff) {
+                    if (!dbStaff.rooms) dbStaff.rooms = dbStaff.room ? [dbStaff.room] : [];
+                    let emptyIndex = dbStaff.rooms.findIndex(rid => !rid);
+                    if (emptyIndex > -1) dbStaff.rooms[emptyIndex] = newRoom; else dbStaff.rooms.push(newRoom);
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', dbStaff.id), dbStaff); continue; 
+                }
+                if (rawBId && existingImportedMap[rawBId]) {
+                    let existingEntry = existingImportedMap[rawBId];
+                    let emptyIndex = existingEntry.rooms.findIndex(rid => !rid);
+                    if (emptyIndex > -1) existingEntry.rooms[emptyIndex] = newRoom; else existingEntry.rooms.push(newRoom);
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', existingEntry.id), existingEntry); continue;
+                }
+                
+                let fullName = safeStr(idx.name, r) || "UNKNOWN"; let last = fullName, first = "";
+                if (fullName.includes(',')) { const parts = fullName.split(','); last = parts[0].trim(); first = parts.slice(1).join(',').trim();
+                } else { const parts = fullName.split(' '); first = parts[0].trim(); last = parts.length > 1 ? parts.slice(1).join(' ').trim() : ""; }
+                
+                let payStatusTxt = safeStr(idx.payStatus, r); let remarksTxt = safeStr(idx.notes, r);
+                let isBdcPaid = payStatusTxt.includes('Payment through Booking.com') || remarksTxt.includes('Payment through Booking.com') || payStatusTxt.includes('Paid online') || remarksTxt.includes('Paid online');
+
+                let addressTxt = safeStr(idx.address, r); let sourceClean = "other";
+                if (addressTxt.includes("Prudential Tower")) { sourceClean = 'agoda';
+                } else if (isBdcPaid || (idx.bookId > -1 && headers[idx.bookId].includes('reservation number')) || (idx.bookId > -1 && headers[idx.bookId].includes('book number'))) { sourceClean = 'booking.com';
+                } else {
+                    const s = safeStr(idx.source, r).toLowerCase();
+                    if(s.includes('booking')) sourceClean = 'booking.com'; else if(s.includes('agoda')) sourceClean = 'agoda'; else if(s.includes('hostelworld')) sourceClean = 'hostelworld'; else if(s.includes('airbnb')) sourceClean = 'airbnb'; else if(s.includes('direct') || s.includes('walk')) sourceClean = 'direct';
+                }
+
+                let statusClean = "future"; const sStatus = safeStr(idx.status, r).toLowerCase();
+                if(sStatus.includes('cancel')) statusClean = "cancelled";
+
+                const total = cleanMoney(safeStr(idx.total, r)); const comm = cleanMoney(safeStr(idx.comm, r));
+                let count = 1; const rCountStr = safeStr(idx.roomsCount, r); if(rCountStr) count = parseInt(rCountStr) || 1;
+                let linkCode = count > 1 ? last.replace(/[^a-zA-Z]/g, '').substr(0, 4).toUpperCase() : "";
+                if (linkCode.length === 0 && count > 1) linkCode = Math.random().toString(36).substr(2, 4).toUpperCase();
+
+                let cCode = safeStr(idx.country, r).toLowerCase();
+                let parsedCountry = rawCountryMap[cCode] || (cCode.length === 2 ? cCode.toUpperCase() : "[UNKNOWN]");
+                if (cCode.length > 2) parsedCountry = safeStr(idx.country, r); 
+
+                const payments = []; const cin = parseDate(safeStr(idx.in, r));
+                
+                if (isFriendlyResort) { statusClean = 'unconfirmed'; remarksTxt = "FRIENDLY RESORT BOOKING\n" + remarksTxt;
+                } else if (isBdcPaid) {
+                    let prefix = sourceClean === 'agoda' ? 'agoda' : 'bdc';
+                    if (comm > 0) payments.push({ date: cin, amt: comm, method: `${prefix}-kp` });
+                    if (total - comm > 0) payments.push({ date: cin, amt: Number((total - comm).toFixed(2)), method: `${prefix}-pay` });
+                }
+
+                let roomsArr = Array(count).fill(""); if (newRoom) roomsArr[0] = newRoom;
+                const id = Math.random().toString(36).substr(2, 9);
+                const entry = {
+                    id, firstName: first.toUpperCase(), lastName: last.toUpperCase(), status: statusClean, room: newRoom, rooms: roomsArr,
+                    checkIn: cin, checkOut: parseDate(safeStr(idx.out, r)), pax: parseInt(safeStr(idx.pax, r)) || 1, source: sourceClean, bookDate: parseDate(safeStr(idx.bookDate, r)), bookId: rawBId, phone: safeStr(idx.phone, r), email: safeStr(idx.email, r), totalPrice: total, netOverride: false, netPrice: total - comm, payments: payments, badCC: false, refundability: 'non-ref', upgrade: 'none', rating: 'none', extended: false, emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: linkCode, country: parsedCountry, notes: remarksTxt, bookedType: safeStr(idx.roomType, r), createdAt: now, createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null
+                };
+                
+                if (rawBId) existingImportedMap[rawBId] = entry;
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry);
+                importCount++;
+            }
+            document.getElementById('import-modal').style.display = 'none'; window.showAlert(`Import Complete. Created ${importCount} booking records.`);
+        };
+
+        window.openCSVModal = () => { document.getElementById('import-textarea').value = ''; document.getElementById('import-modal').style.display = 'flex'; setTimeout(() => document.getElementById('import-textarea').focus(), 50); };
+        window.openEmailParserModal = () => { document.getElementById('email-textarea').value = ''; document.getElementById('email-modal').style.display = 'flex'; setTimeout(() => document.getElementById('email-textarea').focus(), 50); };
+        
+        window.parseEmail = () => {
+            const text = document.getElementById('email-textarea').value;
+            if(!text || text.trim() === '') return;
+            
+            const format = document.getElementById('import-format-select').value;
+            const extract = (regex, source = text) => { const match = source.match(regex); return match ? match[1].trim() : ''; };
+            const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
+            
+            const formatStrictDate = (dateStr) => {
+                if(!dateStr) return '';
+                const d = new Date(dateStr + " 12:00:00Z");
+                if(isNaN(d.getTime())) return '';
+                return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+            };
+
+            const parseDateRelative = (dateStr, isPast = false) => {
+                if(!dateStr) return '';
+                const mths = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+                let cleanStr = dateStr.replace(/,/g, '').replace(/(st|nd|rd|th)\b/gi, '').replace(/['´`’]/g, '').replace(/\s+/g, ' ').trim();
+                let parts = cleanStr.split(' ');
+                
+                let mthIndex = -1;
+                for (let i=0; i<parts.length; i++) {
+                    if (parts[i].length >= 3 && mths[parts[i].toLowerCase().substring(0,3)]) {
+                        mthIndex = i; break;
+                    }
+                }
+                if (mthIndex === -1) return '';
+                let mth = mths[parts[mthIndex].toLowerCase().substring(0,3)];
+                let dayVal = 1; let yrVal = 0;
+                
+                let candidates = parts.filter((p, i) => i !== mthIndex && /^\d+$/.test(p));
+                if (candidates.length > 0) {
+                    dayVal = parseInt(candidates[0]);
+                    if (candidates.length > 1) {
+                        let y = parseInt(candidates[1]);
+                        if (y < 100) yrVal = 2000 + y;
+                        else if (y >= 2000) yrVal = y;
+                    }
+                }
+                
+                let day = dayVal.toString().padStart(2, '0');
+                let now = new Date();
+                let yr = yrVal > 0 ? yrVal : now.getFullYear();
+                
+                if (yrVal === 0) {
+                    let testDate = new Date(`${yr}-${mth}-${day}`);
+                    if (isPast && testDate > now) yr--;
+                    else if (!isPast && testDate.getMonth() < now.getMonth() && testDate < now) yr++;
+                }
+                return `${yr}-${mth}-${day}`;
+            };
+
+            let src = '', gName = '', checkIn = '', checkOut = '', pax = 1, phone = '', email = '', total = 0, comm = 0, bId = '', notes = '', bType = '', bDate = '', countryCode = '', refundability = 0;
+            let hasBdcPayment = false;
+
+            switch (format) {
+                case 'bdc-extranet':
+                    src = 'booking.com';
+                    if (text.toLowerCase().includes('prudential tower')) src = 'agoda';
+                    let lines = text.split(/[\n\r]+/).map(l => l.trim().replace(/\xa0/g, ' ')).filter(Boolean);
+                    
+                    let getLineData = (keywords) => {
+                        let idx = lines.findIndex(l => keywords.some(k => l.toLowerCase() === k.toLowerCase() || l.toLowerCase().startsWith(k.toLowerCase())));
+                        if (idx > -1) {
+                            let match = keywords.find(k => lines[idx].toLowerCase().startsWith(k.toLowerCase()));
+                            let remainder = lines[idx].substring(match.length).trim();
+                            if (remainder) return remainder;
+                            if (idx + 1 < lines.length) return lines[idx + 1];
+                        }
+                        return "";
+                    };
+
+                    checkIn = formatStrictDate(parseDateRelative(getLineData(['Check-in'])));
+                    checkOut = formatStrictDate(parseDateRelative(getLineData(['Check-out'])));
+                    bDate = formatStrictDate(parseDateRelative(getLineData(['Received', 'Booked on']), true));
+                    
+                    bId = getLineData(['Booking number:']);
+                    pax = parseInt(getLineData(['Total guests:'])) || 1;
+                    total = cleanMoney(getLineData(['Total price']));
+                    comm = cleanMoney(getLineData(['Commission and charges:']));
+
+                    let guestIdx = lines.findIndex(l => l.toLowerCase().startsWith('guest name:'));
+                    if (guestIdx > -1) {
+                        let remainder = lines[guestIdx].substring('guest name:'.length).trim();
+                        if (remainder) {
+                            gName = remainder;
+                            email = extract(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/, lines[guestIdx]);
+                            phone = extract(/(\+[\d\s]+)/, lines[guestIdx]);
+                            let ccMatch = lines[guestIdx].replace(email, '').replace(phone, '').match(/\s+([a-zA-Z]{2})$/);
+                            if (ccMatch) countryCode = ccMatch[1].toUpperCase();
+                            gName = gName.replace(email, '').replace(phone, '').replace(/\s+[a-zA-Z]{2}$/, '').trim();
+                        } else {
+                            gName = lines[guestIdx + 1];
+                            for (let i = guestIdx + 2; i < guestIdx + 6; i++) {
+                                if (!lines[i] || lines[i].includes('Preferred language') || lines[i].includes('Channel:')) break;
+                                if (lines[i].length === 2 && !countryCode) countryCode = lines[i].toUpperCase();
+                                else if (lines[i].includes('@') && !email) email = lines[i];
+                                else if (lines[i].includes('+') && !phone) phone = lines[i];
+                            }
+                        }
+                    }
+
+                    let bTypeIdx = -1;
+                    for (let i = 0; i < lines.length; i++) {
+                        if (/^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\d{1,2}\s+[A-Za-z]{3}/i.test(lines[i]) && i >= 2) {
+                            if (/(?:THB|฿|\$|€|£|[A-Z]{3})[\s]*[\d,.]+/i.test(lines[i-1])) {
+                                bTypeIdx = i - 2;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (bTypeIdx === -1) {
+                        let policyIdx = lines.findIndex(l => l.toLowerCase().endsWith('cancellation policy.') || l.toLowerCase().includes('bank transfer payout'));
+                        if (policyIdx > -1 && policyIdx + 1 < lines.length) bTypeIdx = policyIdx + 1;
+                    }
+
+                    if (bTypeIdx > -1) {
+                        let bTypeRaw = lines[bTypeIdx];
+                        let firstParen = bTypeRaw.indexOf('(');
+                        let lastParen = bTypeRaw.lastIndexOf(')');
+                        if (firstParen > -1 && lastParen > firstParen) {
+                            bType = bTypeRaw.substring(firstParen + 1, lastParen).trim();
+                        } else {
+                            bType = bTypeRaw.trim();
+                        }
+                    }
+
+                    // Strict Refundability Check
+                    let cancelIdx = lines.findIndex(l => l.toLowerCase().includes('cancellation'));
+                    if (cancelIdx > -1) {
+                        let cancelText = lines.slice(cancelIdx, cancelIdx + 4).join(' ').toLowerCase();
+                        if (cancelText.includes('free of charge until') || cancelText.includes('free cancellation')) {
+                            refundability = 2; // Refundable
+                        } else if (cancelText.includes('cancel at any time') || cancelText.includes('non-refundable') || cancelText.includes('charged the total price of the reservation if they cancel at any time')) {
+                            refundability = 1; // Non-Refundable
+                        }
+                    } else {
+                        if (text.match(/free of charge until/i) || text.match(/free cancellation/i)) refundability = 2;
+                        else if (text.match(/cancel at any time|cancel anytime|Non-refundable|charged the total price of the reservation if they cancel at any time/i)) refundability = 1;
+                    }
+
+                    // BED PREFERENCES & NOTES Extraction
+                    let allNotes = [];
+                    lines.forEach(l => {
+                        let lUp = l.toUpperCase();
+                        if (lUp.includes('BED PREFERENCE:') || lUp.includes('BED-PREFERENCE REQUEST:')) {
+                            // Strip the word "Reply" if it gets accidentally glued to the end of the string
+                            allNotes.push(l.replace(/Reply$/i, '').trim());
+                        }
+                    });
+
+                    // Conversation / Notes Extraction
+                    let convoIdx = lines.findIndex(l => l.toLowerCase() === 'conversation with guest');
+                    if (convoIdx > -1) {
+                        let msgLines = [];
+                        for (let i = convoIdx + 1; i < lines.length; i++) {
+                            let l = lines[i];
+                            let lLow = l.toLowerCase();
+                            
+                            // Stop parsing if we hit a new section
+                            if (lLow.includes('protect your account security') || lLow === 'images' || lLow === 'templates' || lLow.includes('important information about this guest') || lLow === 'cancellation') break;
+                            if (lLow === 'no messages' || lLow.includes('conversations with your guests will appear')) break;
+                            
+                            // Skip timestamps and raw "Reply" buttons
+                            if (/^(?:Today|Yesterday|[A-Za-z]+,?\s*\d{1,2}\s*[A-Za-z]*),\s*\d{1,2}:\d{2}/i.test(l) || /^\d{1,2}:\d{2}$/.test(l) || lLow === 'reply') continue; 
+                            
+                            if (l.trim()) msgLines.push(l.trim());
+                        }
+                        if (msgLines.length > 0) {
+                            allNotes.push("GUEST MSG: " + msgLines.join(" "));
+                        }
+                    }
+                    notes = allNotes.join('\n\n');
+
+                    if (text.includes('Payment is facilitated') || text.includes('Booking.com will collect')) hasBdcPayment = true;
+
+                    break;
+                    
+                case 'airbnb-email':
+                    src = 'airbnb';
+                    gName = extract(/Reservation confirmed - (.*?)\s+arrives/i);
+                    if(!gName) gName = extract(/welcome\s+(.*?)\./i);
+                    checkIn = parseDateRelative(extract(/Check-in[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
+                    checkOut = parseDateRelative(extract(/Checkout[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
+                    bId = extract(/Confirmation code[\s\S]*?([A-Z0-9]+)/i);
+                    bDate = parseDateRelative(extract(/Airbnb[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true);
+                    pax = parseInt(extract(/Guests[\s\S]*?(\d+)/i)) || 1;
+                    
+                    let totalStr = extract(/Total\s*(?:\([A-Z]+\))?[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
+                    if (!totalStr) totalStr = extract(/Guest paid[\s\S]{0,60}?nights[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
+                    total = cleanMoney(totalStr);
+                    
+                    const payout = cleanMoney(extract(/You earn[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
+                    comm = Number((total - payout).toFixed(2));
+                    bType = extract(/([^\n]+?)\s*Room\s*Check-in/i);
+                    
+                    let abnbNotes = extract(/Identity verified[\s\S]*?\n([^\n]+)\n\s*Send.*?a Message/i);
+                    if(abnbNotes && !abnbNotes.includes('Translated') && !abnbNotes.includes('Add guest')) notes = abnbNotes; 
+                    
+                    const policyMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i);
+                    if (policyMatch) {
+                        const pol = policyMatch[1].toLowerCase();
+                        if (pol.includes('strict') || pol.includes('firm') || pol.includes('non-refundable')) refundability = 1;
+                        else refundability = 2;
+                    }
+                    break;
+
+                case 'hw-email':
+                    src = 'hostelworld';
+                    bId = extract(/\(ref:\s*([\d-]+)\)/i);
+                    bDate = parseDateRelative(extract(/made on\s*([^\n]+?)\s*by/i), true);
+                    gName = extract(/by the customer[\s\S]*?:\s*\n+([^\n]+)/i);
+                    checkIn = parseDateRelative(extract(/Arrival:\s*([^\n]+)/i), false);
+                    
+                    let nightsStrE = extract(/Nights:\s*(\d+)/i);
+                    if (checkIn && nightsStrE) {
+                        let n = parseInt(nightsStrE);
+                        let d = new Date(checkIn + "T12:00:00Z");
+                        d.setUTCDate(d.getUTCDate() + n);
+                        checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+                    }
+                    
+                    pax = parseInt(extract(/Guests:\s*(\d+)/i)) || 1;
+                    total = cleanMoney(extract(/Total Price:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
+                    comm = cleanMoney(extract(/Deposit Paid:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
+                    bType = extract(/Beds? reserved in\s+([^\n]+)/i);
+                    if (bType) {
+                        if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)';
+                        else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; 
+                    }
+                    if (text.includes('Non-refundable') || text.includes('Non Refundable')) refundability = 1;
+                    else refundability = 2;
+                    break;
+
+                case 'hw-web':
+                    src = 'hostelworld';
+                    bId = extract(/Reference\s*\n*\s*([\d-]+)/i);
+                    bDate = parseDateRelative(extract(/Booked\s*\n*\s*([^\n]+)/i), true);
+                    checkIn = parseDateRelative(extract(/Arriving\s*\n*\s*([^\n]+)/i), false);
+                    
+                    let regexRefBlock = new RegExp(`Reference\\s*\\n*\\s*${bId}\\s*\\n*\\s*([^\\n]+)\\s*\\n*\\s*([^\\n]+)`, 'i');
+                    let matchBlock = text.match(regexRefBlock);
+                    if (matchBlock) {
+                        gName = matchBlock[1].trim();
+                        countryCode = matchBlock[2].trim();
+                    }
+                    
+                    let allEmails = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/g) || [];
+                    email = allEmails.find(e => !e.toLowerCase().includes('hostelworld')) || '';
+                    
+                    phone = extract(/(\+[\d\s-]+)/);
+                    if (!phone && email) {
+                        let emailIdx = text.indexOf(email);
+                        let afterEmail = text.substring(emailIdx + email.length);
+                        let phoneMatch = afterEmail.match(/^\s*[\n\r]+\s*([\d\s-]{8,20})/);
+                        if (phoneMatch) phone = phoneMatch[1].trim();
+                    }
+                    if (!phone) {
+                         let digitMatch = text.match(/(?:^|[^\d])(\d[\d\s-]{8,20}\d)(?:[^\d]|$)/);
+                         if (digitMatch && bId && !digitMatch[1].includes(bId.replace(/[^\d]/g, ''))) phone = digitMatch[1].trim();
+                    }
+                    
+                    let nightsStrW = extract(/(\d+)\s*Nights/i);
+                    if (checkIn && nightsStrW) {
+                        let n = parseInt(nightsStrW);
+                        let d = new Date(checkIn + "T12:00:00Z");
+                        d.setUTCDate(d.getUTCDate() + n);
+                        checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+                    }
+                    
+                    let paxMatch = text.match(/[\n\r]\s*(\d+)\s*[\n\r]\s*\d+\s*Nights/i);
+                    if (paxMatch) pax = parseInt(paxMatch[1]);
+                    
+                    total = cleanMoney(extract(/Subtotal\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
+                    comm = cleanMoney(extract(/Hostelworld Deposit\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
+                    
+                    let hwTableIdx = text.toLowerCase().lastIndexOf('room type');
+                    if (hwTableIdx > -1) {
+                        let tableText = text.substring(hwTableIdx);
+                        let rMatch = tableText.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*([^\n\r]+?)(?:\s*Non-?refundable|\s*Promo|\n|\r|$)/i);
+                        if (rMatch) {
+                            bType = rMatch[1].replace(/^FMP\s+/i, '').trim();
+                        }
+                    }
+                    if (!bType) {
+                        let rowMatch = text.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*\n*\s*([\s\S]+?)(?:\s+Promo)?\s*\n*\s*(\d+)\s*\n*\s*\d+\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})\s*[\d,.]+/i);
+                        if (rowMatch) {
+                            bType = rowMatch[1].replace(/^FMP\s+/i, '').trim();
+                            if (!pax) pax = parseInt(rowMatch[2]);
+                        }
+                    }
+
+                    if (bType) {
+                        if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)';
+                        else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; 
+                    }
+                    break;
+            }
+
+            document.getElementById('email-modal').style.display = 'none';
+            window.openStaffModal();
+
+            let last = gName.trim(), first = "";
+            if(gName.includes(',')) { const p = gName.split(','); last = p[0].trim(); first = p.slice(1).join(',').trim(); }
+            else { const p = gName.split(' '); first = p[0].trim(); last = p.length>1 ? p.slice(1).join(' ').trim() : ""; }
+            
+            document.getElementById('first-name').value = first.toUpperCase();
+            document.getElementById('last-name').value = last.toUpperCase();
+            document.getElementById('check-in').value = checkIn;
+            document.getElementById('check-out').value = checkOut;
+            document.getElementById('pax-count').value = pax;
+            document.getElementById('booking-source').value = src || 'other';
+            document.getElementById('booking-date').value = bDate;
+            document.getElementById('booking-id').value = bId;
+            document.getElementById('booked-type').value = (bType || "").toUpperCase();
+            
+            document.getElementById('phone').value = phone;
+            document.getElementById('email').value = email;
+            if (countryCode && countryCode.length === 2 && rawCountryMap[countryCode.toLowerCase()]) {
+                document.getElementById('staff-country').value = rawCountryMap[countryCode.toLowerCase()];
+            }
+            
+            document.getElementById('total-price').value = total.toFixed(2);
+            document.getElementById('net-price').value = Math.max(0, total - comm).toFixed(2);
+            document.getElementById('staff-notes').value = notes;
+            
+            setMulti('refund-btn', refundability, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
+            
+            if (comm > 0) {
+                let kpMethod = 'other';
+                if (src === 'booking.com') kpMethod = 'bdc-kp';
+                if (src === 'agoda') kpMethod = 'agoda-kp';
+                if (src === 'airbnb') kpMethod = 'airbnb-kp';
+                if (src === 'hostelworld') kpMethod = 'hw-kp';
+                window.addPaymentRow(checkIn || new Date().toISOString().split('T')[0], comm.toFixed(2), kpMethod);
+            }
+            
+            if (hasBdcPayment && (total - comm) > 0) {
+                window.addPaymentRow(checkIn || new Date().toISOString().split('T')[0], (total - comm).toFixed(2), 'bdc-pay');
+            }
+
+            window.updateHeaderName();
+            window.syncLabels();
+            window.calcFinancials();
+            window.updateAvailableRooms();
         };
 
         window.showAlert = (msg, isConfirm = false, onConfirm = null) => {
