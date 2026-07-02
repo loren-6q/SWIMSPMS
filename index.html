@@ -2262,14 +2262,40 @@
                 const newCheckOut = current.checkOut > target.checkOut ? current.checkOut : target.checkOut;
                 const newTotal = Number(current.totalPrice || 0) + Number(target.totalPrice || 0);
                 const newNet = Number(current.netPrice || 0) + Number(target.netPrice || 0);
-                const newNotes = (document.getElementById('staff-notes').value || "") + `\n\n--- MERGED WITH BOOKING ${target.bookId || targetId} ---\n` + (target.notes || "");
                 const newPax = Math.max(current.pax || 1, target.pax || 1);
                 
+                let mergedNotes = (document.getElementById('staff-notes').value || "") + `\n\n--- MERGED WITH BOOKING ${target.bookId || targetId} ---\n` + (target.notes || "");
+
+                const fieldsToMerge = [
+                    { id: 'first-name', targetVal: target.firstName, label: 'First Name' },
+                    { id: 'last-name', targetVal: target.lastName, label: 'Last Name' },
+                    { id: 'phone', targetVal: target.phone, label: 'Phone' },
+                    { id: 'email', targetVal: target.email, label: 'Email' },
+                    { id: 'staff-country', targetVal: target.country, label: 'Country' },
+                    { id: 'booked-type', targetVal: target.bookedType, label: 'Booked Type' },
+                    { id: 'booking-source', targetVal: target.source, label: 'Source' },
+                    { id: 'booking-date', targetVal: target.bookDate, label: 'Book Date' },
+                    { id: 'booking-id', targetVal: target.bookId, label: 'Book ID' }
+                ];
+
+                fieldsToMerge.forEach(field => {
+                    const inputEl = document.getElementById(field.id);
+                    if (!inputEl) return;
+                    const currentVal = inputEl.value;
+                    const tVal = field.targetVal || "";
+                    
+                    if (!currentVal && tVal) {
+                        inputEl.value = tVal;
+                    } else if (currentVal && tVal && currentVal.toString().trim().toLowerCase() !== tVal.toString().trim().toLowerCase()) {
+                        mergedNotes += `\n[Merged ${field.label}]: ${tVal}`;
+                    }
+                });
+
                 document.getElementById('check-in').value = newCheckIn;
                 document.getElementById('check-out').value = newCheckOut;
                 document.getElementById('total-price').value = newTotal;
                 document.getElementById('net-price').value = newNet;
-                document.getElementById('staff-notes').value = newNotes;
+                document.getElementById('staff-notes').value = mergedNotes.trim();
                 document.getElementById('pax-count').value = newPax;
                 
                 (target.payments || []).forEach(p => window.addPaymentRow(p.date, Number(p.amt||0).toFixed(2), p.method, true));
@@ -2803,161 +2829,6 @@
             window.syncLabels();
             window.calcFinancials();
             window.updateAvailableRooms();
-        };
-
-        window.requestDuplicate = async () => {
-            if(currentUserRole === 'staff') return;
-            const id = document.getElementById('staff-id').value;
-            const s = staff.find(x => x.id === id); if (!s) return;
-
-            let linkCode = document.getElementById('link-code').value.trim().toUpperCase() || s.linkedId || Math.random().toString(36).substr(2, 4).toUpperCase();
-            if(!s.linkedId) { const updatedOriginal = { ...s, linkedId: linkCode }; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), updatedOriginal); }
-
-            const newId = Math.random().toString(36).substr(2, 9);
-            const newRecord = { ...s, id: newId, room: "", rooms: [""], linkedId: linkCode, payments: [], extended: false, createdAt: new Date().toISOString(), createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null };
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), newRecord);
-            window.closeStaffModal();
-        };
-
-        window.requestSplit = () => {
-            if(currentUserRole === 'staff') return;
-            const id = document.getElementById('staff-id').value; const s = staff.find(x => x.id === id); if (!s) return;
-            const splitDateInput = document.getElementById('split-date'); splitDateInput.value = ""; splitDateInput.min = s.checkIn; splitDateInput.max = s.checkOut; document.getElementById('split-modal').style.display = 'flex';
-        };
-
-        window.confirmSplit = async () => {
-            const splitDate = document.getElementById('split-date').value; const id = document.getElementById('staff-id').value; const s = staff.find(x => x.id === id);
-            if (!splitDate || splitDate <= s.checkIn || splitDate >= s.checkOut) { window.showAlert("Invalid split date."); return; }
-            let linkCode = s.linkedId || Math.random().toString(36).substr(2, 4).toUpperCase();
-            const updatedRecord = { ...s, checkOut: splitDate, linkedId: linkCode };
-            const newId = Math.random().toString(36).substr(2, 9);
-            
-            const newRecord = { 
-                ...s, id: newId, checkIn: splitDate, room: "", rooms: [""], linkedId: linkCode, 
-                totalPrice: 0, netPrice: 0, payments: [], extended: false, notes: "Split segment for mid-stay room change. Master folio kept on original booking.\n" + (s.notes || "")
-            };
-            
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), updatedRecord); 
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), newRecord);
-            document.getElementById('split-modal').style.display = 'none'; window.closeStaffModal();
-        };
-
-        window.requestMerge = () => {
-            if(currentUserRole === 'staff') return;
-            const id = document.getElementById('staff-id').value; 
-            if (!id) return window.showAlert("Please save this booking first before merging.");
-            const current = staff.find(x => x.id === id); if (!current) return;
-            
-            const sel = document.getElementById('merge-target');
-            sel.innerHTML = '<option value="">-- SELECT BOOKING --</option>';
-            
-            let options = [...staff].filter(s => s.id !== id && s.status !== 'cancelled' && s.status !== 'noshow');
-            options.sort((a,b) => {
-                const aMatch = a.lastName === current.lastName;
-                const bMatch = b.lastName === current.lastName;
-                if (aMatch && !bMatch) return -1;
-                if (!aMatch && bMatch) return 1;
-                return a.checkIn.localeCompare(b.checkIn);
-            });
-            
-            options.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.id;
-                opt.innerText = `${s.lastName}, ${s.firstName} (${s.checkIn.substr(5)} to ${s.checkOut.substr(5)})`;
-                if (s.lastName === current.lastName) opt.className = "text-indigo-600 font-black";
-                sel.appendChild(opt);
-            });
-            
-            document.getElementById('merge-modal').style.display = 'flex';
-        };
-
-        window.confirmMerge = async () => {
-            const targetId = document.getElementById('merge-target').value;
-            if(!targetId) return window.showAlert("Please select a booking to merge.");
-            
-            const currentId = document.getElementById('staff-id').value;
-            const target = staff.find(s => s.id === targetId);
-            const current = staff.find(s => s.id === currentId);
-            
-            if(!target || !current) return;
-            
-            const btn = document.getElementById('merge-confirm-btn');
-            btn.innerHTML = 'MERGING...'; btn.disabled = true;
-
-            try {
-                const newCheckIn = current.checkIn < target.checkIn ? current.checkIn : target.checkIn;
-                const newCheckOut = current.checkOut > target.checkOut ? current.checkOut : target.checkOut;
-                const newTotal = Number(current.totalPrice || 0) + Number(target.totalPrice || 0);
-                const newNet = Number(current.netPrice || 0) + Number(target.netPrice || 0);
-                const newNotes = (document.getElementById('staff-notes').value || "") + `\n\n--- MERGED WITH BOOKING ${target.bookId || targetId} ---\n` + (target.notes || "");
-                const newPax = Math.max(current.pax || 1, target.pax || 1);
-                
-                document.getElementById('check-in').value = newCheckIn;
-                document.getElementById('check-out').value = newCheckOut;
-                document.getElementById('total-price').value = newTotal;
-                document.getElementById('net-price').value = newNet;
-                document.getElementById('staff-notes').value = newNotes;
-                document.getElementById('pax-count').value = newPax;
-                
-                (target.payments || []).forEach(p => window.addPaymentRow(p.date, Number(p.amt||0).toFixed(2), p.method, true));
-                
-                const currentRooms = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
-                const targetRooms = (target.rooms || []).filter(Boolean);
-                const combinedRooms = Array.from(new Set([...currentRooms, ...targetRooms]));
-                
-                document.getElementById('assigned-rooms-container').innerHTML = '';
-                if (combinedRooms.length > 0) {
-                    combinedRooms.forEach(r => window.addRoomSelect(r));
-                } else {
-                    window.addRoomSelect("");
-                }
-                
-                window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms();
-                
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', target.id));
-                document.getElementById('merge-modal').style.display = 'none';
-                window.saveBooking();
-                
-            } catch(err) {
-                console.error(err); window.showAlert("Merge error, please check connection.");
-            } finally {
-                btn.innerHTML = 'Merge'; btn.disabled = false;
-            }
-        };
-
-        window.openPriceCheckModal = () => {
-            const modal = document.getElementById('price-check-modal');
-            const inInput = document.getElementById('pc-in');
-            const nightsInput = document.getElementById('pc-nights');
-            
-            const now = new Date();
-            inInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-            nightsInput.value = 1;
-            document.getElementById('pc-pax').value = 1;
-            window.updatePcOut();
-            
-            modal.style.display = 'flex';
-        };
-
-        window.updatePcOut = () => {
-            const inDate = document.getElementById('pc-in').value;
-            const nights = parseInt(document.getElementById('pc-nights').value) || 1;
-            if (!inDate) return;
-            
-            const d = new Date(inDate + "T12:00:00Z");
-            d.setUTCDate(d.getUTCDate() + nights);
-            document.getElementById('pc-out').value = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
-        };
-
-        window.executePriceCheck = () => {
-            const checkin = document.getElementById('pc-in').value;
-            const checkout = document.getElementById('pc-out').value;
-            const pax = document.getElementById('pc-pax').value || 1;
-            
-            if (!checkin || !checkout) return window.showAlert("Please select dates first.");
-            
-            const url = `https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${checkin}&checkout=${checkout}&group_adults=${pax}&group_children=0&no_rooms=1`;
-            window.open(url, '_blank');
         };
 
         window.requestDelete = () => {
