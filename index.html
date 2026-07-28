@@ -661,7 +661,7 @@
         const uniqueCountries = [...new Set(Object.values(rawCountryMap))].filter(c => c !== 'Thailand').sort();
         const countries = ["[UNKNOWN]", "Thailand", ...uniqueCountries];
 
-        const hotelRooms=[{id:"B1",type:"OV Deluxe",bed:"KING",floor:1,order:101},{id:"B2",type:"OV Deluxe",bed:"TWIN",floor:2,order:102},{id:"B3",type:"Deluxe",bed:"KING",floor:1,order:201},{id:"B4",type:"Deluxe",bed:"TWIN",floor:2,order:202},{id:"A1",type:"OV Superior",bed:"KING",floor:1,order:301},{id:"A2",type:"OV Superior",bed:"TWIN",floor:2,order:302},{id:"A3",type:"Superior",bed:"KING",floor:1,order:401},{id:"A4",type:"Superior",bed:"KING",floor:2,order:402},{id:"A5",type:"Superior",bed:"KING",floor:1,order:403},{id:"A6",type:"Superior",bed:"KING",floor:2,order:404},{id:"A7",type:"Superior",bed:"KING",floor:1,order:405},{id:"A8",type:"Superior",bed:"TWIN",floor:2,order:406},{id:"A9",type:"Superior",bed:"KING",floor:1,order:407},{id:"A10",type:"Superior",bed:"TWIN",floor:2,order:408},{id:"A11",type:"Superior",bed:"KING",floor:1,order:409},{id:"A12",type:"Superior",bed:"KING",floor:2,order:410},{id:"B5",type:"Superior",bed:"KING",floor:1,order:411},{id:"B6",type:"Superior",bed:"TWIN",floor:2,order:412},{id:"B7",type:"Superior",bed:"KING",floor:1,order:413},{id:"B8",type:"Superior",bed:"TWIN",floor:2,order:414},{id:"B9",type:"Superior",bed:"KING",floor:1,order:415},{id:"B10",type:"Superior",bed:"TWIN",floor:2,order:416},{id:"B11",type:"Superior",bed:"KING",floor:1,order:417},{id:"B12",type:"Superior",bed:"TWIN",floor:2,order:418},{id:"B13",type:"Superior",bed:"KING",floor:1,order:419},{id:"B14",type:"Superior",bed:"TWIN",floor:2,order:420},{id:"B15",type:"Superior",bed:"KING",floor:1,order:421},{id:"B16",type:"Superior",bed:"TWIN",floor:2,order:422},{id:"B17",type:"Superior",bed:"KING",floor:1,order:423},{id:"B18",type:"Superior",bed:"TWIN",floor:2,order:424},{id:"B19",type:"Superior",bed:"KING",floor:1,order:425},{id:"B20",type:"Superior",bed:"TWIN",floor:2,order:426},{id:"B21",type:"Superior",bed:"KING",floor:1,order:427},{id:"B22",type:"Superior",bed:"",floor:2,order:428},{id:"206",type:"OV Standard",bed:"KING",floor:2,order:501},{id:"212",type:"OV Standard",bed:"TWIN",floor:2,order:502},{id:"306",type:"OV Standard",bed:"KING",floor:3,order:503},{id:"311",type:"OV Standard",bed:"KING",floor:3,order:504},{id:"101",type:"Standard",bed:"",floor:1,order:601},{id:"102",type:"Standard",bed:"",floor:1,order:602},{id:"103",type:"Standard",bed:"",floor:1,order:603},{id:"201",type:"Standard",bed:"KING",floor:2,order:604},{id:"202",type:"Standard",bed:"KING",floor:2,order:605},{id:"203",type:"Standard",bed:"KING",floor:2,order:606},{id:"204",type:"Standard",bed:"KING",floor:2,order:607},{id:"205",type:"Standard",bed:"KING",floor:2,order:608},{id:"207",type:"Standard",bed:"TWIN",floor:2,order:609},{id:"208",type:"Standard",bed:"TWIN",floor:2,order:610},{id:"209",type:"Standard",bed:"TWIN",floor:2,order:611},{id:"210",type:"Standard",bed:"TWIN",floor:2,order:612},{id:"211",type:"Standard",bed:"TWIN",floor:2,order:613},{id:"305",type:"Standard",bed:"K+T",floor:3,order:614},{id:"307",type:"Standard",bed:"BUNK+T",floor:3,order:615},{id:"308",type:"Standard",bed:"BUNK+T",floor:3,order:616},{id:"309",type:"Standard",bed:"K+T",floor:3,order:617},{id:"310",type:"Standard",bed:"K+T",floor:3,order:618},{id:"301-1",type:"Dorm",bed:"2BUNK",floor:3,order:701},{id:"301-2",type:"Dorm",bed:"2BUNK",floor:3,order:702},{id:"301-3",type:"Dorm",bed:"2BUNK",floor:3,order:703},{id:"301-4",type:"Dorm",bed:"2BUNK",floor:3,order:704},{id:"302-1",type:"Dorm",bed:"2BUNK",floor:3,order:705},{id:"302-2",type:"Dorm",bed:"2BUNK",floor:3,order:706},{id:"302-3",type:"Dorm",bed:"2BUNK",floor:3,order:707},{id:"302-4",type:"Dorm",bed:"2BUNK",floor:3,order:708},{id:"303-1",type:"Dorm",bed:"2BUNK",floor:3,order:709},{id:"303-2",type:"Dorm",bed:"2BUNK",floor:3,order:710},{id:"303-3",type:"Dorm",bed:"2BUNK",floor:3,order:711},{id:"303-4",type:"Dorm",bed:"2BUNK",floor:3,order:712},{id:"304-1",type:"Dorm",bed:"2BUNK",floor:3,order:713},{id:"304-2",type:"Dorm",bed:"2BUNK",floor:3,order:714},{id:"304-3",type:"Dorm",bed:"2BUNK",floor:3,order:715},{id:"304-4",type:"Dorm",bed:"2BUNK",floor:3,order:716},{id:"F1",type:"Budget",bed:"",floor:1,order:801},{id:"F2",type:"Budget",bed:"",floor:1,order:802},{id:"F3",type:"Budget",bed:"",floor:1,order:803},{id:"F4",type:"Budget",bed:"",floor:1,order:804},{id:"F5",type:"Budget",bed:"",floor:1,order:805},{id:"F6",type:"Budget",bed:"",floor:1,order:806},{id:"F7",type:"Budget",bed:"",floor:1,order:807},{id:"F8",type:"Budget",bed:"",floor:1,order:808},{id:"F9",type:"Budget",bed:"",floor:1,order:809},{id:"F10",type:"Budget",bed:"",floor:1,order:810},{id:"F11",type:"Budget",bed:"",floor:1,order:811}];
+        const hotelRooms=[{id:"B1",type:"OV Deluxe",bed:"KING",floor:1,order:101},{id:"B2",type:"OV Deluxe",bed:"TWIN",floor:2,order:102},{id:"B3",type:"Deluxe",bed:"KING",floor:1,order:201},{id:"B4",type:"Deluxe",bed:"TWIN",floor:2,order:202},{id:"A1",type:"OV Superior",bed:"KING",floor:1,order:301},{id:"A2",type:"OV Superior",bed:"TWIN",floor:2,order:302},{id:"A3",type:"Superior",bed:"KING",floor:1,order:401},{id:"A4",type:"Superior",bed:"KING",floor:2,order:402},{id:"A5",type:"Superior",bed:"KING",floor:1,order:403},{id:"A6",type:"Superior",bed:"KING",floor:2,order:404},{id:"A7",type:"Superior",bed:"KING",floor:1,order:405},{id:"A8",type:"Superior",bed:"TWIN",floor:2,order:406},{id:"A9",type:"Superior",bed:"KING",floor:1,order:407},{id:"A10",type:"Superior",bed:"TWIN",floor:2,order:408},{id:"A11",type:"Superior",bed:"KING",floor:1,order:409},{id:"A12",type:"Superior",bed:"KING",floor:2,order:410},{id:"B5",type:"Superior",bed:"KING",floor:1,order:411},{id:"B6",type:"Superior",bed:"TWIN",floor:2,order:412},{id:"B7",type:"Superior",bed:"KING",floor:1,order:413},{id:"B8",type:"Superior",bed:"TWIN",floor:2,order:414},{id:"B9",type:"Superior",bed:"KING",floor:1,order:415},{id:"B10",type:"Superior",bed:"TWIN",floor:2,order:416},{id:"B11",type:"Superior",bed:"KING",floor:1,order:417},{id:"B12",type:"Superior",bed:"TWIN",floor:2,order:418},{id:"B13",type:"Superior",bed:"KING",floor:1,order:419},{id:"B14",type:"Superior",bed:"TWIN",floor:2,order:420},{id:"B15",type:"Superior",bed:"KING",floor:1,order:421},{id:"B16",type:"Superior",bed:"TWIN",floor:2,order:422},{id:"B17",type:"Superior",bed:"KING",floor:1,order:423},{id:"B18",type:"Superior",bed:"TWIN",floor:2,order:424},{id:"B19",type:"Superior",bed:"KING",floor:1,order:425},{id:"B20",type:"Superior",bed:"TWIN",floor:2,order:426},{id:"B21",type:"Superior",bed:"KING",floor:1,order:427},{id:"B22",type:"Superior",bed:"",floor:2,order:428},{id:"206",type:"OV Standard",bed:"KING",floor:2,order:501},{id:"212",type:"OV Standard",bed:"TWIN",floor:2,order:502},{id:"306",type:"OV Standard",bed:"KING",floor:3,order:503},{id:"311",type:"OV Standard",bed:"KING",floor:3,order:504},{id:"101",type:"Standard",bed:"",floor:1,order:601},{id:"102",type:"Standard",bed:"",floor:1,order:602},{id:"103",type:"Standard",bed:"",floor:1,order:603},{id:"201",type:"Standard",bed:"KING",floor:2,order:604},{id:"202",type:"Standard",bed:"KING",floor:2,order:605},{id:"203",type:"Standard",bed:"KING",floor:2,order:606},{id:"204",type:"Standard",bed:"KING",floor:2,order:607},{id:"205",type:"Standard",bed:"KING",floor:2,order:608},{id:"207",type:"Standard",bed:"TWIN",floor:2,order:609},{id:"208",type:"Standard",bed:"TWIN",floor:2,order:610},{id:"209",type:"Standard",bed:"TWIN",floor:2,order:611},{id:"210",type:"Standard",bed:"TWIN",floor:2,order:612},{id:"211",type:"Standard",bed:"TWIN",floor:2,order:613},{id:"305",type:"Triple",bed:"K+T",floor:3,order:614},{id:"307",type:"Triple",bed:"BUNK+T",floor:3,order:615},{id:"308",type:"Triple",bed:"BUNK+T",floor:3,order:616},{id:"309",type:"Triple",bed:"K+T",floor:3,order:617},{id:"310",type:"Triple",bed:"K+T",floor:3,order:618},{id:"301-1",type:"Dorm",bed:"2BUNK",floor:3,order:701},{id:"301-2",type:"Dorm",bed:"2BUNK",floor:3,order:702},{id:"301-3",type:"Dorm",bed:"2BUNK",floor:3,order:703},{id:"301-4",type:"Dorm",bed:"2BUNK",floor:3,order:704},{id:"302-1",type:"Dorm",bed:"2BUNK",floor:3,order:705},{id:"302-2",type:"Dorm",bed:"2BUNK",floor:3,order:706},{id:"302-3",type:"Dorm",bed:"2BUNK",floor:3,order:707},{id:"302-4",type:"Dorm",bed:"2BUNK",floor:3,order:708},{id:"303-1",type:"Dorm",bed:"2BUNK",floor:3,order:709},{id:"303-2",type:"Dorm",bed:"2BUNK",floor:3,order:710},{id:"303-3",type:"Dorm",bed:"2BUNK",floor:3,order:711},{id:"303-4",type:"Dorm",bed:"2BUNK",floor:3,order:712},{id:"304-1",type:"Dorm",bed:"2BUNK",floor:3,order:713},{id:"304-2",type:"Dorm",bed:"2BUNK",floor:3,order:714},{id:"304-3",type:"Dorm",bed:"2BUNK",floor:3,order:715},{id:"304-4",type:"Dorm",bed:"2BUNK",floor:3,order:716},{id:"F1",type:"Budget",bed:"",floor:1,order:801},{id:"F2",type:"Budget",bed:"",floor:1,order:802},{id:"F3",type:"Budget",bed:"",floor:1,order:803},{id:"F4",type:"Budget",bed:"",floor:1,order:804},{id:"F5",type:"Budget",bed:"",floor:1,order:805},{id:"F6",type:"Budget",bed:"",floor:1,order:806},{id:"F7",type:"Budget",bed:"",floor:1,order:807},{id:"F8",type:"Budget",bed:"",floor:1,order:808},{id:"F9",type:"Budget",bed:"",floor:1,order:809},{id:"F10",type:"Budget",bed:"",floor:1,order:810},{id:"F11",type:"Budget",bed:"",floor:1,order:811}];
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
 
         window.getPaid = (s) => (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
@@ -717,11 +717,14 @@
             if(icon) icon.style.transform = shouldShow ? 'rotate(0deg)' : 'rotate(-90deg)';
         };
 
+        if (window.groupStates === undefined) window.groupStates = {};
+
         window.toggleGroup = (groupName) => {
-            const rows = document.querySelectorAll(`.group-${groupName}`), icon = document.getElementById(`icon-${groupName}`);
-            if (rows.length === 0) return; const isHidden = rows[0].style.display === 'none';
-            rows.forEach(r => r.style.display = isHidden ? '' : 'none');
-            if (icon) icon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+            if (window.groupStates[groupName] === undefined) window.groupStates[groupName] = 0;
+            let s = window.groupStates[groupName];
+            s = (s + 1) % 3; 
+            window.groupStates[groupName] = s;
+            window.render();
         };
 
         window.toggleMultiSelect = (id, btnEventEl) => {
@@ -890,14 +893,32 @@
                 const row = document.createElement('div'); 
                 if (rowDef.isDivider) {
                     currentGroup = rowDef.label.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase();
-                    let isDefaultCollapsed = currentGroup === 'unconfirmed-hold';
+                    
+                    let state = window.groupStates[currentGroup] || 0;
+                    if (currentGroup === 'unconfirmed-hold' && window.groupStates[currentGroup] === undefined) {
+                        window.groupStates[currentGroup] = 2; // Default collapsed
+                        state = 2;
+                    }
+                    
+                    let iconHtml = '';
+                    if (state === 2) iconHtml = `<i data-lucide="chevron-down" id="icon-${currentGroup}" size="14"></i>`;
+                    else if (state === 1) iconHtml = `<i data-lucide="filter" id="icon-${currentGroup}" size="12" class="text-blue-300"></i>`;
+                    else iconHtml = `<i data-lucide="chevron-up" id="icon-${currentGroup}" size="14"></i>`;
+
                     row.className = `timeline-grid ${rowDef.isUnconfirmedZone ? 'mt-4' : ''} cursor-pointer transition-colors unselectable`;
-                    row.innerHTML = `<div class="${rowDef.isUnconfirmedZone ? 'unassigned-header bg-slate-300 hover:bg-slate-400 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-white border-t border-slate-600'} p-0.5 text-[10px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-20 transition-colors" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')"><span>${rowDef.label}</span><i data-lucide="chevron-up" class="transition-transform duration-200" id="icon-${currentGroup}" size="14" style="${isDefaultCollapsed ? 'transform: rotate(180deg);' : ''}"></i></div>`;
+                    row.innerHTML = `<div class="${rowDef.isUnconfirmedZone ? 'unassigned-header bg-slate-300 hover:bg-slate-400 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-white border-t border-slate-600'} p-0.5 text-[10px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-20 transition-colors" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')"><span>${rowDef.label}</span><div id="icon-container-${currentGroup}">${iconHtml}</div></div>`;
                     return body.appendChild(row);
                 }
 
                 row.className = `timeline-grid bed-row group-${currentGroup} ${rowDef.isRoom && rowDef.id.endsWith('-4') ? '!border-b-[3px] !border-slate-400' : ''}`;
-                if (currentGroup === 'unconfirmed-hold') row.style.display = 'none';
+                
+                let state = window.groupStates[currentGroup] || 0;
+                if (currentGroup === 'unconfirmed-hold' && window.groupStates[currentGroup] === undefined) state = 2;
+                
+                const hasBookings = rowDef.bookings && rowDef.bookings.length > 0;
+                if (state === 2) row.style.display = 'none';
+                else if (state === 1 && !hasBookings) row.style.display = 'none';
+                else row.style.display = '';
 
                 const headerHtml = rowDef.isRoom ? `<div class="flex items-center justify-between px-1 w-full gap-1"><div class="flex items-center gap-0.5 shrink-0"><span class="text-[13px] font-black text-slate-700">${rowDef.id}</span>${getFloorIcon(rowDef.floor)}</div><span class="text-[10px] font-bold text-slate-600 text-right leading-none tracking-tighter truncate">${rowDef.bed}</span></div>` : `<span class="text-[11px] font-black text-amber-700">${rowDef.label}</span>`;
                 row.innerHTML = `<div class="border-r border-slate-400 ${rowDef.isUnassigned ? 'bg-amber-100' : 'bg-slate-50'} flex items-center justify-center uppercase overflow-hidden shrink-0 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.05)] unselectable">${headerHtml}</div>`;
@@ -1421,6 +1442,7 @@
 
             let pType = null;
             if (bt.includes("DORM") || bt.includes("BED")) pType = "Dorm";
+            else if (bt.includes("TRIPLE") || bt.includes("3 BED")) pType = "Triple";
             else if (bt.includes("DELUXE") && bt.includes("OV")) pType = "OV Deluxe";
             else if (bt.includes("DELUXE")) pType = "Deluxe";
             else if (bt.includes("SUPERIOR") && bt.includes("OV")) pType = "OV Superior";
@@ -1430,8 +1452,10 @@
             else if (bt.includes("BUDGET")) pType = "Budget";
 
             let pBed = null;
-            if (nt.includes("TWIN") || nt.includes("SEPARATE") || nt.includes("2 SINGLE") || nt.includes("TWO SINGLE") || nt.includes("2 BEDS") || nt.includes("SINGLES")) pBed = "TWIN";
-            else if (nt.includes("KING") || nt.includes("DOUBLE") || nt.includes("LARGE") || nt.includes("1 BED") || nt.includes("ONE BED") || nt.includes("1 DOUBLE") || nt.includes("1 EXTRA-LARGE")) pBed = "KING";
+            const ntUp = nt.toUpperCase();
+            if (ntUp.includes("TWIN") || ntUp.includes("SEPARATE") || ntUp.includes("2 SINGLE") || ntUp.includes("TWO SINGLE") || ntUp.includes("2 BEDS") || ntUp.includes("SINGLES")) pBed = "TWIN";
+            else if (ntUp.includes("KING") || ntUp.includes("DOUBLE") || ntUp.includes("LARGE") || ntUp.includes("1 BED") || ntUp.includes("ONE BED") || ntUp.includes("1 DOUBLE") || ntUp.includes("1 EXTRA-LARGE")) pBed = "KING";
+            
             if (!pBed) { if (bt.includes("KING") || (bt.includes("DOUBLE") && !bt.includes("TWIN"))) pBed = "KING"; else if (bt.includes("TWIN") && !bt.includes("DOUBLE")) pBed = "TWIN"; }
 
             let match = (pType && pBed) ? available.find(r => r.type === pType && r.bed && r.bed.includes(pBed)) : null;
@@ -1481,21 +1505,9 @@
                     if (bTypeIdx === -1) { let pIdx = lines.findIndex(l => l.toLowerCase().endsWith('cancellation policy.') || l.toLowerCase().includes('bank transfer payout')); if (pIdx > -1 && pIdx + 1 < lines.length) bTypeIdx = pIdx + 1; }
                     if (bTypeIdx > -1) { let bRaw = lines[bTypeIdx], fP = bRaw.indexOf('('), lP = bRaw.lastIndexOf(')'); bType = (fP > -1 && lP > fP) ? bRaw.substring(fP + 1, lP).trim() : bRaw.trim(); }
 
-                    let lowText = text.toLowerCase();
-                    if (lowText.includes('free of charge until') || lowText.includes('free cancellation')) refundability = 2; else if (lowText.includes('cancel at any time') || lowText.includes('cancel anytime') || lowText.includes('non-refundable') || lowText.includes('non refundable') || lowText.includes('charged the total price')) refundability = 1;
-
                     let allNotes = []; lines.forEach(l => { if (l.toUpperCase().includes('BED PREFERENCE:') || l.toUpperCase().includes('BED-PREFERENCE REQUEST:')) allNotes.push(l.replace(/Reply$/i, '').trim()); });
                     let convoIdx = lines.findIndex(l => l.toLowerCase() === 'conversation with guest');
-                    if (convoIdx > -1) { 
-                        let mLines = []; 
-                        for (let i = convoIdx + 1; i < lines.length; i++) { 
-                            let lLow = lines[i].toLowerCase(); 
-                            if (lLow.includes('protect your account security') || lLow === 'images' || lLow === 'templates' || lLow.includes('important information about this guest') || lLow === 'cancellation' || lLow === 'no messages' || lLow.includes('conversations with your guests will appear')) break; 
-                            if (/^(?:Today|Yesterday|[A-Za-z]+,?\s*\d{1,2}\s*[A-Za-z]*),\s*\d{1,2}:\d{2}/i.test(lines[i]) || /^\d{1,2}:\d{2}$/.test(lines[i]) || lLow === 'reply') continue; 
-                            if (lines[i].trim()) mLines.push(lines[i].trim()); 
-                        } 
-                        if (mLines.length > 0) allNotes.push("GUEST MSG: " + mLines.join(" ")); 
-                    }
+                    if (convoIdx > -1) { let mLines = []; for (let i = convoIdx + 1; i < lines.length; i++) { let lLow = lines[i].toLowerCase(); if (lLow.includes('protect your account security') || lLow === 'images' || lLow === 'templates' || lLow.includes('important information about this guest') || lLow === 'cancellation' || lLow === 'no messages' || lLow.includes('conversations with your guests will appear')) break; if (/^(?:Today|Yesterday|[A-Za-z]+,?\s*\d{1,2}\s*[A-Za-z]*),\s*\d{1,2}:\d{2}/i.test(lines[i]) || /^\d{1,2}:\d{2}$/.test(lines[i]) || lLow === 'reply') continue; if (lines[i].trim()) mLines.push(lines[i].trim()); } if (mLines.length > 0) allNotes.push("GUEST MSG: " + mLines.join(" ")); }
                     notes = allNotes.join('\n\n');
                     if (text.includes('Payment is facilitated') || text.includes('Booking.com will collect')) hasBdcPayment = true;
                     break;
@@ -1517,7 +1529,6 @@
                     let nStrE = extract(/Nights:\s*(\d+)/i); if (checkIn && nStrE) { let d = new Date(checkIn + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + parseInt(nStrE)); checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; }
                     pax = parseInt(extract(/Guests:\s*(\d+)/i)) || 1; total = cleanMoney(extract(/Total Price:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i)); comm = cleanMoney(extract(/Deposit Paid:[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i));
                     bType = extract(/Beds? reserved in\s+([^\n]+)/i); if (bType) { if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)'; else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; }
-                    refundability = text.includes('Non-refundable') || text.includes('Non Refundable') ? 1 : 2;
                     break;
 
                 case 'hw-web':
@@ -1534,6 +1545,11 @@
                     if (bType) { if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)'; else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; }
                     break;
             }
+
+            // Global Refundability Sweep Fallback
+            let lowText = text.toLowerCase();
+            if (lowText.includes('free of charge until') || lowText.includes('free cancellation')) refundability = 2;
+            else if (lowText.includes('cancel at any time') || lowText.includes('cancel anytime') || lowText.includes('non-refundable') || lowText.includes('non refundable') || lowText.includes('charged the total price')) refundability = 1;
 
             document.getElementById('email-modal').style.display = 'none';
 
