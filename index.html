@@ -526,8 +526,9 @@
                         <div class="w-24"><label class="field-label text-slate-400 text-[10px]">Avg Daily ฿</label><input type="text" id="ext-avg-rate" class="w-full bg-slate-100 text-slate-500 font-bold" readonly></div>
                         <div class="flex-1"><label class="field-label text-blue-600">Ext. Price ฿</label><input type="number" id="ext-price" class="w-full font-black text-blue-700 bg-white"></div>
                     </div>
+                    <div id="ext-fmp-warning" class="hidden text-[10px] font-black text-pink-600 uppercase mt-2 animate-pulse">⚠️ Extends into Full Moon! Check BDC!</div>
                     <div class="flex gap-2 mt-2">
-                        <button type="button" onclick="window.checkBdcPrice()" class="flex-1 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-black uppercase rounded border border-slate-300 flex items-center justify-center gap-1 shadow-sm transition-colors"><i data-lucide="external-link" size="12"></i> Check BDC Rate</button>
+                        <button type="button" id="ext-bdc-btn" onclick="window.checkBdcPrice()" class="flex-1 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-black uppercase rounded border border-slate-300 flex items-center justify-center gap-1 shadow-sm transition-colors"><i data-lucide="external-link" size="12"></i> Check BDC Rate</button>
                         <button type="button" onclick="window.confirmExtension()" class="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase rounded shadow-sm flex items-center justify-center gap-1 transition-colors"><i data-lucide="plus-circle" size="12"></i> Add Extension</button>
                     </div>
                 </div>
@@ -1209,9 +1210,28 @@
             wrapper.appendChild(sel); wrapper.appendChild(del); container.appendChild(wrapper); window.updateAvailableRooms();
         };
 
-        window.calcExtension = () => { const ms = parseYMD(document.getElementById('check-out').value) - parseYMD(document.getElementById('check-in').value); const avg = ms > 0 ? (Number(document.getElementById('total-price').value) || 0) / Math.round(ms / 86400000) : 0; document.getElementById('ext-avg-rate').value = Math.round(avg); document.getElementById('ext-price').value = Math.round(avg * (parseInt(document.getElementById('ext-days').value) || 1)); };
+        window.calcExtension = () => {
+            const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value;
+            const total = Number(document.getElementById('total-price').value) || 0, days = parseInt(document.getElementById('ext-days').value) || 1;
+            let avg = 0; if (cin && cout) { const ms = parseYMD(cout) - parseYMD(cin); if (ms > 0) avg = total / Math.round(ms / 86400000); }
+            let isFMP = false;
+            if (cout) {
+                const start = parseYMD(cout), end = start + days * 86400000;
+                for (let d = start; d < end; d += 86400000) { if (fmpDates.some(f => Math.abs(Math.round((d - parseYMD(f)) / 86400000)) <= 3)) { isFMP = true; break; } }
+            }
+            const avgEl = document.getElementById('ext-avg-rate'), priceEl = document.getElementById('ext-price'), warnEl = document.getElementById('ext-fmp-warning'), bdcBtn = document.getElementById('ext-bdc-btn');
+            if (isFMP) {
+                avgEl.value = 'FMP!'; priceEl.value = '';
+                if(warnEl) warnEl.style.display = 'block';
+                if(bdcBtn) { bdcBtn.classList.remove('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300'); bdcBtn.classList.add('bg-pink-600', 'text-white', 'hover:bg-pink-700', 'animate-pulse'); }
+            } else {
+                avgEl.value = Math.round(avg); priceEl.value = Math.round(avg * days);
+                if(warnEl) warnEl.style.display = 'none';
+                if(bdcBtn) { bdcBtn.classList.remove('bg-pink-600', 'text-white', 'hover:bg-pink-700', 'animate-pulse'); bdcBtn.classList.add('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300'); }
+            }
+        };
         window.checkBdcPrice = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + (parseInt(document.getElementById('ext-days').value) || 1)); window.open(`https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${cout}&checkout=${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}&group_adults=${document.getElementById('pax-count').value || 1}&group_children=0&no_rooms=${Array.from(document.querySelectorAll('.assigned-room-select')).filter(sel => sel.value !== "").length || 1}`, '_blank'); };
-        window.confirmExtension = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const days = parseInt(document.getElementById('ext-days').value) || 1, addPrice = Number(document.getElementById('ext-price').value) || 0, d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + days); const newCout = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; document.getElementById('check-out').value = newCout; document.getElementById('total-price').value = ((Number(document.getElementById('total-price').value) || 0) + addPrice).toFixed(2); setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); window.syncLabels(); window.updateAvailableRooms(); window.calcFinancials(); window.calcExtension(); window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${newCout}.\nAdded ฿${addPrice} to Total Price.`); };
+        window.confirmExtension = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const priceEl = document.getElementById('ext-price'); if(priceEl.value === '') return window.showAlert("Please enter the extension price first."); const days = parseInt(document.getElementById('ext-days').value) || 1, addPrice = Number(priceEl.value) || 0, d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + days); const newCout = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; document.getElementById('check-out').value = newCout; document.getElementById('total-price').value = ((Number(document.getElementById('total-price').value) || 0) + addPrice).toFixed(2); setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); window.syncLabels(); window.updateAvailableRooms(); window.calcFinancials(); window.calcExtension(); window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${newCout}.\nAdded ฿${addPrice} to Total Price.`); };
 
         window.populateStaffForm = (s = {}) => {
             const isNew = !s.id;
