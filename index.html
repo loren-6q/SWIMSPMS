@@ -1554,10 +1554,11 @@
             else if (bt.includes("BUDGET")) pType = "Budget";
 
             let pBed = null;
-            // Check explicit guest notes FIRST to avoid "Double or Twin" string confusing the parser
             if (nt.includes("TWIN") || nt.includes("SEPARATE") || nt.includes("2 SINGLE") || nt.includes("TWO SINGLE") || nt.includes("2 BEDS") || nt.includes("SINGLES")) pBed = "TWIN";
+            else if (nt.includes("BUNK") && nt.includes("SINGLE")) pBed = "BUNK+T";
+            else if (nt.includes("BUNK")) pBed = "BUNK+T";
             else if (nt.includes("KING") || nt.includes("DOUBLE") || nt.includes("LARGE") || nt.includes("1 BED") || nt.includes("ONE BED") || nt.includes("1 DOUBLE") || nt.includes("1 EXTRA-LARGE")) pBed = "KING";
-            // If no notes, fall back to the OTA room title
+            
             if (!pBed) { if (bt.includes("KING") || (bt.includes("DOUBLE") && !bt.includes("TWIN"))) pBed = "KING"; else if (bt.includes("TWIN") && !bt.includes("DOUBLE")) pBed = "TWIN"; }
 
             let match = (pType && pBed) ? available.find(r => r.type === pType && r.bed && r.bed.includes(pBed)) : null;
@@ -1572,6 +1573,12 @@
             const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
             const formatStrictDate = (dStr) => { if(!dStr) return ''; const d = new Date(dStr + " 12:00:00Z"); return isNaN(d.getTime()) ? '' : `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; };
 
+            // CLEAR THE FORM STATE FIRST!
+            document.getElementById('payments-list').innerHTML = '';
+            document.getElementById('assigned-rooms-container').innerHTML = '';
+            window.addRoomSelect("");
+            document.getElementById('staff-id').value = ""; // Crucial: ensure it treats it as a NEW booking
+            
             const parseDateRelative = (dateStr, isPast = false) => {
                 if(!dateStr) return ''; const mths = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
                 let cleanStr = dateStr.replace(/,/g, '').replace(/(st|nd|rd|th)\b/gi, '').replace(/['´`’]/g, '').replace(/\s+/g, ' ').trim(), parts = cleanStr.split(' '), mthIndex = -1;
@@ -1627,11 +1634,12 @@
                     src = 'airbnb';
                     gName = extract(/Reservation confirmed - (.*?)\s+arrives/i); if(!gName) gName = extract(/welcome\s+(.*?)\./i);
                     checkIn = parseDateRelative(extract(/Check-in[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false); checkOut = parseDateRelative(extract(/Checkout[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
-                    bId = extract(/Confirmation code[\s\S]*?([A-Z0-9]+)/i); bDate = parseDateRelative(extract(/Airbnb[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true); pax = parseInt(extract(/Guests[\s\S]*?(\d+)/i)) || 1;
+                    bId = extract(/Confirmation code[\s\S]*?([A-Z0-9]+)/i); bDate = parseDateRelative(extract(/Airbnb[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true); if(!bDate) bDate = new Date().toISOString().split('T')[0]; pax = parseInt(extract(/Guests[\s\S]*?(\d+)/i)) || 1;
                     let totalStr = extract(/Total\s*(?:\([A-Z]+\))?[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i); if (!totalStr) totalStr = extract(/Guest paid[\s\S]{0,60}?nights[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
                     total = cleanMoney(totalStr); comm = Number((total - cleanMoney(extract(/You earn[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i))).toFixed(2));
                     bType = extract(/([^\n]+?)\s*Room\s*Check-in/i);
-                    let abnbNotes = extract(/Identity verified[\s\S]*?\n([^\n]+)\n\s*Send.*?a Message/i); if(abnbNotes && !abnbNotes.includes('Translated') && !abnbNotes.includes('Add guest')) notes = abnbNotes; 
+                    let locM = text.match(/Identity verified[^\n]*\n([^\n]+)/i); if (locM) { let locP = locM[1].split(','); countryCode = locP.pop().trim(); }
+                    let abnbNotes = extract(/\n([^\n]+)\n\s*Send.*?a Message/i); if(abnbNotes && !abnbNotes.includes('Translated') && !abnbNotes.includes('Add guest')) notes = abnbNotes; 
                     const polMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i); if (polMatch) { const pol = polMatch[1].toLowerCase(); refundability = (pol.includes('strict') || pol.includes('firm') || pol.includes('non-refundable')) ? 1 : 2; }
                     break;
 
@@ -1743,10 +1751,11 @@
                 window.addPaymentRow(checkIn || new Date().toISOString().split('T')[0], comm.toFixed(2), kpMethod);
             }
             
-            if (hasBdcPayment && (total - comm) > 0) {
-                let payMethod = src === 'agoda' ? 'agoda-pay' : 'bdc-pay';
+            if ((hasBdcPayment || src === 'airbnb') && (total - comm) > 0) {
+                let payMethod = src === 'agoda' ? 'agoda-pay' : (src === 'airbnb' ? 'airbnb-pay' : 'bdc-pay');
                 window.addPaymentRow(checkIn || new Date().toISOString().split('T')[0], (total - comm).toFixed(2), payMethod);
             }
+
             window.updateHeaderName();
             window.syncLabels();
             window.calcFinancials();
@@ -1759,7 +1768,7 @@
                 viewStart = d;
                 window.render();
             }
-            window.openStaffModal();
+            document.getElementById('staff-modal').style.display = 'flex';
         };
 
         window.requestDelete = () => {
