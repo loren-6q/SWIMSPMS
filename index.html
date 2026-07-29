@@ -30,6 +30,7 @@
 
         .day-column { border-right: 1px solid #94a3b8; height: 100%; position: relative; cursor: cell; transition: background-color 0.1s; }
         .day-column::after { content: ''; position: absolute; inset: 0; background-color: rgba(0,0,0,0.06); opacity: 0; pointer-events: none; z-index: 5; transition: opacity 0.1s; }
+        .day-column::before { content: attr(data-date-num); position: absolute; top: 2px; right: 4px; font-size: 9px; font-weight: 900; color: #64748b; opacity: 0.3; pointer-events: none; z-index: 1; }
         .day-column.hover-col::after { opacity: 1; }
 
         .bed-row { height: 28px; border-bottom: 1px solid #94a3b8; position: relative; }
@@ -53,12 +54,19 @@
         .overdue-checkout-past { animation: red-pulse 1.5s infinite; background-color: #fca5a5 !important; color: #7f1d1d !important; border-color: #ef4444 !important; }
         .overdue-checkout-today { animation: orange-pulse 1.5s infinite; background-color: #fed7aa !important; color: #7c2d12 !important; border-color: #f97316 !important; }
 
-        @keyframes overdue-checkin-pulse {
+        @keyframes today-checkin-pulse {
             0% { background-color: rgba(234, 179, 8, 0.4); border-color: #ca8a04; }
             50% { background-color: rgba(234, 179, 8, 1); border-color: #854d0e; }
             100% { background-color: rgba(234, 179, 8, 0.4); border-color: #ca8a04; }
         }
-        .overdue-checkin { animation: overdue-checkin-pulse 1.2s infinite !important; border-width: 2px !important; color: #422006 !important; z-index: 25 !important; }
+        .checkin-today { animation: today-checkin-pulse 1.2s infinite !important; border-width: 2px !important; color: #422006 !important; z-index: 25 !important; }
+
+        @keyframes late-checkin-pulse {
+            0% { background-color: rgba(239, 68, 68, 0.4); border-color: #b91c1c; }
+            50% { background-color: rgba(239, 68, 68, 1); border-color: #7f1d1d; }
+            100% { background-color: rgba(239, 68, 68, 0.4); border-color: #b91c1c; }
+        }
+        .late-checkin { animation: late-checkin-pulse 1.2s infinite !important; border-width: 2px !important; color: #fff !important; z-index: 25 !important; }
 
         .staff-bar { position: absolute; height: 22px; top: 3px; border-radius: 4px; display: flex; align-items: center; cursor: pointer; z-index: 10; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; transition: all 0.2s; }
 
@@ -950,6 +958,7 @@
                     const cell = document.createElement('div'), isToday = days[i].toDateString() === new Date().toDateString();
                     cell.className = `day-column ${getFMPShade(days[i])} ${isToday ? 'day-today' : ''} ${rowDef.isUnassigned ? 'bg-amber-50/50' : ''}`;
                     cell.dataset.colIndex = i;
+                    cell.dataset.dateNum = days[i].getDate();
                     cell.onmouseenter = () => document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.add('hover-col'));
                     cell.onmouseleave = () => document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.remove('hover-col'));
                     cell.onclick = () => window.quickAdd(rowDef.isUnassigned ? "" : rowDef.id, days[i]); row.appendChild(cell);
@@ -962,14 +971,16 @@
                     if (exStart >= daysToShow || exEnd <= 0) return;
                     
                     const due = window.getDue(s), owes = due > 0, isPastDue = s.status === 'here' && s.checkOut < todayLocal, isDueToday = s.status === 'here' && s.checkOut === todayLocal;
-                    const isOverdueCheckin = s.status === 'future' && s.checkIn <= todayLocal;
+                    const isCheckinToday = s.status === 'future' && s.checkIn === todayLocal;
+                    const isLateCheckin = s.status === 'future' && s.checkIn < todayLocal;
 
                     let bStyles = 'border border-black/10';
                     if (s.badCC) bStyles = '!border-red-500 !border-dashed !border-[3px]'; else if (owes) bStyles = '!border-red-500 !border-[3px]';
                     
                     if (isPastDue) bStyles += ' overdue-checkout-past';
                     else if (isDueToday) bStyles += ' overdue-checkout-today';
-                    else if (isOverdueCheckin) bStyles += ' overdue-checkin';
+                    else if (isLateCheckin) bStyles += ' late-checkin';
+                    else if (isCheckinToday) bStyles += ' checkin-today';
 
                     const srcConfig = { 'booking.com': { bg: 'bg-[#003580]', text: 'B' }, 'agoda': { bg: 'bg-[#87B2D6]', text: 'A' }, 'hostelworld': { bg: 'bg-[#F15A24]', text: 'H' }, 'airbnb': { bg: 'bg-[#FF5A5F]', text: 'A' }, 'direct': { bg: 'bg-emerald-500', text: 'D' } }, src = srcConfig[s.source] || { bg: 'bg-slate-700', text: '?' };
                     
@@ -984,7 +995,8 @@
                     bHtml += `<span class="${s.refundability === 'ref' && parseYMD(s.checkIn) - Date.now() > 7 * 86400000 ? 'italic font-bold' : 'font-bold'} truncate text-[11px]" style="letter-spacing:-0.3px;">${s.lastName}</span>`;
                     if (s.pax > 1) bHtml += `<span class="text-[8px] opacity-60 leading-none self-start mt-0.5 ml-0.5">x${s.pax}</span>`;
                     
-                    if (isOverdueCheckin) bHtml += `<div class="ml-1 px-1 bg-red-600 text-white text-[8px] font-black rounded-sm animate-pulse border border-red-800 leading-tight flex items-center shadow-sm">MISSED IN</div>`;
+                    if (isLateCheckin) bHtml += `<div class="ml-1 px-1 bg-red-700 text-white text-[8px] font-black rounded-sm animate-pulse border border-red-900 leading-tight flex items-center shadow-sm">LATE</div>`;
+                    else if (isCheckinToday) bHtml += `<div class="ml-1 px-1 bg-yellow-400 text-yellow-900 text-[8px] font-black rounded-sm animate-pulse border border-yellow-600 leading-tight flex items-center shadow-sm">NOW</div>`;
 
                     if (s.upgrade === 'free') bHtml += UI_ICONS.upgFree; else if (s.upgrade === 'paid') bHtml += UI_ICONS.upgPaid;
                     if (s.extended) bHtml += UI_ICONS.ext;
