@@ -53,6 +53,13 @@
         .overdue-checkout-past { animation: red-pulse 1.5s infinite; background-color: #fca5a5 !important; color: #7f1d1d !important; border-color: #ef4444 !important; }
         .overdue-checkout-today { animation: orange-pulse 1.5s infinite; background-color: #fed7aa !important; color: #7c2d12 !important; border-color: #f97316 !important; }
 
+        @keyframes overdue-checkin-pulse {
+            0% { background-color: rgba(234, 179, 8, 0.4); border-color: #ca8a04; }
+            50% { background-color: rgba(234, 179, 8, 1); border-color: #854d0e; }
+            100% { background-color: rgba(234, 179, 8, 0.4); border-color: #ca8a04; }
+        }
+        .overdue-checkin { animation: overdue-checkin-pulse 1.2s infinite !important; border-width: 2px !important; color: #422006 !important; z-index: 25 !important; }
+
         .staff-bar { position: absolute; height: 22px; top: 3px; border-radius: 4px; display: flex; align-items: center; cursor: pointer; z-index: 10; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; transition: all 0.2s; }
 
         .status-future { background-color: #7fc6f5; color: #1e293b; border: 1px solid #38bdf8; } 
@@ -166,17 +173,9 @@
         <!-- CALENDAR TAB -->
         <div id="calendar-view" class="unselectable block">
             <div id="calendar-scroll-container" class="bg-white sm:rounded shadow border-y sm:border border-slate-300">
-                <div class="timeline-grid sticky top-0 z-40 bg-slate-800 shadow-sm border-b border-slate-700 h-[26px] box-border">
-                    <div class="border-r border-slate-700 flex items-center justify-center h-full sticky left-0 z-50 bg-slate-800 w-[var(--sidebar-w)]">
-                        <button id="zoom-toggle-btn" onclick="window.toggleZoom()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1 transition-colors"><i data-lucide="zoom-in" size="12"></i> ZOOM WIDE</button>
-                    </div>
-                    <div id="month-labels" class="contents text-white text-[11px] font-bold uppercase tracking-widest"></div>
-                </div>
+                <div id="calendar-header-months" class="timeline-grid sticky top-0 z-40 bg-slate-800 shadow-sm border-b border-slate-700 h-[26px] box-border"></div>
                 
-                <div class="timeline-grid sticky top-[26px] z-30 bg-slate-100 shadow-sm border-b border-slate-400 h-[28px] box-border">
-                    <div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-center border-r border-slate-400 bg-slate-100 h-full sticky left-0 z-40 w-[var(--sidebar-w)]">ROOM</div>
-                    <div id="timeline-header" class="contents"></div>
-                </div>
+                <div id="calendar-header-days" class="timeline-grid sticky top-[26px] z-30 bg-slate-100 shadow-sm border-b border-slate-400 h-[28px] box-border"></div>
                 
                 <div id="timeline-body" class="relative pb-2"></div>
             </div>
@@ -187,10 +186,8 @@
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-green-200 border border-green-400"></span> HERE</div>
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#aba39d] border border-[#78716c]"></span> LEFT</div>
                     <div class="legend-item"><span class="w-3 h-3 rounded-full bg-purple-200 border border-purple-400"></span> UNCONFIRMED</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#fef08a] border border-[#fde047]"></span> SPECIAL</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#475569] border border-[#334155]"></span> BLOCKED</div>
                 </div>
-                <div class="w-px h-4 bg-slate-300 hidden xl:block"></div>
+                <div class="w-px h-4 bg-slate-300 hidden md:block"></div>
                 <div class="flex flex-wrap items-center justify-center gap-3">
                     <div class="legend-item"><span class="w-3 h-3 rounded-sm border border-slate-300" style="background-color: rgba(225, 29, 72, 0.2)"></span> FULL MOON PARTY</div>
                     <div class="legend-item"><span class="w-3 h-3 rounded-sm border border-slate-300" style="background-color: rgba(249, 115, 22, 0.1)"></span> FULL MOON WEEK</div>
@@ -306,8 +303,8 @@
                     <div class="bg-slate-100 border-2 border-slate-300 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
                         <i data-lucide="ban" class="absolute -bottom-4 -right-4 text-slate-500 opacity-10 w-24 h-24"></i>
                         <span class="text-slate-500 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Lost Revenue</span>
-                        <span id="acc-lost-cancel" class="text-2xl lg:text-3xl font-black text-slate-700 tracking-tighter z-10 mb-0.5">฿0</span>
-                        <span id="acc-retained-cancel" class="text-[10px] font-black text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-full z-10">Retained: ฿0</span>
+                        <span id="acc-lost-cancel" class="text-2xl lg:text-3xl font-black text-slate-700 tracking-tighter z-10">฿0</span>
+                        <span id="acc-retained-cancels" class="text-slate-500 font-black text-[9px] uppercase mt-1 z-10 bg-slate-200 px-1.5 py-0.5 rounded shadow-sm">+ ฿0 Retained</span>
                     </div>
                 </div>
 
@@ -385,10 +382,25 @@
                 </div>
 
                 <!-- Lower Analytics Modules Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    
+                    <!-- Channel Distribution Module -->
+                    <div class="border border-indigo-300 rounded-lg overflow-hidden shadow-sm self-start">
+                        <div class="bg-indigo-700 text-white p-1.5 font-black uppercase tracking-widest text-[10px] border-b border-indigo-800 text-center unselectable flex justify-center items-center gap-1.5"><i data-lucide="pie-chart" size="12"></i> Channel Distribution</div>
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-indigo-50 unselectable">
+                                <tr class="text-[9px] uppercase tracking-widest font-bold text-indigo-700">
+                                    <th class="p-1.5 border-r border-indigo-200">Source</th>
+                                    <th class="p-1.5 border-r border-indigo-200 text-right" title="Bookings">Bks</th>
+                                    <th class="p-1.5 text-right">Value ฿</th>
+                                </tr>
+                            </thead>
+                            <tbody id="acc-channel-body" class="text-[10px] font-bold text-slate-700 bg-white"></tbody>
+                        </table>
+                    </div>
                     
                     <!-- Bed Popularity Module -->
-                    <div class="border border-slate-300 rounded-lg overflow-hidden shadow-sm self-start lg:col-span-1">
+                    <div class="border border-slate-300 rounded-lg overflow-hidden shadow-sm self-start">
                         <div class="bg-slate-800 text-white p-1.5 font-black uppercase tracking-widest text-[10px] border-b border-slate-700 text-center unselectable flex justify-center items-center gap-1.5"><i data-lucide="bed-double" size="12"></i> Bed Popularity</div>
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-slate-100 unselectable">
@@ -399,22 +411,6 @@
                                 </tr>
                             </thead>
                             <tbody id="acc-bed-body" class="text-[10px] font-bold text-slate-700 bg-white"></tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Channel Distribution Module -->
-                    <div class="border border-indigo-300 rounded-lg overflow-hidden shadow-sm self-start lg:col-span-2">
-                        <div class="bg-indigo-700 text-white p-1.5 font-black uppercase tracking-widest text-[10px] border-b border-indigo-800 text-center unselectable flex justify-center items-center gap-1.5"><i data-lucide="pie-chart" size="12"></i> Channel Distribution</div>
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-indigo-50 unselectable">
-                                <tr class="text-[9px] uppercase tracking-widest font-bold text-indigo-700">
-                                    <th class="p-1.5 border-r border-indigo-200">Channel</th>
-                                    <th class="p-1.5 border-r border-indigo-200 text-right">Bks</th>
-                                    <th class="p-1.5 border-r border-indigo-200 text-right">Gross</th>
-                                    <th class="p-1.5 text-right">Net</th>
-                                </tr>
-                            </thead>
-                            <tbody id="acc-channel-body" class="text-[10px] font-bold text-slate-700 bg-white"></tbody>
                         </table>
                     </div>
                     
@@ -542,10 +538,10 @@
                     <div class="flex gap-2 items-end">
                         <div class="w-16"><label class="field-label">Days</label><input type="number" id="ext-days" value="1" min="1" class="w-full text-center bg-white" oninput="window.calcExtension()"></div>
                         <div class="w-24"><label class="field-label text-slate-400 text-[10px]">Avg Daily ฿</label><input type="text" id="ext-avg-rate" class="w-full bg-slate-100 text-slate-500 font-bold" readonly></div>
-                        <div class="flex-1"><label class="field-label text-blue-600">Ext. Price ฿</label><input type="text" id="ext-price" class="w-full font-black text-blue-700 bg-white"></div>
+                        <div class="flex-1"><label class="field-label text-blue-600">Ext. Price ฿</label><input type="number" id="ext-price" class="w-full font-black text-blue-700 bg-white"></div>
                     </div>
                     <div class="flex gap-2 mt-2">
-                        <button type="button" id="ext-bdc-btn" onclick="window.checkBdcPrice()" class="flex-1 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-black uppercase rounded border border-slate-300 flex items-center justify-center gap-1 shadow-sm transition-colors"><i data-lucide="external-link" size="12"></i> Check BDC Rate</button>
+                        <button type="button" id="btn-check-bdc" onclick="window.checkBdcPrice()" class="flex-1 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-black uppercase rounded border border-slate-300 flex items-center justify-center gap-1 shadow-sm transition-colors"><i data-lucide="external-link" size="12"></i> Check BDC Rate</button>
                         <button type="button" onclick="window.confirmExtension()" class="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase rounded shadow-sm flex items-center justify-center gap-1 transition-colors"><i data-lucide="plus-circle" size="12"></i> Add Extension</button>
                     </div>
                 </div>
@@ -735,27 +731,34 @@
             if(icon) icon.style.transform = shouldShow ? 'rotate(0deg)' : 'rotate(-90deg)';
         };
 
-        const groupStates = {};
         window.toggleGroup = (groupName) => {
-            if(!groupStates[groupName]) groupStates[groupName] = 'expanded';
-            let nextState = 'expanded';
-            if(groupStates[groupName] === 'expanded') nextState = 'occupied';
-            else if(groupStates[groupName] === 'occupied') nextState = 'collapsed';
-            groupStates[groupName] = nextState;
-
-            const rows = document.querySelectorAll(`.group-${groupName}`), icon = document.getElementById(`icon-${groupName}`);
+            const rows = document.querySelectorAll(`.group-${groupName}`);
+            const icon = document.getElementById(`icon-${groupName}`);
             if (rows.length === 0) return;
             
+            // Cycle through 3 states: Filtered -> Collapsed -> Expanded
+            let currentState = rows[0].dataset.state || 'expanded';
+            let nextState = 'expanded';
+            
+            if (currentState === 'expanded') nextState = 'filtered';
+            else if (currentState === 'filtered') nextState = 'collapsed';
+            
             rows.forEach(r => {
-                if(nextState === 'expanded') r.style.display = '';
-                else if(nextState === 'collapsed') r.style.display = 'none';
-                else if(nextState === 'occupied') r.style.display = r.querySelectorAll('.staff-bar').length > 0 ? '' : 'none';
+                r.dataset.state = nextState;
+                if (nextState === 'collapsed') {
+                    r.style.display = 'none';
+                } else if (nextState === 'filtered') {
+                    // Only show rows that have a bar inside them (i.e. occupied)
+                    r.style.display = r.querySelector('.staff-bar') ? '' : 'none';
+                } else {
+                    r.style.display = '';
+                }
             });
             
             if (icon) {
-                if(nextState === 'expanded') icon.style.transform = 'rotate(0deg)';
-                else if(nextState === 'collapsed') icon.style.transform = 'rotate(180deg)';
-                else if(nextState === 'occupied') icon.style.transform = 'rotate(90deg)';
+                if (nextState === 'expanded') { icon.style.transform = 'rotate(0deg)'; icon.innerHTML = '<polyline points="18 15 12 9 6 15"></polyline>'; }
+                else if (nextState === 'filtered') { icon.style.transform = 'rotate(0deg)'; icon.innerHTML = '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>'; }
+                else { icon.style.transform = 'rotate(180deg)'; icon.innerHTML = '<polyline points="18 15 12 9 6 15"></polyline>'; }
             }
         };
 
@@ -871,25 +874,31 @@
         };
 
         const renderTimeline = (daysToShow) => {
-            const header = document.getElementById('timeline-header'), body = document.getElementById('timeline-body'), monthLabels = document.getElementById('month-labels');
-            header.innerHTML = monthLabels.innerHTML = body.innerHTML = '';
+            const monthsGrid = document.getElementById('calendar-header-months');
+            const daysGrid = document.getElementById('calendar-header-days');
+            const body = document.getElementById('timeline-body');
+            
+            monthsGrid.innerHTML = `<div class="border-r border-slate-700 flex items-center justify-center h-full sticky left-0 z-50 bg-slate-800 w-[var(--sidebar-w)]"><button id="zoom-toggle-btn" onclick="window.toggleZoom()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1 transition-colors"><i data-lucide="${isZoomWide ? 'zoom-out' : 'zoom-in'}" size="12"></i> ZOOM ${isZoomWide ? 'FIT' : 'WIDE'}</button></div>`;
+            daysGrid.innerHTML = `<div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-center border-r border-slate-400 bg-slate-100 h-full sticky left-0 z-40 w-[var(--sidebar-w)]">ROOM</div>`;
+            body.innerHTML = '';
+
             const days = Array.from({length: daysToShow}, (_, i) => new Date(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate() + i, 12, 0, 0));
             
             let currentMonth = -1, currentSpan = 0;
             days.forEach((d, i) => {
                 if (d.getMonth() !== currentMonth) {
-                    if (currentMonth !== -1) monthLabels.innerHTML += `<div style="grid-column: span ${currentSpan}" class="unselectable flex items-center justify-center month-divider py-1 border-b border-slate-700">${mNames[currentMonth]} ${days[i-1].getFullYear()}</div>`;
+                    if (currentMonth !== -1) monthsGrid.innerHTML += `<div style="grid-column: span ${currentSpan}" class="unselectable flex items-center justify-center month-divider py-1 border-b border-slate-700 text-white text-[11px] font-bold uppercase tracking-widest">${mNames[currentMonth]} ${days[i-1].getFullYear()}</div>`;
                     currentMonth = d.getMonth(); currentSpan = 1;
                 } else currentSpan++;
-                if (i === days.length - 1) monthLabels.innerHTML += `<div style="grid-column: span ${currentSpan}" class="unselectable flex items-center justify-center month-divider py-1 border-b border-slate-700">${mNames[currentMonth]} ${d.getFullYear()}</div>`;
+                if (i === days.length - 1) monthsGrid.innerHTML += `<div style="grid-column: span ${currentSpan}" class="unselectable flex items-center justify-center month-divider py-1 border-b border-slate-700 text-white text-[11px] font-bold uppercase tracking-widest">${mNames[currentMonth]} ${d.getFullYear()}</div>`;
             });
 
             days.forEach(d => {
                 const isToday = d.toDateString() === new Date().toDateString();
-                header.innerHTML += `<div class="flex flex-col items-center justify-center border-r border-slate-400 ${isToday ? 'bg-blue-100' : ''}"><div class="text-[10px] font-black text-slate-500 uppercase leading-none">${d.toLocaleDateString('en-US', {weekday:'short'})}</div><div class="text-[16px] font-black ${isToday ? 'text-blue-600' : 'text-slate-800'} leading-tight">${d.getDate()}</div></div>`;
+                daysGrid.innerHTML += `<div class="flex flex-col items-center justify-center border-r border-slate-400 ${isToday ? 'bg-blue-100' : ''}"><div class="text-[10px] font-black text-slate-500 uppercase leading-none">${d.toLocaleDateString('en-US', {weekday:'short'})}</div><div class="text-[16px] font-black ${isToday ? 'text-blue-600' : 'text-slate-800'} leading-tight">${d.getDate()}</div></div>`;
             });
 
-            const activeStaff = staff.filter(s => s.status !== 'cancelled');
+            const activeStaff = staff.filter(s => s.status !== 'cancelled'); // Kept no-shows so they render in unconfirmed
             const viewStartUTC = Date.UTC(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate());
             const viewEndUTC = viewStartUTC + daysToShow * 86400000;
             
@@ -925,16 +934,14 @@
                 const row = document.createElement('div'); 
                 if (rowDef.isDivider) {
                     currentGroup = rowDef.label.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase();
-                    if(!groupStates[currentGroup]) groupStates[currentGroup] = currentGroup === 'unconfirmed-hold' ? 'collapsed' : 'expanded';
-                    let iconTransform = groupStates[currentGroup] === 'collapsed' ? 'rotate(180deg)' : (groupStates[currentGroup] === 'occupied' ? 'rotate(90deg)' : 'rotate(0deg)');
-                    
+                    let isDefaultCollapsed = currentGroup === 'unconfirmed-hold';
                     row.className = `timeline-grid ${rowDef.isUnconfirmedZone ? 'mt-4' : ''} cursor-pointer transition-colors unselectable`;
-                    row.innerHTML = `<div class="${rowDef.isUnconfirmedZone ? 'unassigned-header bg-slate-300 hover:bg-slate-400 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-white border-t border-slate-600'} p-0.5 text-[10px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-20 transition-colors" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')"><span>${rowDef.label}</span><i data-lucide="chevron-up" class="transition-transform duration-200" id="icon-${currentGroup}" size="14" style="transform: ${iconTransform};"></i></div>`;
+                    row.innerHTML = `<div class="${rowDef.isUnconfirmedZone ? 'unassigned-header bg-slate-300 hover:bg-slate-400 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-white border-t border-slate-600'} p-0.5 text-[10px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-20 transition-colors" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')"><span>${rowDef.label}</span><i data-lucide="chevron-up" class="transition-transform duration-200" id="icon-${currentGroup}" size="14" style="${isDefaultCollapsed ? 'transform: rotate(180deg);' : ''}"></i></div>`;
                     return body.appendChild(row);
                 }
 
                 row.className = `timeline-grid bed-row group-${currentGroup} ${rowDef.isRoom && rowDef.id.endsWith('-4') ? '!border-b-[3px] !border-slate-400' : ''}`;
-                if (groupStates[currentGroup] === 'collapsed') row.style.display = 'none';
+                if (currentGroup === 'unconfirmed-hold') row.style.display = 'none';
 
                 const headerHtml = rowDef.isRoom ? `<div class="flex items-center justify-between px-1 w-full gap-1"><div class="flex items-center gap-0.5 shrink-0"><span class="text-[13px] font-black text-slate-700">${rowDef.id}</span>${getFloorIcon(rowDef.floor)}</div><span class="text-[10px] font-bold text-slate-600 text-right leading-none tracking-tighter truncate">${rowDef.bed}</span></div>` : `<span class="text-[11px] font-black text-amber-700">${rowDef.label}</span>`;
                 row.innerHTML = `<div class="border-r border-slate-400 ${rowDef.isUnassigned ? 'bg-amber-100' : 'bg-slate-50'} flex items-center justify-center uppercase overflow-hidden shrink-0 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.05)] unselectable">${headerHtml}</div>`;
@@ -955,9 +962,14 @@
                     if (exStart >= daysToShow || exEnd <= 0) return;
                     
                     const due = window.getDue(s), owes = due > 0, isPastDue = s.status === 'here' && s.checkOut < todayLocal, isDueToday = s.status === 'here' && s.checkOut === todayLocal;
+                    const isOverdueCheckin = s.status === 'future' && s.checkIn <= todayLocal;
+
                     let bStyles = 'border border-black/10';
                     if (s.badCC) bStyles = '!border-red-500 !border-dashed !border-[3px]'; else if (owes) bStyles = '!border-red-500 !border-[3px]';
-                    if (isPastDue) bStyles += ' overdue-checkout-past'; else if (isDueToday) bStyles += ' overdue-checkout-today';
+                    
+                    if (isPastDue) bStyles += ' overdue-checkout-past';
+                    else if (isDueToday) bStyles += ' overdue-checkout-today';
+                    else if (isOverdueCheckin) bStyles += ' overdue-checkin';
 
                     const srcConfig = { 'booking.com': { bg: 'bg-[#003580]', text: 'B' }, 'agoda': { bg: 'bg-[#87B2D6]', text: 'A' }, 'hostelworld': { bg: 'bg-[#F15A24]', text: 'H' }, 'airbnb': { bg: 'bg-[#FF5A5F]', text: 'A' }, 'direct': { bg: 'bg-emerald-500', text: 'D' } }, src = srcConfig[s.source] || { bg: 'bg-slate-700', text: '?' };
                     
@@ -972,6 +984,8 @@
                     bHtml += `<span class="${s.refundability === 'ref' && parseYMD(s.checkIn) - Date.now() > 7 * 86400000 ? 'italic font-bold' : 'font-bold'} truncate text-[11px]" style="letter-spacing:-0.3px;">${s.lastName}</span>`;
                     if (s.pax > 1) bHtml += `<span class="text-[8px] opacity-60 leading-none self-start mt-0.5 ml-0.5">x${s.pax}</span>`;
                     
+                    if (isOverdueCheckin) bHtml += `<div class="ml-1 px-1 bg-red-600 text-white text-[8px] font-black rounded-sm animate-pulse border border-red-800 leading-tight flex items-center shadow-sm">MISSED IN</div>`;
+
                     if (s.upgrade === 'free') bHtml += UI_ICONS.upgFree; else if (s.upgrade === 'paid') bHtml += UI_ICONS.upgPaid;
                     if (s.extended) bHtml += UI_ICONS.ext;
                     if (s.emailSpecial) bHtml += UI_ICONS.mailSpec; else if (s.emailPrePost) bHtml += UI_ICONS.mailPre; else if (s.emailConfirm) bHtml += UI_ICONS.mailConf;
@@ -996,8 +1010,6 @@
                     bar.onclick = (e) => { e.stopPropagation(); tooltip.style.display = 'none'; if(typeof window.editStaff === 'function') window.editStaff(s.id); }; 
                     row.appendChild(bar);
                 });
-                
-                if (groupStates[currentGroup] === 'occupied' && row.querySelectorAll('.staff-bar').length === 0) row.style.display = 'none';
                 body.appendChild(row);
             });
         };
@@ -1060,8 +1072,9 @@
         };
 
         window.renderAccounting = () => {
-            let activeGross = 0, actualCollected = 0, pendingAR = 0, badDebt = 0, lostCancel = 0, retainedCancel = 0, bedStats = {};
-            let channelStats = { 'booking.com': {b:0,g:0,n:0}, 'agoda': {b:0,g:0,n:0}, 'hostelworld': {b:0,g:0,n:0}, 'airbnb': {b:0,g:0,n:0}, 'direct': {b:0,g:0,n:0}, 'walkin': {b:0,g:0,n:0}, 'other': {b:0,g:0,n:0} };
+            let activeGross = 0, actualCollected = 0, pendingAR = 0, badDebt = 0, lostCancel = 0, bedStats = {};
+            let channelStats = { 'booking.com': { count: 0, val: 0 }, 'agoda': { count: 0, val: 0 }, 'hostelworld': { count: 0, val: 0 }, 'airbnb': { count: 0, val: 0 }, 'direct': { count: 0, val: 0 }, 'walkin': { count: 0, val: 0 }, 'other': { count: 0, val: 0 } };
+            
             const ledgerRows = [], nowStr = new Date().toISOString().split('T')[0];
             const startStr = document.getElementById('acc-date-start').value, endStr = document.getElementById('acc-date-end').value;
             let cfStats = { cash: { label: 'Cash (In-House)', count: 0, amt: 0 }, scan: { label: 'QR / Bank Transfer', count: 0, amt: 0 }, card: { label: 'Credit Card (Stripe/Terminal)', count: 0, amt: 0 }, otapay: { label: 'Virtual OTA Payouts', count: 0, amt: 0 }, otakp: { label: 'OTA Comm. Withheld (Expense)', count: 0, amt: 0 }, other: { label: 'Other', count: 0, amt: 0 } };
@@ -1086,26 +1099,20 @@
                 const balance = Math.max(0, tPrice - (paidRealized + paidPending + paidComm));
                 actualCollected += paidRealized; pendingAR += paidPending;
 
-                if (s.status === 'cancelled') {
-                    lostCancel += balance;
-                    retainedCancel += (paidRealized + paidPending + paidComm);
-                } 
+                if (s.status === 'cancelled') lostCancel += balance; 
                 else if (s.status === 'noshow') badDebt += balance; 
                 else if (s.status === 'left') { activeGross += tPrice; badDebt += balance; } 
-                else if (s.status === 'unconfirmed') { /* Excluded from Active Gross */ }
-                else { activeGross += tPrice; pendingAR += balance; }
+                else if (s.status !== 'unconfirmed') { activeGross += tPrice; pendingAR += balance; }
 
-                if (s.status !== 'cancelled' && s.status !== 'noshow' && s.status !== 'unconfirmed') {
+                if (s.status !== 'cancelled' && s.status !== 'noshow') {
                     const cin = parseYMD(s.checkIn), cout = parseYMD(s.checkOut), nights = cin && cout && cout > cin ? Math.round((cout - cin) / 86400000) : 0;
                     (s.rooms?.length ? s.rooms : (s.room ? [s.room] : [])).forEach(r => {
                         const hr = hotelRooms.find(x => x.id === r);
                         if (hr && hr.bed) { if (!bedStats[hr.bed]) bedStats[hr.bed] = { count: 0, nights: 0 }; bedStats[hr.bed].count += 1; bedStats[hr.bed].nights += nights; }
                     });
                     
-                    const srcKey = channelStats[s.source] ? s.source : 'other';
-                    channelStats[srcKey].b += 1;
-                    channelStats[srcKey].g += tPrice;
-                    channelStats[srcKey].n += nPrice;
+                    const srcKey = s.source || 'other';
+                    if(channelStats[srcKey]) { channelStats[srcKey].count++; channelStats[srcKey].val += tPrice; }
                 }
                 
                 ledgerRows.push({ id: s.id, name: `${s.firstName||''} ${s.lastName||''}`.trim(), in: s.checkIn ? s.checkIn.substr(5) : '--', out: s.checkOut ? s.checkOut.substr(5) : '--', src: (s.source||'').toUpperCase(), gross: tPrice.toFixed(2), net: nPrice.toFixed(2), comm: paidComm.toFixed(2), coll: paidRealized.toFixed(2), bal: balance.toFixed(2), status: s.status });
@@ -1116,19 +1123,18 @@
             document.getElementById('acc-pending-ar').innerText = `฿${pendingAR.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
             document.getElementById('acc-bad-debt').innerText = `฿${badDebt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
             document.getElementById('acc-lost-cancel').innerText = `฿${lostCancel.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-            document.getElementById('acc-retained-cancel').innerText = `Retained: ฿${retainedCancel.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
 
             const tBody = document.getElementById('acc-bed-body'); tBody.innerHTML = '';
             Object.keys(bedStats).sort((a, b) => bedStats[b].count - bedStats[a].count).forEach(bed => {
                 tBody.innerHTML += `<tr class="border-b border-slate-200 hover:bg-slate-50"><td class="p-1.5 border-r border-slate-200 font-black uppercase text-slate-800">${bed}</td><td class="p-1.5 border-r border-slate-200 text-right font-black text-slate-600">${bedStats[bed].count}</td><td class="p-1.5 text-right font-black text-blue-600">${bedStats[bed].nights}</td></tr>`;
             });
             
-            const cBody = document.getElementById('acc-channel-body'); cBody.innerHTML = '';
-            Object.keys(channelStats).sort((a,b) => channelStats[b].g - channelStats[a].g).forEach(c => {
-                if(channelStats[c].b > 0) {
-                    cBody.innerHTML += `<tr class="border-b border-slate-200 hover:bg-indigo-50"><td class="p-1.5 border-r border-indigo-200 font-bold text-slate-700 capitalize">${c}</td><td class="p-1.5 border-r border-indigo-200 text-right text-slate-500">${channelStats[c].b}</td><td class="p-1.5 border-r border-indigo-200 text-right font-black text-indigo-700">฿${channelStats[c].g.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td><td class="p-1.5 text-right font-black text-indigo-500">฿${channelStats[c].n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td></tr>`;
-                }
-            });
+            const cBody = document.getElementById('acc-channel-body'); if(cBody) {
+                cBody.innerHTML = '';
+                Object.keys(channelStats).sort((a, b) => channelStats[b].val - channelStats[a].val).forEach(c => {
+                    if (channelStats[c].count > 0) cBody.innerHTML += `<tr class="border-b border-indigo-200 hover:bg-indigo-50"><td class="p-1.5 border-r border-indigo-200 font-bold uppercase text-slate-700">${c}</td><td class="p-1.5 border-r border-indigo-200 text-right text-slate-500">${channelStats[c].count}</td><td class="p-1.5 text-right font-black text-indigo-700">฿${channelStats[c].val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td></tr>`;
+                });
+            }
 
             const cfBody = document.getElementById('acc-cashflow-body'), cfFoot = document.getElementById('acc-cashflow-foot');
             if (cfBody && cfFoot) {
@@ -1189,17 +1195,7 @@
 
         window.sortDatabase = (key) => { if(sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } window.renderDatabase(); };
         window.sortAccounting = (key) => { if(accSortKey === key) accSortAsc = !accSortAsc; else { accSortKey = key; accSortAsc = true; } window.renderAccounting(); };
-        window.switchTab = (t) => { 
-            ['calendar', 'database', 'accounting'].forEach(id => { 
-                const view = document.getElementById(`${id}-view`);
-                if (view) view.style.display = t === id ? 'block' : 'none'; 
-            }); 
-            document.getElementById('tab-cal').classList.toggle('active', t === 'calendar');
-            document.getElementById('tab-db').classList.toggle('active', t === 'database');
-            document.getElementById('tab-acc').classList.toggle('active', t === 'accounting');
-            if(t === 'database') window.renderDatabase(); 
-            if(t === 'accounting') window.renderAccounting(); 
-        };
+        window.switchTab = (t) => { ['calendar', 'database', 'accounting'].forEach(id => { document.getElementById(`${id}-view`).style.display = t === id ? 'block' : 'none'; document.getElementById(`tab-${id.substring(0,3)}`).classList.toggle('active', t === id); }); if(t === 'database') window.renderDatabase(); if(t === 'accounting') window.renderAccounting(); };
         window.handleSearch = (val) => { searchTerm = val.trim().toUpperCase(); searchMatchIndex = 0; const jb = document.getElementById('search-jump-btn'), mc = document.getElementById('match-counter'), m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)); if(searchTerm && m.length > 0) { jb?.classList.replace('hidden', 'flex'); if(mc) mc.innerText = `Match ${searchMatchIndex + 1} of ${m.length}`; } else { jb?.classList.replace('flex', 'hidden'); } window.render(); };
         window.clearSearch = () => { document.getElementById('staff-search').value = ""; window.handleSearch(""); };
         window.jumpToSearchMatch = () => { const m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (m.length > 0) { const d = new Date(m[searchMatchIndex % m.length].checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; const mc = document.getElementById('match-counter'); if(mc) mc.innerText = `Match ${(searchMatchIndex % m.length) + 1} of ${m.length}`; window.render(); } };
@@ -1259,62 +1255,39 @@
         };
 
         window.calcExtension = () => { 
-            const ms = parseYMD(document.getElementById('check-out').value) - parseYMD(document.getElementById('check-in').value); 
-            const avg = ms > 0 ? (Number(document.getElementById('total-price').value) || 0) / Math.round(ms / 86400000) : 0; 
+            const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value;
+            const ms = parseYMD(cout) - parseYMD(cin); const avg = ms > 0 ? (Number(document.getElementById('total-price').value) || 0) / Math.round(ms / 86400000) : 0; 
             const days = parseInt(document.getElementById('ext-days').value) || 1;
-            document.getElementById('ext-avg-rate').value = Math.round(avg); 
-            
-            // FMP Safe-Guard Check
-            let isFmpOverlap = false;
-            const checkOutStr = document.getElementById('check-out').value;
-            if (checkOutStr) {
-                const coutDate = new Date(checkOutStr + "T12:00:00Z");
-                for (let i = 0; i < days; i++) {
-                    const testDate = new Date(coutDate.getTime() + (i * 86400000));
-                    for (let f of fmpDates) {
-                        const d = Math.round((testDate - new Date(f + "T12:00:00Z")) / 86400000);
-                        if (d >= -3 && d <= 3) { isFmpOverlap = true; break; }
-                    }
-                    if (isFmpOverlap) break;
+            let crossesFMP = false;
+            if (cout) {
+                const startD = parseYMD(cout); const endD = startD + (days * 86400000);
+                for (let f of fmpDates) {
+                    const fTime = new Date(f + "T12:00:00").getTime();
+                    if ((startD <= fTime && endD >= fTime) || (Math.abs(startD - fTime) <= 3 * 86400000) || (Math.abs(endD - fTime) <= 3 * 86400000)) { crossesFMP = true; break; }
                 }
             }
-
-            const priceBox = document.getElementById('ext-price');
-            const bdcBtn = document.getElementById('ext-bdc-btn');
-            const avgBox = document.getElementById('ext-avg-rate');
-            
-            if (isFmpOverlap) {
-                priceBox.value = '';
-                priceBox.placeholder = 'CHECK BDC!';
-                avgBox.value = 'FMP!';
-                bdcBtn.classList.add('bg-pink-500', 'text-white', 'border-pink-600', 'animate-pulse');
-                bdcBtn.classList.remove('bg-slate-200', 'text-slate-700', 'border-slate-300');
+            if (crossesFMP) {
+                document.getElementById('ext-avg-rate').value = 'FMP!'; document.getElementById('ext-avg-rate').classList.add('text-pink-600', 'bg-pink-100');
+                document.getElementById('ext-price').value = ''; document.getElementById('ext-price').placeholder = 'CHECK RATE ->';
+                document.getElementById('btn-check-bdc').classList.replace('bg-slate-200', 'bg-pink-500'); document.getElementById('btn-check-bdc').classList.replace('text-slate-700', 'text-white'); document.getElementById('btn-check-bdc').classList.add('animate-pulse');
             } else {
-                priceBox.value = Math.round(avg * days);
-                priceBox.placeholder = '';
-                bdcBtn.classList.remove('bg-pink-500', 'text-white', 'border-pink-600', 'animate-pulse');
-                bdcBtn.classList.add('bg-slate-200', 'text-slate-700', 'border-slate-300');
+                document.getElementById('ext-avg-rate').value = Math.round(avg); document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100');
+                document.getElementById('ext-price').value = Math.round(avg * days); document.getElementById('ext-price').placeholder = '';
+                document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse');
             }
         };
 
         window.checkBdcPrice = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + (parseInt(document.getElementById('ext-days').value) || 1)); window.open(`https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${cout}&checkout=${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}&group_adults=${document.getElementById('pax-count').value || 1}&group_children=0&no_rooms=${Array.from(document.querySelectorAll('.assigned-room-select')).filter(sel => sel.value !== "").length || 1}`, '_blank'); };
         
         window.confirmExtension = () => { 
-            const cout = document.getElementById('check-out').value; 
-            if(!cout) return window.showAlert("Please set a check-out date first."); 
+            const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); 
+            const addPrice = document.getElementById('ext-price').value;
+            if(addPrice === '') return window.showAlert("Please enter the Extension Price first. If this crosses Full Moon, check BDC for the correct rate!");
             
-            const addPriceRaw = document.getElementById('ext-price').value;
-            if (addPriceRaw === '') return window.showAlert("PRICE REQUIRED:\n\nPlease enter the Extension Price to proceed. Check BDC for the current daily rate if FMP is approaching.");
-            
-            const days = parseInt(document.getElementById('ext-days').value) || 1;
-            const addPrice = Number(addPriceRaw) || 0;
-            const d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + days); 
+            const days = parseInt(document.getElementById('ext-days').value) || 1, d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + days); 
             const newCout = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; 
-            
-            document.getElementById('check-out').value = newCout; 
-            document.getElementById('total-price').value = ((Number(document.getElementById('total-price').value) || 0) + addPrice).toFixed(2); 
+            document.getElementById('check-out').value = newCout; document.getElementById('total-price').value = ((Number(document.getElementById('total-price').value) || 0) + Number(addPrice)).toFixed(2); 
             setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); 
-            
             window.syncLabels(); window.updateAvailableRooms(); window.calcFinancials(); window.calcExtension(); 
             window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${newCout}.\nAdded ฿${addPrice} to Total Price.`); 
         };
@@ -1368,6 +1341,8 @@
             setMulti('ext-btn', s.extended ? 1 : 0, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
 
             document.getElementById('ext-days').value = 1; document.getElementById('ext-avg-rate').value = ''; document.getElementById('ext-price').value = '';
+            document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100');
+            document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse');
 
             window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension();
 
@@ -1553,12 +1528,15 @@
             else if (bt.includes("SUPERIOR") && bt.includes("OV")) pType = "OV Superior";
             else if (bt.includes("SUPERIOR")) pType = "Superior";
             else if (bt.includes("STANDARD") && bt.includes("OV")) pType = "OV Standard";
+            else if (bt.includes("TRIPLE")) pType = "Triple";
             else if (bt.includes("STANDARD")) pType = "Standard";
             else if (bt.includes("BUDGET")) pType = "Budget";
 
             let pBed = null;
+            // Check explicit guest notes FIRST to avoid "Double or Twin" string confusing the parser
             if (nt.includes("TWIN") || nt.includes("SEPARATE") || nt.includes("2 SINGLE") || nt.includes("TWO SINGLE") || nt.includes("2 BEDS") || nt.includes("SINGLES")) pBed = "TWIN";
             else if (nt.includes("KING") || nt.includes("DOUBLE") || nt.includes("LARGE") || nt.includes("1 BED") || nt.includes("ONE BED") || nt.includes("1 DOUBLE") || nt.includes("1 EXTRA-LARGE")) pBed = "KING";
+            // If no notes, fall back to the OTA room title
             if (!pBed) { if (bt.includes("KING") || (bt.includes("DOUBLE") && !bt.includes("TWIN"))) pBed = "KING"; else if (bt.includes("TWIN") && !bt.includes("DOUBLE")) pBed = "TWIN"; }
 
             let match = (pType && pBed) ? available.find(r => r.type === pType && r.bed && r.bed.includes(pBed)) : null;
@@ -1608,9 +1586,15 @@
                     if (bTypeIdx === -1) { let pIdx = lines.findIndex(l => l.toLowerCase().endsWith('cancellation policy.') || l.toLowerCase().includes('bank transfer payout')); if (pIdx > -1 && pIdx + 1 < lines.length) bTypeIdx = pIdx + 1; }
                     if (bTypeIdx > -1) { let bRaw = lines[bTypeIdx], fP = bRaw.indexOf('('), lP = bRaw.lastIndexOf(')'); bType = (fP > -1 && lP > fP) ? bRaw.substring(fP + 1, lP).trim() : bRaw.trim(); }
 
+                    // Strict Refundability Check
                     let lowText = text.toLowerCase();
-                    if (lowText.includes('free of charge until') || lowText.includes('free cancellation')) refundability = 2; else if (lowText.includes('cancel at any time') || lowText.includes('cancel anytime') || lowText.includes('non-refundable') || lowText.includes('non refundable') || lowText.includes('charged the total price')) refundability = 1;
+                    if (lowText.includes('free of charge until') || lowText.includes('free cancellation')) {
+                        refundability = 2; // Refundable
+                    } else if (lowText.includes('cancel at any time') || lowText.includes('cancel anytime') || lowText.includes('non-refundable') || lowText.includes('non refundable') || lowText.includes('charged the total price')) {
+                        refundability = 1; // Non-Refundable
+                    }
 
+                    // BED PREFERENCES & NOTES Extraction
                     let allNotes = []; lines.forEach(l => { if (l.toUpperCase().includes('BED PREFERENCE:') || l.toUpperCase().includes('BED-PREFERENCE REQUEST:')) allNotes.push(l.replace(/Reply$/i, '').trim()); });
                     let convoIdx = lines.findIndex(l => l.toLowerCase() === 'conversation with guest');
                     if (convoIdx > -1) { let mLines = []; for (let i = convoIdx + 1; i < lines.length; i++) { let lLow = lines[i].toLowerCase(); if (lLow.includes('protect your account security') || lLow === 'images' || lLow === 'templates' || lLow.includes('important information about this guest') || lLow === 'cancellation' || lLow === 'no messages' || lLow.includes('conversations with your guests will appear')) break; if (/^(?:Today|Yesterday|[A-Za-z]+,?\s*\d{1,2}\s*[A-Za-z]*),\s*\d{1,2}:\d{2}/i.test(lines[i]) || /^\d{1,2}:\d{2}$/.test(lines[i]) || lLow === 'reply') continue; if (lines[i].trim()) mLines.push(lines[i].trim()); } if (mLines.length > 0) allNotes.push("GUEST MSG: " + mLines.join(" ")); }
@@ -1641,20 +1625,60 @@
                 case 'hw-web':
                     src = 'hostelworld'; bId = extract(/Reference\s*\n*\s*([\d-]+)/i); bDate = parseDateRelative(extract(/Booked\s*\n*\s*([^\n]+)/i), true); checkIn = parseDateRelative(extract(/Arriving\s*\n*\s*([^\n]+)/i), false);
                     let mBlock = text.match(new RegExp(`Reference\\s*\\n*\\s*${bId}\\s*\\n*\\s*([^\\n]+)\\s*\\n*\\s*([^\\n]+)`, 'i')); if (mBlock) { gName = mBlock[1].trim(); countryCode = mBlock[2].trim(); }
-                    email = (text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/g) || []).find(e => !e.toLowerCase().includes('hostelworld')) || '';
-                    phone = extract(/(\+[\d \t-]+)/); if (!phone && email) { let aE = text.substring(text.indexOf(email) + email.length), pM = aE.match(/^\s*[\n\r]+\s*([\d \t-]{8,20})/); if (pM) phone = pM[1].trim(); }
-                    if (!phone) { let dM = text.match(/(?:^|[^\d])(\d[\d \t-]{8,20}\d)(?:[^\d]|$)/); if (dM && bId && !dM[1].includes(bId.replace(/[^\d]/g, ''))) phone = dM[1].trim(); }
-                    let nStrW = extract(/(\d+)\s*Nights/i); if (checkIn && nStrW) { let d = new Date(checkIn + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + parseInt(nStrW)); checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; }
-                    let paxM = text.match(/[\n\r]\s*(\d+)\s*[\n\r]\s*\d+\s*Nights/i); if (paxM) pax = parseInt(paxM[1]);
-                    total = cleanMoney(extract(/Subtotal\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i)); comm = cleanMoney(extract(/Hostelworld Deposit\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
-                    let tIdx = text.toLowerCase().lastIndexOf('room type'); if (tIdx > -1) { let rM = text.substring(tIdx).match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*([^\n\r]+?)(?:\s*Non-?refundable|\s*Promo|\n|\r|$)/i); if (rM) bType = rM[1].replace(/^FMP\s+/i, '').trim(); }
-                    if (!bType) { let rM2 = text.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*\n*\s*([\s\S]+?)(?:\s+Promo)?\s*\n*\s*(\d+)\s*\n*\s*\d+\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})\s*[\d,.]+/i); if (rM2) { bType = rM2[1].replace(/^FMP\s+/i, '').trim(); if (!pax) pax = parseInt(rM2[2]); } }
-                    if (bType) { if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)'; else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; }
+                    
+                    let allEmails = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/g) || [];
+                    email = allEmails.find(e => !e.toLowerCase().includes('hostelworld')) || '';
+                    
+                    phone = extract(/(\+[\d \t-]+)/);
+                    if (!phone && email) {
+                        let emailIdx = text.indexOf(email);
+                        let afterEmail = text.substring(emailIdx + email.length);
+                        let phoneMatch = afterEmail.match(/^\s*[\n\r]+\s*([\d \t-]{8,20})/);
+                        if (phoneMatch) phone = phoneMatch[1].trim();
+                    }
+                    if (!phone) {
+                         let digitMatch = text.match(/(?:^|[^\d])(\d[\d \t-]{8,20}\d)(?:[^\d]|$)/);
+                         if (digitMatch && bId && !digitMatch[1].includes(bId.replace(/[^\d]/g, ''))) phone = digitMatch[1].trim();
+                    }
+                    
+                    let nightsStrW = extract(/(\d+)\s*Nights/i);
+                    if (checkIn && nightsStrW) {
+                        let n = parseInt(nightsStrW);
+                        let d = new Date(checkIn + "T12:00:00Z");
+                        d.setUTCDate(d.getUTCDate() + n);
+                        checkOut = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+                    }
+                    
+                    let paxMatch = text.match(/[\n\r]\s*(\d+)\s*[\n\r]\s*\d+\s*Nights/i);
+                    if (paxMatch) pax = parseInt(paxMatch[1]);
+                    
+                    total = cleanMoney(extract(/Subtotal\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
+                    comm = cleanMoney(extract(/Hostelworld Deposit\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
+                    
+                    let hwTableIdx = text.toLowerCase().lastIndexOf('room type');
+                    if (hwTableIdx > -1) {
+                        let tableText = text.substring(hwTableIdx);
+                        let rMatch = tableText.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*([^\n\r]+?)(?:\s*Non-?refundable|\s*Promo|\n|\r|$)/i);
+                        if (rMatch) {
+                            bType = rMatch[1].replace(/^FMP\s+/i, '').trim();
+                        }
+                    }
+                    if (!bType) {
+                        let rowMatch = text.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*\n*\s*([\s\S]+?)(?:\s+Promo)?\s*\n*\s*(\d+)\s*\n*\s*\d+\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})\s*[\d,.]+/i);
+                        if (rowMatch) {
+                            bType = rowMatch[1].replace(/^FMP\s+/i, '').trim();
+                            if (!pax) pax = parseInt(rowMatch[2]);
+                        }
+                    }
+
+                    if (bType) {
+                        if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)';
+                        else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; 
+                    }
                     break;
             }
 
             document.getElementById('email-modal').style.display = 'none';
-            window.openStaffModal();
 
             let last = gName.trim(), first = "";
             if(gName.includes(',')) { const p = gName.split(','); last = p[0].trim(); first = p.slice(1).join(',').trim(); }
@@ -1702,7 +1726,6 @@
                 let payMethod = src === 'agoda' ? 'agoda-pay' : 'bdc-pay';
                 window.addPaymentRow(checkIn || new Date().toISOString().split('T')[0], (total - comm).toFixed(2), payMethod);
             }
-
             window.updateHeaderName();
             window.syncLabels();
             window.calcFinancials();
@@ -1715,6 +1738,7 @@
                 viewStart = d;
                 window.render();
             }
+            window.openStaffModal();
         };
 
         window.requestDelete = () => {
