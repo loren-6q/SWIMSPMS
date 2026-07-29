@@ -1207,7 +1207,16 @@
 
         window.sortDatabase = (key) => { if(sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } window.renderDatabase(); };
         window.sortAccounting = (key) => { if(accSortKey === key) accSortAsc = !accSortAsc; else { accSortKey = key; accSortAsc = true; } window.renderAccounting(); };
-        window.switchTab = (t) => { ['calendar', 'database', 'accounting'].forEach(id => { document.getElementById(`${id}-view`).style.display = t === id ? 'block' : 'none'; document.getElementById(`tab-${id.substring(0,3)}`).classList.toggle('active', t === id); }); if(t === 'database') window.renderDatabase(); if(t === 'accounting') window.renderAccounting(); };
+        window.switchTab = (t) => { 
+            document.getElementById('calendar-view').style.display = t === 'calendar' ? 'block' : 'none'; 
+            document.getElementById('database-view').style.display = t === 'database' ? 'block' : 'none'; 
+            document.getElementById('accounting-view').style.display = t === 'accounting' ? 'block' : 'none'; 
+            document.getElementById('tab-cal').classList.toggle('active', t === 'calendar'); 
+            document.getElementById('tab-db').classList.toggle('active', t === 'database'); 
+            document.getElementById('tab-acc').classList.toggle('active', t === 'accounting'); 
+            if(t === 'database') window.renderDatabase(); 
+            if(t === 'accounting') window.renderAccounting(); 
+        };
         window.handleSearch = (val) => { searchTerm = val.trim().toUpperCase(); searchMatchIndex = 0; const jb = document.getElementById('search-jump-btn'), mc = document.getElementById('match-counter'), m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)); if(searchTerm && m.length > 0) { jb?.classList.replace('hidden', 'flex'); if(mc) mc.innerText = `Match ${searchMatchIndex + 1} of ${m.length}`; } else { jb?.classList.replace('flex', 'hidden'); } window.render(); };
         window.clearSearch = () => { document.getElementById('staff-search').value = ""; window.handleSearch(""); };
         window.jumpToSearchMatch = () => { const m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (m.length > 0) { const d = new Date(m[searchMatchIndex % m.length].checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; const mc = document.getElementById('match-counter'); if(mc) mc.innerText = `Match ${(searchMatchIndex % m.length) + 1} of ${m.length}`; window.render(); } };
