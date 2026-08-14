@@ -77,6 +77,7 @@
         .status-cancelled, .status-noshow { background-color: #e5e7eb; color: #1e293b; border: 1px solid #d1d5db; opacity: 0.8; }
         .status-special { background-color: #fef08a; color: #1e293b; border: 1px solid #fde047; }
         .status-blocked { background-color: #475569; color: #ffffff; border: 1px solid #334155; }
+        .status-charged { background-color: #0f172a; color: #fbbf24; border: 1px solid #f59e0b; }
         
         .modal-overlay { display: none; position: fixed; inset: 0; background: transparent; pointer-events: none; z-index: 100; align-items: flex-start; justify-content: center; padding-top: 5vh; padding-bottom: 5vh; }
         .modal-overlay.active { display: flex; }
@@ -172,7 +173,7 @@
 
                 <div class="relative group shrink-0 w-32 sm:w-40">
                     <i data-lucide="search" class="absolute left-2 top-1.5 text-slate-400" size="14"></i>
-                    <input type="text" id="staff-search" placeholder="FIND NAME..." oninput="window.handleSearch(this.value)" class="pl-7 pr-7 py-1 w-full bg-white border border-slate-200 rounded font-black text-xs uppercase outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="staff-search" placeholder="FIND NAME OR ID..." oninput="window.handleSearch(this.value)" class="pl-7 pr-7 py-1 w-full bg-white border border-slate-200 rounded font-black text-xs uppercase outline-none focus:ring-2 focus:ring-blue-500">
                     <button onclick="window.clearSearch()" class="absolute right-2 top-1.5 text-slate-400 hover:text-slate-600"><i data-lucide="x" size="14"></i></button>
                 </div>
             </div>
@@ -463,6 +464,7 @@
         <label><input type="checkbox" value="unconfirmed" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> UNCONFIRMED</label>
         <label><input type="checkbox" value="cancelled" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CANCELLED</label>
         <label><input type="checkbox" value="noshow" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> NO-SHOW</label>
+        <label><input type="checkbox" value="charged" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CHARGED</label>
         <label><input type="checkbox" value="special" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> SPECIAL</label>
         <label><input type="checkbox" value="blocked" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> BLOCKED</label>
     </div>
@@ -520,7 +522,7 @@
                     <div class="col-span-1"><label class="field-label">PAX</label><input type="number" id="pax-count" value="1" min="1" class="w-full text-center" oninput="window.calcFinancials(); window.calcExtension && window.calcExtension();"></div>
                     <div class="col-span-1"><label class="field-label">Status</label>
                         <select id="staff-status" class="w-full text-sm font-black text-white px-1!" style="background: #7fc6f5; color: #1e293b;" onchange="window.updateStatusColor(this)">
-                            <option value="future">FUTURE</option><option value="here">HERE</option><option value="left">LEFT</option><option value="unconfirmed">UNCONFIRM</option><option value="cancelled">CANCEL</option><option value="noshow">NO-SHOW</option><option value="special">SPECIAL</option><option value="blocked">BLOCKED</option>
+                            <option value="future">FUTURE</option><option value="here">HERE</option><option value="left">LEFT</option><option value="unconfirmed">UNCONFIRM</option><option value="cancelled">CANCEL</option><option value="noshow">NO-SHOW</option><option value="charged">CHARGED</option><option value="special">SPECIAL</option><option value="blocked">BLOCKED</option>
                         </select>
                     </div>
                 </div>
@@ -906,7 +908,7 @@
                 daysGrid.innerHTML += `<div class="flex flex-col items-center justify-center border-r border-slate-400 ${isToday ? 'bg-blue-100' : ''}"><div class="text-[10px] font-black text-slate-500 uppercase leading-none">${d.toLocaleDateString('en-US', {weekday:'short'})}</div><div class="text-[16px] font-black ${isToday ? 'text-blue-600' : 'text-slate-800'} leading-tight">${d.getDate()}</div></div>`;
             });
 
-            const activeStaff = staff.filter(s => s.status !== 'cancelled'); // Kept no-shows so they render in unconfirmed
+            const activeStaff = staff.filter(s => s.status !== 'cancelled' && s.status !== 'charged'); // Kept no-shows so they render in unconfirmed
             const viewStartUTC = Date.UTC(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate());
             const viewEndUTC = viewStartUTC + daysToShow * 86400000;
             
@@ -938,6 +940,9 @@
             const tooltip = document.getElementById('custom-tooltip');
             let currentGroup = '';
 
+            const todayLocal = new Date().toISOString().split('T')[0];
+            const srcConfig = { 'booking.com': { bg: 'bg-[#003580]', text: 'B' }, 'agoda': { bg: 'bg-[#87B2D6]', text: 'A' }, 'hostelworld': { bg: 'bg-[#F15A24]', text: 'H' }, 'airbnb': { bg: 'bg-[#FF5A5F]', text: 'A' }, 'direct': { bg: 'bg-emerald-500', text: 'D' } };
+
             timelineRows.forEach(rowDef => {
                 const row = document.createElement('div'); 
                 if (rowDef.isDivider) {
@@ -964,8 +969,6 @@
                     cell.onclick = () => window.quickAdd(rowDef.isUnassigned ? "" : rowDef.id, days[i]); row.appendChild(cell);
                 }
 
-                const todayLocal = new Date().toISOString().split('T')[0];
-
                 rowDef.bookings.forEach(s => {
                     const exStart = getDayIndex(s.checkIn) + 0.3, exEnd = getDayIndex(s.checkOut) + 0.25;
                     if (exStart >= daysToShow || exEnd <= 0) return;
@@ -982,13 +985,13 @@
                     else if (isLateCheckin) bStyles += ' late-checkin';
                     else if (isCheckinToday) bStyles += ' checkin-today';
 
-                    const srcConfig = { 'booking.com': { bg: 'bg-[#003580]', text: 'B' }, 'agoda': { bg: 'bg-[#87B2D6]', text: 'A' }, 'hostelworld': { bg: 'bg-[#F15A24]', text: 'H' }, 'airbnb': { bg: 'bg-[#FF5A5F]', text: 'A' }, 'direct': { bg: 'bg-emerald-500', text: 'D' } }, src = srcConfig[s.source] || { bg: 'bg-slate-700', text: '?' };
+                    const src = srcConfig[s.source] || { bg: 'bg-slate-700', text: '?' };
                     
                     const bar = document.createElement('div'); 
                     bar.className = `unselectable staff-bar status-${s.status} ${bStyles} ${s.linkedId ? 'linked-'+s.linkedId : ''}`; 
                     bar.style.left = `calc(var(--sidebar-w) + (100% - var(--sidebar-w)) * ${Math.max(0, exStart) / daysToShow})`;
                     bar.style.width = `calc((100% - var(--sidebar-w)) * ${(Math.min(daysToShow, exEnd) - Math.max(0, exStart)) / daysToShow})`;
-                    if (searchTerm && !(s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)) bar.style.opacity = "0.15";
+                    if (searchTerm && !(s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm) && !(s.bookId||'').toUpperCase().includes(searchTerm)) bar.style.opacity = "0.15";
 
                     let bHtml = `<div class="bar-sticky-content gap-0.5">`;
                     if (s.linkedId) bHtml += UI_ICONS.link;
@@ -1042,7 +1045,8 @@
                 if (v === 'acc' && ((startStr && s.checkOut < startStr) || (endStr && s.checkIn > endStr))) return false;
                 if (v === 'db' && statFilter.length > 0 && !statFilter.includes(s.status)) return false;
                 const fN = (s.firstName+' '+s.lastName).toUpperCase();
-                if (searchTerm && !fN.includes(searchTerm)) return false;
+                const bId = (s.bookId||'').toUpperCase();
+                if (searchTerm && !fN.includes(searchTerm) && !bId.includes(searchTerm)) return false;
                 if (nFilter && !fN.includes(nFilter)) return false;
                 if (sFilter.length > 0 && !sFilter.includes(s.source)) return false;
                 if (mFilter) { const [mY, mM] = mFilter.split('-'); if (!(parseYMD(s.checkIn) < Date.UTC(mY, mM, 1) && parseYMD(s.checkOut) > Date.UTC(mY, mM - 1, 1))) return false; }
@@ -1114,6 +1118,7 @@
                 if (s.status === 'cancelled') lostCancel += balance; 
                 else if (s.status === 'noshow') badDebt += balance; 
                 else if (s.status === 'left') { activeGross += tPrice; badDebt += balance; } 
+                else if (s.status === 'charged') { activeGross += tPrice; } 
                 else if (s.status !== 'unconfirmed') { activeGross += tPrice; pendingAR += balance; }
 
                 if (s.status !== 'cancelled' && s.status !== 'noshow') {
@@ -1217,9 +1222,9 @@
             if(t === 'database') window.renderDatabase(); 
             if(t === 'accounting') window.renderAccounting(); 
         };
-        window.handleSearch = (val) => { searchTerm = val.trim().toUpperCase(); searchMatchIndex = 0; const jb = document.getElementById('search-jump-btn'), mc = document.getElementById('match-counter'), m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)); if(searchTerm && m.length > 0) { jb?.classList.replace('hidden', 'flex'); if(mc) mc.innerText = `Match ${searchMatchIndex + 1} of ${m.length}`; } else { jb?.classList.replace('flex', 'hidden'); } window.render(); };
+        window.handleSearch = (val) => { searchTerm = val.trim().toUpperCase(); searchMatchIndex = 0; const jb = document.getElementById('search-jump-btn'), mc = document.getElementById('match-counter'), m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm) || (s.bookId||'').toUpperCase().includes(searchTerm)); if(searchTerm && m.length > 0) { jb?.classList.replace('hidden', 'flex'); if(mc) mc.innerText = `Match ${searchMatchIndex + 1} of ${m.length}`; } else { jb?.classList.replace('flex', 'hidden'); } window.render(); };
         window.clearSearch = () => { document.getElementById('staff-search').value = ""; window.handleSearch(""); };
-        window.jumpToSearchMatch = () => { const m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (m.length > 0) { const d = new Date(m[searchMatchIndex % m.length].checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; const mc = document.getElementById('match-counter'); if(mc) mc.innerText = `Match ${(searchMatchIndex % m.length) + 1} of ${m.length}`; window.render(); } };
+        window.jumpToSearchMatch = () => { const m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm) || (s.bookId||'').toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (m.length > 0) { const d = new Date(m[searchMatchIndex % m.length].checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; const mc = document.getElementById('match-counter'); if(mc) mc.innerText = `Match ${(searchMatchIndex % m.length) + 1} of ${m.length}`; window.render(); } };
         window.syncLabels = () => { const inEl = document.getElementById('check-in'), outEl = document.getElementById('check-out'); if(inEl && document.getElementById('ov-in')) document.getElementById('ov-in').innerText = to15MAR(new Date(inEl.value + "T12:00:00")); if(outEl && document.getElementById('ov-out')) document.getElementById('ov-out').innerText = to15MAR(new Date(outEl.value + "T12:00:00")); };
         window.prevPeriod = () => { viewStart.setDate(viewStart.getDate() - 7); window.render(); };
         window.nextPeriod = () => { viewStart.setDate(viewStart.getDate() + 7); window.render(); };
@@ -1228,7 +1233,7 @@
         window.checkEmailProxy = (val) => { const el = document.getElementById('email'), v = val.toLowerCase(); if (v.includes('booking.com') || v.includes('agoda')) { el.classList.remove('text-green-600'); el.classList.add('text-red-600', 'font-black'); } else if (v.includes('@')) { el.classList.remove('text-red-600'); el.classList.add('text-green-600', 'font-black'); } else { el.classList.remove('text-red-600', 'text-green-600', 'font-black'); } };
         window.cycleMulti = (el, labels, classes) => { if (!el) return; let s = parseInt(el.dataset.state) + 1; if(s >= labels.length) s = 0; el.dataset.state = s; el.innerText = labels[s]; el.className = el.id.includes('email') ? `flex-1 min-w-[80px] unselectable multi-state-btn px-0.5 py-1 rounded text-[9px] sm:text-[10px] font-black uppercase border text-center whitespace-nowrap ${classes[s]}` : `flex-1 unselectable multi-state-btn px-1 sm:px-2 py-1.5 rounded text-[9px] sm:text-[11px] text-center font-black uppercase border min-w-[100px] ${classes[s]}`; };
         const setMulti = (id, state, labels, classes) => { const el = document.getElementById(id); if (!el) return; el.dataset.state = state; el.innerText = labels[state]; el.className = id.includes('email') ? `flex-1 min-w-[80px] unselectable multi-state-btn px-0.5 py-1 rounded text-[9px] sm:text-[10px] font-black uppercase border text-center whitespace-nowrap ${classes[state]}` : `flex-1 unselectable multi-state-btn px-1 sm:px-2 py-1.5 rounded text-[9px] sm:text-[11px] text-center font-black uppercase border min-w-[100px] ${classes[state]}`; };
-        window.updateStatusColor = (sel) => { const bg = { 'future': '#7fc6f5', 'here': '#059669', 'left': '#aba39d', 'cancelled': '#94a3b8', 'noshow': '#000', 'unconfirmed': '#8b5cf6', 'special': '#fde047', 'blocked': '#475569' }, txt = { 'future': '#1e293b', 'here': '#ffffff', 'left': '#1e293b', 'cancelled': '#1e293b', 'noshow': '#ffffff', 'unconfirmed': '#ffffff', 'special': '#1e293b', 'blocked': '#ffffff' }; sel.style.background = bg[sel.value] || '#7fc6f5'; sel.style.color = txt[sel.value] || '#1e293b'; };
+        window.updateStatusColor = (sel) => { const bg = { 'future': '#7fc6f5', 'here': '#059669', 'left': '#aba39d', 'cancelled': '#94a3b8', 'noshow': '#000', 'charged': '#0f172a', 'unconfirmed': '#8b5cf6', 'special': '#fde047', 'blocked': '#475569' }, txt = { 'future': '#1e293b', 'here': '#ffffff', 'left': '#1e293b', 'cancelled': '#1e293b', 'noshow': '#ffffff', 'charged': '#fbbf24', 'unconfirmed': '#ffffff', 'special': '#1e293b', 'blocked': '#ffffff' }; sel.style.background = bg[sel.value] || '#7fc6f5'; sel.style.color = txt[sel.value] || '#1e293b'; };
         window.toggleBadCC = () => { const box = document.getElementById('bad-cc-box'); if(box.dataset.bad === 'true') { box.dataset.bad = 'false'; box.innerHTML = ''; box.classList.replace('bg-red-500', 'border-slate-300'); box.classList.remove('border-red-600'); } else { box.dataset.bad = 'true'; box.innerHTML = '<span class="text-white text-[10px] font-black">X</span>'; box.classList.replace('border-slate-300', 'bg-red-500'); box.classList.add('border-red-600'); } };
 
         window.calcFinancials = () => {
@@ -1554,12 +1559,17 @@
             else if (bt.includes("BUDGET")) pType = "Budget";
 
             let pBed = null;
-            if (nt.includes("TWIN") || nt.includes("SEPARATE") || nt.includes("2 SINGLE") || nt.includes("TWO SINGLE") || nt.includes("2 BEDS") || nt.includes("SINGLES")) pBed = "TWIN";
+            if (nt.includes("THE GUEST ASKED FOR 1 EXTRA-LARGE DOUBLE BED") || nt.includes("1 EXTRA-LARGE") || nt.includes("1 DOUBLE") || nt.includes("1 KING") || nt.includes("LARGE DOUBLE")) pBed = "KING";
+            else if (nt.includes("TWIN") || nt.includes("SEPARATE") || nt.includes("2 SINGLE") || nt.includes("TWO SINGLE") || nt.includes("2 BEDS") || nt.includes("SINGLES")) pBed = "TWIN";
             else if (nt.includes("BUNK") && nt.includes("SINGLE")) pBed = "BUNK+T";
             else if (nt.includes("BUNK")) pBed = "BUNK+T";
-            else if (nt.includes("KING") || nt.includes("DOUBLE") || nt.includes("LARGE") || nt.includes("1 BED") || nt.includes("ONE BED") || nt.includes("1 DOUBLE") || nt.includes("1 EXTRA-LARGE")) pBed = "KING";
+            else if (nt.includes("KING") || nt.includes("DOUBLE") || nt.includes("LARGE") || nt.includes("1 BED") || nt.includes("ONE BED")) pBed = "KING";
             
-            if (!pBed) { if (bt.includes("KING") || (bt.includes("DOUBLE") && !bt.includes("TWIN"))) pBed = "KING"; else if (bt.includes("TWIN") && !bt.includes("DOUBLE")) pBed = "TWIN"; }
+            if (!pBed) {
+                if (bt.includes("1 EXTRA-LARGE") || bt.includes("1 DOUBLE") || bt.includes("1 KING") || bt.includes("LARGE DOUBLE")) pBed = "KING";
+                else if (bt.includes("TWIN") || bt.includes("SEPARATE") || bt.includes("2 SINGLE") || bt.includes("TWO SINGLE") || bt.includes("2 BEDS")) pBed = "TWIN";
+                else if (bt.includes("KING") || (bt.includes("DOUBLE") && !bt.includes("TWIN"))) pBed = "KING";
+            }
 
             let match = (pType && pBed) ? available.find(r => r.type === pType && r.bed && r.bed.includes(pBed)) : null;
             if (!match && pType) match = available.find(r => r.type === pType);
@@ -1573,11 +1583,8 @@
             const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
             const formatStrictDate = (dStr) => { if(!dStr) return ''; const d = new Date(dStr + " 12:00:00Z"); return isNaN(d.getTime()) ? '' : `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; };
 
-            // CLEAR THE FORM STATE FIRST!
-            document.getElementById('payments-list').innerHTML = '';
-            document.getElementById('assigned-rooms-container').innerHTML = '';
-            window.addRoomSelect("");
-            document.getElementById('staff-id').value = ""; // Crucial: ensure it treats it as a NEW booking
+            // FULL FORM RESET
+            window.populateStaffForm({});
             
             const parseDateRelative = (dateStr, isPast = false) => {
                 if(!dateStr) return ''; const mths = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
@@ -1591,7 +1598,7 @@
                 return `${yr}-${mth}-${dayVal.toString().padStart(2, '0')}`;
             };
 
-            let src = '', gName = '', checkIn = '', checkOut = '', pax = 1, phone = '', email = '', total = 0, comm = 0, bId = '', notes = '', bType = '', bDate = '', countryCode = '', refundability = 0, hasBdcPayment = false;
+            let src = '', gName = '', checkIn = '', checkOut = '', pax = 1, phone = '', email = '', total = 0, comm = 0, bId = '', notes = '', bType = '', bDate = '', countryCode = '', refundability = 0, parsedUpgrade = 0, parsedStatus = 'future', hasBdcPayment = false;
 
             switch (format) {
                 case 'bdc-extranet':
@@ -1612,7 +1619,18 @@
                     let bTypeIdx = lines.findIndex((l, i) => /^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\d{1,2}\s+[A-Za-z]{3}/i.test(l) && i >= 2 && /(?:THB|฿|\$|€|£|[A-Z]{3})[\s]*[\d,.]+/i.test(lines[i-1]));
                     if(bTypeIdx > -1) bTypeIdx -= 2;
                     if (bTypeIdx === -1) { let pIdx = lines.findIndex(l => l.toLowerCase().endsWith('cancellation policy.') || l.toLowerCase().includes('bank transfer payout')); if (pIdx > -1 && pIdx + 1 < lines.length) bTypeIdx = pIdx + 1; }
-                    if (bTypeIdx > -1) { let bRaw = lines[bTypeIdx], fP = bRaw.indexOf('('), lP = bRaw.lastIndexOf(')'); bType = (fP > -1 && lP > fP) ? bRaw.substring(fP + 1, lP).trim() : bRaw.trim(); }
+                    if (bTypeIdx > -1) { 
+                        let bRaw = lines[bTypeIdx]; 
+                        if (bRaw.toLowerCase().includes('free upgrade')) {
+                            parsedUpgrade = 1;
+                            if (bTypeIdx > 0 && !lines[bTypeIdx - 1].toLowerCase().includes('price')) bRaw = lines[bTypeIdx - 1];
+                        }
+                        const fP = bRaw.indexOf('('), lP = bRaw.lastIndexOf(')'); 
+                        bType = (fP > -1 && lP > fP) ? bRaw.substring(fP + 1, lP).trim() : bRaw.trim(); 
+                    }
+
+                    if (text.toLowerCase().includes('free upgrade')) parsedUpgrade = 1;
+                    if (/\b(?:status:\s*canceled|status:\s*cancelled|booking canceled|booking cancelled)\b/i.test(text)) parsedStatus = 'cancelled';
 
                     // Strict Refundability Check
                     let lowText = text.toLowerCase();
@@ -1641,6 +1659,7 @@
                     let locM = text.match(/Identity verified[^\n]*\n([^\n]+)/i); if (locM) { let locP = locM[1].split(','); countryCode = locP.pop().trim(); }
                     let abnbNotes = extract(/\n([^\n]+)\n\s*Send.*?a Message/i); if(abnbNotes && !abnbNotes.includes('Translated') && !abnbNotes.includes('Add guest')) notes = abnbNotes; 
                     const polMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i); if (polMatch) { const pol = polMatch[1].toLowerCase(); refundability = (pol.includes('strict') || pol.includes('firm') || pol.includes('non-refundable')) ? 1 : 2; }
+                    if (text.toLowerCase().includes('reservation canceled') || text.toLowerCase().includes('reservation cancelled')) parsedStatus = 'cancelled';
                     break;
 
                 case 'hw-email':
@@ -1723,6 +1742,9 @@
             document.getElementById('booking-id').value = bId;
             document.getElementById('booked-type').value = (bType || "").toUpperCase();
             
+            document.getElementById('staff-status').value = parsedStatus;
+            window.updateStatusColor(document.getElementById('staff-status'));
+
             document.getElementById('phone').value = phone;
             document.getElementById('email').value = email;
             if (countryCode) {
@@ -1741,6 +1763,7 @@
             document.getElementById('staff-notes').value = notes;
             
             setMulti('refund-btn', refundability, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
+            if (parsedUpgrade > 0) setMulti('upgrade-btn', parsedUpgrade, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
             
             if (comm > 0) {
                 let kpMethod = 'other';
