@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWIMS Accounting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Roboto+Condensed:wght@400;700;900&display=swap');
+        body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; overflow-x: hidden; font-size: 1.2rem; }
+        .unselectable { user-select: none; -webkit-user-select: none; }
+        input, select { font-size: 1rem !important; padding: 2px 6px !important; border-radius: 4px !important; border: 1px solid #cbd5e1 !important; font-weight: 700 !important; }
+        .loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .multi-select-dropdown { background-color: #1e293b; color: white; z-index: 50; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); max-height: 250px; overflow-y: auto; border-radius: 4px; display: none; font-size: 0.75rem; position: absolute; }
+        .multi-select-dropdown label { display: flex; align-items: center; padding: 6px 8px; cursor: pointer; text-transform: uppercase; border-bottom: 1px solid #334155; }
+        .multi-select-dropdown label:hover { background-color: #334155; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-slate-100 p-0 sm:p-4">
+
+    <div id="boot-loader" class="loading-overlay"><div class="spinner"></div><div class="mt-4 font-black text-slate-800 uppercase tracking-widest text-center px-4"><span id="sync-status">Authenticating...</span></div></div>
+
+    <div class="max-w-[1950px] mx-auto">
+        
+        <!-- Header -->
+        <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 mb-4 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-40">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="px-3 py-1.5 bg-slate-800 text-white rounded font-black text-xs uppercase hover:bg-slate-700 flex items-center gap-1 transition-colors"><i data-lucide="arrow-left" size="14"></i> Calendar</a>
+                <h1 class="text-xl font-black uppercase tracking-tighter text-blue-900 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-blue-600"></i> Financial Dashboard</h1>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded border border-slate-300 shadow-inner w-full md:w-auto">
+                <span class="text-xs font-black uppercase text-slate-500 px-2">Date Range:</span>
+                <input type="date" id="acc-date-start" onchange="window.renderAccounting()" class="w-full text-xs p-1 border-none shadow-none">
+                <span class="text-slate-400 font-bold px-1">TO</span>
+                <input type="date" id="acc-date-end" onchange="window.renderAccounting()" class="w-full text-xs p-1 border-none shadow-none">
+                <button onclick="document.getElementById('acc-date-start').value=''; document.getElementById('acc-date-end').value=''; window.renderAccounting();" class="p-1 hover:bg-slate-200 rounded text-slate-400"><i data-lucide="x" size="14"></i></button>
+            </div>
+        </div>
+
+        <div class="p-4 sm:p-6 bg-white rounded-lg shadow border border-slate-200">
+            
+            <!-- KPI Blocks -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8 unselectable">
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
+                    <span class="text-blue-500 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Active Gross Booked</span>
+                    <span id="acc-active-gross" class="text-2xl lg:text-3xl font-black text-blue-900 tracking-tighter z-10">฿0</span>
+                    <span class="text-blue-400 font-bold text-[9px] uppercase mt-1 z-10">Future, Here, Left, Charged</span>
+                </div>
+                <div class="bg-emerald-500 border-2 border-emerald-400 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transform scale-105 h-28">
+                    <div class="absolute top-0 right-0 bg-emerald-400 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg uppercase tracking-widest shadow z-20">Real Money</div>
+                    <span class="text-emerald-100 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Realized Income</span>
+                    <span id="acc-actual-collected" class="text-3xl lg:text-4xl font-black text-white tracking-tighter z-10">฿0</span>
+                    <span class="text-emerald-200 font-bold text-[9px] uppercase mt-1 z-10">All Settled Payments</span>
+                </div>
+                <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
+                    <span class="text-amber-600 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Pending Receivables</span>
+                    <span id="acc-pending-ar" class="text-2xl lg:text-3xl font-black text-amber-700 tracking-tighter z-10">฿0</span>
+                    <span class="text-amber-500 font-bold text-[9px] uppercase mt-1 z-10">Due Balances & Future OTA</span>
+                </div>
+                <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
+                    <span class="text-red-500 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Bad Debt</span>
+                    <span id="acc-bad-debt" class="text-2xl lg:text-3xl font-black text-red-700 tracking-tighter z-10">฿0</span>
+                    <span class="text-red-400 font-bold text-[9px] uppercase mt-1 z-10">Unpaid No-Shows & Left</span>
+                </div>
+                <div class="bg-slate-100 border-2 border-slate-300 rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden h-28">
+                    <span class="text-slate-500 font-black text-[10px] uppercase tracking-widest mb-1 z-10">Lost Revenue</span>
+                    <span id="acc-lost-cancel" class="text-2xl lg:text-3xl font-black text-slate-700 tracking-tighter z-10">฿0</span>
+                    <span class="text-slate-400 font-bold text-[9px] uppercase mt-1 z-10">Zero-Revenue Cancels</span>
+                </div>
+            </div>
+
+            <!-- Daily Operations Report -->
+            <div class="mb-8 bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 shadow-sm unselectable">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4 pb-2 border-b border-indigo-200">
+                    <h3 class="font-black text-indigo-900 uppercase tracking-widest flex items-center gap-2"><i data-lucide="calendar-clock" size="18"></i> Daily Operations Report</h3>
+                    <div class="flex items-center gap-2 mt-2 sm:mt-0">
+                        <label class="text-[10px] font-black uppercase text-indigo-600">Select Date:</label>
+                        <input type="date" id="daily-rep-date" class="text-xs border border-indigo-300 rounded p-1 font-bold text-indigo-800 bg-white shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer" onchange="window.renderDailyReport()">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg p-3 border border-indigo-100 shadow-sm text-center">
+                        <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Check-Ins Expected Value</div>
+                        <div id="rep-checkins" class="text-xl font-black text-slate-800">฿0</div>
+                        <div id="rep-checkins-count" class="text-[9px] font-bold text-slate-400 uppercase mt-0.5">0 Bookings</div>
+                    </div>
+                    <div class="bg-emerald-500 rounded-lg p-3 border border-emerald-600 shadow-sm text-center text-white">
+                        <div class="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-1">Real Money Collected</div>
+                        <div id="rep-real-money" class="text-xl font-black text-white">฿0</div>
+                        <div class="text-[9px] font-bold text-emerald-200 uppercase mt-0.5">Cash, Card, Scan</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 border border-indigo-100 shadow-sm text-center">
+                        <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Virtual / OTA Pay</div>
+                        <div id="rep-ota-pay" class="text-xl font-black text-blue-600">฿0</div>
+                        <div class="text-[9px] font-bold text-slate-400 uppercase mt-0.5">Agoda, BDC, Airbnb Pay</div>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 border border-indigo-100 shadow-sm text-center">
+                        <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">OTA Comm. Withheld</div>
+                        <div id="rep-ota-kp" class="text-xl font-black text-red-500">฿0</div>
+                        <div class="text-[9px] font-bold text-slate-400 uppercase mt-0.5">HW, Agoda, BDC KP</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtered Ledger -->
+            <div class="mb-8">
+                <div class="flex justify-between items-end border-b border-slate-200 pb-2 mb-3">
+                    <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm unselectable">Filtered Ledger</h3>
+                    <button onclick="window.exportLedgerCSV()" class="text-[10px] font-black uppercase bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded flex items-center gap-1 shadow-sm transition-colors unselectable"><i data-lucide="download" size="12"></i> Export CSV</button>
+                </div>
+                
+                <div class="overflow-x-auto min-h-[300px] max-h-[500px] border border-slate-300 rounded-lg shadow-sm">
+                    <table class="w-full text-left border-collapse text-sm min-w-[900px]" id="acc-ledger-table">
+                        <thead class="bg-slate-800 text-white sticky top-0 z-10 unselectable">
+                            <tr class="font-black uppercase tracking-wider text-sm cursor-pointer">
+                                <th onclick="window.sortAccounting('name')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[16%]">Guest Name <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                <th onclick="window.sortAccounting('source')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[10%]">Source <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                <th onclick="window.sortAccounting('checkIn')" class="p-2 border-r border-slate-600 hover:bg-slate-700 w-[20%]">Dates <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                <th onclick="window.sortAccounting('totalPrice')" class="p-2 border-r border-slate-600 text-right hover:bg-slate-700 w-[12%]">Gross <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                <th onclick="window.sortAccounting('netPrice')" class="p-2 border-r border-slate-600 text-right hover:bg-slate-700 w-[12%]">Net <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                <th onclick="window.sortAccounting('comm')" class="p-2 border-r border-slate-600 text-right text-red-300 hover:bg-slate-700 w-[10%]">Comm <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                <th onclick="window.sortAccounting('collected')" class="p-2 border-r border-slate-600 text-right text-emerald-300 hover:bg-slate-700 w-[10%]">Coll. <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                                <th onclick="window.sortAccounting('due')" class="p-2 text-right text-amber-300 hover:bg-slate-700 w-[10%]">Bal <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
+                            </tr>
+                            <tr class="bg-slate-700 text-slate-300 text-[10px] uppercase font-normal">
+                                <th class="p-1 border-r border-slate-600"><input type="text" id="acc-filter-name" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" placeholder="FILTER NAME OR ID..." oninput="window.renderAccounting()"></th>
+                                <th class="p-1 border-r border-slate-600">
+                                    <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-[10px]" onclick="window.toggleMultiSelect('acc-source-dropdown', this)">
+                                        <span id="acc-source-label" class="truncate">ALL SOURCES</span><span class="text-[8px] ml-1">▼</span>
+                                    </div>
+                                </th>
+                                <th class="p-1 border-r border-slate-600"><select id="acc-filter-month" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderAccounting()"></select></th>
+                                <th class="p-1 border-r border-slate-600 flex gap-1"><input type="number" id="acc-filter-min" placeholder="MIN ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderAccounting()"><input type="number" id="acc-filter-max" placeholder="MAX ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderAccounting()"></th>
+                                <th class="p-1 border-r border-slate-600"></th>
+                                <th class="p-1 border-r border-slate-600"></th>
+                                <th class="p-1 border-r border-slate-600"></th>
+                                <th class="p-1"><select id="acc-filter-due" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderAccounting()"><option value="">ALL</option><option value="zero">PAID</option><option value="owes">OWES</option></select></th>
+                            </tr>
+                        </thead>
+                        <tbody id="acc-ledger-body" class="bg-white text-slate-700 font-bold text-xs"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Analytics Modules Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Channel Distribution -->
+                <div class="border border-indigo-300 rounded-lg overflow-hidden shadow-sm self-start">
+                    <div class="bg-indigo-700 text-white p-1.5 font-black uppercase tracking-widest text-[10px] text-center unselectable">Channel Distribution</div>
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-indigo-50 text-[9px] uppercase font-bold text-indigo-700"><tr><th class="p-1.5 border-r border-indigo-200">Source</th><th class="p-1.5 border-r border-indigo-200 text-right">Bks</th><th class="p-1.5 text-right">Value ฿</th></tr></thead>
+                        <tbody id="acc-channel-body" class="text-[10px] font-bold text-slate-700 bg-white"></tbody>
+                    </table>
+                </div>
+                <!-- Bed Popularity -->
+                <div class="border border-slate-300 rounded-lg overflow-hidden shadow-sm self-start">
+                    <div class="bg-slate-800 text-white p-1.5 font-black uppercase tracking-widest text-[10px] text-center unselectable" title="Counts total bed/room instances sold, not just bookings.">Bed Popularity</div>
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-100 text-[9px] uppercase font-bold text-slate-500"><tr><th class="p-1.5 border-r border-slate-200">Bed Setup</th><th class="p-1.5 border-r border-slate-200 text-right" title="Beds/Rooms Sold">Sold</th><th class="p-1.5 text-right">Nights</th></tr></thead>
+                        <tbody id="acc-bed-body" class="text-[10px] font-bold text-slate-700 bg-white"></tbody>
+                    </table>
+                </div>
+                <!-- Cash Flow -->
+                <div class="border border-emerald-300 rounded-lg overflow-hidden shadow-sm self-start lg:col-span-2">
+                    <div class="bg-emerald-700 text-white p-1.5 font-black uppercase tracking-widest text-[10px] text-center unselectable">Income & Cash Flow (By Payment Date)</div>
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-emerald-50 text-[9px] uppercase font-bold text-emerald-700"><tr><th class="p-1.5 border-r border-emerald-200">Payment Category</th><th class="p-1.5 border-r border-emerald-200 text-right">Txns</th><th class="p-1.5 text-right">Total Amount</th></tr></thead>
+                        <tbody id="acc-cashflow-body" class="text-[10px] font-bold text-slate-700 bg-white"></tbody>
+                        <tfoot id="acc-cashflow-foot" class="bg-emerald-100 text-[11px] font-black text-emerald-900 border-t-2 border-emerald-300"></tfoot>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Hidden Dropdowns -->
+    <div id="acc-source-dropdown" class="multi-select-dropdown">
+        <label><input type="checkbox" value="booking.com" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> BDC</label>
+        <label><input type="checkbox" value="agoda" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> AGODA</label>
+        <label><input type="checkbox" value="airbnb" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> AIRBNB</label>
+        <label><input type="checkbox" value="hostelworld" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> HW</label>
+        <label><input type="checkbox" value="direct" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> DIRECT</label>
+        <label><input type="checkbox" value="walkin" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> WALK-IN</label>
+        <label><input type="checkbox" value="other" onchange="window.updateMultiLabel('acc-source-dropdown', 'acc-source-label', 'ALL SOURCES'); window.renderAccounting();" class="mr-1.5"> OTHER</label>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyCyz--TlQZf_d-YNxhtGCV29LuFoRBfEeU", authDomain: "swimspms.firebaseapp.com", projectId: "swimspms", storageBucket: "swimspms.firebasestorage.app", messagingSenderId: "989960113115", appId: "1:989960113115:web:a99e08a23a36ff4289f5fe" };
+        const appId = 'hotel-pms-v1'; 
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+
+        let staff = [];
+        let accSortKey = "checkIn"; let accSortAsc = false;
+        const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+        // Updated Custom BDC Room Mapping
+        const hotelRooms = [
+            {id:"101",type:"[ROOM 101-103] STAFF",bed:""}, {id:"102",type:"[ROOM 101-103] STAFF",bed:""}, {id:"103",type:"[ROOM 101-103] STAFF",bed:""},
+            {id:"201",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"202",type:"Gardenview Twin Room",bed:"TWIN"},
+            {id:"203",type:"Partial Oceanview Twin Room",bed:"TWIN"}, {id:"204",type:"Partial Oceanview Twin Room",bed:"TWIN"}, {id:"205",type:"Partial Oceanview Twin Room",bed:"TWIN"},
+            {id:"206",type:"Oceanview King Room",bed:"KING"},
+            {id:"207",type:"Gardenview King Room",bed:"KING"}, {id:"208",type:"Gardenview King Room",bed:"KING"}, {id:"209",type:"Gardenview King Room",bed:"KING"}, {id:"210",type:"Gardenview King Room",bed:"KING"}, {id:"211",type:"Gardenview King Room",bed:"KING"},
+            {id:"212",type:"Oceanview Twin Room",bed:"TWIN"},
+            {id:"301-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"301-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"301-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"301-4",type:"Standard Quad Dorm",bed:"QUAD"},
+            {id:"302-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"302-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"302-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"302-4",type:"Standard Quad Dorm",bed:"QUAD"},
+            {id:"303-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"303-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"303-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"303-4",type:"Standard Quad Dorm",bed:"QUAD"},
+            {id:"304-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"304-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"304-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"304-4",type:"Standard Quad Dorm",bed:"QUAD"},
+            {id:"305",type:"Standard Triple Room",bed:"K+T"},
+            {id:"306",type:"Oceanview King Room",bed:"KING"},
+            {id:"307",type:"Standard Triple Room",bed:"BUNK+T"}, {id:"308",type:"Standard Triple Room",bed:"BUNK+T"},
+            {id:"309",type:"Standard Triple Room",bed:"K+T"}, {id:"310",type:"Standard Triple Room",bed:"K+T"},
+            {id:"311",type:"Oceanview Twin Room",bed:"TWIN"},
+            {id:"A01",type:"[OCEANFRONT]",bed:"KING"}, {id:"A02",type:"[OCEANFRONT]",bed:"TWIN"},
+            {id:"A03",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"A04",type:"Oceanview Twin Room",bed:"TWIN"},
+            {id:"A05",type:"Partial Oceanview King Room",bed:"KING"},
+            {id:"A06",type:"Oceanview Twin Room",bed:"TWIN"},
+            {id:"A07",type:"Partial Oceanview King Room",bed:"KING"},
+            {id:"A08",type:"Oceanview Twin Room",bed:"KING"},
+            {id:"A09",type:"Partial Oceanview King Room",bed:"KING"},
+            {id:"A10",type:"Oceanview King Room",bed:"KING"},
+            {id:"A11",type:"Partial Oceanview King Room",bed:"KING"},
+            {id:"A12",type:"Oceanview King Room",bed:"KING"},
+            {id:"B01",type:"[OCEANFRONT]",bed:"KING"}, {id:"B02",type:"[OCEANFRONT]",bed:"TWIN"},
+            {id:"B03",type:"Oceanview King Room",bed:"KING"}, {id:"B04",type:"Oceanview King Room",bed:"KING"}, {id:"B05",type:"Oceanview King Room",bed:"KING"}, {id:"B06",type:"Oceanview King Room",bed:"KING"}, {id:"B07",type:"Oceanview King Room",bed:"KING"}, {id:"B08",type:"Oceanview King Room",bed:"KING"},
+            {id:"B09",type:"Gardenview King Room",bed:"KING"}, {id:"B10",type:"Gardenview King Room",bed:"KING"}, {id:"B11",type:"Gardenview King Room",bed:"KING"}, {id:"B12",type:"Gardenview King Room",bed:"KING"}, {id:"B13",type:"Gardenview King Room",bed:"KING"}, {id:"B14",type:"Gardenview King Room",bed:"KING"}, {id:"B15",type:"Gardenview King Room",bed:"KING"}, {id:"B16",type:"Gardenview King Room",bed:"KING"},
+            {id:"B17",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B18",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B19",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B20",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B21",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B22",type:"Gardenview Twin Room",bed:"TWIN"}
+        ];
+        for(let i=1;i<=11;i++) hotelRooms.push({id:"F"+String(i).padStart(2,'0'),type:"[BUNGALOWS]",bed:""});
+
+        const parseYMD = (dateStr) => { if (!dateStr) return 0; const p = dateStr.split('-'); return p.length !== 3 ? 0 : Date.UTC(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])); };
+        window.getPaid = (s) => (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
+        window.getDue = (s) => Number((Number(s.totalPrice || 0) - window.getPaid(s)).toFixed(2));
+        window.getComm = (s) => (s.payments || []).filter(p => ['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)).reduce((sum, p) => sum + Number(p.amt), 0);
+
+        window.toggleMultiSelect = (id, btnEventEl) => {
+            event.stopPropagation(); const drop = document.getElementById(id); if(!drop) return;
+            const isHidden = drop.style.display === 'none' || drop.style.display === '';
+            document.querySelectorAll('.multi-select-dropdown').forEach(d => { d.style.display = 'none'; });
+            if(isHidden) {
+                const rect = btnEventEl.getBoundingClientRect(); document.body.appendChild(drop);
+                drop.style.position = 'absolute'; drop.style.top = (rect.bottom + window.scrollY) + 'px'; drop.style.left = (rect.left + window.scrollX) + 'px'; drop.style.width = Math.max(rect.width, 140) + 'px';
+                if (rect.left + 150 > window.innerWidth) drop.style.left = (window.scrollX + rect.right - 150) + 'px';
+                drop.style.display = 'block';
+            }
+        };
+
+        window.updateMultiLabel = (dropId, labelId, defaultText) => {
+            const checked = document.querySelectorAll(`#${dropId} input[type="checkbox"]:checked`), label = document.getElementById(labelId);
+            if(!label) return; label.innerText = checked.length === 0 ? defaultText : (checked.length === 1 ? checked[0].parentNode.textContent.trim().toUpperCase() : checked.length + ' SELECTED');
+        };
+
+        window.getMultiValues = (id) => Array.from(document.getElementById(id)?.querySelectorAll('input[type="checkbox"]:checked') || []).map(cb => cb.value);
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.multi-select-dropdown')) document.querySelectorAll('.multi-select-dropdown').forEach(d => { d.style.display = 'none'; });
+        });
+
+        const init = async () => {
+            try {
+                await signInAnonymously(auth);
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => { 
+                    staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
+                    document.getElementById('boot-loader').style.display = 'none';
+                    
+                    // Setup Month Dropdown Options
+                    const mSelect = document.getElementById('acc-filter-month');
+                    if (mSelect && mSelect.options.length < 2) {
+                        let html = '<option value="">ALL DATES</option>', d = new Date(); d.setMonth(d.getMonth() - 2); d.setDate(1);
+                        for(let i=0; i<36; i++) {
+                            html += `<option value="${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}">${mNames[d.getMonth()]} ${d.getFullYear()}</option>`;
+                            d.setMonth(d.getMonth() + 1);
+                        } mSelect.innerHTML = html;
+                    }
+                    window.renderAccounting();
+                });
+            } catch (error) { document.getElementById('sync-status').innerText = "Auth Error"; }
+            lucide.createIcons();
+        };
+
+        window.sortAccounting = (key) => { if(accSortKey === key) accSortAsc = !accSortAsc; else { accSortKey = key; accSortAsc = true; } window.renderAccounting(); };
+
+        window.getFilteredBookings = () => {
+            const nFilter = (document.getElementById('acc-filter-name')?.value || '').trim().toUpperCase();
+            const sFilter = window.getMultiValues('acc-source-dropdown') || [];
+            const mFilter = document.getElementById('acc-filter-month')?.value || '';
+            const minF = document.getElementById('acc-filter-min')?.value;
+            const maxF = document.getElementById('acc-filter-max')?.value;
+            const dFilter = document.getElementById('acc-filter-due')?.value || '';
+            const startStr = document.getElementById('acc-date-start').value;
+            const endStr = document.getElementById('acc-date-end').value;
+
+            return staff.filter(s => {
+                if ((startStr && s.checkOut < startStr) || (endStr && s.checkIn > endStr)) return false;
+                const fN = (s.firstName+' '+s.lastName).toUpperCase();
+                const bId = (s.bookId||'').toUpperCase();
+                if (nFilter && !fN.includes(nFilter) && !bId.includes(nFilter)) return false;
+                if (sFilter.length > 0 && !sFilter.includes(s.source)) return false;
+                if (mFilter) { const [mY, mM] = mFilter.split('-'); if (!(parseYMD(s.checkIn) < Date.UTC(mY, mM, 1) && parseYMD(s.checkOut) > Date.UTC(mY, mM - 1, 1))) return false; }
+                const due = window.getDue(s);
+                if (dFilter === 'zero' && due > 0) return false;
+                if (dFilter === 'owes' && due <= 0) return false;
+                const tP = Number(s.totalPrice || 0);
+                if (minF && tP < Number(minF)) return false;
+                if (maxF && tP > Number(maxF)) return false;
+                return true;
+            }).sort((a, b) => {
+                let vA = a[accSortKey], vB = b[accSortKey];
+                if (accSortKey === 'name') { vA = (a.firstName+' '+a.lastName).toUpperCase(); vB = (b.firstName+' '+b.lastName).toUpperCase(); }
+                if (['totalPrice', 'netPrice'].includes(accSortKey)) { vA = Number(vA||0); vB = Number(vB||0); }
+                if (accSortKey === 'comm') { vA = Number(a.totalPrice||0) - Number(a.netPrice||0); vB = Number(b.totalPrice||0) - Number(b.netPrice||0); }
+                if (accSortKey === 'due') { vA = window.getDue(a); vB = window.getDue(b); }
+                if (accSortKey === 'collected') {
+                    const now = Date.now(), cA = parseYMD(a.checkOut), cB = parseYMD(b.checkOut);
+                    vA = (a.payments||[]).reduce((s,p) => s + (['bdc-pay', 'agoda-pay', 'airbnb-pay'].includes(p.method) ? (cA <= now ? Number(p.amt) : 0) : (!['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method) ? Number(p.amt) : 0)), 0);
+                    vB = (b.payments||[]).reduce((s,p) => s + (['bdc-pay', 'agoda-pay', 'airbnb-pay'].includes(p.method) ? (cB <= now ? Number(p.amt) : 0) : (!['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method) ? Number(p.amt) : 0)), 0);
+                } return accSortAsc ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
+            });
+        };
+
+        window.renderAccounting = () => {
+            let activeGross = 0, actualCollected = 0, pendingAR = 0, badDebt = 0, lostCancel = 0, bedStats = {};
+            let channelStats = { 'booking.com': { count: 0, val: 0 }, 'agoda': { count: 0, val: 0 }, 'hostelworld': { count: 0, val: 0 }, 'airbnb': { count: 0, val: 0 }, 'direct': { count: 0, val: 0 }, 'walkin': { count: 0, val: 0 }, 'other': { count: 0, val: 0 } };
+            
+            const ledgerRows = [], nowStr = new Date().toISOString().split('T')[0];
+            const startStr = document.getElementById('acc-date-start').value, endStr = document.getElementById('acc-date-end').value;
+            let cfStats = { cash: { label: 'Cash (In-House)', count: 0, amt: 0 }, scan: { label: 'QR / Bank Transfer', count: 0, amt: 0 }, card: { label: 'Credit Card (Stripe/Terminal)', count: 0, amt: 0 }, otapay: { label: 'Virtual OTA Payouts', count: 0, amt: 0 }, otakp: { label: 'OTA Comm. Withheld (Expense)', count: 0, amt: 0 }, other: { label: 'Other', count: 0, amt: 0 } };
+            let totalRealCash = 0;
+            const cfStart = startStr || '1970-01-01', cfEnd = endStr || '2099-12-31';
+
+            window.getFilteredBookings().forEach(s => {
+                const tPrice = Number(s.totalPrice || 0), nPrice = Number(s.netPrice || 0);
+                let paidRealized = 0, paidPending = 0, paidComm = 0;
+                
+                const countsTowardIncome = (s.status !== 'cancelled' && s.status !== 'noshow');
+                if (countsTowardIncome) paidComm = window.getComm(s);
+
+                (s.payments || []).forEach(p => {
+                    if (!['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)) { if (p.date > nowStr) paidPending += Number(p.amt||0); else paidRealized += Number(p.amt||0); }
+                    if (countsTowardIncome && p.date >= cfStart && p.date <= cfEnd) {
+                        const amt = Number(p.amt || 0); if (amt === 0) return;
+                        if (cfStats[p.method]) { cfStats[p.method].count++; cfStats[p.method].amt += amt; totalRealCash += amt; }
+                        else if (['bdc-pay', 'agoda-pay', 'airbnb-pay'].includes(p.method)) { cfStats.otapay.count++; cfStats.otapay.amt += amt; totalRealCash += amt; }
+                        else if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)) { cfStats.otakp.count++; cfStats.otakp.amt += amt; }
+                        else { cfStats.other.count++; cfStats.other.amt += amt; totalRealCash += amt; }
+                    }
+                });
+                
+                const balance = Math.max(0, tPrice - (paidRealized + paidPending + paidComm));
+                if (countsTowardIncome) {
+                    actualCollected += paidRealized; 
+                    pendingAR += paidPending;
+                }
+
+                // STRICT STATUS HANDLING
+                if (s.status === 'cancelled') lostCancel += balance; 
+                else if (s.status === 'noshow') badDebt += balance; 
+                else if (s.status === 'left') { activeGross += tPrice; badDebt += balance; } 
+                else if (s.status === 'charged') { activeGross += tPrice; } // Counts as gross, payments count as realized, balance NOT considered pendingAR or badDebt
+                else if (s.status !== 'unconfirmed') { activeGross += tPrice; pendingAR += balance; }
+
+                if (countsTowardIncome) {
+                    const cin = parseYMD(s.checkIn), cout = parseYMD(s.checkOut), nights = cin && cout && cout > cin ? Math.round((cout - cin) / 86400000) : 0;
+                    (s.rooms?.length ? s.rooms : (s.room ? [s.room] : [])).forEach(r => {
+                        const hr = hotelRooms.find(x => x.id === r);
+                        if (hr && hr.bed) { if (!bedStats[hr.bed]) bedStats[hr.bed] = { count: 0, nights: 0 }; bedStats[hr.bed].count += 1; bedStats[hr.bed].nights += nights; }
+                    });
+                    
+                    const srcKey = s.source || 'other';
+                    if(channelStats[srcKey]) { channelStats[srcKey].count++; channelStats[srcKey].val += tPrice; }
+                }
+                
+                ledgerRows.push({ id: s.id, name: `${s.firstName||''} ${s.lastName||''}`.trim(), in: s.checkIn ? s.checkIn.substr(5) : '--', out: s.checkOut ? s.checkOut.substr(5) : '--', src: (s.source||'').toUpperCase(), gross: tPrice.toFixed(2), net: nPrice.toFixed(2), comm: paidComm.toFixed(2), coll: paidRealized.toFixed(2), bal: balance.toFixed(2), status: s.status, badCC: s.badCC });
+            });
+
+            document.getElementById('acc-active-gross').innerText = `฿${activeGross.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('acc-actual-collected').innerText = `฿${actualCollected.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('acc-pending-ar').innerText = `฿${pendingAR.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('acc-bad-debt').innerText = `฿${badDebt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('acc-lost-cancel').innerText = `฿${lostCancel.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+
+            const tBody = document.getElementById('acc-bed-body'); tBody.innerHTML = '';
+            Object.keys(bedStats).sort((a, b) => bedStats[b].count - bedStats[a].count).forEach(bed => {
+                tBody.innerHTML += `<tr class="border-b border-slate-200 hover:bg-slate-50"><td class="p-1.5 border-r border-slate-200 font-black uppercase text-slate-800">${bed}</td><td class="p-1.5 border-r border-slate-200 text-right font-black text-slate-600">${bedStats[bed].count}</td><td class="p-1.5 text-right font-black text-blue-600">${bedStats[bed].nights}</td></tr>`;
+            });
+            
+            const cBody = document.getElementById('acc-channel-body'); if(cBody) {
+                cBody.innerHTML = '';
+                Object.keys(channelStats).sort((a, b) => channelStats[b].val - channelStats[a].val).forEach(c => {
+                    if (channelStats[c].count > 0) cBody.innerHTML += `<tr class="border-b border-indigo-200 hover:bg-indigo-50"><td class="p-1.5 border-r border-indigo-200 font-bold uppercase text-slate-700">${c}</td><td class="p-1.5 border-r border-indigo-200 text-right text-slate-500">${channelStats[c].count}</td><td class="p-1.5 text-right font-black text-indigo-700">฿${channelStats[c].val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td></tr>`;
+                });
+            }
+
+            const cfBody = document.getElementById('acc-cashflow-body'), cfFoot = document.getElementById('acc-cashflow-foot');
+            if (cfBody && cfFoot) {
+                cfBody.innerHTML = ''; cfFoot.innerHTML = `<tr><td colspan="2" class="p-2 border-r border-emerald-300 text-right uppercase tracking-widest">Net Income (Period):</td><td class="p-2 text-right text-[14px]">฿${totalRealCash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td></tr>`;
+                Object.keys(cfStats).forEach(k => { if (cfStats[k].count > 0) cfBody.innerHTML += `<tr class="border-b border-slate-200 hover:bg-emerald-50"><td class="p-1.5 border-r border-emerald-200 font-bold text-slate-700">${cfStats[k].label}</td><td class="p-1.5 border-r border-emerald-200 text-right text-slate-500">${cfStats[k].count}</td><td class="p-1.5 text-right font-black text-emerald-700">฿${cfStats[k].amt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td></tr>`; });
+            }
+
+            const lBody = document.getElementById('acc-ledger-body'); lBody.innerHTML = '';
+            ledgerRows.forEach(lr => {
+                const tr = document.createElement('tr'); const isDead = lr.status === 'cancelled' || lr.status === 'noshow';
+                // REDIRECT TO MAIN CALENDAR ON CLICK
+                tr.className = `border-b border-slate-200 hover:bg-slate-50 cursor-pointer ${isDead ? 'opacity-40 line-through decoration-slate-400 decoration-[1.5px]' : ''}`;
+                tr.onclick = () => { window.location.href = `index.html?edit=${lr.id}`; };
+                
+                const statusColor = lr.status === 'charged' ? 'bg-[#0f172a] text-[#fbbf24]' : (lr.status === 'here' ? 'bg-[#059669] text-white' : (lr.status === 'future' ? 'bg-[#7fc6f5] text-slate-800' : 'bg-slate-200 text-slate-700'));
+                tr.innerHTML = `<td class="p-2 border-r border-slate-200">${lr.name} <span class="ml-1 px-1 py-0.5 text-[9px] rounded uppercase font-black ${statusColor}">${lr.status}</span></td><td class="p-2 border-r border-slate-200 text-[10px] uppercase">${lr.src}</td><td class="p-2 border-r border-slate-200 text-slate-500 text-xs">${lr.in} to ${lr.out}</td><td class="p-2 border-r border-slate-200 text-right">${lr.gross}</td><td class="p-2 border-r border-slate-200 text-right">${lr.net}</td><td class="p-2 border-r border-slate-200 text-right text-red-400">${lr.comm}</td><td class="p-2 border-r border-slate-200 text-right text-emerald-600">${lr.coll}</td><td class="p-2 text-right ${lr.badCC ? 'underline decoration-dashed decoration-red-500 text-red-600 font-black' : 'text-amber-500'}">${lr.bal}</td>`;
+                lBody.appendChild(tr);
+            });
+            
+            window.exportLedgerCSV = () => {
+                let csv = "Guest Name,Check In,Check Out,Source,Status,Gross Booked,Net Expected,Commission,Actual Collected,Balance\n";
+                ledgerRows.forEach(lr => { csv += `"${lr.name}","${lr.in}","${lr.out}","${lr.src}","${lr.status}",${lr.gross},${lr.net},${lr.comm},${lr.coll},${lr.bal}\n`; });
+                const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = "SWIMS_Ledger.csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            };
+            window.renderDailyReport();
+        };
+
+        window.renderDailyReport = () => {
+            const dateInput = document.getElementById('daily-rep-date'); if (!dateInput) return;
+            if (!dateInput.value) { const n = new Date(); dateInput.value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; }
+            const tDate = dateInput.value; let ciVal = 0, ciCount = 0, rMoney = 0, oPay = 0, oKp = 0;
+            
+            staff.forEach(s => {
+                const countsTowardIncome = (s.status !== 'cancelled' && s.status !== 'noshow');
+                if (countsTowardIncome && s.checkIn === tDate) { ciVal += Number(s.totalPrice || 0); ciCount++; }
+                if (countsTowardIncome) {
+                    (s.payments || []).forEach(p => {
+                        if (p.date === tDate) {
+                            const amt = Number(p.amt || 0);
+                            if (['cash', 'card', 'scan'].includes(p.method)) rMoney += amt;
+                            else if (['bdc-pay', 'agoda-pay', 'airbnb-pay'].includes(p.method)) oPay += amt;
+                            else if (['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)) oKp += amt;
+                            else rMoney += amt; 
+                        }
+                    });
+                }
+            });
+            document.getElementById('rep-checkins').innerText = `฿${ciVal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('rep-checkins-count').innerText = `${ciCount} BOOKINGS ARRIVING`;
+            document.getElementById('rep-real-money').innerText = `฿${rMoney.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('rep-ota-pay').innerText = `฿${oPay.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('rep-ota-kp').innerText = `฿${oKp.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        };
+
+        init();
+    </script>
+</body>
+</html>
