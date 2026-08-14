@@ -204,37 +204,18 @@
 
         // Updated Custom BDC Room Mapping
         const hotelRooms = [
-            {id:"101",type:"[ROOM 101-103] STAFF",bed:""}, {id:"102",type:"[ROOM 101-103] STAFF",bed:""}, {id:"103",type:"[ROOM 101-103] STAFF",bed:""},
-            {id:"201",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"202",type:"Gardenview Twin Room",bed:"TWIN"},
-            {id:"203",type:"Partial Oceanview Twin Room",bed:"TWIN"}, {id:"204",type:"Partial Oceanview Twin Room",bed:"TWIN"}, {id:"205",type:"Partial Oceanview Twin Room",bed:"TWIN"},
-            {id:"206",type:"Oceanview King Room",bed:"KING"},
-            {id:"207",type:"Gardenview King Room",bed:"KING"}, {id:"208",type:"Gardenview King Room",bed:"KING"}, {id:"209",type:"Gardenview King Room",bed:"KING"}, {id:"210",type:"Gardenview King Room",bed:"KING"}, {id:"211",type:"Gardenview King Room",bed:"KING"},
-            {id:"212",type:"Oceanview Twin Room",bed:"TWIN"},
-            {id:"301-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"301-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"301-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"301-4",type:"Standard Quad Dorm",bed:"QUAD"},
-            {id:"302-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"302-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"302-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"302-4",type:"Standard Quad Dorm",bed:"QUAD"},
-            {id:"303-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"303-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"303-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"303-4",type:"Standard Quad Dorm",bed:"QUAD"},
-            {id:"304-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"304-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"304-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"304-4",type:"Standard Quad Dorm",bed:"QUAD"},
-            {id:"305",type:"Standard Triple Room",bed:"K+T"},
-            {id:"306",type:"Oceanview King Room",bed:"KING"},
-            {id:"307",type:"Standard Triple Room",bed:"BUNK+T"}, {id:"308",type:"Standard Triple Room",bed:"BUNK+T"},
-            {id:"309",type:"Standard Triple Room",bed:"K+T"}, {id:"310",type:"Standard Triple Room",bed:"K+T"},
-            {id:"311",type:"Oceanview Twin Room",bed:"TWIN"},
-            {id:"A01",type:"[OCEANFRONT]",bed:"KING"}, {id:"A02",type:"[OCEANFRONT]",bed:"TWIN"},
-            {id:"A03",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"A04",type:"Oceanview Twin Room",bed:"TWIN"},
-            {id:"A05",type:"Partial Oceanview King Room",bed:"KING"},
-            {id:"A06",type:"Oceanview Twin Room",bed:"TWIN"},
-            {id:"A07",type:"Partial Oceanview King Room",bed:"KING"},
-            {id:"A08",type:"Oceanview Twin Room",bed:"KING"},
-            {id:"A09",type:"Partial Oceanview King Room",bed:"KING"},
-            {id:"A10",type:"Oceanview King Room",bed:"KING"},
-            {id:"A11",type:"Partial Oceanview King Room",bed:"KING"},
-            {id:"A12",type:"Oceanview King Room",bed:"KING"},
-            {id:"B01",type:"[OCEANFRONT]",bed:"KING"}, {id:"B02",type:"[OCEANFRONT]",bed:"TWIN"},
-            {id:"B03",type:"Oceanview King Room",bed:"KING"}, {id:"B04",type:"Oceanview King Room",bed:"KING"}, {id:"B05",type:"Oceanview King Room",bed:"KING"}, {id:"B06",type:"Oceanview King Room",bed:"KING"}, {id:"B07",type:"Oceanview King Room",bed:"KING"}, {id:"B08",type:"Oceanview King Room",bed:"KING"},
-            {id:"B09",type:"Gardenview King Room",bed:"KING"}, {id:"B10",type:"Gardenview King Room",bed:"KING"}, {id:"B11",type:"Gardenview King Room",bed:"KING"}, {id:"B12",type:"Gardenview King Room",bed:"KING"}, {id:"B13",type:"Gardenview King Room",bed:"KING"}, {id:"B14",type:"Gardenview King Room",bed:"KING"}, {id:"B15",type:"Gardenview King Room",bed:"KING"}, {id:"B16",type:"Gardenview King Room",bed:"KING"},
-            {id:"B17",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B18",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B19",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B20",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B21",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B22",type:"Gardenview Twin Room",bed:"TWIN"}
+            {id:"A1",type:"[OCEANFRONT]",bed:"KING"}, {id:"A2",type:"[OCEANFRONT]",bed:"TWIN"}, {id:"B1",type:"[OCEANFRONT]",bed:"KING"}, {id:"B2",type:"[OCEANFRONT]",bed:"TWIN"},
+            {id:"C206",type:"Oceanview King Room",bed:"KING"}, {id:"C306",type:"Oceanview King Room",bed:"KING"}, {id:"A10",type:"Oceanview King Room",bed:"KING"}, {id:"A12",type:"Oceanview King Room",bed:"KING"}, {id:"B3",type:"Oceanview King Room",bed:"KING"}, {id:"B4",type:"Oceanview King Room",bed:"KING"}, {id:"B5",type:"Oceanview King Room",bed:"KING"}, {id:"B6",type:"Oceanview King Room",bed:"KING"}, {id:"B7",type:"Oceanview King Room",bed:"KING"}, {id:"B8",type:"Oceanview King Room",bed:"KING"},
+            {id:"C212",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"C311",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"A3",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"A4",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"A6",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"A8",type:"Oceanview Twin Room",bed:"KING"},
+            {id:"A5",type:"Partial Oceanview King Room",bed:"KING"}, {id:"A7",type:"Partial Oceanview King Room",bed:"KING"}, {id:"A9",type:"Partial Oceanview King Room",bed:"KING"}, {id:"A11",type:"Partial Oceanview King Room",bed:"KING"},
+            {id:"C203",type:"Partial Oceanview Twin Room",bed:"TWIN"}, {id:"C204",type:"Partial Oceanview Twin Room",bed:"TWIN"}, {id:"C205",type:"Partial Oceanview Twin Room",bed:"TWIN"},
+            {id:"C207",type:"Gardenview King Room",bed:"KING"}, {id:"C208",type:"Gardenview King Room",bed:"KING"}, {id:"C209",type:"Gardenview King Room",bed:"KING"}, {id:"C210",type:"Gardenview King Room",bed:"KING"}, {id:"C211",type:"Gardenview King Room",bed:"KING"}, {id:"B9",type:"Gardenview King Room",bed:"KING"}, {id:"B10",type:"Gardenview King Room",bed:"KING"}, {id:"B11",type:"Gardenview King Room",bed:"KING"}, {id:"B12",type:"Gardenview King Room",bed:"KING"}, {id:"B13",type:"Gardenview King Room",bed:"KING"}, {id:"B14",type:"Gardenview King Room",bed:"KING"}, {id:"B15",type:"Gardenview King Room",bed:"KING"}, {id:"B16",type:"Gardenview King Room",bed:"KING"},
+            {id:"C201",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"C202",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B17",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B18",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B19",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B20",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B21",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B22",type:"Gardenview Twin Room",bed:"TWIN"},
+            {id:"C305",type:"Standard Triple Room",bed:"K+T"}, {id:"C307",type:"Standard Triple Room",bed:"BUNK+T"}, {id:"C308",type:"Standard Triple Room",bed:"BUNK+T"}, {id:"C309",type:"Standard Triple Room",bed:"K+T"}, {id:"C310",type:"Standard Triple Room",bed:"K+T"},
+            {id:"C301-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C301-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C301-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C301-4",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C302-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C302-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C302-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C302-4",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C303-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C303-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C303-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C303-4",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C304-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C304-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C304-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C304-4",type:"Standard Quad Dorm",bed:"QUAD"},
+            {id:"F1",type:"[BUNGALOWS]",bed:""}, {id:"F2",type:"[BUNGALOWS]",bed:""}, {id:"F3",type:"[BUNGALOWS]",bed:""}, {id:"F4",type:"[BUNGALOWS]",bed:""}, {id:"F5",type:"[BUNGALOWS]",bed:""}, {id:"F6",type:"[BUNGALOWS]",bed:""}, {id:"F7",type:"[BUNGALOWS]",bed:""}, {id:"F8",type:"[BUNGALOWS]",bed:""}, {id:"F9",type:"[BUNGALOWS]",bed:""}, {id:"F10",type:"[BUNGALOWS]",bed:""}, {id:"F11",type:"[BUNGALOWS]",bed:""},
+            {id:"C101",type:"[ROOM 101-103] STAFF",bed:""}, {id:"C102",type:"[ROOM 101-103] STAFF",bed:""}, {id:"C103",type:"[ROOM 101-103] STAFF",bed:""}
         ];
-        for(let i=1;i<=11;i++) hotelRooms.push({id:"F"+String(i).padStart(2,'0'),type:"[BUNGALOWS]",bed:""});
 
         const parseYMD = (dateStr) => { if (!dateStr) return 0; const p = dateStr.split('-'); return p.length !== 3 ? 0 : Date.UTC(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])); };
         window.getPaid = (s) => (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
