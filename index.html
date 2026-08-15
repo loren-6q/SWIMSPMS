@@ -780,10 +780,11 @@
             if (idxStart > -1) {
                 let pStart = notes.lastIndexOf('Hi ', idxStart); if (pStart === -1) pStart = notes.lastIndexOf('GUEST MSG:', idxStart);
                 let pEnd = notes.indexOf('SWIMS! a Social Beach Resort', idxStart);
-                if (pEnd > -1) { pEnd += 'SWIMS! a Social Beach Resort'.length; notes = (notes.substring(0, pStart !== -1 ? pStart : idxStart) + notes.substring(pEnd)).trim(); }
+                if (pEnd > -1) { pEnd += 'SWIMS! a Social Beach Resort'.length; notes = (notes.substring(0, pStart !== -1 ? pStart : idxStart) + " " + notes.substring(pEnd)).trim(); }
             }
             notes = notes.replace(/_+\s*Your Check-in:[^\n]+\s*Your Check-out:[^\n]+/gi, '');
             notes = notes.replace(/'?Before Check-in'? was sent automatically based on your messaging preferences\.?/gi, '');
+            notes = notes.replace(/GUEST MSG:\s*$/i, '');
             notes = notes.trim();
 
             let last = gName.trim(), first = ""; if(gName.includes(',')) { const p = gName.split(','); last = p[0].trim(); first = p.slice(1).join(',').trim(); } else { const p = gName.split(' '); first = p[0].trim(); last = p.length>1 ? p.slice(1).join(' ').trim() : ""; }
