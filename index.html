@@ -96,7 +96,7 @@
         <div class="bg-white px-2 py-1.5 rounded-none sm:rounded-lg shadow-sm border-b sm:border border-slate-200 mb-1 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2 sticky top-0 z-50 unselectable">
             <div class="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-start">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center shadow-inner"><i data-lucide="waves" class="text-white" size="20"></i></div>
+                    <img src="apple-touch-icon.png" class="w-8 h-8 rounded border border-slate-200 shadow-sm" alt="Logo" onerror="this.style.display='none'">
                     <button onclick="window.fixDatabaseRooms()" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase px-2 py-1 rounded shadow-sm border border-red-800 transition-colors">Fix DB</button>
                     <div class="flex bg-slate-100 rounded-lg p-1 ml-2">
                         <button id="tab-cal" onclick="window.switchTab('calendar')" class="tab-btn active">CAL</button>
@@ -142,29 +142,8 @@
                 <div id="timeline-body" class="relative pb-2"></div>
             </div>
 
-            <footer class="mt-2 bg-white p-2 sm:rounded-lg border border-slate-200 flex flex-col md:flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-[10px] md:text-[11px]">
-                <div class="flex flex-wrap items-center justify-center gap-3">
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#7fc6f5] border border-[#38bdf8]"></span> FUTURE</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#059669] border border-[#047857]"></span> HERE</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#aba39d] border border-[#78716c]"></span> LEFT</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#f3e8ff] border border-[#d8b4fe]"></span> UNCONFIRMED</div>
-                    <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#0f172a] border border-[#f59e0b]"></span> CHARGED</div>
-                </div>
-                <div class="w-px h-4 bg-slate-300 hidden md:block"></div>
-                <div class="flex flex-wrap items-center justify-center gap-3">
-                    <div class="legend-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="#facc15" stroke="#000" stroke-width="2" stroke-linejoin="round"><polygon points="12 4 22 20 2 20"></polygon></svg> FREE UPGRADE</div>
-                    <div class="legend-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="#4ade80" stroke="#000" stroke-width="2" stroke-linejoin="round"><polygon points="12 4 22 20 2 20"></polygon></svg> PAID UPGRADE</div>
-                    <div class="legend-item"><i data-lucide="link" class="w-3.5 h-3.5 text-slate-800"></i> LINKED</div>
-                    <div class="legend-item"><i data-lucide="chevron-up" class="w-3.5 h-3.5 text-blue-500"></i> EXTENDED</div>
-                    <div class="legend-item"><div class="border-[2px] border-red-500 w-3 h-3"></div> DUE</div>
-                    <div class="legend-item"><div class="border-[2px] border-red-500 border-dashed w-3 h-3"></div> BAD CC</div>
-                </div>
-                <div class="w-px h-4 bg-slate-300 hidden xl:block"></div>
-                <div class="flex flex-wrap items-center justify-center gap-3">
-                    <div class="legend-item"><i data-lucide="mail" class="w-3.5 h-3.5 text-slate-500"></i> CONFIRM</div>
-                    <div class="legend-item"><i data-lucide="mail" class="w-3.5 h-3.5 text-orange-500"></i> PRE/POST</div>
-                    <div class="legend-item"><i data-lucide="mail-warning" class="w-3.5 h-3.5 text-red-500"></i> SPECIAL</div>
-                </div>
+            <!-- Populated via JS to inject custom SVGs -->
+            <footer id="calendar-legend" class="mt-2 bg-white p-2 sm:rounded-lg border border-slate-200 flex flex-col md:flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-[10px] md:text-[11px]">
             </footer>
         </div>
 
@@ -234,7 +213,7 @@
         <label><input type="checkbox" value="unconfirmed" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> UNCONFIRMED</label>
         <label><input type="checkbox" value="cancelled" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CANCELLED</label>
         <label><input type="checkbox" value="noshow" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> NO-SHOW</label>
-        <label><input type="checkbox" value="charged" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CHARGED (RETAINED)</label>
+        <label><input type="checkbox" value="charged" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CHARGED</label>
         <label><input type="checkbox" value="special" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> SPECIAL</label>
         <label><input type="checkbox" value="blocked" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> BLOCKED</label>
     </div>
@@ -269,8 +248,8 @@
                     <div><label class="field-label">Email</label><input type="text" id="email" class="w-full text-sm" oninput="window.checkEmailProxy(this.value)"></div>
                     <div class="grid grid-cols-3 gap-1 sm:gap-2 pt-1 border-t border-slate-200 mt-2 unselectable overflow-x-auto no-scrollbar">
                         <div id="email-confirm-btn" class="flex-1 min-w-[80px] multi-state-btn px-0.5 py-1 rounded text-[9px] sm:text-[10px] font-black uppercase border border-slate-300 text-slate-400 whitespace-nowrap" data-state="0" onclick="window.cycleMulti(this, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400'])">CONFIRM: --</div>
-                        <div id="email-prepost-btn" class="flex-1 min-w-[80px] multi-state-btn px-0.5 py-1 rounded text-[9px] sm:text-[10px] font-black uppercase border border-slate-300 text-slate-400 whitespace-nowrap" data-state="0" onclick="window.cycleMulti(this, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400'])">PRE/POST: --</div>
-                        <div id="email-special-btn" class="flex-1 min-w-[80px] multi-state-btn px-0.5 py-1 rounded text-[9px] sm:text-[10px] font-black uppercase border border-slate-300 text-slate-400 whitespace-nowrap" data-state="0" onclick="window.cycleMulti(this, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400'])">SPECIAL: --</div>
+                        <div id="email-prepost-btn" class="flex-1 min-w-[80px] multi-state-btn px-0.5 py-1 rounded text-[9px] sm:text-[10px] font-black uppercase border border-slate-300 text-slate-400 whitespace-nowrap" data-state="0" onclick="window.cycleMulti(this, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400'])">PRE/POST: --</div>
+                        <div id="email-special-btn" class="flex-1 min-w-[80px] multi-state-btn px-0.5 py-1 rounded text-[9px] sm:text-[10px] font-black uppercase border border-slate-300 text-slate-400 whitespace-nowrap" data-state="0" onclick="window.cycleMulti(this, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-yellow-100 text-yellow-700 border-yellow-400'])">SPECIAL: --</div>
                     </div>
                 </div>
 
@@ -294,7 +273,7 @@
 
                 <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 sm:gap-2 pb-2 unselectable">
                     <div id="refund-btn" class="flex-1 multi-state-btn px-1 sm:px-2 py-1.5 rounded text-[9px] sm:text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400 min-w-[100px]" data-state="0" onclick="window.cycleMulti(this, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400'])">REFUNDABILITY: ?</div>
-                    <div id="upgrade-btn" class="flex-1 multi-state-btn px-1 sm:px-2 py-1.5 rounded text-[9px] sm:text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400 min-w-[100px]" data-state="0" onclick="window.cycleMulti(this, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400'])">NO UPGRADE</div>
+                    <div id="upgrade-btn" class="flex-1 multi-state-btn px-1 sm:px-2 py-1.5 rounded text-[9px] sm:text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400 min-w-[100px]" data-state="0" onclick="window.cycleMulti(this, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-yellow-100 text-yellow-700 border-yellow-400', 'bg-green-100 text-green-700 border-green-400'])">NO UPGRADE</div>
                     <div id="rating-btn" class="flex-1 multi-state-btn px-1 sm:px-2 py-1.5 rounded text-[9px] sm:text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400 min-w-[100px]" data-state="0" onclick="window.cycleMulti(this, ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400'])">FEEDBACK: --</div>
                     <div id="ext-btn" class="flex-1 multi-state-btn px-1 sm:px-2 py-1.5 rounded text-[9px] sm:text-[11px] text-center font-black uppercase border border-slate-300 text-slate-400 min-w-[100px]" data-state="0" onclick="window.cycleMulti(this, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400'])">NOT EXTENDED</div>
                 </div>
@@ -403,7 +382,7 @@
 
     <div id="alert-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div id="alert-header" class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Attention</div><div class="p-6 text-center"><p id="alert-message" class="font-black text-slate-700 leading-tight text-md whitespace-pre-wrap"></p><div id="alert-actions" class="mt-6 flex gap-2 justify-center"><button id="alert-cancel" onclick="window.closeAlert()" class="hidden px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button id="alert-confirm" onclick="window.closeAlert()" class="px-10 py-2 bg-blue-600 text-white rounded-lg font-black text-sm uppercase">Okay</button></div></div></div></div>
     <div id="split-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Split Stay</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select date to split booking.<br><span class="text-xs font-bold text-slate-500 mt-2 block">This creates a zero-balance linked segment so you can easily move guests to a different room mid-stay without messing up your accounting!</span></p><input type="date" id="split-date" class="w-full mb-6 bg-slate-50 border border-slate-300 font-bold text-lg p-2 rounded outline-none"><div class="flex gap-2 justify-center"><button onclick="document.getElementById('split-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button onclick="window.confirmSplit()" class="px-10 py-2 bg-orange-600 text-white rounded-lg font-black text-sm uppercase">Split Stay</button></div></div></div></div>
-    <div id="merge-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Merge Bookings</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select a booking to absorb.<br><span class="text-xs font-bold text-slate-500 mt-2 block">Dates, rooms, and payments will be seamlessly combined. The absorbed booking will be deleted!</span></p><select id="merge-target" class="w-full mb-6 bg-slate-50 border border-slate-300 font-bold text-sm p-2 rounded outline-none cursor-pointer"></select><div class="flex gap-2 justify-center"><button onclick="document.getElementById('merge-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button id="merge-confirm-btn" onclick="window.confirmMerge()" class="px-10 py-2 bg-indigo-600 text-white rounded-lg font-black text-sm uppercase transition-all">Merge</button></div></div></div></div>
+    <div id="merge-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Merge Bookings</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select a booking to absorb.<br><span class="text-xs font-bold text-slate-500 mt-2 block">Dates, rooms, and payments will be seamlessly combined. The absorbed booking will be deleted!</span></p><select id="merge-target" class="w-full mb-6 bg-slate-50 border border-slate-300 font-bold text-sm p-2 rounded outline-none cursor-pointer"></select><div class="flex gap-2 justify-center"><button onclick="document.getElementById('merge-modal').style.display='none'" class="px-6 py-2 bg-slate-200 rounded-lg font-black text-sm uppercase">Cancel</button><button id="merge-confirm-btn" onclick="window.confirmMerge()" class="px-10 py-2 bg-indigo-600 text-white rounded-lg font-black text-sm transition-all">Merge</button></div></div></div></div>
     <div id="price-check-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm flex justify-between items-center"><span>Quick Price Check</span><button type="button" onclick="document.getElementById('price-check-modal').style.display='none'"><i data-lucide="x" size="18"></i></button></div><div class="p-6 flex flex-col gap-3"><div class="flex gap-2"><div class="flex-1"><label class="field-label">Check-in</label><input type="date" id="pc-in" class="w-full text-sm p-2 bg-slate-50 border border-slate-300 rounded outline-none font-bold"></div><div class="w-20"><label class="field-label">Nights</label><input type="number" id="pc-nights" value="1" min="1" class="w-full text-sm p-2 bg-slate-50 border border-slate-300 rounded outline-none text-center font-bold" onchange="window.updatePcOut()"></div></div><div class="flex gap-2"><div class="flex-1"><label class="field-label">Check-out</label><input type="date" id="pc-out" class="w-full text-sm p-2 bg-slate-100 border border-slate-300 rounded outline-none font-bold text-slate-500" readonly></div><div class="w-20"><label class="field-label">PAX</label><input type="number" id="pc-pax" value="1" min="1" class="w-full text-sm p-2 bg-slate-50 border border-slate-300 rounded outline-none text-center font-bold"></div></div><button onclick="window.executePriceCheck()" class="mt-2 w-full py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-black text-sm uppercase flex items-center justify-center gap-2 transition-colors"><i data-lucide="external-link" size="16"></i> Check BDC Rates</button></div></div></div>
 
     <div id="custom-tooltip"></div>
@@ -438,21 +417,134 @@
         
         const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         const fmpDates = ["2026-01-03", "2026-02-02", "2026-03-03", "2026-04-02", "2026-05-01", "2026-06-01", "2026-06-29", "2026-07-31", "2026-08-28", "2026-09-26", "2026-10-27", "2026-11-24", "2026-12-24", "2026-12-31"];
+
         const topCountries = ["Thailand", "United Kingdom", "United States", "Australia", "Germany", "France", "Netherlands", "Canada", "Israel", "Spain", "Italy", "Sweden", "Switzerland", "Ireland", "New Zealand", "Austria", "Belgium", "Denmark", "Norway", "Finland", "Brazil", "Argentina", "Mexico", "South Africa", "Russia", "China", "Japan", "South Korea", "India"];
 
-        // The exact room array mapping exactly as provided
+        // The exactly requested Custom SVGs (Thick borders, Skinny Arrows, Multi-state Colors)
+        const SVG_ICONS = {
+            link: `<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+            mailConf: `<svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="2" y="5" width="20" height="14" fill="#fff" stroke="#000" stroke-width="2" rx="2"/><path d="M2 6l10 7 10-7" fill="none" stroke="#000" stroke-width="2"/></svg>`,
+            mailPre: `<svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="2" y="5" width="20" height="14" fill="#f87171" stroke="#000" stroke-width="2" rx="2"/><path d="M2 6l10 7 10-7" fill="none" stroke="#000" stroke-width="2"/></svg>`,
+            mailPreConf: `<svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="2" y="5" width="20" height="14" fill="#4ade80" stroke="#000" stroke-width="2" rx="2"/><path d="M2 6l10 7 10-7" fill="none" stroke="#000" stroke-width="2"/></svg>`,
+            mailSpec: `<svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="2" y="5" width="20" height="14" fill="#fde047" stroke="#000" stroke-width="2" rx="2"/><path d="M2 6l10 7 10-7" fill="none" stroke="#000" stroke-width="2"/></svg>`,
+            upFree: `<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M12 4l-8 8h5v8h6v-8h5z" fill="#facc15" stroke="#000" stroke-width="2" stroke-linejoin="round"/></svg>`,
+            upPaid: `<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M12 4l-8 8h5v8h6v-8h5z" fill="#22c55e" stroke="#000" stroke-width="2" stroke-linejoin="round"/></svg>`,
+            ext: `<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M14 4l8 8-8 8v-5H4v-6h10z" fill="#3b82f6" stroke="#000" stroke-width="2" stroke-linejoin="round"/></svg>`,
+            fbGood: `<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M4 12l4 4L20 6" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12l4 4L20 6" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+            fbBad: `<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M6 6l12 12M6 18L18 6" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 6l12 12M6 18L18 6" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+        };
+
+        document.getElementById('calendar-legend').innerHTML = `
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#7fc6f5] border border-[#38bdf8]"></span> FUTURE</div>
+                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#059669] border border-[#047857]"></span> HERE</div>
+                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#aba39d] border border-[#78716c]"></span> LEFT</div>
+                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#f3e8ff] border border-[#d8b4fe]"></span> UNCONFIRMED</div>
+                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#0f172a] border border-[#f59e0b]"></span> CHARGED</div>
+            </div>
+            <div class="w-px h-4 bg-slate-300 hidden md:block"></div>
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <div class="legend-item"><div class="w-3 h-4 shrink-0">${SVG_ICONS.upFree}</div> FREE UP</div>
+                <div class="legend-item"><div class="w-3 h-4 shrink-0">${SVG_ICONS.upPaid}</div> PAID UP</div>
+                <div class="legend-item"><div class="w-4 h-4 shrink-0">${SVG_ICONS.link}</div> LINKED</div>
+                <div class="legend-item"><div class="w-3.5 h-3.5 shrink-0">${SVG_ICONS.ext}</div> EXTENDED</div>
+                <div class="legend-item"><div class="border-[2px] border-red-500 w-3 h-3"></div> DUE</div>
+                <div class="legend-item"><div class="border-[2px] border-red-500 border-dashed w-3 h-3"></div> BAD CC</div>
+            </div>
+            <div class="w-px h-4 bg-slate-300 hidden xl:block"></div>
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVG_ICONS.mailConf}</div> CONFIRM</div>
+                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVG_ICONS.mailPre}</div> PRE/POST SENT</div>
+                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVG_ICONS.mailPreConf}</div> PRE/POST CONF</div>
+                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVG_ICONS.mailSpec}</div> SPECIAL</div>
+            </div>
+        `;
+
+        // Exact Hotel Rooms grouping requested by the user
         const hotelRooms = [
-            { id: "B01", type: "Oceanfront King", bed: "KING", floor: 2 }, { id: "A01", type: "Oceanfront King", bed: "KING", floor: 1 }, { id: "A02", type: "Oceanfront King", bed: "KING", floor: 1 },
-            { id: "B02", type: "Oceanfront Twin", bed: "TWIN", floor: 2 },
-            { id: "B03", type: "Oceanview King Room", bed: "KING", floor: 2 }, { id: "B05", type: "Oceanview King Room", bed: "KING", floor: 2 }, { id: "B07", type: "Oceanview King Room", bed: "KING", floor: 2 }, { id: "A03", type: "Oceanview King Room", bed: "KING", floor: 1 }, { id: "A04", type: "Oceanview King Room", bed: "KING", floor: 1 }, { id: "A06", type: "Oceanview King Room", bed: "KING", floor: 1 }, { id: "A08", type: "Oceanview King Room", bed: "KING", floor: 1 }, { id: "A10", type: "Oceanview King Room", bed: "KING", floor: 1 }, { id: "A12", type: "Oceanview King Room", bed: "KING", floor: 1 }, { id: "C206", type: "Oceanview King Room", bed: "KING", floor: 2 }, { id: "C306", type: "Oceanview King Room", bed: "KING", floor: 3 }, { id: "C311", type: "Oceanview King Room", bed: "KING", floor: 3 },
-            { id: "B04", type: "Oceanview Twin Room", bed: "TWIN", floor: 2 }, { id: "B06", type: "Oceanview Twin Room", bed: "TWIN", floor: 2 }, { id: "B08", type: "Oceanview Twin Room", bed: "TWIN", floor: 2 }, { id: "C212", type: "Oceanview Twin Room", bed: "TWIN", floor: 2 },
-            { id: "A05", type: "Partial Oceanview King Room", bed: "KING", floor: 1 }, { id: "A07", type: "Partial Oceanview King Room", bed: "KING", floor: 1 }, { id: "A09", type: "Partial Oceanview King Room", bed: "KING", floor: 1 }, { id: "A11", type: "Partial Oceanview King Room", bed: "KING", floor: 1 }, { id: "C203", type: "Partial Oceanview King Room", bed: "KING", floor: 2 }, { id: "C204", type: "Partial Oceanview King Room", bed: "KING", floor: 2 }, { id: "C205", type: "Partial Oceanview King Room", bed: "KING", floor: 2 },
-            { id: "B09", type: "Gardenview King Room", bed: "KING", floor: 2 }, { id: "B11", type: "Gardenview King Room", bed: "KING", floor: 2 }, { id: "B13", type: "Gardenview King Room", bed: "KING", floor: 2 }, { id: "B15", type: "Gardenview King Room", bed: "KING", floor: 2 }, { id: "B17", type: "Gardenview King Room", bed: "KING", floor: 2 }, { id: "B19", type: "Gardenview King Room", bed: "KING", floor: 2 }, { id: "B21", type: "Gardenview King Room", bed: "KING", floor: 2 }, { id: "B22", type: "Gardenview King Room", bed: "KING", floor: 2 },
-            { id: "B10", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "B12", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "B14", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "B16", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "B18", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "B20", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "C201", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "C202", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "C207", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "C208", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "C209", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "C210", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "C211", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 }, { id: "C101", type: "Gardenview Twin Room", bed: "TWIN", floor: 1 },
-            { id: "C307", type: "Partial Oceanview Triple Room", bed: "BUNK+T", floor: 3 }, { id: "C308", type: "Partial Oceanview Triple Room", bed: "BUNK+T", floor: 3 }, { id: "C305", type: "Partial Oceanview Triple Room", bed: "K+T", floor: 3 }, { id: "C309", type: "Partial Oceanview Triple Room", bed: "K+T", floor: 3 }, { id: "C310", type: "Partial Oceanview Triple Room", bed: "K+T", floor: 3 },
-            { id: "C301-1", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C301-2", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C301-3", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C301-4", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C302-1", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C302-2", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C302-3", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C302-4", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C303-1", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C303-2", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C303-3", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C303-4", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C304-1", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C304-2", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C304-3", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 }, { id: "C304-4", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
-            { id: "D01", type: "BUNGALOWS", bed: "", floor: 1 }, { id: "D02", type: "BUNGALOWS", bed: "", floor: 1 }, { id: "D03", type: "BUNGALOWS", bed: "", floor: 1 }, { id: "D04", type: "BUNGALOWS", bed: "", floor: 1 }, { id: "D05", type: "BUNGALOWS", bed: "", floor: 1 }, { id: "D06", type: "BUNGALOWS", bed: "", floor: 1 }, { id: "D07", type: "BUNGALOWS", bed: "", floor: 1 }, { id: "D08", type: "BUNGALOWS", bed: "", floor: 1 }, { id: "D09", type: "BUNGALOWS", bed: "", floor: 1 }, { id: "D10", type: "BUNGALOWS", bed: "", floor: 1 }, { id: "D11", type: "BUNGALOWS", bed: "", floor: 1 },
-            { id: "102", type: "STAFF ROOMS", bed: "", floor: 1 }, { id: "103", type: "STAFF ROOMS", bed: "", floor: 1 }
+            { id: "B01", type: "Oceanfront King", bed: "1 King", floor: 2, order: 101 },
+            { id: "A01", type: "Oceanfront King", bed: "1 King", floor: 1, order: 102 },
+            { id: "A02", type: "Oceanfront King", bed: "1 King", floor: 1, order: 103 },
+            { id: "B02", type: "Oceanfront Twin", bed: "2 Twin", floor: 2, order: 201 },
+            { id: "B03", type: "Oceanview King Room", bed: "1 King", floor: 2, order: 301 },
+            { id: "B05", type: "Oceanview King Room", bed: "1 King", floor: 2, order: 302 },
+            { id: "B07", type: "Oceanview King Room", bed: "1 King", floor: 2, order: 303 },
+            { id: "A03", type: "Oceanview King Room", bed: "1 King", floor: 1, order: 304 },
+            { id: "A04", type: "Oceanview King Room", bed: "1 King", floor: 1, order: 305 },
+            { id: "A06", type: "Oceanview King Room", bed: "1 King", floor: 1, order: 306 },
+            { id: "A08", type: "Oceanview King Room", bed: "1 King", floor: 1, order: 307 },
+            { id: "A10", type: "Oceanview King Room", bed: "1 King", floor: 1, order: 308 },
+            { id: "A12", type: "Oceanview King Room", bed: "1 King", floor: 1, order: 309 },
+            { id: "C206", type: "Oceanview King Room", bed: "1 King", floor: 2, order: 310 },
+            { id: "C306", type: "Oceanview King Room", bed: "1 King", floor: 3, order: 311 },
+            { id: "C311", type: "Oceanview King Room", bed: "1 King", floor: 3, order: 312 },
+            { id: "B04", type: "Oceanview Twin Room", bed: "2 Twin", floor: 2, order: 401 },
+            { id: "B06", type: "Oceanview Twin Room", bed: "2 Twin", floor: 2, order: 402 },
+            { id: "B08", type: "Oceanview Twin Room", bed: "2 Twin", floor: 2, order: 403 },
+            { id: "C212", type: "Oceanview Twin Room", bed: "2 Twin", floor: 2, order: 404 },
+            { id: "A05", type: "Partial Oceanview King Room", bed: "1 King", floor: 1, order: 501 },
+            { id: "A07", type: "Partial Oceanview King Room", bed: "1 King", floor: 1, order: 502 },
+            { id: "A09", type: "Partial Oceanview King Room", bed: "1 King", floor: 1, order: 503 },
+            { id: "A11", type: "Partial Oceanview King Room", bed: "1 King", floor: 1, order: 504 },
+            { id: "C203", type: "Partial Oceanview King Room", bed: "1 King", floor: 2, order: 505 },
+            { id: "C204", type: "Partial Oceanview King Room", bed: "1 King", floor: 2, order: 506 },
+            { id: "C205", type: "Partial Oceanview King Room", bed: "1 King", floor: 2, order: 507 },
+            { id: "B09", type: "Gardenview King Room", bed: "1 King", floor: 2, order: 601 },
+            { id: "B11", type: "Gardenview King Room", bed: "1 King", floor: 2, order: 602 },
+            { id: "B13", type: "Gardenview King Room", bed: "1 King", floor: 2, order: 603 },
+            { id: "B15", type: "Gardenview King Room", bed: "1 King", floor: 2, order: 604 },
+            { id: "B17", type: "Gardenview King Room", bed: "1 King", floor: 2, order: 605 },
+            { id: "B19", type: "Gardenview King Room", bed: "1 King", floor: 2, order: 606 },
+            { id: "B21", type: "Gardenview King Room", bed: "1 King", floor: 2, order: 607 },
+            { id: "B22", type: "Gardenview King Room", bed: "1 King", floor: 2, order: 608 },
+            { id: "B10", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 701 },
+            { id: "B12", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 702 },
+            { id: "B14", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 703 },
+            { id: "B16", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 704 },
+            { id: "B18", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 705 },
+            { id: "B20", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 706 },
+            { id: "C201", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 707 },
+            { id: "C202", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 708 },
+            { id: "C207", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 709 },
+            { id: "C208", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 710 },
+            { id: "C209", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 711 },
+            { id: "C210", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 712 },
+            { id: "C211", type: "Gardenview Twin Room", bed: "2 Twin", floor: 2, order: 713 },
+            { id: "C101", type: "Gardenview Twin Room", bed: "2 Twin", floor: 1, order: 714 },
+            { id: "C307", type: "Partial Oceanview Triple Room", bed: "Twin/Bunk", floor: 3, order: 801 },
+            { id: "C308", type: "Partial Oceanview Triple Room", bed: "Twin/Bunk", floor: 3, order: 802 },
+            { id: "C305", type: "Partial Oceanview Triple Room", bed: "Twin/King", floor: 3, order: 803 },
+            { id: "C309", type: "Partial Oceanview Triple Room", bed: "Twin/King", floor: 3, order: 804 },
+            { id: "C310", type: "Partial Oceanview Triple Room", bed: "Twin/King", floor: 3, order: 805 },
+            { id: "C301-1", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 901 },
+            { id: "C301-2", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 902 },
+            { id: "C301-3", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 903 },
+            { id: "C301-4", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 904 },
+            { id: "C302-1", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 905 },
+            { id: "C302-2", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 906 },
+            { id: "C302-3", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 907 },
+            { id: "C302-4", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 908 },
+            { id: "C303-1", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 909 },
+            { id: "C303-2", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 910 },
+            { id: "C303-3", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 911 },
+            { id: "C303-4", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 912 },
+            { id: "C304-1", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 913 },
+            { id: "C304-2", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 914 },
+            { id: "C304-3", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 915 },
+            { id: "C304-4", type: "Standard Quad Dorm", bed: "Quad", floor: 3, order: 916 },
+            { id: "D01", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1001 },
+            { id: "D02", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1002 },
+            { id: "D03", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1003 },
+            { id: "D04", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1004 },
+            { id: "D05", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1005 },
+            { id: "D06", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1006 },
+            { id: "D07", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1007 },
+            { id: "D08", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1008 },
+            { id: "D09", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1009 },
+            { id: "D10", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1010 },
+            { id: "D11", type: "BUNGALOWS", bed: "XXXX", floor: 1, order: 1011 },
+            { id: "102", type: "STAFF ROOMS", bed: "????", floor: 1, order: 1101 },
+            { id: "103", type: "STAFF ROOMS", bed: "????", floor: 1, order: 1102 }
         ];
 
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
@@ -473,19 +565,22 @@
             } return html;
         };
 
+        // Safe DB adapters: Preserves live DB history by mapping locally
         const dbToUiRoom = (rid) => {
             if (!rid) return rid;
-            let nid = String(rid).toUpperCase();
-            if (/^[ABF]\d$/.test(nid)) { let l = nid[0] === 'F' ? 'D' : nid[0]; return l + '0' + nid.substring(1); }
-            if (nid === '102' || nid === '103') return nid;
-            if (/^[123]\d\d(?:-\d)?$/.test(nid)) return 'C' + nid;
+            let nid = rid.toUpperCase();
+            if (/^[AB]\d$/.test(nid)) return nid[0] + '0' + nid.substring(1);
+            if (/^F\d+$/.test(nid)) return 'D' + (nid.length === 2 ? '0' + nid[1] : nid.substring(1));
+            if (/^[23]\d{2}(?:-\d)?$/.test(nid) || nid === '101') return 'C' + nid;
             return nid;
         };
+
         const uiToDbRoom = (rid) => {
             if (!rid) return rid;
-            let nid = String(rid).toUpperCase();
-            if (/^[ABD]0\d$/.test(nid)) { let l = nid[0] === 'D' ? 'F' : nid[0]; return l + nid.substring(2); }
-            if (nid.startsWith('C') && /^\d{3}(?:-\d)?$/.test(nid.substring(1))) return nid.substring(1);
+            let nid = rid.toUpperCase();
+            if (/^[AB]0\d$/.test(nid)) return nid[0] + nid.substring(2);
+            if (/^D0?\d+$/.test(nid)) return 'F' + (nid[1] === '0' ? nid.substring(2) : nid.substring(1));
+            if (nid.startsWith('C') && (/^\d{3}(?:-\d)?$/.test(nid.substring(1)))) return nid.substring(1);
             return nid;
         };
 
@@ -515,7 +610,8 @@
                     snap.forEach(docSnap => {
                         const data = docSnap.data();
                         const fix = (rid) => {
-                            if(!rid) return rid; let old = rid.toUpperCase();
+                            if(!rid) return rid;
+                            let old = rid.toUpperCase();
                             if (old.startsWith('C') && /^\d{3}(?:-\d)?$/.test(old.substring(1))) return old.substring(1);
                             if (/^[ABF]0\d$/.test(old)) return old[0] + old.substring(2);
                             return old;
@@ -550,7 +646,10 @@
                 
                 const urlParams = new URLSearchParams(window.location.search);
                 const editId = urlParams.get('edit');
-                if (editId) { window.editStaff(editId); try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {} }
+                if (editId) { 
+                    window.editStaff(editId); 
+                    try { window.history.replaceState({}, document.title, window.location.pathname); } catch (e) {} 
+                }
             };
 
             if (typeof window.__initial_auth_token !== 'undefined' || !REQUIRE_LOGIN) {
@@ -780,19 +879,21 @@
                     if (searchTerm && !(s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm) && !(s.bookId||'').toUpperCase().includes(searchTerm)) bar.style.opacity = "0.15";
 
                     let bHtml = `<div class="bar-sticky-content gap-0.5">`;
-                    if (s.linkedId) bHtml += `<i data-lucide="link" class="w-3 h-3 text-slate-800 shrink-0 mr-0.5"></i>`;
+                    if (s.linkedId) bHtml += `<div class="w-3.5 h-3.5 shrink-0 mr-0.5">${SVG_ICONS.link}</div>`;
                     bHtml += `<span class="${s.refundability === 'ref' && parseYMD(s.checkIn) - Date.now() > 7 * 86400000 ? 'italic font-bold' : 'font-bold'} truncate text-[11px]" style="letter-spacing:-0.3px;">${s.lastName}</span>`;
                     if (s.pax > 1) bHtml += `<span class="text-[8px] opacity-60 leading-none self-start mt-0.5 ml-0.5">x${s.pax}</span>`;
                     
-                    if (s.upgrade === 'free') bHtml += `<svg width="14" height="14" viewBox="0 0 24 24" fill="#facc15" stroke="#000" stroke-width="2" stroke-linejoin="round" class="shrink-0 ml-0.5"><polygon points="12 4 22 20 2 20"></polygon></svg>`;
-                    else if (s.upgrade === 'paid') bHtml += `<svg width="14" height="14" viewBox="0 0 24 24" fill="#4ade80" stroke="#000" stroke-width="2" stroke-linejoin="round" class="shrink-0 ml-0.5"><polygon points="12 4 22 20 2 20"></polygon></svg>`;
+                    if (s.upgrade === 'free') bHtml += `<div class="w-3 h-4 shrink-0 ml-0.5">${SVG_ICONS.upFree}</div>`; 
+                    else if (s.upgrade === 'paid') bHtml += `<div class="w-3 h-4 shrink-0 ml-0.5">${SVG_ICONS.upPaid}</div>`;
+                    if (s.extended) bHtml += `<div class="w-3.5 h-3.5 shrink-0 ml-0.5">${SVG_ICONS.ext}</div>`;
+                    if (s.rating === 'good') bHtml += `<div class="w-4 h-4 shrink-0 ml-0.5">${SVG_ICONS.fbGood}</div>`; 
+                    else if (s.rating === 'bad') bHtml += `<div class="w-4 h-4 shrink-0 ml-0.5">${SVG_ICONS.fbBad}</div>`;
+                    if (s.emailSpecial) bHtml += `<div class="w-4 h-3.5 shrink-0 ml-0.5">${SVG_ICONS.mailSpec}</div>`; 
+                    else if (s.emailPrePost === 'confirmed') bHtml += `<div class="w-4 h-3.5 shrink-0 ml-0.5">${SVG_ICONS.mailPreConf}</div>`; 
+                    else if (s.emailPrePost === 'sent' || s.emailPrePost === true) bHtml += `<div class="w-4 h-3.5 shrink-0 ml-0.5">${SVG_ICONS.mailPre}</div>`; 
+                    else if (s.emailConfirm) bHtml += `<div class="w-4 h-3.5 shrink-0 ml-0.5">${SVG_ICONS.mailConf}</div>`;
                     
-                    if (s.extended) bHtml += `<i data-lucide="chevron-up" class="w-3.5 h-3.5 text-blue-500 shrink-0 ml-0.5"></i>`;
-                    if (s.emailSpecial) bHtml += `<i data-lucide="mail-warning" class="w-3 h-3 text-red-500 shrink-0 ml-0.5"></i>`; 
-                    else if (s.emailPrePost) bHtml += `<i data-lucide="mail" class="w-3 h-3 text-orange-500 shrink-0 ml-0.5"></i>`; 
-                    else if (s.emailConfirm) bHtml += `<i data-lucide="mail" class="w-3 h-3 text-slate-500 shrink-0 ml-0.5"></i>`;
-                    
-                    bHtml += `<div class="ml-1 ${src.bg} text-white w-[14px] h-[14px] text-[10px] font-black flex items-center justify-center shrink-0 rounded-sm">${src.text}</div><div class="w-2 shrink-0"></div></div>`;
+                    bHtml += `<div class="ml-1 ${src.bg} text-white w-[15px] h-[15px] text-[13px] font-black flex items-center justify-center shrink-0 rounded-sm leading-none pb-[1px] pt-[0.5px]">${src.text}</div><div class="w-2 shrink-0"></div></div>`;
                     bar.innerHTML = bHtml;
 
                     let tags = [];
@@ -931,7 +1032,7 @@
         window.updateAvailableRooms = () => {
             const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value, cid = document.getElementById('staff-id').value;
             if(!cin || !cout) return; const sUTC = parseYMD(cin), eUTC = parseYMD(cout), occ = new Set();
-            staff.forEach(s => { if(s.id === cid || s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed') return; if(sUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < eUTC) (s.rooms?.length ? s.rooms : [s.room]).forEach(r => { if(r) occ.add(r); }); });
+            staff.forEach(s => { if(s.id === cid || s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed' || s.status === 'charged') return; if(sUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < eUTC) (s.rooms?.length ? s.rooms : [s.room]).forEach(r => { if(r) occ.add(r); }); });
             document.querySelectorAll('.assigned-room-select').forEach(sel => {
                 const cur = sel.value; Array.from(sel.options).forEach(opt => { if(!opt.value) return; if(occ.has(opt.value)) { opt.disabled = true; opt.text = opt.text.replace(' (OCCUPIED)', '') + ' (OCCUPIED)'; } else { opt.disabled = false; opt.text = opt.text.replace(' (OCCUPIED)', ''); } }); sel.value = cur;
             });
@@ -1033,10 +1134,10 @@
             if(s.payments) s.payments.forEach(p => window.addPaymentRow(p.date, Number(p.amt || 0).toFixed(2), p.method, true));
 
             setMulti('email-confirm-btn', s.emailConfirm ? 1 : 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
-            setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='sent'?1:2), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-orange-100 text-orange-700 border-orange-400', 'bg-green-100 text-green-700 border-green-400']);
-            setMulti('email-special-btn', s.emailSpecial ? 1 : 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-purple-100 text-purple-700 border-purple-400']);
+            setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='confirmed'?2:1), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
+            setMulti('email-special-btn', s.emailSpecial ? 1 : 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-yellow-100 text-yellow-700 border-yellow-400']);
             setMulti('refund-btn', s.refundability === 'non-ref' ? 1 : (s.refundability === 'ref' ? 2 : 0), ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
-            setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade === 'free' ? 1 : 2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
+            setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade === 'free' ? 1 : 2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-yellow-100 text-yellow-700 border-yellow-400', 'bg-green-100 text-green-700 border-green-400']);
             setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating === 'good' ? 1 : 2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']);
             setMulti('ext-btn', s.extended ? 1 : 0, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
 
@@ -1060,7 +1161,10 @@
 
         window.editStaff = (id) => { const s = staff.find(x => x.id === id); if (s) window.populateStaffForm(s); };
         window.openStaffModal = () => window.populateStaffForm({});
-        window.closeStaffModal = () => { document.getElementById('staff-modal').style.display = 'none'; try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e){} };
+        window.closeStaffModal = () => { 
+            document.getElementById('staff-modal').style.display = 'none'; 
+            try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
+        };
         window.quickAdd = (room, date) => { window.populateStaffForm({}); document.getElementById('assigned-rooms-container').innerHTML = ''; window.addRoomSelect(room); document.getElementById('check-in').value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; const out = new Date(date); out.setDate(date.getDate() + 1); document.getElementById('check-out').value = `${out.getFullYear()}-${String(out.getMonth() + 1).padStart(2, '0')}-${String(out.getDate()).padStart(2, '0')}`; window.syncLabels(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension(); };
 
         window.saveBooking = async () => {
@@ -1078,9 +1182,9 @@
 
                 const status = document.getElementById('staff-status').value, startUTC = parseYMD(cin), endUTC = parseYMD(cout);
 
-                if (status !== 'unconfirmed' && status !== 'cancelled' && status !== 'noshow') {
+                if (status !== 'unconfirmed' && status !== 'cancelled' && status !== 'noshow' && status !== 'charged') {
                     for (let s of staff) {
-                        if (s.id === id || s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed') continue;
+                        if (s.id === id || s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed' || s.status === 'charged') continue;
                         if(startUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < endUTC) {
                             const rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []);
                             for (let r of roomsList) if (rList.includes(r)) { window.showAlert(`ROOM OVERLAP ERROR:\n\nRoom ${r} is already assigned to ${s.firstName} ${s.lastName} during these dates.`); return; }
@@ -1097,14 +1201,18 @@
                 };
                 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry); window.closeStaffModal();
-            } catch (err) { console.error(err); window.showAlert("Save process timed out or encountered an error. Please verify connection."); } finally { saveBtn.disabled = false; saveBtn.innerHTML = originalBtnHtml; lucide.createIcons(); }
+            } catch (err) { 
+                console.error("Save Error:", err);
+                window.showAlert("Save process timed out or encountered an error. Please verify connection.\n\n" + err.message); 
+            } finally { 
+                saveBtn.disabled = false; saveBtn.innerHTML = originalBtnHtml; lucide.createIcons(); 
+            }
         };
 
         window.requestDuplicate = async () => {
             if(currentUserRole === 'staff') return; const s = staff.find(x => x.id === document.getElementById('staff-id').value); if (!s) return;
             let linkCode = document.getElementById('link-code').value.trim().toUpperCase() || s.linkedId || Math.random().toString(36).substr(2, 4).toUpperCase();
             if(!s.linkedId) {
-                // Keep DB mapping consistent for the old booking update
                 let dbRooms = (s.rooms || []).map(uiToDbRoom);
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), { ...s, room: dbRooms[0]||"", rooms: dbRooms, linkedId: linkCode });
             }
@@ -1237,20 +1345,21 @@
         
         window.autoSuggestRoom = (bt, nt, cin, cout) => {
             if (!cin || !cout) return; const startUTC = parseYMD(cin), endUTC = parseYMD(cout), occ = new Set();
-            staff.forEach(s => { if(s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed') return; if(startUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < endUTC) (s.rooms || [s.room]).forEach(r => { if(r) occ.add(r); }); });
+            staff.forEach(s => { if(s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed' || s.status === 'charged') return; if(startUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < endUTC) (s.rooms || [s.room]).forEach(r => { if(r) occ.add(r); }); });
             const available = hotelRooms.filter(r => !occ.has(r.id)); if (available.length === 0) return;
 
             let pType = null;
-            if (bt.includes("DORMITORY") || bt.includes("4-BED") || bt.includes("DORM")) pType = "Bed in 4-Bed Mixed Dormitory Room";
-            else if (bt.includes("TRIPLE")) pType = "Standard Triple Room";
-            else if (bt.includes("SIDE SEA VIEW") || (bt.includes("PARTIAL") && !bt.includes("TWIN"))) pType = "Deluxe Double Room with Side Sea View";
-            else if (bt.includes("PARTIAL SEA VIEW") || (bt.includes("PARTIAL") && bt.includes("TWIN"))) pType = "Double or Twin Room with Partial Sea View";
-            else if (bt.includes("DELUXE TWIN") || (bt.includes("OCEANVIEW") && bt.includes("TWIN"))) pType = "Deluxe Twin Room with Sea View";
-            else if (bt.includes("DELUXE DOUBLE") || (bt.includes("OCEANVIEW") && !bt.includes("TWIN"))) pType = "Deluxe Double Room with Balcony and Sea View";
-            else if (bt.includes("TWIN ROOM WITH BALCONY") || (bt.includes("GARDEN") && bt.includes("TWIN"))) pType = "Twin Room with Balcony";
-            else if (bt.includes("KING ROOM WITH BALCONY") || (bt.includes("GARDEN") && !bt.includes("TWIN"))) pType = "King Room with Balcony";
-            else if (bt.includes("OCEANFRONT")) pType = "[OCEANFRONT]";
-            else if (bt.includes("BUNGALOW")) pType = "[BUNGALOWS]";
+            if (bt.includes("DORMITORY") || bt.includes("4-BED") || bt.includes("DORM")) pType = "Standard Quad Dorm";
+            else if (bt.includes("TRIPLE")) pType = "Partial Oceanview Triple Room";
+            else if (bt.includes("SIDE SEA VIEW") || (bt.includes("PARTIAL") && !bt.includes("TWIN"))) pType = "Partial Oceanview King Room";
+            else if (bt.includes("PARTIAL SEA VIEW") || (bt.includes("PARTIAL") && bt.includes("TWIN"))) pType = "Partial Oceanview King Room";
+            else if (bt.includes("DELUXE TWIN") || (bt.includes("OCEANVIEW") && bt.includes("TWIN"))) pType = "Oceanview Twin Room";
+            else if (bt.includes("DELUXE DOUBLE") || (bt.includes("OCEANVIEW") && !bt.includes("TWIN"))) pType = "Oceanview King Room";
+            else if (bt.includes("TWIN ROOM WITH BALCONY") || (bt.includes("GARDEN") && bt.includes("TWIN"))) pType = "Gardenview Twin Room";
+            else if (bt.includes("KING ROOM WITH BALCONY") || (bt.includes("GARDEN") && !bt.includes("TWIN"))) pType = "Gardenview King Room";
+            else if (bt.includes("OCEANFRONT") && bt.includes("TWIN")) pType = "Oceanfront Twin";
+            else if (bt.includes("OCEANFRONT") && !bt.includes("TWIN")) pType = "Oceanfront King";
+            else if (bt.includes("BUNGALOW")) pType = "BUNGALOWS";
 
             let pBed = null;
             if (nt.includes("THE GUEST ASKED FOR 1 EXTRA-LARGE DOUBLE BED") || nt.includes("1 EXTRA-LARGE") || nt.includes("1 DOUBLE") || nt.includes("1 KING") || nt.includes("LARGE DOUBLE")) pBed = "KING";
@@ -1327,7 +1436,8 @@
                     let allNotes = []; lines.forEach(l => { if (l.toUpperCase().includes('BED PREFERENCE:') || l.toUpperCase().includes('BED-PREFERENCE REQUEST:')) allNotes.push(l.replace(/Reply$/i, '').trim()); });
                     let convoIdx = lines.findIndex(l => l.toLowerCase() === 'conversation with guest');
                     if (convoIdx > -1) { let mLines = []; for (let i = convoIdx + 1; i < lines.length; i++) { let lLow = lines[i].toLowerCase(); if (lLow.includes('protect your account security') || lLow === 'images' || lLow === 'templates' || lLow.includes('important information about this guest') || lLow === 'cancellation' || lLow === 'no messages' || lLow.includes('conversations with your guests will appear')) break; if (/^(?:Today|Yesterday|[A-Za-z]+,?\s*\d{1,2}\s*[A-Za-z]*),\s*\d{1,2}:\d{2}/i.test(lines[i]) || /^\d{1,2}:\d{2}$/.test(lines[i]) || lLow === 'reply') continue; if (lines[i].trim()) mLines.push(lines[i].trim()); } if (mLines.length > 0) allNotes.push("GUEST MSG: " + mLines.join(" ")); }
-                    notes = allNotes.join('\n\n');
+                    
+                    notes = allNotes.join('\n\n').replace(/['"]?Before Check-in['"]? was sent automatically based on your messaging preferences\.?/gi, '').trim();
                     if (text.includes('Payment is facilitated') || text.includes('Booking.com will collect')) hasBdcPayment = true;
                     break;
                     
@@ -1365,7 +1475,7 @@
                     total = cleanMoney(extract(/Subtotal\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i)); comm = cleanMoney(extract(/Hostelworld Deposit\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})?\s*([\d,.]+)/i));
                     let hwTableIdx = text.toLowerCase().lastIndexOf('room type');
                     if (hwTableIdx > -1) { let tableText = text.substring(hwTableIdx); let rMatch = tableText.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*([^\n\r]+?)(?:\s*Non-?refundable|\s*Promo|\n|\r|$)/i); if (rMatch) bType = rMatch[1].replace(/^FMP\s+/i, '').trim(); }
-                    if (!bType) { let rowMatch = text.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*\n*\s*([\s\S]+?)(?:\s+Promo)?\s*\n*\s*(\d+)\s*\n*\s*\d+\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})\s*[\d,.]+/i); if (rowMatch) { bType = rowMatch[1].replace(/^FMP\s+/i, '').trim(); if (!pax) pax = parseInt(rowMatch[2]); } }
+                    if (!bType) { let rowMatch = text.match(/\d{1,2}(?:st|nd|rd|th)\s+[A-Za-z]{3}\s*(?:´\d{2}|\d{4})?\s*\n*\s*([\s\S]+?)(?:\s+Promo)?\s*\n*\s*(\d+)\s*\n*\s*(?:THB|฿|\$|€|£|[A-Z]{3})\s*[\d,.]+/i); if (rowMatch) { bType = rowMatch[1].replace(/^FMP\s+/i, '').trim(); if (!pax) pax = parseInt(rowMatch[2]); } }
                     if (bType) { if (bType.toLowerCase().includes('2 bed private ensuite')) bType = 'Standard: 1 King OR 2 Twin Beds (200s/300s)'; else if (bType.toLowerCase().includes('3 bed') && !bType.toLowerCase().includes('dorm')) bType = 'Triple Room'; }
                     break;
             }
@@ -1401,7 +1511,7 @@
             document.getElementById('staff-notes').value = notes;
             
             setMulti('refund-btn', refundability, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
-            if (parsedUpgrade > 0) setMulti('upgrade-btn', parsedUpgrade, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
+            if (parsedUpgrade > 0) setMulti('upgrade-btn', parsedUpgrade, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-yellow-100 text-yellow-700 border-yellow-400', 'bg-green-100 text-green-700 border-green-400']);
             
             if (comm > 0) {
                 let kpMethod = 'other';
