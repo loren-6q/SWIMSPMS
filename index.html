@@ -17,10 +17,10 @@
             .btn-action { @apply px-2 py-1 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:brightness-110 active:scale-95 transition-all; }
             .btn-modal { @apply px-6 py-2 rounded-lg font-black text-sm uppercase transition-colors; }
             .btn-tool { @apply w-full sm:w-auto px-2 sm:px-4 py-1.5 rounded hover:brightness-95 shadow-sm flex items-center justify-center transition-colors; }
-            .input-base { @apply w-full bg-slate-50 border border-slate-300 font-bold text-xs px-1.5 py-1 rounded outline-none focus:ring-2 focus:ring-blue-500; }
+            .input-base { @apply w-full bg-slate-50 border border-slate-300 font-bold text-xs px-2 py-1.5 rounded outline-none focus:ring-2 focus:ring-blue-500; }
             .label-base { @apply text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest block; }
             .field-label { @apply text-[11px] font-black text-slate-500 uppercase block mb-[-2px]; }
-            .section-header { @apply bg-slate-200 hover:bg-slate-300 px-2 py-1 text-[0.75rem] font-black uppercase text-slate-600 cursor-pointer flex justify-between items-center border-y border-slate-300 transition-colors; }
+            .section-header { @apply bg-slate-200 hover:bg-slate-300 px-2 py-1.5 text-[0.75rem] font-black uppercase text-slate-600 cursor-pointer flex justify-between items-center border-y border-slate-300 transition-colors; }
         }
 
         body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; font-size: 1.2rem; }
@@ -76,8 +76,8 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .unassigned-header { border-top: 4px solid #cbd5e1; }
-        .smart-notes { transition: height 0.2s ease; height: 50px; resize: none; overflow: hidden; }
-        .smart-notes:focus { height: 120px; overflow-y: auto; }
+        .smart-notes { transition: height 0.2s ease; height: 50px; resize: none; overflow-y: auto; }
+        .smart-notes:focus { height: 120px; }
         .multi-state-btn { cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         .link-glow { box-shadow: 0 0 0 3px #fbbf24 !important; z-index: 40 !important; filter: brightness(1.1); }
         #custom-tooltip { position: fixed; z-index: 99999; pointer-events: none; background: rgba(15, 23, 42, 0.95); color: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); font-size: 13px; font-family: 'Roboto Condensed', sans-serif; display: none; white-space: pre-wrap; transform: translate(10px, 10px); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px); }
@@ -98,7 +98,8 @@
             <div class="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-start">
                 <div class="flex items-center gap-2">
                     <img src="apple-touch-icon.png" class="w-8 h-8 rounded shadow-inner" alt="Logo" onerror="this.style.display='none'">
-                    <div class="flex bg-slate-100 rounded-lg p-1 ml-2">
+                    <button onclick="window.fixDatabaseRooms()" class="btn-action bg-red-600 ml-1 whitespace-nowrap"><i data-lucide="wrench" size="14"></i> Fix DB</button>
+                    <div class="flex bg-slate-100 rounded-lg p-1 ml-1">
                         <button id="tab-cal" onclick="window.switchTab('calendar')" class="tab-btn active">CAL</button>
                         <button id="tab-db" onclick="window.switchTab('database')" class="tab-btn">DB</button>
                         <a href="accounting.html" id="tab-acc" class="tab-btn" target="_blank" title="Accounting Dashboard">ACCT <i data-lucide="external-link" size="10" class="inline mb-0.5"></i></a>
@@ -235,14 +236,14 @@
                 </div>
                 <div id="guest-profile-section" class="bg-slate-50 p-1.5 border-x border-b border-slate-200 rounded-b-md space-y-1.5 mt-0 block">
                     <div class="grid grid-cols-2 gap-1.5">
-                        <div><label class="field-label">First Name</label><input type="text" id="first-name" class="input-base uppercase" oninput="window.updateHeaderName()"></div>
-                        <div><label class="field-label">Last Name</label><input type="text" id="last-name" required class="input-base uppercase" oninput="window.updateHeaderName()"></div>
+                        <div><label class="field-label">First Name</label><input type="text" id="first-name" class="input-base uppercase !py-1 !px-1.5" oninput="window.updateHeaderName()"></div>
+                        <div><label class="field-label">Last Name</label><input type="text" id="last-name" required class="input-base uppercase !py-1 !px-1.5" oninput="window.updateHeaderName()"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-1.5">
-                        <div><label class="field-label">Phone</label><input type="text" id="phone" class="input-base"></div>
-                        <div><label class="field-label">Country</label><select id="guest-country" class="input-base"></select></div>
+                        <div><label class="field-label">Phone</label><input type="text" id="phone" class="input-base !py-1 !px-1.5"></div>
+                        <div><label class="field-label">Country</label><select id="guest-country" class="input-base !py-1 !px-1.5"></select></div>
                     </div>
-                    <div><label class="field-label">Email</label><input type="text" id="email" class="input-base" oninput="window.checkEmailProxy(this.value)"></div>
+                    <div><label class="field-label">Email</label><input type="text" id="email" class="input-base !py-1 !px-1.5" oninput="window.checkEmailProxy(this.value)"></div>
                     <div class="grid grid-cols-3 gap-1 pt-1 border-t border-slate-200 mt-1 unselectable overflow-x-auto no-scrollbar">
                         <div id="email-confirm-btn" class="flex-1 min-w-[80px] multi-state-btn px-0.5 py-1 rounded text-[9px] font-black uppercase border border-slate-300 text-slate-400 whitespace-nowrap" data-state="0" onclick="window.cycleMulti(this, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400'])">CONFIRM: --</div>
                         <div id="email-prepost-btn" class="flex-1 min-w-[80px] multi-state-btn px-0.5 py-1 rounded text-[9px] font-black uppercase border border-slate-300 text-slate-400 whitespace-nowrap" data-state="0" onclick="window.cycleMulti(this, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400'])">PRE/POST: --</div>
@@ -251,18 +252,18 @@
                 </div>
 
                 <div class="grid grid-cols-4 gap-1.5 pt-1">
-                    <div class="col-span-1"><label class="field-label">In</label><input type="date" id="check-in" required class="input-base !px-1" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
-                    <div class="col-span-1"><label class="field-label">Out</label><input type="date" id="check-out" required class="input-base !px-1" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
-                    <div class="col-span-1"><label class="field-label">PAX</label><input type="number" id="pax-count" value="1" min="1" class="input-base text-center" oninput="window.calcFinancials(); window.calcExtension && window.calcExtension();"></div>
+                    <div class="col-span-1"><label class="field-label">In</label><input type="date" id="check-in" required class="input-base !px-1 !py-1" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
+                    <div class="col-span-1"><label class="field-label">Out</label><input type="date" id="check-out" required class="input-base !px-1 !py-1" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
+                    <div class="col-span-1"><label class="field-label">PAX</label><input type="number" id="pax-count" value="1" min="1" class="input-base text-center !py-1" oninput="window.calcFinancials(); window.calcExtension && window.calcExtension();"></div>
                     <div class="col-span-1"><label class="field-label">Status</label>
-                        <select id="guest-status" class="input-base text-white !px-1 cursor-pointer" style="background: #7fc6f5; color: #1e293b;" onchange="window.updateStatusColor(this)">
+                        <select id="guest-status" class="input-base text-white !px-1 !py-1 cursor-pointer" style="background: #7fc6f5; color: #1e293b;" onchange="window.updateStatusColor(this)">
                             <option value="future">FUTURE</option><option value="here">HERE</option><option value="left">LEFT</option><option value="unconfirmed">UNCONFIRM</option><option value="cancelled">CANCEL</option><option value="noshow">NO-SHOW</option><option value="charged">CHARGED</option><option value="special">SPECIAL</option><option value="blocked">BLOCKED</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-1.5">
-                    <div><label class="field-label">Booked Type</label><input type="text" id="booked-type" class="input-base" placeholder="--"></div>
+                    <div><label class="field-label">Booked Type</label><input type="text" id="booked-type" class="input-base !py-1 !px-1.5" placeholder="--"></div>
                     <div>
                         <div class="flex justify-between items-end mb-1"><label class="field-label text-blue-600 mb-0">Assigned Rooms</label><button type="button" onclick="window.addRoomSelect()" class="text-[9px] font-black uppercase text-blue-600 bg-blue-100 px-1 py-0.5 rounded hover:bg-blue-200 border border-blue-200 shadow-sm transition-colors">+ ADD</button></div>
                         <div id="assigned-rooms-container" class="max-h-[110px] overflow-y-auto no-scrollbar border border-slate-200 rounded p-1 bg-slate-50 flex flex-col gap-1 w-full shadow-inner"></div>
@@ -392,7 +393,7 @@
         const SVGS = {
             upFree: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M12 2L4 12h5v10h6V12h5z" fill="#facc15" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
             upPaid: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M12 2L4 12h5v10h6V12h5z" fill="#4ade80" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
-            ext: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M2 12l10-8v5h10v6H12v5z" fill="#3b82f6" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
+            ext: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M22 12l-10-8v5H2v6h10v5z" fill="#3b82f6" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
             link: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke="#64748b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
             mailConf: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><rect x="1" y="4" width="22" height="16" rx="2" fill="#fff" stroke="#000" stroke-width="2"/><path d="M1 6l11 8 11-8" fill="none" stroke="#000" stroke-width="2"/></svg>`,
             mailPre: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><rect x="1" y="4" width="22" height="16" rx="2" fill="#f87171" stroke="#000" stroke-width="2"/><path d="M1 6l11 8 11-8" fill="none" stroke="#000" stroke-width="2"/></svg>`,
@@ -456,6 +457,26 @@
         document.addEventListener('mousemove', (e) => { if (!isDragging) return; const modal = document.getElementById('guest-modal-content'); let newLeft = e.clientX - dragOffsetX, newTop = e.clientY - dragOffsetY; if (newTop < 0) newTop = 0; if (newTop > window.innerHeight - 50) newTop = window.innerHeight - 50; modal.style.left = newLeft + 'px'; modal.style.top = newTop + 'px'; });
         document.addEventListener('mouseup', () => { if(isDragging) isDragging = false; });
 
+        window.fixDatabaseRooms = async () => {
+            if (currentUserRole !== 'admin') return;
+            window.showAlert("Migrating 'F' bungalows to 'D' bungalows...", true, async () => {
+                document.getElementById('boot-loader').style.display = 'flex'; document.getElementById('sync-status').innerText = 'MIGRATING DB...';
+                try {
+                    const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'staff'));
+                    let count = 0; const promises = [];
+                    snap.forEach(docSnap => {
+                        const data = docSnap.data();
+                        const fix = (rid) => { if (!rid) return rid; let old = rid.toUpperCase(); if (/^F\d+$/.test(old)) return 'D' + old.substring(1); return old; };
+                        let fixedRoom = fix(data.room || ""); let fixedRooms = (data.rooms || []).map(fix);
+                        if (data.room !== fixedRoom || JSON.stringify(data.rooms) !== JSON.stringify(fixedRooms)) {
+                            promises.push(setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', docSnap.id), { ...data, room: fixedRoom, rooms: fixedRooms })); count++;
+                        }
+                    });
+                    await Promise.all(promises); window.showAlert(`Migrated ${count} bungalow bookings!`);
+                } catch (e) { window.showAlert("Error: " + e.message); } finally { document.getElementById('boot-loader').style.display = 'none'; }
+            });
+        };
+
         const init = async () => {
             const processSnapshot = (snap) => { 
                 let rawStaff = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
@@ -513,7 +534,7 @@
         const renderTimeline = (daysToShow) => {
             const monthsGrid = document.getElementById('calendar-header-months'), daysGrid = document.getElementById('calendar-header-days'), body = document.getElementById('timeline-body');
             monthsGrid.innerHTML = `<div class="border-r border-slate-700 flex items-center justify-center h-full sticky left-0 z-50 bg-slate-800 w-[var(--sidebar-w)]"></div>`;
-            daysGrid.innerHTML = `<div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-between border-r border-slate-400 bg-slate-100 h-full sticky left-0 z-40 w-[var(--sidebar-w)]"><span>ROOM</span><button onclick="window.toggleZoom()" class="hover:text-blue-500 transition-colors bg-slate-200 hover:bg-slate-300 p-0.5 rounded shadow-sm" title="Toggle Zoom"><i data-lucide="zoom-in" size="14"></i></button></div>`;
+            daysGrid.innerHTML = `<div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-between border-r border-slate-400 bg-slate-100 h-full sticky left-0 z-40 w-[var(--sidebar-w)]"><span>ROOM</span><button onclick="window.toggleZoom()" class="hover:text-blue-500 transition-colors bg-slate-200 hover:bg-slate-300 rounded shadow-sm flex items-center justify-center w-[20px] h-[20px]" title="Toggle Zoom"><i data-lucide="zoom-in" size="12"></i></button></div>`;
             body.innerHTML = '';
 
             const days = Array.from({length: daysToShow}, (_, i) => new Date(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate() + i, 12, 0, 0));
@@ -641,22 +662,25 @@
             const del = document.createElement('button'); del.type = "button"; del.className = "w-6 flex justify-center items-center text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded border border-red-200 flex-shrink-0 shadow-sm transition-colors"; del.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>`; del.onclick = () => { wrapper.remove(); if(container.children.length === 0) window.addRoomSelect(); window.updateAvailableRooms(); }; wrapper.appendChild(sel); wrapper.appendChild(del); container.appendChild(wrapper); window.updateAvailableRooms();
         };
 
-        window.calcExtension = () => { const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value; const ms = parseYMD(cout) - parseYMD(cin); const avg = ms > 0 ? (Number(document.getElementById('total-price').value) || 0) / Math.round(ms / 86400000) : 0; const days = parseInt(document.getElementById('ext-days').value) || 1; let crossesFMP = false; if (cout) { const startD = parseYMD(cout); const endD = startD + (days * 86400000); for (let f of fmpDates) { const fTime = new Date(f + "T12:00:00").getTime(); if ((startD <= fTime && endD >= fTime) || (Math.abs(startD - fTime) <= 3 * 86400000) || (Math.abs(endD - fTime) <= 3 * 86400000)) { crossesFMP = true; break; } } } if (crossesFMP) { document.getElementById('ext-avg-rate').value = 'FMP!'; document.getElementById('ext-avg-rate').classList.add('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = ''; document.getElementById('ext-price').placeholder = 'CHECK RATE ->'; document.getElementById('btn-check-bdc').classList.replace('bg-slate-200', 'bg-pink-500'); document.getElementById('btn-check-bdc').classList.replace('text-slate-700', 'text-white'); document.getElementById('btn-check-bdc').classList.add('animate-pulse'); } else { document.getElementById('ext-avg-rate').value = Math.round(avg); document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = Math.round(avg * days); document.getElementById('ext-price').placeholder = ''; document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse'); } };
+        window.calcExtension = () => { const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value; const ms = parseYMD(cout) - parseYMD(cin); let avg = 0; if (ms > 0) { const total = Number(document.getElementById('total-price').value) || 0; avg = total / Math.round(ms / 86400000); } const days = parseInt(document.getElementById('ext-days').value) || 1; let crossesFMP = false; if (cout) { const startD = parseYMD(cout); const endD = startD + (days * 86400000); for (let f of fmpDates) { const fTime = new Date(f + "T12:00:00").getTime(); if ((startD <= fTime && endD >= fTime) || (Math.abs(startD - fTime) <= 3 * 86400000) || (Math.abs(endD - fTime) <= 3 * 86400000)) { crossesFMP = true; break; } } } if (crossesFMP) { document.getElementById('ext-avg-rate').value = 'FMP!'; document.getElementById('ext-avg-rate').classList.add('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = ''; document.getElementById('ext-price').placeholder = 'CHECK RATE ->'; document.getElementById('btn-check-bdc').classList.replace('bg-slate-200', 'bg-pink-500'); document.getElementById('btn-check-bdc').classList.replace('text-slate-700', 'text-white'); document.getElementById('btn-check-bdc').classList.add('animate-pulse'); } else { document.getElementById('ext-avg-rate').value = avg > 0 ? Math.round(avg) : ''; document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = avg > 0 ? Math.round(avg * days) : ''; document.getElementById('ext-price').placeholder = ''; document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse'); } };
         window.checkBdcPrice = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + (parseInt(document.getElementById('ext-days').value) || 1)); window.open(`https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${cout}&checkout=${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}&group_adults=${document.getElementById('pax-count').value || 1}&group_children=0&no_rooms=${Array.from(document.querySelectorAll('.assigned-room-select')).filter(sel => sel.value !== "").length || 1}`, '_blank'); };
         window.confirmExtension = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const addPrice = document.getElementById('ext-price').value; if(addPrice === '') return window.showAlert("Please enter the Extension Price first."); const days = parseInt(document.getElementById('ext-days').value) || 1, d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + days); const newCout = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; document.getElementById('check-out').value = newCout; document.getElementById('total-price').value = ((Number(document.getElementById('total-price').value) || 0) + Number(addPrice)).toFixed(2); setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); window.syncLabels(); window.updateAvailableRooms(); window.calcFinancials(); window.calcExtension(); window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${newCout}.\nAdded ฿${addPrice} to Total Price.`); };
 
         window.populateStaffForm = (s = {}) => {
             const isNew = !s.id; const form = document.getElementById('guest-form'); if(form) form.reset(); const modalContent = document.getElementById('guest-modal-content'); modalContent.style.position = 'relative'; modalContent.style.left = 'auto'; modalContent.style.top = 'auto'; modalContent.style.margin = '0';
             [ ['guest-id', s.id], ['first-name', s.firstName], ['last-name', s.lastName], ['phone', s.phone], ['email', s.email], ['booked-type', s.bookedType], ['check-in', s.checkIn], ['check-out', s.checkOut], ['booking-date', s.bookDate], ['booking-id', s.bookId], ['link-code', s.linkedId] ].forEach(([id, val]) => document.getElementById(id).value = val || "");
-            const cSel = document.getElementById('guest-country'); if (s.country) { let found = Array.from(cSel.options).some(o => o.value === s.country); if (!found) { const opt = document.createElement('option'); opt.value = s.country; opt.innerText = s.country; cSel.appendChild(opt); } cSel.value = s.country; } else cSel.value = "Thailand";
+            
+            const cSel = document.getElementById('guest-country');
+            if (s.country) { let found = Array.from(cSel.options).some(o => o.value === s.country); if (!found) { const opt = document.createElement('option'); opt.value = s.country; opt.innerText = s.country; cSel.appendChild(opt); } cSel.value = s.country; } else cSel.value = "Thailand";
+            
             document.getElementById('guest-status').value = s.status || "future"; window.updateStatusColor(document.getElementById('guest-status')); document.getElementById('pax-count').value = s.pax || 1; document.getElementById('booking-source').value = s.source || 'direct'; document.getElementById('guest-notes').value = s.notes || "";
             document.getElementById('assigned-rooms-container').innerHTML = ''; const rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : (isNew ? [] : [""])); if(rList.length > 0) rList.forEach(r => window.addRoomSelect(r)); else window.addRoomSelect("");
             document.getElementById('total-price').value = Number(s.totalPrice || 0).toFixed(2); document.getElementById('net-price').value = Number(s.netPrice || 0).toFixed(2); document.getElementById('net-price').dataset.override = s.netOverride ? 'true' : 'false';
             const bcc = document.getElementById('bad-cc-box'); bcc.dataset.bad = s.badCC ? 'true' : 'false'; bcc.innerHTML = s.badCC ? '<span class="text-white text-[10px] font-black">X</span>' : ''; bcc.className = `w-3.5 h-3.5 border-2 rounded mt-0.5 flex items-center justify-center ${s.badCC ? 'bg-red-500 border-red-600' : 'border-slate-300'}`;
             document.getElementById('payments-list').innerHTML = ''; if(s.payments) s.payments.forEach(p => window.addPaymentRow(p.date, Number(p.amt || 0).toFixed(2), p.method, true));
 
-            setMulti('email-confirm-btn', s.emailConfirm ? 1 : 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='sent'?1:2), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']); setMulti('email-special-btn', s.emailSpecial ? 1 : 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-yellow-100 text-yellow-700 border-yellow-400']); setMulti('refund-btn', s.refundability === 'non-ref' ? 1 : (s.refundability === 'ref' ? 2 : 0), ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']); setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade === 'free' ? 1 : 2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-yellow-100 text-yellow-700 border-yellow-400', 'bg-green-100 text-green-700 border-green-400']); setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating === 'good' ? 1 : 2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']); setMulti('ext-btn', s.extended ? 1 : 0, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
-            document.getElementById('ext-days').value = 1; document.getElementById('ext-avg-rate').value = ''; document.getElementById('ext-price').value = ''; document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse');
+            setMulti('email-confirm-btn', s.emailConfirm ? 1 : 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='sent'?1:2), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']); setMulti('email-special-btn', s.emailSpecial ? 1 : 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-yellow-100 text-yellow-700 border-yellow-400']); setMulti('refund-btn', s.refundability === 'non-ref' ? 1 : (s.refundability === 'ref' ? 2 : 0), ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']); setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade === 'free' ? 1 : 2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']); setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating === 'good' ? 1 : 2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']); setMulti('ext-btn', s.extended ? 1 : 0, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
+            document.getElementById('ext-days').value = 1; document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse');
 
             window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension();
             window.toggleSection('guest-profile-section', 'profile-chevron', true); window.toggleSection('ext-section', 'ext-chevron', false); window.toggleSection('fin-section', 'fin-chevron', true); window.toggleSection('meta-section', 'meta-chevron', true);
@@ -734,9 +758,9 @@
                     if (bTypeIdx > -1) { let bRaw = lines[bTypeIdx]; if (bRaw.toLowerCase().includes('free upgrade')) { parsedUpgrade = 1; if (bTypeIdx > 0 && !lines[bTypeIdx - 1].toLowerCase().includes('price')) bRaw = lines[bTypeIdx - 1]; } const fP = bRaw.indexOf('('), lP = bRaw.lastIndexOf(')'); bType = (fP > -1 && lP > fP) ? bRaw.substring(fP + 1, lP).trim() : bRaw.trim(); }
                     if (text.toLowerCase().includes('free upgrade')) parsedUpgrade = 1; if (/\b(?:status:\s*canceled|status:\s*cancelled|booking canceled|booking cancelled)\b/i.test(text)) parsedStatus = 'cancelled';
                     let lowText = text.toLowerCase(); if (lowText.includes('free of charge until') || lowText.includes('free cancellation')) { refundability = 2; } else if (lowText.includes('cancel at any time') || lowText.includes('cancel anytime') || lowText.includes('non-refundable') || lowText.includes('non refundable') || lowText.includes('charged the total price')) { refundability = 1; }
-                    let allNotes = []; lines.forEach(l => { if (l.toUpperCase().includes('BED PREFERENCE:') || l.toUpperCase().includes('BED-PREFERENCE REQUEST:')) allNotes.push(l.replace(/Reply$/i, '').trim()); });
+                    let allNotes = []; lines.forEach((l, i) => { if (l.toUpperCase().includes('BED PREFERENCE:') || l.toUpperCase().includes('BED-PREFERENCE REQUEST:')) allNotes.push(l.replace(/Reply$/i, '').trim()); });
                     let convoIdx = lines.findIndex(l => l.toLowerCase() === 'conversation with guest');
-                    if (convoIdx > -1) { let mLines = []; for (let i = convoIdx + 1; i < lines.length; i++) { let lLow = lines[i].toLowerCase(); if (lLow.includes('protect your account security') || lLow === 'images' || lLow === 'templates' || lLow.includes('important information about this guest') || lLow === 'cancellation' || lLow === 'no messages' || lLow.includes('conversations with your guests will appear')) break; if (/^(?:Today|Yesterday|[A-Za-z]+,?\s*\d{1,2}\s*[A-Za-z]*),\s*\d{1,2}:\d{2}/i.test(lines[i]) || /^\d{1,2}:\d{2}$/.test(lines[i]) || lLow === 'reply') continue; if (lines[i].trim()) mLines.push(lines[i].trim()); } if (mLines.length > 0) allNotes.push("GUEST MSG: " + mLines.join(" ")); }
+                    if (convoIdx > -1) { let mLines = []; for (let i = convoIdx + 1; i < lines.length; i++) { let lLow = lines[i].toLowerCase(); if (lLow.includes('protect your account security') || lLow === 'images' || lLow === 'templates' || lLow.includes('important information about this guest') || lLow === 'cancellation' || lLow === 'no messages' || lLow.includes('conversations with your guests will appear')) break; if (/^(?:Today|Yesterday|[A-Za-z]+,?\s*\d{1,2}\s*[A-Za-z]*),\s*\d{1,2}:\d{2}/i.test(lines[i]) || /^\d{1,2}:\d{2}$/.test(lines[i]) || /^(?:Today|Yesterday)$/i.test(lines[i]) || lLow === 'reply') continue; if (lines[i].trim()) mLines.push(lines[i].trim()); } if (mLines.length > 0) allNotes.push("GUEST MSG: " + mLines.join(" ")); }
                     notes = allNotes.join('\n\n'); if (text.includes('Payment is facilitated') || text.includes('Booking.com will collect')) hasBdcPayment = true;
                     break;
                     
@@ -776,20 +800,26 @@
 
             document.getElementById('email-modal').style.display = 'none';
 
-            let idxStart = notes.toLowerCase().indexOf('thanks so much for booking with us');
-            if (idxStart > -1) {
-                let pStart = notes.lastIndexOf('Hi ', idxStart); if (pStart === -1) pStart = notes.lastIndexOf('GUEST MSG:', idxStart);
-                let pEnd = notes.indexOf('SWIMS! a Social Beach Resort', idxStart);
-                if (pEnd > -1) { pEnd += 'SWIMS! a Social Beach Resort'.length; notes = (notes.substring(0, pStart !== -1 ? pStart : idxStart) + " " + notes.substring(pEnd)).trim(); }
-            }
-            notes = notes.replace(/_+\s*Your Check-in:[^\n]+\s*Your Check-out:[^\n]+/gi, '');
-            notes = notes.replace(/'?Before Check-in'? was sent automatically based on your messaging preferences\.?/gi, '');
-            notes = notes.replace(/GUEST MSG:\s*$/i, '');
-            notes = notes.trim();
+            let cleanNotes = notes;
+            cleanNotes = cleanNotes.replace(/GUEST MSG:\s*(?:Today|Yesterday)?\s*Hi[\s\S]*?SWIMS! a Social Beach Resort/ig, '');
+            cleanNotes = cleanNotes.replace(/(?:😍)?Thanks so much for booking with us[\s\S]*?SWIMS! a Social Beach Resort/ig, '');
+            cleanNotes = cleanNotes.replace(/_+\s*Your Check-in:[\s\S]*?messaging preferences\.?/ig, '');
+            cleanNotes = cleanNotes.replace(/Responses in this chat include AI-generated content[\s\S]*?Type your message\.\.\./ig, '');
+            cleanNotes = cleanNotes.replace(/GUEST MSG:\s*(?:Today|Yesterday)?\s*$/ig, '');
+            notes = cleanNotes.trim();
 
             let last = gName.trim(), first = ""; if(gName.includes(',')) { const p = gName.split(','); last = p[0].trim(); first = p.slice(1).join(',').trim(); } else { const p = gName.split(' '); first = p[0].trim(); last = p.length>1 ? p.slice(1).join(' ').trim() : ""; }
             document.getElementById('first-name').value = first.toUpperCase(); document.getElementById('last-name').value = last.toUpperCase(); document.getElementById('check-in').value = checkIn; document.getElementById('check-out').value = checkOut; document.getElementById('pax-count').value = pax; document.getElementById('booking-source').value = src || 'other'; document.getElementById('booking-date').value = bDate; document.getElementById('booking-id').value = bId; document.getElementById('booked-type').value = (bType || "").toUpperCase(); document.getElementById('guest-status').value = parsedStatus; window.updateStatusColor(document.getElementById('guest-status')); document.getElementById('phone').value = phone; document.getElementById('email').value = email;
-            if (countryCode && countryCode.length === 2) { try { document.getElementById('guest-country').value = new Intl.DisplayNames(['en'], {type: 'region'}).of(countryCode.toUpperCase()); } catch(e) {} }
+            
+            if (countryCode && countryCode.trim().length === 2) { 
+                try { 
+                    let parsedCountry = new Intl.DisplayNames(['en'], {type: 'region'}).of(countryCode.trim().toUpperCase());
+                    const cSel = document.getElementById('guest-country');
+                    if (!Array.from(cSel.options).some(o => o.value === parsedCountry)) { const opt = document.createElement('option'); opt.value = parsedCountry; opt.innerText = parsedCountry; cSel.appendChild(opt); }
+                    document.getElementById('guest-country').value = parsedCountry;
+                } catch(e) {} 
+            }
+            
             document.getElementById('total-price').value = total.toFixed(2); document.getElementById('net-price').value = Math.max(0, total - comm).toFixed(2); document.getElementById('guest-notes').value = notes;
             setMulti('refund-btn', refundability, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
             if (parsedUpgrade > 0) setMulti('upgrade-btn', parsedUpgrade, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
