@@ -201,26 +201,107 @@
         let staff = [];
         let accSortKey = "checkIn"; let accSortAsc = false;
         const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const parseYMD = (ymd) => { if (!ymd) return 0; const [y, m, d] = ymd.split('-'); return Date.UTC(y, m - 1, d); };
 
-        // Updated Custom BDC Room Mapping
         const hotelRooms = [
-            {id:"A1",type:"[OCEANFRONT]",bed:"KING"}, {id:"A2",type:"[OCEANFRONT]",bed:"TWIN"}, {id:"B1",type:"[OCEANFRONT]",bed:"KING"}, {id:"B2",type:"[OCEANFRONT]",bed:"TWIN"},
-            {id:"C206",type:"Oceanview King Room",bed:"KING"}, {id:"C306",type:"Oceanview King Room",bed:"KING"}, {id:"A10",type:"Oceanview King Room",bed:"KING"}, {id:"A12",type:"Oceanview King Room",bed:"KING"}, {id:"B3",type:"Oceanview King Room",bed:"KING"}, {id:"B4",type:"Oceanview King Room",bed:"KING"}, {id:"B5",type:"Oceanview King Room",bed:"KING"}, {id:"B6",type:"Oceanview King Room",bed:"KING"}, {id:"B7",type:"Oceanview King Room",bed:"KING"}, {id:"B8",type:"Oceanview King Room",bed:"KING"},
-            {id:"C212",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"C311",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"A3",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"A4",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"A6",type:"Oceanview Twin Room",bed:"TWIN"}, {id:"A8",type:"Oceanview Twin Room",bed:"KING"},
-            {id:"A5",type:"Partial Oceanview King Room",bed:"KING"}, {id:"A7",type:"Partial Oceanview King Room",bed:"KING"}, {id:"A9",type:"Partial Oceanview King Room",bed:"KING"}, {id:"A11",type:"Partial Oceanview King Room",bed:"KING"},
-            {id:"C203",type:"Partial Oceanview Twin Room",bed:"TWIN"}, {id:"C204",type:"Partial Oceanview Twin Room",bed:"TWIN"}, {id:"C205",type:"Partial Oceanview Twin Room",bed:"TWIN"},
-            {id:"C207",type:"Gardenview King Room",bed:"KING"}, {id:"C208",type:"Gardenview King Room",bed:"KING"}, {id:"C209",type:"Gardenview King Room",bed:"KING"}, {id:"C210",type:"Gardenview King Room",bed:"KING"}, {id:"C211",type:"Gardenview King Room",bed:"KING"}, {id:"B9",type:"Gardenview King Room",bed:"KING"}, {id:"B10",type:"Gardenview King Room",bed:"KING"}, {id:"B11",type:"Gardenview King Room",bed:"KING"}, {id:"B12",type:"Gardenview King Room",bed:"KING"}, {id:"B13",type:"Gardenview King Room",bed:"KING"}, {id:"B14",type:"Gardenview King Room",bed:"KING"}, {id:"B15",type:"Gardenview King Room",bed:"KING"}, {id:"B16",type:"Gardenview King Room",bed:"KING"},
-            {id:"C201",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"C202",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B17",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B18",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B19",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B20",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B21",type:"Gardenview Twin Room",bed:"TWIN"}, {id:"B22",type:"Gardenview Twin Room",bed:"TWIN"},
-            {id:"C305",type:"Standard Triple Room",bed:"K+T"}, {id:"C307",type:"Standard Triple Room",bed:"BUNK+T"}, {id:"C308",type:"Standard Triple Room",bed:"BUNK+T"}, {id:"C309",type:"Standard Triple Room",bed:"K+T"}, {id:"C310",type:"Standard Triple Room",bed:"K+T"},
-            {id:"C301-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C301-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C301-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C301-4",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C302-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C302-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C302-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C302-4",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C303-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C303-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C303-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C303-4",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C304-1",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C304-2",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C304-3",type:"Standard Quad Dorm",bed:"QUAD"}, {id:"C304-4",type:"Standard Quad Dorm",bed:"QUAD"},
-            {id:"F1",type:"[BUNGALOWS]",bed:""}, {id:"F2",type:"[BUNGALOWS]",bed:""}, {id:"F3",type:"[BUNGALOWS]",bed:""}, {id:"F4",type:"[BUNGALOWS]",bed:""}, {id:"F5",type:"[BUNGALOWS]",bed:""}, {id:"F6",type:"[BUNGALOWS]",bed:""}, {id:"F7",type:"[BUNGALOWS]",bed:""}, {id:"F8",type:"[BUNGALOWS]",bed:""}, {id:"F9",type:"[BUNGALOWS]",bed:""}, {id:"F10",type:"[BUNGALOWS]",bed:""}, {id:"F11",type:"[BUNGALOWS]",bed:""},
-            {id:"C101",type:"[ROOM 101-103] STAFF",bed:""}, {id:"C102",type:"[ROOM 101-103] STAFF",bed:""}, {id:"C103",type:"[ROOM 101-103] STAFF",bed:""}
+            { id: "B01", type: "Oceanfront King", bed: "KING", floor: 2 },
+            { id: "A01", type: "Oceanfront King", bed: "KING", floor: 1 },
+            { id: "A02", type: "Oceanfront King", bed: "KING", floor: 1 },
+            { id: "B02", type: "Oceanfront Twin", bed: "TWIN", floor: 2 },
+            { id: "B03", type: "Oceanview King Room", bed: "KING", floor: 2 },
+            { id: "B05", type: "Oceanview King Room", bed: "KING", floor: 2 },
+            { id: "B07", type: "Oceanview King Room", bed: "KING", floor: 2 },
+            { id: "A03", type: "Oceanview King Room", bed: "KING", floor: 1 },
+            { id: "A04", type: "Oceanview King Room", bed: "KING", floor: 1 },
+            { id: "A06", type: "Oceanview King Room", bed: "KING", floor: 1 },
+            { id: "A08", type: "Oceanview King Room", bed: "KING", floor: 1 },
+            { id: "A10", type: "Oceanview King Room", bed: "KING", floor: 1 },
+            { id: "A12", type: "Oceanview King Room", bed: "KING", floor: 1 },
+            { id: "C206", type: "Oceanview King Room", bed: "KING", floor: 2 },
+            { id: "C306", type: "Oceanview King Room", bed: "KING", floor: 3 },
+            { id: "C311", type: "Oceanview King Room", bed: "KING", floor: 3 },
+            { id: "B04", type: "Oceanview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "B06", type: "Oceanview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "B08", type: "Oceanview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "C212", type: "Oceanview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "A05", type: "Partial Oceanview King Room", bed: "KING", floor: 1 },
+            { id: "A07", type: "Partial Oceanview King Room", bed: "KING", floor: 1 },
+            { id: "A09", type: "Partial Oceanview King Room", bed: "KING", floor: 1 },
+            { id: "A11", type: "Partial Oceanview King Room", bed: "KING", floor: 1 },
+            { id: "C203", type: "Partial Oceanview King Room", bed: "KING", floor: 2 },
+            { id: "C204", type: "Partial Oceanview King Room", bed: "KING", floor: 2 },
+            { id: "C205", type: "Partial Oceanview King Room", bed: "KING", floor: 2 },
+            { id: "B09", type: "Gardenview King Room", bed: "KING", floor: 2 },
+            { id: "B11", type: "Gardenview King Room", bed: "KING", floor: 2 },
+            { id: "B13", type: "Gardenview King Room", bed: "KING", floor: 2 },
+            { id: "B15", type: "Gardenview King Room", bed: "KING", floor: 2 },
+            { id: "B17", type: "Gardenview King Room", bed: "KING", floor: 2 },
+            { id: "B19", type: "Gardenview King Room", bed: "KING", floor: 2 },
+            { id: "B21", type: "Gardenview King Room", bed: "KING", floor: 2 },
+            { id: "B22", type: "Gardenview King Room", bed: "KING", floor: 2 },
+            { id: "B10", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "B12", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "B14", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "B16", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "B18", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "B20", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "C201", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "C202", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "C207", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "C208", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "C209", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "C210", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "C211", type: "Gardenview Twin Room", bed: "TWIN", floor: 2 },
+            { id: "C101", type: "Gardenview Twin Room", bed: "TWIN", floor: 1 },
+            { id: "C307", type: "Partial Oceanview Triple Room", bed: "BUNK+T", floor: 3 },
+            { id: "C308", type: "Partial Oceanview Triple Room", bed: "BUNK+T", floor: 3 },
+            { id: "C305", type: "Partial Oceanview Triple Room", bed: "K+T", floor: 3 },
+            { id: "C309", type: "Partial Oceanview Triple Room", bed: "K+T", floor: 3 },
+            { id: "C310", type: "Partial Oceanview Triple Room", bed: "K+T", floor: 3 },
+            { id: "C301-1", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C301-2", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C301-3", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C301-4", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C302-1", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C302-2", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C302-3", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C302-4", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C303-1", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C303-2", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C303-3", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C303-4", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C304-1", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C304-2", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C304-3", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "C304-4", type: "Standard Quad Dorm", bed: "QUAD", floor: 3 },
+            { id: "D01", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "D02", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "D03", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "D04", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "D05", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "D06", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "D07", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "D08", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "D09", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "D10", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "D11", type: "BUNGALOWS", bed: "", floor: 1 },
+            { id: "102", type: "STAFF ROOMS", bed: "", floor: 1 },
+            { id: "103", type: "STAFF ROOMS", bed: "", floor: 1 }
         ];
 
-        const parseYMD = (dateStr) => { if (!dateStr) return 0; const p = dateStr.split('-'); return p.length !== 3 ? 0 : Date.UTC(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])); };
         window.getPaid = (s) => (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
         window.getDue = (s) => Number((Number(s.totalPrice || 0) - window.getPaid(s)).toFixed(2));
         window.getComm = (s) => (s.payments || []).filter(p => ['hw-kp', 'airbnb-kp', 'bdc-kp', 'agoda-kp', 'cc-fee'].includes(p.method)).reduce((sum, p) => sum + Number(p.amt), 0);
+
+        // Safe DB adapters: Preserves history, translates old DB to new UI formats
+        const dbToUiRoom = (rid) => {
+            if (!rid) return rid;
+            let nid = String(rid).toUpperCase();
+            if (/^[ABF]\d$/.test(nid)) { let l = nid[0] === 'F' ? 'D' : nid[0]; return l + '0' + nid.substring(1); }
+            if (nid === '102' || nid === '103') return nid;
+            if (/^[123]\d\d(?:-\d)?$/.test(nid)) return 'C' + nid;
+            return nid;
+        };
 
         window.toggleMultiSelect = (id, btnEventEl) => {
             event.stopPropagation(); const drop = document.getElementById(id); if(!drop) return;
@@ -249,10 +330,13 @@
             try {
                 await signInAnonymously(auth);
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), (snap) => { 
-                    staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
+                    let rawStaff = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
+                    staff = rawStaff.map(s => {
+                        let mappedRooms = (s.rooms?.length ? s.rooms : (s.room ? [s.room] : [])).map(dbToUiRoom);
+                        return { ...s, room: mappedRooms[0] || "", rooms: mappedRooms };
+                    });
                     document.getElementById('boot-loader').style.display = 'none';
                     
-                    // Setup Month Dropdown Options
                     const mSelect = document.getElementById('acc-filter-month');
                     if (mSelect && mSelect.options.length < 2) {
                         let html = '<option value="">ALL DATES</option>', d = new Date(); d.setMonth(d.getMonth() - 2); d.setDate(1);
@@ -336,16 +420,12 @@
                 });
                 
                 const balance = Math.max(0, tPrice - (paidRealized + paidPending + paidComm));
-                if (countsTowardIncome) {
-                    actualCollected += paidRealized; 
-                    pendingAR += paidPending;
-                }
+                if (countsTowardIncome) { actualCollected += paidRealized; pendingAR += paidPending; }
 
-                // STRICT STATUS HANDLING
                 if (s.status === 'cancelled') lostCancel += balance; 
                 else if (s.status === 'noshow') badDebt += balance; 
                 else if (s.status === 'left') { activeGross += tPrice; badDebt += balance; } 
-                else if (s.status === 'charged') { activeGross += tPrice; } // Counts as gross, payments count as realized, balance NOT considered pendingAR or badDebt
+                else if (s.status === 'charged') { activeGross += tPrice; } 
                 else if (s.status !== 'unconfirmed') { activeGross += tPrice; pendingAR += balance; }
 
                 if (countsTowardIncome) {
@@ -389,7 +469,6 @@
             const lBody = document.getElementById('acc-ledger-body'); lBody.innerHTML = '';
             ledgerRows.forEach(lr => {
                 const tr = document.createElement('tr'); const isDead = lr.status === 'cancelled' || lr.status === 'noshow';
-                // REDIRECT TO MAIN CALENDAR ON CLICK
                 tr.className = `border-b border-slate-200 hover:bg-slate-50 cursor-pointer ${isDead ? 'opacity-40 line-through decoration-slate-400 decoration-[1.5px]' : ''}`;
                 tr.onclick = () => { window.location.href = `index.html?edit=${lr.id}`; };
                 
