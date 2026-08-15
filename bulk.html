@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWIMS Bulk Importer</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Roboto+Condensed:wght@400;700;900&display=swap');
+        body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; display: none; }
+        .loading-overlay.active { display: flex; pointer-events: auto; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div id="loader" class="loading-overlay"><div class="spinner"></div><div id="sync-status" class="mt-4 font-black text-indigo-800 uppercase tracking-widest text-center">PROCESSING...</div></div>
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden border-2 border-slate-800">
+        <div class="bg-slate-900 p-4 text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-500 p-1.5 rounded"><i data-lucide="sheet" class="text-white"></i></div>
+                <h1 class="font-black uppercase tracking-widest text-lg">Bulk Import Spreadsheet</h1>
+            </div>
+            <a href="index.html" class="text-xs font-bold text-slate-400 hover:text-white uppercase">← Back to PMS</a>
+        </div>
+        
+        <div class="p-6 flex flex-col gap-4">
+            <div class="bg-indigo-50 p-4 border border-indigo-100 rounded-lg">
+                <p class="text-sm font-bold text-indigo-900 mb-1">How to use:</p>
+                <ul class="text-xs text-indigo-700 list-disc list-inside ml-4 space-y-1">
+                    <li>Copy data directly from Excel or Google Sheets.</li>
+                    <li><span class="font-black text-rose-600">CRITICAL:</span> You MUST include the header row in your copy selection.</li>
+                    <li>Required columns (any order): Guest Name, Check-in, Check-out, Reservation Number.</li>
+                </ul>
+            </div>
+
+            <textarea id="import-textarea" rows="12" class="w-full bg-slate-50 border-2 border-slate-300 font-mono text-xs p-3 rounded-lg outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 whitespace-pre" placeholder="Reservation number	Booked on	Arrival	Departure	Guest name..."></textarea>
+            
+            <div class="flex gap-3 justify-end mt-2">
+                <button onclick="document.getElementById('import-textarea').value=''" class="px-6 py-3 bg-slate-200 hover:bg-slate-300 rounded-lg font-black text-sm uppercase transition-colors text-slate-600">Clear</button>
+                <button onclick="window.processCSV()" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-black text-sm uppercase flex items-center gap-2 shadow-lg transition-colors"><i data-lucide="database" size="18"></i> Import to Database</button>
+            </div>
+            <div id="log-output" class="mt-4 text-xs font-bold text-emerald-600 whitespace-pre-wrap"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyCyz--TlQZf_d-YNxhtGCV29LuFoRBfEeU", authDomain: "swimspms.firebaseapp.com", projectId: "swimspms", storageBucket: "swimspms.firebasestorage.app", messagingSenderId: "989960113115", appId: "1:989960113115:web:a99e08a23a36ff4289f5fe" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app); const appId = 'hotel-pms-v1';
+        let staff = []; lucide.createIcons();
+
+        // Authenticate before loading existing bookings to prevent permission errors
+        signInAnonymously(auth).then(() => {
+            getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'staff')).then(snap => { staff = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
+        }).catch(err => { document.getElementById('log-output').innerText = `❌ Firebase Auth Error: ` + err.message; });
+
+        const uiToDbRoom = (rid) => { if (!rid) return rid; let nid = rid.toUpperCase(); if (/^[ABFD]0\d$/.test(nid)) return nid[0] + nid.substring(2); return nid; };
+
+        window.processCSV = async () => {
+            const text = document.getElementById('import-textarea').value.trim(); if (!text) return alert("Please paste data first."); 
+            const delim = text.indexOf('\t') !== -1 ? '\t' : ',';
+            const rows = []; let cRow = [], cCell = '', inQ = false;
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i], nC = text[i+1];
+                if (c === '"') { if (inQ && nC === '"') { cCell += '"'; i++; } else { inQ = !inQ; } } else if (c === delim && !inQ) { cRow.push(cCell); cCell = ''; } else if ((c === '\n' || c === '\r') && !inQ) { if (c === '\r' && nC === '\n') i++; cRow.push(cCell); if (cRow.join('').trim() !== '') rows.push(cRow); cRow = []; cCell = ''; } else cCell += c;
+            }
+            if (cCell || cRow.length > 0) { cRow.push(cCell); if (cRow.join('').trim() !== '') rows.push(cRow); }
+            if (rows.length < 2) return alert("Please include the header row and at least one data row.");
+
+            document.getElementById('loader').classList.add('active'); document.getElementById('sync-status').innerText = 'IMPORTING...';
+
+            const headers = rows[0].map(h => h.trim().toLowerCase()), getIdx = (kws) => { for(let k of kws) { const i = headers.findIndex(h => h.includes(k)); if(i > -1) return i; } return -1; };
+            const idx = { in: getIdx(['check-in', 'arrival', 'checkin', 'in']), out: getIdx(['check-out', 'departure', 'checkout', 'out']), name: getIdx(['guest name', 'guest']), room: headers.findIndex(h => h === 'room'), roomType: getIdx(['unit type', 'room type']), source: getIdx(['source']), bookDate: getIdx(['booked on', 'booking date']), bookId: getIdx(['book number', 'reservation number', 'booking id']), pax: getIdx(['people', 'guests', 'adults']), total: getIdx(['price', 'total', 'amount']), comm: getIdx(['commission amount', 'commission']), payStatus: getIdx(['payment status']), address: getIdx(['address']), roomsCount: getIdx(['number of rooms', 'rooms']), country: getIdx(['booker country', 'country']), phone: getIdx(['phone number', 'mobile', 'phone']), email: headers.findIndex(h => h.includes('email') && !h.includes('details')), status: getIdx(['status']), notes: getIdx(['remarks', 'notes', 'comments', 'special comments']) };
+            
+            if(idx.name === -1 && idx.in === -1 && idx.out === -1 && idx.bookId === -1) { document.getElementById('loader').classList.remove('active'); return alert("ERROR: Could not find required column headers."); }
+
+            const safeStr = (i, r) => (i > -1 && r[i] != null) ? String(r[i]).replace(/^"|"$/g, '').trim() : "";
+            const parseDate = (str) => { if(!str) return ""; const dClean = str.split(' ')[0], parts = dClean.split(/[-/]/); if (parts.length !== 3) return dClean; const mMap = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'}; if (isNaN(parts[1])) return `${parts[0]}-${mMap[parts[1].toLowerCase()] || '01'}-${parts[2].padStart(2, '0')}`; else if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`; else if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`; return dClean; };
+            const cleanMoney = (str) => Number(parseFloat((str||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
+
+            let importCount = 0; const now = new Date().toISOString(), existingMap = {}, isFriendly = getIdx(['folio no.', 'swims status']) > -1;
+
+            try {
+                for (let i = 1; i < rows.length; i++) {
+                    const r = rows[i]; if (r.join('').trim() === '') continue;
+                    let rawBId = safeStr(idx.bookId, r).replace(/\.0$/, ''), newRoom = safeStr(idx.room, r).toUpperCase();
+                    let dbStaff = rawBId ? staff.find(s => s.bookId === rawBId) : null;
+                    
+                    if (dbStaff || (rawBId && existingMap[rawBId])) {
+                        let e = dbStaff || existingMap[rawBId]; if (!e.rooms) e.rooms = e.room ? [e.room] : [];
+                        let emptyIdx = e.rooms.findIndex(rid => !rid);
+                        if (emptyIdx > -1) e.rooms[emptyIdx] = newRoom; else e.rooms.push(newRoom);
+                        let dbRooms = e.rooms.map(uiToDbRoom);
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', e.id), {...e, room: dbRooms[0]||"", rooms: dbRooms}); 
+                        continue; 
+                    }
+                    
+                    let fullName = safeStr(idx.name, r) || "UNKNOWN", last = fullName, first = "";
+                    if (fullName.includes(',')) { const p = fullName.split(','); last = p[0].trim(); first = p.slice(1).join(',').trim(); } else { const p = fullName.split(' '); first = p[0].trim(); last = p.length > 1 ? p.slice(1).join(' ').trim() : ""; }
+                    
+                    let payStatusTxt = safeStr(idx.payStatus, r), remarksTxt = safeStr(idx.notes, r), isBdcPaid = payStatusTxt.includes('Payment through Booking.com') || remarksTxt.includes('Payment through Booking.com') || payStatusTxt.includes('Paid online') || remarksTxt.includes('Paid online');
+                    let addressTxt = safeStr(idx.address, r), sourceClean = "other";
+                    if (addressTxt.includes("Prudential Tower")) sourceClean = 'agoda';
+                    else if (isBdcPaid || (idx.bookId > -1 && headers[idx.bookId].includes('reservation number')) || (idx.bookId > -1 && headers[idx.bookId].includes('book number'))) sourceClean = 'booking.com';
+                    else { const s = safeStr(idx.source, r).toLowerCase(); if(s.includes('booking')) sourceClean = 'booking.com'; else if(s.includes('agoda')) sourceClean = 'agoda'; else if(s.includes('hostelworld')) sourceClean = 'hostelworld'; else if(s.includes('airbnb')) sourceClean = 'airbnb'; else if(s.includes('direct') || s.includes('walk')) sourceClean = 'direct'; }
+
+                    let statusClean = safeStr(idx.status, r).toLowerCase().includes('cancel') ? "cancelled" : "future";
+                    const total = cleanMoney(safeStr(idx.total, r)), comm = cleanMoney(safeStr(idx.comm, r)), rCountStr = safeStr(idx.roomsCount, r);
+                    let count = rCountStr ? parseInt(rCountStr) || 1 : 1, linkCode = count > 1 ? (last.replace(/[^a-zA-Z]/g, '').substr(0, 4).toUpperCase() || Math.random().toString(36).substr(2, 4).toUpperCase()) : "";
+                    
+                    let cCode = safeStr(idx.country, r), parsedCountry = cCode;
+                    if(cCode.length === 2) { try { parsedCountry = new Intl.DisplayNames(['en'], {type: 'region'}).of(cCode.toUpperCase()); } catch(e) { parsedCountry = cCode.toUpperCase(); } }
+
+                    const payments = [], cin = parseDate(safeStr(idx.in, r));
+                    if (isFriendly) { statusClean = 'unconfirmed'; remarksTxt = "FRIENDLY RESORT BOOKING\n" + remarksTxt; } 
+                    else if (isBdcPaid) { let prefix = sourceClean === 'agoda' ? 'agoda' : 'bdc'; if (comm > 0) payments.push({ date: cin, amt: comm, method: `${prefix}-kp` }); if (total - comm > 0) payments.push({ date: cin, amt: Number((total - comm).toFixed(2)), method: `${prefix}-pay` }); }
+
+                    let roomsArr = Array(count).fill(""); if (newRoom) roomsArr[0] = newRoom;
+                    let dbRoomsArr = roomsArr.map(uiToDbRoom);
+
+                    const id = Math.random().toString(36).substr(2, 9);
+                    const entry = { id, firstName: first.toUpperCase(), lastName: last.toUpperCase(), status: statusClean, room: dbRoomsArr[0] || "", rooms: dbRoomsArr, checkIn: cin, checkOut: parseDate(safeStr(idx.out, r)), pax: parseInt(safeStr(idx.pax, r)) || 1, source: sourceClean, bookDate: parseDate(safeStr(idx.bookDate, r)), bookId: rawBId, phone: safeStr(idx.phone, r), email: safeStr(idx.email, r), totalPrice: total, netOverride: false, netPrice: total - comm, payments: payments, badCC: false, refundability: 'non-ref', upgrade: 'none', rating: 'none', extended: false, emailConfirm: false, emailPrePost: false, emailSpecial: false, linkedId: linkCode, country: parsedCountry, notes: remarksTxt, bookedType: safeStr(idx.roomType, r), createdAt: now, createdBy: "Admin Bulk Importer", lastEditedAt: null, lastEditedBy: null };
+                    
+                    if (rawBId) existingMap[rawBId] = entry; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry); importCount++;
+                }
+                document.getElementById('import-textarea').value = '';
+                document.getElementById('log-output').innerText = `✅ Successfully mapped and imported ${importCount} booking records to the database.`;
+            } catch (err) {
+                document.getElementById('log-output').innerText = `❌ Error during import: ` + err.message;
+            } finally {
+                document.getElementById('loader').classList.remove('active');
+            }
+        };
+    </script>
+</body>
+</html>
