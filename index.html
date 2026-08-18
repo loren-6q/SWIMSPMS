@@ -268,8 +268,8 @@
                 </div>
 
                 <div class="grid grid-cols-4 gap-1.5 pt-1">
-                    <div class="col-span-1"><label class="field-label">In</label><input type="date" id="check-in" required class="input-base !px-1" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
-                    <div class="col-span-1"><label class="field-label">Out</label><input type="date" id="check-out" required class="input-base !px-1" onchange="window.syncLabels(); window.updateAvailableRooms();"></div>
+                    <div class="col-span-1"><label class="field-label">In</label><input type="date" id="check-in" required class="input-base !px-1" onchange="window.updateAvailableRooms();"></div>
+                    <div class="col-span-1"><label class="field-label">Out</label><input type="date" id="check-out" required class="input-base !px-1" onchange="window.updateAvailableRooms();"></div>
                     <div class="col-span-1"><label class="field-label">PAX</label><input type="number" id="pax-count" value="1" min="1" class="input-base text-center" oninput="window.calcFinancials(); window.calcExtension && window.calcExtension();"></div>
                     <div class="col-span-1"><label class="field-label">Status</label>
                         <select id="guest-status" class="input-base text-white !px-1 cursor-pointer" style="background: #7fc6f5; color: #1e293b;" onchange="window.updateStatusColor(this)">
@@ -293,7 +293,7 @@
                     <div id="ext-btn" class="multi-state-btn px-1 py-1.5 rounded text-[10px] font-black uppercase border border-slate-300 text-slate-400" data-state="0" onclick="window.cycleMulti(this, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400'])">NOT EXTENDED</div>
                 </div>
 
-                <div class="section-header rounded-t-md unselectable" onclick="window.toggleSection('ext-section', 'ext-chevron', null)">
+                <div class="section-header rounded-t-md unselectable" onclick="window.toggleSection('ext-section', 'ext-chevron')">
                     <span class="text-blue-700"><i data-lucide="calendar-plus" size="14" class="inline mb-0.5 mr-1"></i>Extend Stay</span><i data-lucide="chevron-down" id="ext-chevron" size="14" class="transition-transform duration-200" style="transform: rotate(-90deg);"></i>
                 </div>
                 <div id="ext-section" class="bg-blue-50/50 p-1.5 border-x border-b border-blue-200 rounded-b-md mt-0 hidden" style="display: none;">
@@ -401,7 +401,6 @@
         let viewStart = new Date(); viewStart.setHours(12,0,0,0);
         let searchTerm = ""; let searchMatchIndex = 0; let sortKey = "checkIn"; let sortAsc = false; let isZoomWide = false;
         
-        // 0: ALL, 1: OCC, 2: EMP, 3: HID
         window.masterState = 0; 
         
         const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
@@ -410,7 +409,7 @@
         const SVGS = {
             upFree: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M12 2L4 12h5v10h6V12h5z" fill="#facc15" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
             upPaid: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M12 2L4 12h5v10h6V12h5z" fill="#4ade80" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
-            ext: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M22 12L12 4v5H2v6h10v5z" fill="#3b82f6" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
+            ext: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M2 9h10V4l10 8-10 8v-5H2z" fill="#3b82f6" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
             link: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke="#64748b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
             mailConf: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><rect x="1" y="4" width="22" height="16" rx="2" fill="#fff" stroke="#000" stroke-width="2"/><path d="M1 6l11 8 11-8" fill="none" stroke="#000" stroke-width="2"/></svg>`,
             mailPre: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><rect x="1" y="4" width="22" height="16" rx="2" fill="#f87171" stroke="#000" stroke-width="2"/><path d="M1 6l11 8 11-8" fill="none" stroke="#000" stroke-width="2"/></svg>`,
@@ -425,75 +424,34 @@
         const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
 
         document.getElementById('calendar-legend').innerHTML = `
-            <div class="flex flex-wrap items-center justify-center gap-3">
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#7fc6f5] border border-[#38bdf8]"></span> FUTURE</div>
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#059669] border border-[#047857]"></span> HERE</div>
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#aba39d] border border-[#78716c]"></span> LEFT</div>
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#f3e8ff] border border-[#d8b4fe]"></span> UNCONFIRMED</div>
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#0f172a] border border-[#f59e0b]"></span> CHARGED</div>
-            </div>
-            <div class="w-px h-4 bg-slate-300 hidden md:block"></div>
-            <div class="flex flex-wrap items-center justify-center gap-3">
-                <div class="legend-item"><div class="w-3.5 h-4 shrink-0">${SVGS.upFree}</div> FREE UP</div>
-                <div class="legend-item"><div class="w-3.5 h-4 shrink-0">${SVGS.upPaid}</div> PAID UP</div>
-                <div class="legend-item"><div class="w-4 h-4 shrink-0">${SVGS.link}</div> LINKED</div>
-                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.ext}</div> EXTENDED</div>
-                <div class="legend-item"><div class="border-[2px] border-red-500 w-3 h-3"></div> DUE</div>
-                <div class="legend-item"><div class="border-[2px] border-red-500 border-dashed w-3 h-3"></div> BAD CC</div>
-            </div>
-            <div class="w-px h-4 bg-slate-300 hidden xl:block"></div>
-            <div class="flex flex-wrap items-center justify-center gap-3">
-                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailConf}</div> CONFIRM</div>
-                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailPre}</div> PRE/POST SENT</div>
-                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailPreConf}</div> PRE/POST CONF</div>
-                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailSpec}</div> SPECIAL</div>
-            </div>
+            <div class="flex flex-wrap items-center justify-center gap-3"><div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#7fc6f5] border border-[#38bdf8]"></span> FUTURE</div><div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#059669] border border-[#047857]"></span> HERE</div><div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#aba39d] border border-[#78716c]"></span> LEFT</div><div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#f3e8ff] border border-[#d8b4fe]"></span> UNCONFIRMED</div><div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#0f172a] border border-[#f59e0b]"></span> CHARGED</div></div><div class="w-px h-4 bg-slate-300 hidden md:block"></div>
+            <div class="flex flex-wrap items-center justify-center gap-3"><div class="legend-item"><div class="w-3.5 h-4 shrink-0">${SVGS.upFree}</div> FREE UP</div><div class="legend-item"><div class="w-3.5 h-4 shrink-0">${SVGS.upPaid}</div> PAID UP</div><div class="legend-item"><div class="w-4 h-4 shrink-0">${SVGS.link}</div> LINKED</div><div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.ext}</div> EXTENDED</div><div class="legend-item"><span class="italic font-bold text-[11px] text-slate-800">Italics</span> REFUNDABLE</div><div class="legend-item"><div class="border-[2px] border-red-500 w-3 h-3"></div> DUE</div><div class="legend-item"><div class="border-[2px] border-red-500 border-dashed w-3 h-3"></div> BAD CC</div></div><div class="w-px h-4 bg-slate-300 hidden xl:block"></div>
+            <div class="flex flex-wrap items-center justify-center gap-3"><div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailConf}</div> CONFIRM</div><div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailPre}</div> PRE/POST SENT</div><div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailPreConf}</div> PRE/POST CONF</div><div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailSpec}</div> SPECIAL</div></div>
         `;
 
         window.getPaid = (s) => (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
         window.getDue = (s) => Number((Number(s.totalPrice || 0) - window.getPaid(s)).toFixed(2));
-        const toDisplayDate = (d) => { if (!d || isNaN(d.getTime())) return "---"; return `${String(d.getDate()).padStart(2, '0')} ${mNames[d.getMonth()]} ${d.getFullYear()}`; };
         const generateMonthOptions = () => { let html = '<option value="">ALL DATES</option>', d = new Date(viewStart.getFullYear(), viewStart.getMonth() - 2, 1); for(let i=0; i<36; i++) { html += `<option value="${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}">${mNames[d.getMonth()]} ${d.getFullYear()}</option>`; d.setMonth(d.getMonth() + 1); } return html; };
 
-        const dbToUiRoom = (rid) => {
-            if (!rid) return rid; let nid = rid.toUpperCase();
-            if (/^[ABFD]\d$/.test(nid)) return nid[0] + '0' + nid.substring(1);
-            if (/^(101|[23]\d{2}(?:-\d)?)$/.test(nid)) return 'C' + nid;
-            return nid;
-        };
-
-        const uiToDbRoom = (rid) => {
-            if (!rid) return rid; let nid = rid.toUpperCase();
-            if (/^[ABFD]0\d$/.test(nid)) return nid[0] + nid.substring(2);
-            if (nid.startsWith('C') && /^(101|[23]\d{2}(?:-\d)?)$/.test(nid.substring(1))) return nid.substring(1);
-            return nid;
-        };
+        const dbToUiRoom = (rid) => { if (!rid) return rid; let nid = rid.toUpperCase(); if (/^[ABFD]\d$/.test(nid)) return nid[0] + '0' + nid.substring(1); if (/^(101|[23]\d{2}(?:-\d)?)$/.test(nid)) return 'C' + nid; return nid; };
+        const uiToDbRoom = (rid) => { if (!rid) return rid; let nid = rid.toUpperCase(); if (/^[ABFD]0\d$/.test(nid)) return nid[0] + nid.substring(2); if (nid.startsWith('C') && /^(101|[23]\d{2}(?:-\d)?)$/.test(nid.substring(1))) return nid.substring(1); return nid; };
 
         let isDragging = false, dragOffsetX, dragOffsetY;
         window.startDrag = (e) => { if (e.target.closest('button, input, select, i, textarea, .multi-state-btn')) return; isDragging = true; const modal = document.getElementById('guest-modal-content'), rect = modal.getBoundingClientRect(); if(modal.style.position !== 'fixed') { modal.style.position = 'fixed'; modal.style.margin = '0'; modal.style.left = rect.left + 'px'; modal.style.top = rect.top + 'px'; } dragOffsetX = e.clientX - rect.left; dragOffsetY = e.clientY - rect.top; };
         document.addEventListener('mousemove', (e) => { if (!isDragging) return; const modal = document.getElementById('guest-modal-content'); let newLeft = e.clientX - dragOffsetX, newTop = e.clientY - dragOffsetY; if (newTop < 0) newTop = 0; if (newTop > window.innerHeight - 50) newTop = window.innerHeight - 50; modal.style.left = newLeft + 'px'; modal.style.top = newTop + 'px'; });
         document.addEventListener('mouseup', () => { if(isDragging) isDragging = false; });
 
-        window.updateCountryList = () => {
-            const baseCountries = ["France", "Germany", "United Kingdom", "United States", "Australia", "Netherlands", "Israel", "Spain", "Italy", "Switzerland", "Canada", "Sweden", "Denmark", "Russia", "Thailand", "Belgium", "Austria", "Ireland", "Norway", "Finland", "Brazil", "Argentina", "South Korea", "Japan", "China", "India", "Mexico", "New Zealand", "South Africa", "Portugal", "Greece"];
-            const dbCountries = staff.map(s => s.country).filter(Boolean).map(c => {
-                // Ensure proper casing for db entries just in case
-                if (c.length > 2) return c.charAt(0).toUpperCase() + c.slice(1).toLowerCase();
-                return c;
-            });
-            const allUnique = [...new Set([...baseCountries, ...dbCountries])].sort();
-            const dl = document.getElementById('country-list');
-            if (dl) { dl.innerHTML = allUnique.map(c => `<option value="${c}"></option>`).join(''); }
+        const setupDatalist = () => {
+            const base = ["France", "Germany", "United Kingdom", "United States", "Australia", "Netherlands", "Israel", "Spain", "Italy", "Switzerland", "Canada", "Sweden", "Denmark", "Russia", "Thailand", "Belgium", "Austria", "Ireland", "Norway", "Finland", "Brazil", "Argentina", "South Korea", "Japan", "China", "India", "Mexico", "New Zealand", "South Africa", "Portugal", "Greece"];
+            const dbC = staff.map(s => s.country).filter(Boolean).map(c => c.length > 2 ? c.charAt(0).toUpperCase() + c.slice(1).toLowerCase() : c);
+            const dl = document.getElementById('country-list'); if (dl) dl.innerHTML = [...new Set([...base, ...dbC])].sort().map(c => `<option value="${c}"></option>`).join('');
         };
 
         const init = async () => {
             const processSnapshot = (snap) => { 
-                let rawStaff = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
-                staff = rawStaff.map(s => { let mappedRooms = (s.rooms?.length ? s.rooms : (s.room ? [s.room] : [])).map(dbToUiRoom); s.room = mappedRooms[0] || ""; s.rooms = mappedRooms; return s; });
-                window.updateCountryList();
-                window.render(); 
-                const urlParams = new URLSearchParams(window.location.search); const editId = urlParams.get('edit');
-                if (editId) { window.editStaff(editId); try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {} }
+                staff = snap.docs.map(d => ({ id: d.id, ...d.data() })).map(s => { s.room = (s.rooms?.length ? s.rooms : (s.room ? [s.room] : [])).map(dbToUiRoom)[0] || ""; s.rooms = (s.rooms?.length ? s.rooms : (s.room ? [s.room] : [])).map(dbToUiRoom); return s; });
+                setupDatalist(); window.render(); 
+                const editId = new URLSearchParams(window.location.search).get('edit'); if (editId) { window.editStaff(editId); try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {} }
             };
 
             if (typeof window.__initial_auth_token !== 'undefined' || !REQUIRE_LOGIN) {
@@ -511,82 +469,36 @@
                         const email = user.email ? user.email.toLowerCase() : '';
                         if (ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email)) currentUserRole = 'admin'; else if (STAFF_EMAILS.map(e => e.toLowerCase()).includes(email)) currentUserRole = 'staff'; else return signOut(auth).then(() => { window.showAlert("Access Denied."); });
                         currentUserEmail = email.split('@')[0]; document.getElementById('boot-loader').style.display = 'none';
-                        if (currentUserRole === 'admin') { 
-                            if (document.getElementById('tab-acc')) document.getElementById('tab-acc').classList.remove('hidden'); 
-                            if (document.getElementById('tab-sync')) document.getElementById('tab-sync').classList.remove('hidden'); 
-                            document.getElementById('admin-bulk-delete').classList.remove('hidden'); document.getElementById('admin-bulk-delete').classList.add('flex'); 
-                        }
+                        if (currentUserRole === 'admin') { if (document.getElementById('tab-acc')) document.getElementById('tab-acc').classList.remove('hidden'); if (document.getElementById('tab-sync')) document.getElementById('tab-sync').classList.remove('hidden'); document.getElementById('admin-bulk-delete').classList.remove('hidden'); document.getElementById('admin-bulk-delete').classList.add('flex'); }
                         onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'staff'), processSnapshot);
-                    } else { document.getElementById('boot-loader').style.display = 'none'; }
+                    } else document.getElementById('boot-loader').style.display = 'none';
                 });
             }
 
-            const setupDropdown = (id) => { const drop = document.getElementById(id); if(!drop) return; roomTypes.forEach(t => { const lbl = document.createElement('label'); lbl.innerHTML = `<input type="checkbox" value="${t}" onchange="window.updateMultiLabel('${id}', '${id.replace('-dropdown', '-label')}', 'ALL ROOMS'); window.renderDatabase();" class="mr-2"> ${t}`; drop.appendChild(lbl); }); const lbl = document.createElement('label'); lbl.className = 'text-amber-400 font-black'; lbl.innerHTML = `<input type="checkbox" value="UNASSIGNED" onchange="window.updateMultiLabel('${id}', '${id.replace('-dropdown', '-label')}', 'ALL ROOMS'); window.renderDatabase();" class="mr-2"> UNASSIGNED`; drop.appendChild(lbl); };
-            setupDropdown('db-room-dropdown'); window.addEventListener('resize', window.render); lucide.createIcons();
+            const drop = document.getElementById('db-room-dropdown'); if(drop) { roomTypes.forEach(t => drop.innerHTML += `<label><input type="checkbox" value="${t}" onchange="window.updateMultiLabel('db-room-dropdown', 'db-room-label', 'ALL ROOMS'); window.renderDatabase();" class="mr-2"> ${t}</label>`); drop.innerHTML += `<label class="text-amber-400 font-black"><input type="checkbox" value="UNASSIGNED" onchange="window.updateMultiLabel('db-room-dropdown', 'db-room-label', 'ALL ROOMS'); window.renderDatabase();" class="mr-2"> UNASSIGNED</label>`; }
+            window.addEventListener('resize', window.render); lucide.createIcons();
         };
 
         window.toggleSection = (sectionId, chevronId, forceState = null) => {
-            const sec = document.getElementById(sectionId);
-            const icon = document.getElementById(chevronId);
-            if (!sec) return;
-            
-            const isCurrentlyHidden = sec.style.display === 'none' || sec.classList.contains('hidden');
-            const shouldShow = forceState !== null ? forceState : isCurrentlyHidden;
-            
-            if (shouldShow) {
-                sec.style.display = 'block';
-                sec.classList.remove('hidden');
-                if(icon) icon.style.transform = 'rotate(0deg)';
-            } else {
-                sec.style.display = 'none';
-                sec.classList.add('hidden');
-                if(icon) icon.style.transform = 'rotate(-90deg)';
-            }
+            const sec = document.getElementById(sectionId), icon = document.getElementById(chevronId); if (!sec) return;
+            const shouldShow = forceState !== null ? forceState : (sec.style.display === 'none' || sec.classList.contains('hidden'));
+            if (shouldShow) { sec.style.display = 'block'; sec.classList.remove('hidden'); if(icon) icon.style.transform = 'rotate(0deg)'; } 
+            else { sec.style.display = 'none'; sec.classList.add('hidden'); if(icon) icon.style.transform = 'rotate(-90deg)'; }
         };
 
-        window.toggleAllGroups = () => {
-            window.masterState = (window.masterState + 1) % 4;
-            const states = ['expanded', 'booked', 'unbooked', 'collapsed'];
-            const targetState = states[window.masterState];
-            
-            let allGroups = new Set();
-            document.querySelectorAll('.group-header').forEach(el => {
-                if (el.dataset.group) allGroups.add(el.dataset.group);
-            });
-            allGroups.forEach(g => window.toggleGroup(g, targetState));
-        };
+        window.toggleAllGroups = () => { window.masterState = (window.masterState + 1) % 4; const states = ['expanded', 'booked', 'unbooked', 'collapsed'], targetState = states[window.masterState]; let allGroups = new Set(); document.querySelectorAll('.group-header').forEach(el => { if (el.dataset.group) allGroups.add(el.dataset.group); }); allGroups.forEach(g => window.toggleGroup(g, targetState)); };
 
         window.toggleGroup = (groupName, forceState = null) => {
-            const rows = document.querySelectorAll(`.group-${groupName}`);
-            const availRow = document.querySelector(`.avail-row-${groupName}`);
-            const icon = document.getElementById(`icon-${groupName}`);
-            const stateLabel = document.getElementById(`state-${groupName}`);
-            
+            const rows = document.querySelectorAll(`.group-${groupName}`), availRow = document.querySelector(`.avail-row-${groupName}`), icon = document.getElementById(`icon-${groupName}`), stateLabel = document.getElementById(`state-${groupName}`);
             let currentState = rows.length > 0 ? (rows[0].dataset.state || 'expanded') : (availRow && availRow.style.display !== 'none' ? 'collapsed' : 'expanded');
-            
-            let nextState = forceState;
-            if (!nextState) {
-                if (currentState === 'expanded') nextState = 'booked';
-                else if (currentState === 'booked') nextState = 'unbooked';
-                else if (currentState === 'unbooked') nextState = 'collapsed';
-                else if (currentState === 'collapsed') nextState = 'expanded';
-            }
+            let nextState = forceState || (currentState === 'expanded' ? 'booked' : (currentState === 'booked' ? 'unbooked' : (currentState === 'unbooked' ? 'collapsed' : 'expanded')));
 
             rows.forEach(r => {
-                r.dataset.state = nextState;
-                const bars = r.querySelectorAll('.staff-bar');
-                const hasBooking = bars.length > 0;
-                
-                if (nextState === 'collapsed') r.style.display = 'none';
-                else if (nextState === 'booked') r.style.display = hasBooking ? '' : 'none';
-                else if (nextState === 'unbooked') r.style.display = !hasBooking ? '' : 'none';
-                else r.style.display = '';
+                r.dataset.state = nextState; const hasBooking = r.querySelectorAll('.staff-bar').length > 0;
+                if (nextState === 'collapsed') r.style.display = 'none'; else if (nextState === 'booked') r.style.display = hasBooking ? '' : 'none'; else if (nextState === 'unbooked') r.style.display = !hasBooking ? '' : 'none'; else r.style.display = '';
             });
 
-            if (availRow) {
-                availRow.style.display = nextState === 'collapsed' ? 'grid' : 'none';
-            }
-
+            if (availRow) availRow.style.display = nextState === 'collapsed' ? 'grid' : 'none';
             if (icon) icon.style.transform = nextState === 'collapsed' ? 'rotate(180deg)' : 'rotate(0deg)';
             if (stateLabel) {
                 if (nextState === 'expanded') { stateLabel.innerText = 'ALL'; stateLabel.className = 'text-[8px] bg-slate-600 text-slate-300 px-1 rounded'; }
@@ -597,17 +509,17 @@
         };
 
         window.toggleMultiSelect = (id, btnEventEl) => { event.stopPropagation(); const drop = document.getElementById(id); if(!drop) return; const isHidden = drop.style.display === 'none' || drop.style.display === ''; document.querySelectorAll('.multi-select-dropdown').forEach(d => { d.style.display = 'none'; }); if(isHidden) { const rect = btnEventEl.getBoundingClientRect(); document.body.appendChild(drop); drop.style.position = 'absolute'; drop.style.top = (rect.bottom + window.scrollY) + 'px'; drop.style.left = (rect.left + window.scrollX) + 'px'; drop.style.width = Math.max(rect.width, 140) + 'px'; if (rect.left + 150 > window.innerWidth) drop.style.left = (window.scrollX + rect.right - 150) + 'px'; drop.style.display = 'block'; } };
-        window.updateMultiLabel = (dropId, labelId, defaultText) => { const checked = document.querySelectorAll(`#${dropId} input[type="checkbox"]:checked`), label = document.getElementById(labelId); if(!label) return; label.innerText = checked.length === 0 ? defaultText : (checked.length === 1 ? checked[0].parentNode.textContent.trim().toUpperCase() : checked.length + ' SELECTED'); };
+        window.updateMultiLabel = (dropId, labelId, defaultText) => { const checked = document.querySelectorAll(`#${dropId} input[type="checkbox"]:checked`), label = document.getElementById(labelId); if(label) label.innerText = checked.length === 0 ? defaultText : (checked.length === 1 ? checked[0].parentNode.textContent.trim().toUpperCase() : checked.length + ' SELECTED'); };
         window.getMultiValues = (id) => Array.from(document.getElementById(id)?.querySelectorAll('input[type="checkbox"]:checked') || []).map(cb => cb.value);
         document.addEventListener('click', (e) => { if (!e.target.closest('.multi-select-container') && !e.target.closest('.multi-select-dropdown')) document.querySelectorAll('.multi-select-dropdown').forEach(d => { d.style.display = 'none'; }); });
 
         const parseYMD = (dateStr) => { if (!dateStr || typeof dateStr !== 'string') return 0; const p = dateStr.split('-'); return p.length !== 3 ? 0 : Date.UTC(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])); };
-        const getDayIndex = (dateStr) => { const target = parseYMD(dateStr); if (!target) return -1; return Math.round((target - Date.UTC(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate())) / 86400000); };
+        const getDayIndex = (dateStr) => { const t = parseYMD(dateStr); return t ? Math.round((t - Date.UTC(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate())) / 86400000) : -1; };
         
         window.jumpToMonth = (val) => { if(val) { const [y, m] = val.split('-'); viewStart = new Date(y, m-1, 1, 12, 0, 0); window.render(); } };
         window.toggleZoom = () => { isZoomWide = !isZoomWide; const container = document.getElementById('calendar-view'); if (isZoomWide) container.classList.add('zoom-wide-mode'); else container.classList.remove('zoom-wide-mode'); };
         const getFloorIcon = (f) => f === 1 ? `<i data-lucide="arrow-down" class="text-blue-500 shrink-0" size="12" stroke-width="3"></i>` : (f === 2 ? `<i data-lucide="arrow-up" class="text-green-500 shrink-0" size="12" stroke-width="3"></i>` : (f === 3 ? `<i data-lucide="chevrons-up" class="text-purple-500 shrink-0" size="12" stroke-width="3"></i>` : ''));
-        const getFMPShade = (date) => { for (let f of fmpDates) { const d = Math.round((date - new Date(f + "T12:00:00")) / 86400000); if (d === 0) return 'day-fmp-dark'; if (d >= -2 && d <= 2) return 'day-fmp-medium'; } return ''; };
+        const getFMPShade = (date) => { const dMs = date.getTime(); for (let f of fmpDates) { const diff = Math.round((dMs - new Date(f + "T12:00:00").getTime()) / 86400000); if (diff === 0) return 'day-fmp-dark'; if (diff >= -2 && diff <= 2) return 'day-fmp-medium'; } return ''; };
 
         window.render = () => {
             const width = window.innerWidth; let daysToShow = width >= 1150 ? 35 : width >= 950 ? 28 : width >= 650 ? 21 : 14; document.documentElement.style.setProperty('--days', daysToShow);
@@ -626,20 +538,17 @@
             let currentMonth = -1, currentSpan = 0;
             days.forEach((d, i) => { if (d.getMonth() !== currentMonth) { if (currentMonth !== -1) monthsGrid.innerHTML += `<div style="grid-column: span ${currentSpan}" class="unselectable flex items-center justify-center month-divider py-1 border-b border-slate-700 text-white text-[11px] font-bold uppercase tracking-widest">${mNames[currentMonth]} ${days[i-1].getFullYear()}</div>`; currentMonth = d.getMonth(); currentSpan = 1; } else currentSpan++; if (i === days.length - 1) monthsGrid.innerHTML += `<div style="grid-column: span ${currentSpan}" class="unselectable flex items-center justify-center month-divider py-1 border-b border-slate-700 text-white text-[11px] font-bold uppercase tracking-widest">${mNames[currentMonth]} ${d.getFullYear()}</div>`; });
             
-            const getLocalYMD = (d) => { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
-            const todayD = new Date(); const todayStr = getLocalYMD(todayD);
-            const yesterdayD = new Date(); yesterdayD.setDate(todayD.getDate() - 1);
-            const yesterdayStr = getLocalYMD(yesterdayD);
+            const getLocalYMD = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            const todayD = new Date(), todayStr = getLocalYMD(todayD), yesterdayD = new Date(); yesterdayD.setDate(todayD.getDate() - 1); const yesterdayStr = getLocalYMD(yesterdayD);
             
             days.forEach(d => { const isToday = getLocalYMD(d) === todayStr; daysGrid.innerHTML += `<div class="flex flex-col items-center justify-center border-r border-slate-400 ${isToday ? 'bg-blue-100' : ''}"><div class="text-[10px] font-black text-slate-500 uppercase leading-none">${d.toLocaleDateString('en-US', {weekday:'short'})}</div><div class="text-[16px] font-black ${isToday ? 'text-blue-600' : 'text-slate-800'} leading-tight">${d.getDate()}</div></div>`; });
 
-            const activeStaff = staff.filter(s => s.status !== 'cancelled' && s.status !== 'noshow'); 
-            const viewStartUTC = Date.UTC(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate()); const viewEndUTC = viewStartUTC + daysToShow * 86400000;
-            const timelineRows = []; const unconfirmed = [];
+            const activeStaff = staff.filter(s => s.status !== 'cancelled' && s.status !== 'noshow'), viewStartUTC = Date.UTC(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate()), viewEndUTC = viewStartUTC + daysToShow * 86400000;
+            const timelineRows = [], unconfirmed = [];
             
             activeStaff.forEach(s => { 
                 if (parseYMD(s.checkIn) > viewEndUTC || parseYMD(s.checkOut) < viewStartUTC) return; 
-                const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : [""]); 
+                const rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : [""]); 
                 if (s.status === 'unconfirmed' || s.status === 'charged') for(let i=0; i < Math.max(1, rList.length); i++) unconfirmed.push(s); 
                 else { const unassignedCount = rList.filter(rid => !rid).length; for(let i=0; i < unassignedCount; i++) unconfirmed.push(s); } 
             });
@@ -661,7 +570,6 @@
                 if (rowDef.isDivider) {
                     currentGroup = rowDef.label.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase(); 
                     let isDefaultCollapsed = currentGroup === 'unconfirmed-hold';
-                    
                     const headerRow = document.createElement('div');
                     headerRow.className = `timeline-grid ${rowDef.isUnconfirmedZone ? 'mt-4' : ''} cursor-pointer transition-colors unselectable group-header`;
                     headerRow.dataset.group = currentGroup;
@@ -670,14 +578,10 @@
                         headerRow.innerHTML = `<div class="unassigned-header bg-slate-300 hover:bg-slate-400 text-slate-800 p-0.5 text-[10px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-30 transition-colors" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')"><span>${rowDef.label}</span><i data-lucide="chevron-up" class="transition-transform duration-200" id="icon-${currentGroup}" size="14" style="${isDefaultCollapsed ? 'transform: rotate(180deg);' : ''}"></i></div>`;
                         return body.appendChild(headerRow);
                     } else {
-                        // Regular Black Header Row
                         headerRow.innerHTML = `<div class="bg-slate-800 hover:bg-slate-700 text-white border-t border-slate-600 p-0.5 text-[11px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-30 transition-colors shadow-[2px_0_4px_rgba(0,0,0,0.1)] w-[var(--sidebar-w)]" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')"><span class="truncate pr-1">${rowDef.label}</span><div class="flex items-center gap-1 shrink-0"><span id="state-${currentGroup}" class="text-[8px] bg-slate-600 px-1 rounded text-slate-300">ALL</span><i data-lucide="chevron-up" class="transition-transform duration-200" id="icon-${currentGroup}" size="14"></i></div></div>`;
                         body.appendChild(headerRow);
 
-                        const typeRooms = hotelRooms.filter(hr => hr.type === rowDef.label);
-                        const capacity = typeRooms.length;
-                        const typeRoomIds = typeRooms.map(hr => hr.id);
-                        
+                        const typeRoomIds = hotelRooms.filter(hr => hr.type === rowDef.label).map(hr => hr.id), capacity = typeRoomIds.length;
                         const availRow = document.createElement('div');
                         availRow.className = `timeline-grid avail-row-${currentGroup} bg-black border-b border-slate-700 h-[18px]`;
                         availRow.style.display = 'none';
@@ -685,68 +589,47 @@
                         let cellHtml = `<div class="bg-slate-900 border-r border-slate-700 flex items-center justify-end pr-2 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.1)] w-[var(--sidebar-w)] text-[9px] text-slate-400 font-black uppercase tracking-widest unselectable">AVAIL &rarr;</div>`;
 
                         for(let i=0; i<daysToShow; i++) {
-                            let dTime = days[i].getTime();
-                            let occupiedRooms = new Set();
-                            
+                            let dTime = days[i].getTime(), occupiedRooms = new Set();
                             activeStaff.forEach(s => {
                                 if(s.status === 'unconfirmed' || s.status === 'charged') return;
-                                let inMs = parseYMD(s.checkIn), outMs = parseYMD(s.checkOut);
-                                if (dTime >= inMs && dTime < outMs) {
-                                    let rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []);
-                                    rList.forEach(r => { if (r && typeRoomIds.includes(r)) occupiedRooms.add(r); });
+                                if (dTime >= parseYMD(s.checkIn) && dTime < parseYMD(s.checkOut)) {
+                                    (s.rooms?.length ? s.rooms : (s.room ? [s.room] : [])).forEach(r => { if (r && typeRoomIds.includes(r)) occupiedRooms.add(r); });
                                 }
                             });
                             
-                            let avail = capacity - occupiedRooms.size;
-                            let ratio = capacity > 0 ? avail / capacity : 0;
-                            let colorClass = '';
-                            
-                            // Advanced Heatmap Logic
-                            if (avail === capacity) colorClass = 'bg-[#22c55e] text-black'; 
-                            else if (ratio >= 0.75) colorClass = 'bg-black text-[#4ade80]'; 
-                            else if (ratio >= 0.50) colorClass = 'bg-black text-white'; 
-                            else if (ratio >= 0.25) colorClass = 'bg-[#7f1d1d] text-white'; 
-                            else if (avail > 0) colorClass = 'bg-[#dc2626] text-white'; 
-                            else colorClass = 'bg-[#ef4444] text-black border-x border-[#b91c1c] font-black'; 
-
+                            let avail = capacity - occupiedRooms.size, ratio = capacity > 0 ? avail / capacity : 0, colorClass = '';
+                            if (avail === capacity) colorClass = 'bg-[#22c55e] text-black'; else if (ratio >= 0.75) colorClass = 'bg-black text-[#4ade80]'; else if (ratio >= 0.50) colorClass = 'bg-black text-white'; else if (ratio >= 0.25) colorClass = 'bg-[#7f1d1d] text-white'; else if (avail > 0) colorClass = 'bg-[#dc2626] text-white'; else colorClass = 'bg-[#ef4444] text-black border-x border-[#b91c1c] font-black'; 
                             cellHtml += `<div class="flex items-center justify-center border-r border-slate-700 border-opacity-50 text-[10px] font-black ${colorClass}">${avail}</div>`;
                         }
-                        availRow.innerHTML = cellHtml;
-                        return body.appendChild(availRow);
+                        availRow.innerHTML = cellHtml; return body.appendChild(availRow);
                     }
                 }
 
-                const row = document.createElement('div'); 
-                row.className = `timeline-grid bed-row group-${currentGroup} ${rowDef.isRoom && rowDef.id.endsWith('-4') ? '!border-b-[3px] !border-slate-400' : ''}`;
+                const row = document.createElement('div'); row.className = `timeline-grid bed-row group-${currentGroup} ${rowDef.isRoom && rowDef.id.endsWith('-4') ? '!border-b-[3px] !border-slate-400' : ''}`;
                 if (currentGroup === 'unconfirmed-hold') row.style.display = 'none';
 
                 const headerHtml = rowDef.isRoom ? `<div class="flex items-center justify-between px-1 w-full gap-1"><div class="flex items-center gap-0.5 shrink-0"><span class="text-[13px] font-black text-slate-700">${rowDef.id}</span>${getFloorIcon(rowDef.floor)}</div><span class="text-[10px] font-bold text-slate-600 text-right leading-none tracking-tighter truncate">${rowDef.bed}</span></div>` : `<span class="text-[11px] font-black text-amber-700">${rowDef.label}</span>`;
                 row.innerHTML = `<div class="border-r border-slate-400 ${rowDef.isUnassigned ? 'bg-amber-100' : 'bg-slate-50'} flex items-center justify-center uppercase overflow-hidden shrink-0 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.05)] unselectable w-[var(--sidebar-w)]">${headerHtml}</div>`;
                 
-                for(let i=0; i<daysToShow; i++) { const cell = document.createElement('div'), isToday = getLocalYMD(days[i]) === todayStr; cell.className = `day-column ${getFMPShade(days[i])} ${isToday ? 'day-today' : ''} ${rowDef.isUnassigned ? 'bg-amber-50/50' : ''}`; cell.dataset.colIndex = i; cell.dataset.dateNum = days[i].getDate(); cell.onmouseenter = () => document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.add('hover-col')); cell.onmouseleave = () => document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.remove('hover-col')); cell.onclick = () => window.quickAdd(rowDef.isUnassigned ? "" : rowDef.id, days[i]); row.appendChild(cell); }
+                for(let i=0; i<daysToShow; i++) { 
+                    const cell = document.createElement('div'), isToday = getLocalYMD(days[i]) === todayStr; 
+                    cell.className = `day-column ${getFMPShade(days[i])} ${isToday ? 'day-today' : ''} ${rowDef.isUnassigned ? 'bg-amber-50/50' : ''}`; 
+                    cell.dataset.colIndex = i; cell.dataset.dateNum = days[i].getDate(); 
+                    cell.onmouseenter = () => document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.add('hover-col')); 
+                    cell.onmouseleave = () => document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.remove('hover-col')); 
+                    cell.onclick = () => window.quickAdd(rowDef.isUnassigned ? "" : rowDef.id, days[i]); 
+                    row.appendChild(cell); 
+                }
 
                 rowDef.bookings.forEach(s => {
                     const exStart = getDayIndex(s.checkIn) + 0.3, exEnd = getDayIndex(s.checkOut) + 0.25; if (exStart >= daysToShow || exEnd <= 0) return;
-                    const due = window.getDue(s), owes = due > 0; 
+                    const due = window.getDue(s), owes = due > 0; let bStyles = 'border border-black/10', isAlerting = false;
                     
-                    let bStyles = 'border border-black/10'; 
-                    let isAlerting = false;
-                    
-                    if (s.status === 'future') {
-                        if (s.checkIn === todayStr) { bStyles += ' checkin-today'; isAlerting = true; }
-                        else if (s.checkIn <= yesterdayStr) { bStyles += ' late-checkin'; isAlerting = true; }
-                    } else if (s.status === 'here') {
-                        if (s.checkOut === todayStr) { bStyles += ' overdue-checkout-today'; isAlerting = true; }
-                        else if (s.checkOut <= yesterdayStr) { bStyles += ' overdue-checkout-past'; isAlerting = true; }
-                    }
-
-                    if (!isAlerting) {
-                        if (s.badCC) bStyles = '!border-red-500 !border-dashed !border-[3px]'; 
-                        else if (owes) bStyles = '!border-red-500 !border-[3px]';
-                    }
+                    if (s.status === 'future') { if (s.checkIn === todayStr) { bStyles += ' checkin-today'; isAlerting = true; } else if (s.checkIn <= yesterdayStr) { bStyles += ' late-checkin'; isAlerting = true; } } 
+                    else if (s.status === 'here') { if (s.checkOut === todayStr) { bStyles += ' overdue-checkout-today'; isAlerting = true; } else if (s.checkOut <= yesterdayStr) { bStyles += ' overdue-checkout-past'; isAlerting = true; } }
+                    if (!isAlerting) { if (s.badCC) bStyles = '!border-red-500 !border-dashed !border-[3px]'; else if (owes) bStyles = '!border-red-500 !border-[3px]'; }
                     
                     const srcConfig = { 'booking.com': { bg: 'bg-[#003580]', text: 'B' }, 'agoda': { bg: 'bg-[#87B2D6]', text: 'A' }, 'hostelworld': { bg: 'bg-[#F15A24]', text: 'H' }, 'airbnb': { bg: 'bg-[#FF5A5F]', text: 'A' }, 'direct': { bg: 'bg-emerald-500', text: 'D' } }, src = srcConfig[s.source] || { bg: 'bg-slate-700', text: '?' };
-                    
                     const bar = document.createElement('div'); bar.className = `unselectable staff-bar status-${s.status} ${bStyles} ${s.linkedId ? 'linked-'+s.linkedId : ''}`; 
                     bar.style.left = `calc(var(--sidebar-w) + (100% - var(--sidebar-w)) * ${Math.max(0, exStart) / daysToShow})`; bar.style.width = `calc((100% - var(--sidebar-w)) * ${(Math.min(daysToShow, exEnd) - Math.max(0, exStart)) / daysToShow})`;
                     if (searchTerm && !(s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm) && !(s.bookId||'').toUpperCase().includes(searchTerm)) bar.style.opacity = "0.15";
@@ -759,9 +642,7 @@
                     if (s.upgrade === 'free') bHtml += `<div class="w-3.5 h-4 shrink-0 ml-0.5">${SVGS.upFree}</div>`; else if (s.upgrade === 'paid') bHtml += `<div class="w-3.5 h-4 shrink-0 ml-0.5">${SVGS.upPaid}</div>`;
                     if (s.extended) bHtml += `<div class="w-4 h-3.5 shrink-0 ml-0.5">${SVGS.ext}</div>`;
                     if (s.rating === 'good') bHtml += `<div class="w-4 h-4 shrink-0 ml-0.5">${SVGS.fbGood}</div>`; else if (s.rating === 'bad') bHtml += `<div class="w-4 h-4 shrink-0 ml-0.5">${SVGS.fbBad}</div>`;
-                    
                     if (s.emailSpecial) bHtml += `<div class="w-4 h-3.5 shrink-0 ml-0.5">${SVGS.mailSpec}</div>`; else if (s.emailPrePost === 'confirmed') bHtml += `<div class="w-4 h-3.5 shrink-0 ml-0.5">${SVGS.mailPreConf}</div>`; else if (s.emailPrePost === 'sent' || s.emailPrePost === true) bHtml += `<div class="w-4 h-3.5 shrink-0 ml-0.5">${SVGS.mailPre}</div>`; else if (s.emailConfirm) bHtml += `<div class="w-4 h-3.5 shrink-0 ml-0.5">${SVGS.mailConf}</div>`;
-                    
                     bHtml += `<div class="ml-1 ${src.bg} text-white w-[15px] h-[15px] text-[13px] font-black flex items-center justify-center shrink-0 rounded-sm leading-none pb-[1px] pt-[0.5px]">${src.text}</div><div class="w-2 shrink-0"></div></div>`;
                     bar.innerHTML = bHtml;
 
@@ -775,15 +656,7 @@
                 }); body.appendChild(row);
             });
             
-            if (window.masterState !== 0) {
-                const states = ['expanded', 'booked', 'unbooked', 'collapsed'];
-                const targetState = states[window.masterState];
-                let allGroups = new Set();
-                document.querySelectorAll('.group-header').forEach(el => {
-                    if (el.dataset.group) allGroups.add(el.dataset.group);
-                });
-                allGroups.forEach(g => window.toggleGroup(g, targetState));
-            }
+            if (window.masterState !== 0) { const targetState = ['expanded', 'booked', 'unbooked', 'collapsed'][window.masterState], allGroups = new Set(); document.querySelectorAll('.group-header').forEach(el => { if (el.dataset.group) allGroups.add(el.dataset.group); }); allGroups.forEach(g => window.toggleGroup(g, targetState)); }
         };
 
         window.getFilteredBookings = (v, sKey, sAsc) => {
@@ -798,13 +671,14 @@
         window.sortDatabase = (key) => { if(sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } window.renderDatabase(); };
         window.switchTab = (t) => { document.getElementById('calendar-view').style.display = t === 'calendar' ? 'flex' : 'none'; document.getElementById('database-view').style.display = t === 'database' ? 'flex' : 'none'; document.getElementById('tab-cal').classList.toggle('active', t === 'calendar'); document.getElementById('tab-db').classList.toggle('active', t === 'database'); if(t === 'database') window.renderDatabase(); };
         
-        window.handleSearch = (val) => { searchTerm = val.trim().toUpperCase(); searchMatchIndex = 0; const jb = document.getElementById('search-jump-btn'), mc = document.getElementById('match-counter'), m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm) || (s.bookId||'').toUpperCase().includes(searchTerm)); if(searchTerm && m.length > 0) { jb?.classList.replace('hidden', 'flex'); if(mc) mc.innerText = `Match ${searchMatchIndex + 1} of ${m.length}`; } else { jb?.classList.replace('flex', 'hidden'); } window.render(); };
+        window.handleSearch = (val) => { searchTerm = val.trim().toUpperCase(); searchMatchIndex = 0; const jb = document.getElementById('search-jump-btn'), mc = document.getElementById('match-counter'), m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm) || (s.bookId||'').toUpperCase().includes(searchTerm)); if(searchTerm && m.length > 0) { jb?.classList.replace('hidden', 'flex'); if(mc) mc.innerText = `Match ${searchMatchIndex + 1} of ${m.length}`; } else jb?.classList.replace('flex', 'hidden'); window.render(); };
         window.clearSearch = () => { document.getElementById('guest-search').value = ""; window.handleSearch(""); };
         window.jumpToSearchMatch = () => { const m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm) || (s.bookId||'').toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (m.length > 0) { const d = new Date(m[searchMatchIndex % m.length].checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; const mc = document.getElementById('match-counter'); if(mc) mc.innerText = `Match ${(searchMatchIndex % m.length) + 1} of ${m.length}`; window.render(); } };
-        window.syncLabels = () => {}; window.prevPeriod = () => { viewStart.setDate(viewStart.getDate() - 7); window.render(); }; window.nextPeriod = () => { viewStart.setDate(viewStart.getDate() + 7); window.render(); }; window.goToday = () => { viewStart = new Date(); viewStart.setDate(viewStart.getDate() - 7); viewStart.setHours(12,0,0,0); window.render(); }; window.updateHeaderName = () => { document.getElementById('modal-guest-name-display').innerText = `${document.getElementById('first-name').value.trim().toUpperCase()} ${document.getElementById('last-name').value.trim().toUpperCase()}`.trim() || "NEW BOOKING"; }; window.checkEmailProxy = (val) => { const el = document.getElementById('email'), v = val.toLowerCase(); if (v.includes('booking.com') || v.includes('agoda')) { el.classList.remove('text-green-600'); el.classList.add('text-red-600', 'font-black'); } else if (v.includes('@')) { el.classList.remove('text-red-600'); el.classList.add('text-green-600', 'font-black'); } else { el.classList.remove('text-red-600', 'text-green-600', 'font-black'); } };
-        window.cycleMulti = (el, labels, classes) => { if (!el) return; let s = parseInt(el.dataset.state) + 1; if(s >= labels.length) s = 0; el.dataset.state = s; el.innerText = labels[s]; el.className = el.id.includes('email') ? `flex-1 min-w-[80px] unselectable multi-state-btn px-0.5 py-1 rounded text-[9px] font-black uppercase border text-center whitespace-nowrap ${classes[s]}` : `flex-1 unselectable multi-state-btn px-1 py-1.5 rounded text-[10px] font-black uppercase border ${classes[s]}`; };
+        window.prevPeriod = () => { viewStart.setDate(viewStart.getDate() - 7); window.render(); }; window.nextPeriod = () => { viewStart.setDate(viewStart.getDate() + 7); window.render(); }; window.goToday = () => { viewStart = new Date(); viewStart.setDate(viewStart.getDate() - 7); viewStart.setHours(12,0,0,0); window.render(); }; window.updateHeaderName = () => { document.getElementById('modal-guest-name-display').innerText = `${document.getElementById('first-name').value.trim().toUpperCase()} ${document.getElementById('last-name').value.trim().toUpperCase()}`.trim() || "NEW BOOKING"; }; window.checkEmailProxy = (val) => { const el = document.getElementById('email'), v = val.toLowerCase(), isOTA = v.includes('booking.com') || v.includes('agoda'); el.classList.remove('text-red-600', 'text-green-600', 'font-black'); if (isOTA) el.classList.add('text-red-600', 'font-black'); else if (v.includes('@')) el.classList.add('text-green-600', 'font-black'); };
+        
         const setMulti = (id, state, labels, classes) => { const el = document.getElementById(id); if (!el) return; el.dataset.state = state; el.innerText = labels[state]; el.className = id.includes('email') ? `flex-1 min-w-[80px] unselectable multi-state-btn px-0.5 py-1 rounded text-[9px] font-black uppercase border text-center whitespace-nowrap ${classes[state]}` : `flex-1 unselectable multi-state-btn px-1 py-1.5 rounded text-[10px] font-black uppercase border ${classes[state]}`; };
-        window.updateStatusColor = (sel) => { const bg = { 'future': '#7fc6f5', 'here': '#059669', 'left': '#aba39d', 'cancelled': '#94a3b8', 'noshow': '#000', 'charged': '#0f172a', 'unconfirmed': '#8b5cf6', 'special': '#fde047', 'blocked': '#475569' }; const txt = { 'future': '#1e293b', 'here': '#ffffff', 'left': '#1e293b', 'cancelled': '#1e293b', 'noshow': '#ffffff', 'charged': '#fbbf24', 'unconfirmed': '#ffffff', 'special': '#1e293b', 'blocked': '#ffffff' }; sel.style.background = bg[sel.value] || '#7fc6f5'; sel.style.color = txt[sel.value] || '#1e293b'; };
+        window.cycleMulti = (el, labels, classes) => { if (!el) return; let s = parseInt(el.dataset.state) + 1; if(s >= labels.length) s = 0; setMulti(el.id, s, labels, classes); };
+        window.updateStatusColor = (sel) => { const bg = { 'future': '#7fc6f5', 'here': '#059669', 'left': '#aba39d', 'cancelled': '#94a3b8', 'noshow': '#000', 'charged': '#0f172a', 'unconfirmed': '#8b5cf6', 'special': '#fde047', 'blocked': '#475569' }, txt = { 'here': '#fff', 'noshow': '#fff', 'charged': '#fbbf24', 'unconfirmed': '#fff', 'blocked': '#fff' }; sel.style.background = bg[sel.value] || '#7fc6f5'; sel.style.color = txt[sel.value] || '#1e293b'; };
         window.toggleBadCC = () => { const box = document.getElementById('bad-cc-box'); if(box.dataset.bad === 'true') { box.dataset.bad = 'false'; box.innerHTML = ''; box.classList.replace('bg-red-500', 'border-slate-300'); box.classList.remove('border-red-600'); } else { box.dataset.bad = 'true'; box.innerHTML = '<span class="text-white text-[10px] font-black">X</span>'; box.classList.replace('border-slate-300', 'bg-red-500'); box.classList.add('border-red-600'); } };
 
         window.calcFinancials = () => {
@@ -839,67 +713,59 @@
             const del = document.createElement('button'); del.type = "button"; del.className = "w-6 flex justify-center items-center text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded border border-red-200 flex-shrink-0 shadow-sm transition-colors"; del.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>`; del.onclick = () => { wrapper.remove(); if(container.children.length === 0) window.addRoomSelect(); window.updateAvailableRooms(); }; wrapper.appendChild(sel); wrapper.appendChild(del); container.appendChild(wrapper); window.updateAvailableRooms();
         };
 
-        window.calcExtension = () => { const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value; const ms = parseYMD(cout) - parseYMD(cin); const avg = ms > 0 ? (Number(document.getElementById('total-price').value) || 0) / Math.round(ms / 86400000) : 0; const days = parseInt(document.getElementById('ext-days').value) || 1; let crossesFMP = false; if (cout) { const startD = parseYMD(cout); const endD = startD + (days * 86400000); for (let f of fmpDates) { const fTime = new Date(f + "T12:00:00").getTime(); if ((startD <= fTime && endD >= fTime) || (Math.abs(startD - fTime) <= 3 * 86400000) || (Math.abs(endD - fTime) <= 3 * 86400000)) { crossesFMP = true; break; } } } if (crossesFMP) { document.getElementById('ext-avg-rate').value = 'FMP!'; document.getElementById('ext-avg-rate').classList.add('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = ''; document.getElementById('ext-price').placeholder = 'CHECK RATE ->'; document.getElementById('btn-check-bdc').classList.replace('bg-slate-200', 'bg-pink-500'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.add('animate-pulse'); } else { document.getElementById('ext-avg-rate').value = Math.round(avg); document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = Math.round(avg * days); document.getElementById('ext-price').placeholder = ''; document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse'); } };
+        window.calcExtension = () => { const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value, ms = parseYMD(cout) - parseYMD(cin), avg = ms > 0 ? (Number(document.getElementById('total-price').value) || 0) / Math.round(ms / 86400000) : 0, days = parseInt(document.getElementById('ext-days').value) || 1; let crossesFMP = false; if (cout) { const startD = parseYMD(cout), endD = startD + (days * 86400000); for (let f of fmpDates) { const fTime = new Date(f + "T12:00:00").getTime(); if ((startD <= fTime && endD >= fTime) || (Math.abs(startD - fTime) <= 3 * 86400000) || (Math.abs(endD - fTime) <= 3 * 86400000)) { crossesFMP = true; break; } } } if (crossesFMP) { document.getElementById('ext-avg-rate').value = 'FMP!'; document.getElementById('ext-avg-rate').classList.add('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = ''; document.getElementById('ext-price').placeholder = 'CHECK RATE ->'; document.getElementById('btn-check-bdc').classList.replace('bg-slate-200', 'bg-pink-500'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.add('animate-pulse'); } else { document.getElementById('ext-avg-rate').value = Math.round(avg); document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = Math.round(avg * days); document.getElementById('ext-price').placeholder = ''; document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse'); } };
         window.checkBdcPrice = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + (parseInt(document.getElementById('ext-days').value) || 1)); window.open(`https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${cout}&checkout=${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}&group_adults=${document.getElementById('pax-count').value || 1}&group_children=0&no_rooms=${Array.from(document.querySelectorAll('.assigned-room-select')).filter(sel => sel.value !== "").length || 1}`, '_blank'); };
-        window.confirmExtension = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const addPrice = document.getElementById('ext-price').value; if(addPrice === '') return window.showAlert("Please enter the Extension Price first."); const days = parseInt(document.getElementById('ext-days').value) || 1, d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + days); const newCout = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; document.getElementById('check-out').value = newCout; document.getElementById('total-price').value = ((Number(document.getElementById('total-price').value) || 0) + Number(addPrice)).toFixed(2); setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); window.syncLabels(); window.updateAvailableRooms(); window.calcFinancials(); window.calcExtension(); window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${newCout}.\nAdded ฿${addPrice} to Total Price.`); };
+        window.confirmExtension = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const addPrice = document.getElementById('ext-price').value; if(addPrice === '') return window.showAlert("Please enter the Extension Price first."); const days = parseInt(document.getElementById('ext-days').value) || 1, d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + days); const newCout = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; document.getElementById('check-out').value = newCout; document.getElementById('total-price').value = ((Number(document.getElementById('total-price').value) || 0) + Number(addPrice)).toFixed(2); setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); window.updateAvailableRooms(); window.calcFinancials(); window.calcExtension(); window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${newCout}.\nAdded ฿${addPrice} to Total Price.`); };
 
         window.populateStaffForm = (s = {}) => {
-            const isNew = !s.id; const form = document.getElementById('guest-form'); if(form) form.reset(); const modalContent = document.getElementById('guest-modal-content'); modalContent.style.position = 'relative'; modalContent.style.left = 'auto'; modalContent.style.top = 'auto'; modalContent.style.margin = '0';
-            [ ['guest-id', s.id], ['first-name', s.firstName], ['last-name', s.lastName], ['phone', s.phone], ['email', s.email], ['booked-type', s.bookedType], ['check-in', s.checkIn], ['check-out', s.checkOut], ['booking-date', s.bookDate], ['booking-id', s.bookId], ['link-code', s.linkedId] ].forEach(([id, val]) => document.getElementById(id).value = val || "");
-            
-            document.getElementById('guest-country').value = s.country || "";
-
-            document.getElementById('guest-status').value = s.status || "future"; window.updateStatusColor(document.getElementById('guest-status')); document.getElementById('pax-count').value = s.pax || 1; document.getElementById('booking-source').value = s.source || 'direct'; document.getElementById('guest-notes').value = s.notes || "";
+            const isNew = !s.id, form = document.getElementById('guest-form'); if(form) form.reset(); const modalContent = document.getElementById('guest-modal-content'); modalContent.style.position = 'relative'; modalContent.style.left = 'auto'; modalContent.style.top = 'auto'; modalContent.style.margin = '0';
+            [ ['guest-id', s.id], ['first-name', s.firstName], ['last-name', s.lastName], ['phone', s.phone], ['email', s.email], ['booked-type', s.bookedType], ['check-in', s.checkIn], ['check-out', s.checkOut], ['booking-date', s.bookDate], ['booking-id', s.bookId], ['link-code', s.linkedId] ].forEach(([id, val]) => { if(document.getElementById(id)) document.getElementById(id).value = val || ""; });
+            document.getElementById('guest-country').value = s.country || ""; document.getElementById('guest-status').value = s.status || "future"; window.updateStatusColor(document.getElementById('guest-status')); document.getElementById('pax-count').value = s.pax || 1; document.getElementById('booking-source').value = s.source || 'direct'; document.getElementById('guest-notes').value = s.notes || "";
             document.getElementById('assigned-rooms-container').innerHTML = ''; const rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : (isNew ? [] : [""])); if(rList.length > 0) rList.forEach(r => window.addRoomSelect(r)); else window.addRoomSelect("");
             document.getElementById('total-price').value = Number(s.totalPrice || 0).toFixed(2); document.getElementById('net-price').value = Number(s.netPrice || 0).toFixed(2); document.getElementById('net-price').dataset.override = s.netOverride ? 'true' : 'false';
-            const bcc = document.getElementById('bad-cc-box'); bcc.dataset.bad = s.badCC ? 'true' : 'false'; bcc.innerHTML = s.badCC ? '<span class="text-white text-[10px] font-black">X</span>' : ''; bcc.className = `w-3.5 h-3.5 border-2 rounded mt-0.5 flex items-center justify-center ${s.badCC ? 'bg-red-500 border-red-600' : 'border-slate-300'}`;
+            const bcc = document.getElementById('bad-cc-box'); bcc.dataset.bad = s.badCC ? 'true' : 'false'; bcc.innerHTML = s.badCC ? '<span class="text-white text-[10px] font-black">X</span>' : ''; bcc.className = `w-3.5 h-3.5 border-2 border-slate-300 rounded mt-0.5 flex items-center justify-center ${s.badCC ? 'bg-red-500 border-red-600' : ''}`;
             document.getElementById('payments-list').innerHTML = ''; if(s.payments) s.payments.forEach(p => window.addPaymentRow(p.date, Number(p.amt || 0).toFixed(2), p.method, true));
 
             setMulti('email-confirm-btn', s.emailConfirm ? 1 : 0, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); setMulti('email-prepost-btn', !s.emailPrePost ? 0 : (s.emailPrePost==='sent'?1:2), ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']); setMulti('email-special-btn', s.emailSpecial ? 1 : 0, ['SPECIAL: --', 'SPECIAL: SENT'], ['text-slate-400', 'bg-yellow-100 text-yellow-700 border-yellow-400']); setMulti('refund-btn', s.refundability === 'non-ref' ? 1 : (s.refundability === 'ref' ? 2 : 0), ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']); setMulti('upgrade-btn', !s.upgrade || s.upgrade === 'none' ? 0 : (s.upgrade === 'free' ? 1 : 2), ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-yellow-100 text-yellow-700 border-yellow-400', 'bg-green-100 text-green-700 border-green-400']); setMulti('rating-btn', !s.rating || s.rating === 'none' ? 0 : (s.rating === 'good' ? 1 : 2), ['FEEDBACK: --', 'FEEDBACK: ✔ GOOD', 'FEEDBACK: ❌ BAD'], ['text-slate-400', 'bg-green-100 text-green-700 border-green-400', 'bg-red-100 text-red-700 border-red-400']); setMulti('ext-btn', s.extended ? 1 : 0, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']);
             document.getElementById('ext-days').value = 1; document.getElementById('ext-avg-rate').value = ''; document.getElementById('ext-price').value = ''; document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse');
 
-            window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension();
-            
-            window.toggleSection('guest-profile-section', 'profile-chevron', true); 
-            window.toggleSection('ext-section', 'ext-chevron', false); 
-            window.toggleSection('fin-section', 'fin-chevron', true); 
-            window.toggleSection('meta-section', 'meta-chevron', true);
+            window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension();
+            window.toggleSection('guest-profile-section', 'profile-chevron', true); window.toggleSection('ext-section', 'ext-chevron', false); window.toggleSection('fin-section', 'fin-chevron', true); window.toggleSection('meta-section', 'meta-chevron', true);
             
             ['delete-btn', 'split-btn', 'merge-btn', 'dup-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.style.visibility = isNew ? 'hidden' : 'visible'; });
             document.getElementById('audit-log').innerText = isNew ? `NEW RECORD | CREATING AS ${currentUserEmail.toUpperCase()}` : `CREATED BY ${s.createdBy||'UNKNOWN'} ON ${s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-GB').slice(0,5) : '--'}` + (s.lastEditedBy ? ` | LAST EDIT: ${s.lastEditedBy} ON ${new Date(s.lastEditedAt).toLocaleDateString('en-GB').slice(0,5)}` : '');
-            if(currentUserRole === 'staff') { ['delete-btn', 'split-btn', 'merge-btn'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.visibility = 'hidden'; }); document.querySelector('#save-btn').style.display = 'none'; }
+            if(currentUserRole === 'staff') { ['delete-btn', 'split-btn', 'merge-btn'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.visibility = 'hidden'; }); document.getElementById('save-btn').style.display = 'none'; }
             document.getElementById('guest-modal').style.display = 'flex';
         };
 
-        window.editStaff = (id) => { const s = staff.find(x => x.id === id); if (s) window.populateStaffForm(s); }; window.closeGuestModal = () => { document.getElementById('guest-modal').style.display = 'none'; try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {} }; window.quickAdd = (room, date) => { window.populateStaffForm({}); document.getElementById('assigned-rooms-container').innerHTML = ''; window.addRoomSelect(room); document.getElementById('check-in').value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; const out = new Date(date); out.setDate(date.getDate() + 1); document.getElementById('check-out').value = `${out.getFullYear()}-${String(out.getMonth() + 1).padStart(2, '0')}-${String(out.getDate()).padStart(2, '0')}`; window.syncLabels(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension(); };
+        window.editStaff = (id) => { const s = staff.find(x => x.id === id); if (s) window.populateStaffForm(s); }; window.closeGuestModal = () => { document.getElementById('guest-modal').style.display = 'none'; try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {} }; window.quickAdd = (room, date) => { window.populateStaffForm({}); document.getElementById('assigned-rooms-container').innerHTML = ''; window.addRoomSelect(room); document.getElementById('check-in').value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; const out = new Date(date); out.setDate(date.getDate() + 1); document.getElementById('check-out').value = `${out.getFullYear()}-${String(out.getMonth() + 1).padStart(2, '0')}-${String(out.getDate()).padStart(2, '0')}`; window.updateAvailableRooms(); window.calcExtension && window.calcExtension(); };
 
         window.saveBooking = async () => {
-            if(currentUserRole === 'staff') return; const saveBtn = document.getElementById('save-btn'); const originalBtnHtml = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'SAVING...';
+            if(currentUserRole === 'staff') return; const saveBtn = document.getElementById('save-btn'), originalBtnHtml = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'SAVING...';
             try {
-                const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value; if (cin >= cout) { window.showAlert("INVALID DATES:\nDeparture must be after arrival."); return; }
+                const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value; if (cin >= cout) return window.showAlert("INVALID DATES:\nDeparture must be after arrival.");
                 const idInput = document.getElementById('guest-id'), id = idInput.value || Math.random().toString(36).substr(2, 9); idInput.value = id;
-                let roomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
-                const dbRoomsList = roomsList.map(uiToDbRoom); const status = document.getElementById('guest-status').value, startUTC = parseYMD(cin), endUTC = parseYMD(cout);
+                let roomsList = Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean); const dbRoomsList = roomsList.map(uiToDbRoom), status = document.getElementById('guest-status').value, startUTC = parseYMD(cin), endUTC = parseYMD(cout);
 
-                if (status !== 'unconfirmed' && status !== 'cancelled' && status !== 'noshow' && status !== 'charged') {
+                if (!['unconfirmed', 'cancelled', 'noshow', 'charged'].includes(status)) {
                     for (let s of staff) {
-                        if (s.id === id || s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed' || s.status === 'charged') continue;
-                        if(startUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < endUTC) { const rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []); for (let r of roomsList) if (rList.includes(r)) { window.showAlert(`ROOM OVERLAP ERROR:\n\nRoom ${r} is already assigned to ${s.firstName} ${s.lastName} during these dates.`); return; } }
+                        if (s.id === id || ['cancelled', 'noshow', 'unconfirmed', 'charged'].includes(s.status)) continue;
+                        if(startUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < endUTC) { const rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []); for (let r of roomsList) if (rList.includes(r)) return window.showAlert(`ROOM OVERLAP ERROR:\n\nRoom ${r} is already assigned to ${s.firstName} ${s.lastName} during these dates.`); }
                     }
                 }
 
                 const refBtn = document.getElementById('refund-btn')?.dataset?.state || 0, preBtn = document.getElementById('email-prepost-btn')?.dataset?.state || 0, upBtn = document.getElementById('upgrade-btn')?.dataset?.state || 0, rateBtn = document.getElementById('rating-btn')?.dataset?.state || 0, existing = staff.find(s => s.id === id), now = new Date().toISOString();
                 const entry = { id, firstName: document.getElementById('first-name').value.trim().toUpperCase(), lastName: document.getElementById('last-name').value.trim().toUpperCase(), status: status, bookedType: document.getElementById('booked-type').value, room: dbRoomsList[0] || "", rooms: dbRoomsList, checkIn: cin, checkOut: cout, pax: parseInt(document.getElementById('pax-count').value) || 1, country: document.getElementById('guest-country').value, phone: document.getElementById('phone').value, email: document.getElementById('email').value, source: document.getElementById('booking-source').value, bookDate: document.getElementById('booking-date').value, bookId: document.getElementById('booking-id').value, linkedId: document.getElementById('link-code').value.trim().toUpperCase(), totalPrice: Number(document.getElementById('total-price').value) || 0, netPrice: Number(document.getElementById('net-price').value) || 0, netOverride: document.getElementById('net-price').dataset.override === 'true', badCC: document.getElementById('bad-cc-box').dataset.bad === 'true', payments: Array.from(document.querySelectorAll('.payment-row')).map(r => ({ date: r.querySelector('.pay-date').value, amt: Number(r.querySelector('.pay-amt').value) || 0, method: r.querySelector('.pay-method').value })), emailConfirm: parseInt(document.getElementById('email-confirm-btn')?.dataset?.state || 0) === 1, emailPrePost: parseInt(preBtn) > 0 ? (parseInt(preBtn) === 1 ? 'sent' : 'confirmed') : false, emailSpecial: parseInt(document.getElementById('email-special-btn')?.dataset?.state || 0) === 1, refundability: refBtn == 1 ? 'non-ref' : (refBtn == 2 ? 'ref' : 'unknown'), upgrade: parseInt(upBtn) > 0 ? (parseInt(upBtn) === 1 ? 'free' : 'paid') : 'none', rating: parseInt(rateBtn) > 0 ? (parseInt(rateBtn) === 1 ? 'good' : 'bad') : 'none', extended: parseInt(document.getElementById('ext-btn')?.dataset?.state || 0) === 1, notes: document.getElementById('guest-notes').value, createdAt: existing?.createdAt || now, createdBy: existing?.createdBy || currentUserEmail, lastEditedAt: now, lastEditedBy: currentUserEmail };
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), entry); window.closeGuestModal();
-            } catch (err) { console.error(err); window.showAlert("Save process timed out or encountered an error. Please verify connection."); } finally { saveBtn.disabled = false; saveBtn.innerHTML = originalBtnHtml; lucide.createIcons(); }
+            } catch (err) { window.showAlert("Save process timed out or encountered an error. Please verify connection."); } finally { saveBtn.disabled = false; saveBtn.innerHTML = originalBtnHtml; lucide.createIcons(); }
         };
 
         window.requestDelete = () => { if(currentUserRole === 'staff') return; window.showAlert(`Permanently delete this record?`, true, async () => { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', document.getElementById('guest-id').value)); window.closeGuestModal(); }); };
         window.requestDuplicate = async () => { if(currentUserRole === 'staff') return; const s = staff.find(x => x.id === document.getElementById('guest-id').value); if (!s) return; let linkCode = document.getElementById('link-code').value.trim().toUpperCase() || s.linkedId || Math.random().toString(36).substr(2, 4).toUpperCase(); if(!s.linkedId) { let dbRooms = (s.rooms || []).map(uiToDbRoom); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), { ...s, room: dbRooms[0]||"", rooms: dbRooms, linkedId: linkCode }); } const newId = Math.random().toString(36).substr(2, 9); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), { ...s, id: newId, room: "", rooms: [""], linkedId: linkCode, payments: [], extended: false, createdAt: new Date().toISOString(), createdBy: currentUserEmail, lastEditedAt: null, lastEditedBy: null }); window.closeGuestModal(); };
         window.requestSplit = () => { if(currentUserRole === 'staff') return; const s = staff.find(x => x.id === document.getElementById('guest-id').value); if (!s) return; const sd = document.getElementById('split-date'); sd.value = ""; sd.min = s.checkIn; sd.max = s.checkOut; document.getElementById('split-modal').style.display = 'flex'; };
-        window.confirmSplit = async () => { const splitDate = document.getElementById('split-date').value, s = staff.find(x => x.id === document.getElementById('guest-id').value); if (!splitDate || splitDate <= s.checkIn || splitDate >= s.checkOut) return window.showAlert("Invalid split date."); let linkCode = s.linkedId || Math.random().toString(36).substr(2, 4).toUpperCase(); const newId = Math.random().toString(36).substr(2, 9); let dbRooms = (s.rooms || []).map(uiToDbRoom); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), { ...s, room: dbRooms[0]||"", rooms: dbRooms, checkOut: splitDate, linkedId: linkCode }); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), { ...s, id: newId, checkIn: splitDate, room: "", rooms: [""], linkedId: linkCode, totalPrice: 0, netPrice: 0, payments: [], extended: false, notes: "Split segment for mid-stay room change. Master folio kept on original booking.\n" + (s.notes || "") }); document.getElementById('split-modal').style.display = 'none'; window.closeGuestModal(); };
+        window.confirmSplit = async () => { const splitDate = document.getElementById('split-date').value, s = staff.find(x => x.id === document.getElementById('guest-id').value); if (!splitDate || splitDate <= s.checkIn || splitDate >= s.checkOut) return window.showAlert("Invalid split date."); let linkCode = s.linkedId || Math.random().toString(36).substr(2, 4).toUpperCase(), newId = Math.random().toString(36).substr(2, 9), dbRooms = (s.rooms || []).map(uiToDbRoom); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), { ...s, room: dbRooms[0]||"", rooms: dbRooms, checkOut: splitDate, linkedId: linkCode }); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', newId), { ...s, id: newId, checkIn: splitDate, room: "", rooms: [""], linkedId: linkCode, totalPrice: 0, netPrice: 0, payments: [], extended: false, notes: "Split segment for mid-stay room change. Master folio kept on original booking.\n" + (s.notes || "") }); document.getElementById('split-modal').style.display = 'none'; window.closeGuestModal(); };
         window.requestMerge = () => { if(currentUserRole === 'staff') return; const currentId = document.getElementById('guest-id').value; if (!currentId) return window.showAlert("Please save this booking first before merging."); const current = staff.find(x => x.id === currentId); if (!current) return; const sel = document.getElementById('merge-target'); sel.innerHTML = '<option value="">-- SELECT BOOKING --</option>'; [...staff].filter(s => s.id !== currentId && s.status !== 'cancelled' && s.status !== 'noshow').sort((a,b) => (a.lastName === current.lastName ? -1 : (b.lastName === current.lastName ? 1 : a.checkIn.localeCompare(b.checkIn)))).forEach(s => { const opt = document.createElement('option'); opt.value = s.id; opt.innerText = `${s.lastName}, ${s.firstName} (${s.checkIn.substr(5)} to ${s.checkOut.substr(5)})`; if (s.lastName === current.lastName) opt.className = "text-indigo-600 font-black"; sel.appendChild(opt); }); document.getElementById('merge-modal').style.display = 'flex'; };
-        window.confirmMerge = async () => { const targetId = document.getElementById('merge-target').value; if(!targetId) return window.showAlert("Please select a booking to merge."); const target = staff.find(s => s.id === targetId), current = staff.find(s => s.id === document.getElementById('guest-id').value); if(!target || !current) return; const btn = document.getElementById('merge-confirm-btn'); btn.innerHTML = 'MERGING...'; btn.disabled = true; try { let mergedNotes = (document.getElementById('guest-notes').value || "") + `\n\n--- MERGED WITH BOOKING ${target.bookId || targetId} ---\n` + (target.notes || ""); [ { id: 'first-name', targetVal: target.firstName, label: 'First Name' }, { id: 'last-name', targetVal: target.lastName, label: 'Last Name' }, { id: 'phone', targetVal: target.phone, label: 'Phone' }, { id: 'email', targetVal: target.email, label: 'Email' }, { id: 'guest-country', targetVal: target.country, label: 'Country' }, { id: 'booked-type', targetVal: target.bookedType, label: 'Booked Type' }, { id: 'booking-source', targetVal: target.source, label: 'Source' }, { id: 'booking-date', targetVal: target.bookDate, label: 'Book Date' }, { id: 'booking-id', targetVal: target.bookId, label: 'Book ID' } ].forEach(f => { const inputEl = document.getElementById(f.id); if (!inputEl) return; if (!inputEl.value && f.targetVal) inputEl.value = f.targetVal; else if (inputEl.value && f.targetVal && inputEl.value.toString().trim().toLowerCase() !== f.targetVal.toString().trim().toLowerCase()) mergedNotes += `\n[Merged ${f.label}]: ${f.targetVal}`; }); document.getElementById('check-in').value = current.checkIn < target.checkIn ? current.checkIn : target.checkIn; document.getElementById('check-out').value = current.checkOut > target.checkOut ? current.checkOut : target.checkOut; document.getElementById('total-price').value = Number(current.totalPrice || 0) + Number(target.totalPrice || 0); document.getElementById('net-price').value = Number(current.netPrice || 0) + Number(target.netPrice || 0); document.getElementById('guest-notes').value = mergedNotes.trim(); document.getElementById('pax-count').value = Math.max(current.pax || 1, target.pax || 1); (target.payments || []).forEach(p => window.addPaymentRow(p.date, Number(p.amt||0).toFixed(2), p.method, true)); const combinedRooms = Array.from(new Set([...Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean), ...(target.rooms || []).filter(Boolean)])); document.getElementById('assigned-rooms-container').innerHTML = ''; if (combinedRooms.length > 0) combinedRooms.forEach(r => window.addRoomSelect(r)); else window.addRoomSelect(""); window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms(); await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', target.id)); document.getElementById('merge-modal').style.display = 'none'; window.saveBooking(); } catch(err) { window.showAlert("Merge error, please check connection."); } finally { btn.innerHTML = 'Merge'; btn.disabled = false; } };
+        window.confirmMerge = async () => { const targetId = document.getElementById('merge-target').value; if(!targetId) return window.showAlert("Please select a booking to merge."); const target = staff.find(s => s.id === targetId), current = staff.find(s => s.id === document.getElementById('guest-id').value); if(!target || !current) return; const btn = document.getElementById('merge-confirm-btn'); btn.innerHTML = 'MERGING...'; btn.disabled = true; try { let mergedNotes = (document.getElementById('guest-notes').value || "") + `\n\n--- MERGED WITH BOOKING ${target.bookId || targetId} ---\n` + (target.notes || ""); [ { id: 'first-name', targetVal: target.firstName, label: 'First Name' }, { id: 'last-name', targetVal: target.lastName, label: 'Last Name' }, { id: 'phone', targetVal: target.phone, label: 'Phone' }, { id: 'email', targetVal: target.email, label: 'Email' }, { id: 'guest-country', targetVal: target.country, label: 'Country' }, { id: 'booked-type', targetVal: target.bookedType, label: 'Booked Type' }, { id: 'booking-source', targetVal: target.source, label: 'Source' }, { id: 'booking-date', targetVal: target.bookDate, label: 'Book Date' }, { id: 'booking-id', targetVal: target.bookId, label: 'Book ID' } ].forEach(f => { const inputEl = document.getElementById(f.id); if (!inputEl) return; if (!inputEl.value && f.targetVal) inputEl.value = f.targetVal; else if (inputEl.value && f.targetVal && inputEl.value.toString().trim().toLowerCase() !== f.targetVal.toString().trim().toLowerCase()) mergedNotes += `\n[Merged ${f.label}]: ${f.targetVal}`; }); document.getElementById('check-in').value = current.checkIn < target.checkIn ? current.checkIn : target.checkIn; document.getElementById('check-out').value = current.checkOut > target.checkOut ? current.checkOut : target.checkOut; document.getElementById('total-price').value = Number(current.totalPrice || 0) + Number(target.totalPrice || 0); document.getElementById('net-price').value = Number(current.netPrice || 0) + Number(target.netPrice || 0); document.getElementById('guest-notes').value = mergedNotes.trim(); document.getElementById('pax-count').value = Math.max(current.pax || 1, target.pax || 1); (target.payments || []).forEach(p => window.addPaymentRow(p.date, Number(p.amt||0).toFixed(2), p.method, true)); const combinedRooms = Array.from(new Set([...Array.from(document.querySelectorAll('.assigned-room-select')).map(sel => sel.value).filter(Boolean), ...(target.rooms || []).filter(Boolean)])); document.getElementById('assigned-rooms-container').innerHTML = ''; if (combinedRooms.length > 0) combinedRooms.forEach(r => window.addRoomSelect(r)); else window.addRoomSelect(""); window.calcFinancials(); window.updateAvailableRooms(); await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', target.id)); document.getElementById('merge-modal').style.display = 'none'; window.saveBooking(); } catch(err) { window.showAlert("Merge error, please check connection."); } finally { btn.innerHTML = 'Merge'; btn.disabled = false; } };
 
         window.openPriceCheckModal = () => { const now = new Date(); document.getElementById('pc-in').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; document.getElementById('pc-nights').value = 1; document.getElementById('pc-pax').value = 1; window.updatePcOut(); document.getElementById('price-check-modal').style.display = 'flex'; };
         window.updatePcOut = () => { const inDate = document.getElementById('pc-in').value; if (!inDate) return; const d = new Date(inDate + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + (parseInt(document.getElementById('pc-nights').value) || 1)); document.getElementById('pc-out').value = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; };
@@ -910,51 +776,23 @@
         window.autoSuggestRoom = (bt, nt, cin, cout) => {
             if (!cin || !cout || !bt) return; 
             const startUTC = parseYMD(cin), endUTC = parseYMD(cout), occ = new Set();
-            staff.forEach(s => { 
-                if(s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed' || s.status === 'charged') return; 
-                if(startUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < endUTC) (s.rooms?.length ? s.rooms : [s.room]).forEach(r => { if(r) occ.add(r); }); 
-            });
-            let available = hotelRooms.filter(r => !occ.has(r.id)); 
-            if (available.length === 0) return; 
+            staff.forEach(s => { if(s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed' || s.status === 'charged') return; if(startUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < endUTC) (s.rooms?.length ? s.rooms : [s.room]).forEach(r => { if(r) occ.add(r); }); });
+            let available = hotelRooms.filter(r => !occ.has(r.id)); if (available.length === 0) return; 
             
-            const btParts = bt.split(' + ');
             let assignedRoomIds = [];
-            
-            btParts.forEach(part => {
+            bt.split(' + ').forEach(part => {
                 let pType = null;
-                if (part.includes("DORMITORY") || part.includes("4-BED") || part.includes("DORM")) pType = "Standard Quad Dorm"; 
-                else if (part.includes("TRIPLE")) pType = "Partial Oceanview Triple Room"; 
-                else if (part.includes("SIDE SEA VIEW") || (part.includes("PARTIAL") && !part.includes("TWIN") && !part.includes("TRIPLE"))) pType = "Partial Oceanview King Room"; 
-                else if (part.includes("PARTIAL SEA VIEW") || (part.includes("PARTIAL") && part.includes("TWIN"))) pType = "Double or Twin Room with Partial Sea View"; 
-                else if (part.includes("DELUXE TWIN") || (part.includes("OCEANVIEW") && part.includes("TWIN"))) pType = "Oceanview Twin Room"; 
-                else if (part.includes("DELUXE DOUBLE") || (part.includes("OCEANVIEW") && !part.includes("TWIN"))) pType = "Oceanview King Room"; 
-                else if (part.includes("TWIN ROOM WITH BALCONY") || (part.includes("GARDEN") && part.includes("TWIN"))) pType = "Gardenview Twin Room"; 
-                else if (part.includes("KING ROOM WITH BALCONY") || (part.includes("GARDEN") && !part.includes("TWIN"))) pType = "Gardenview King Room"; 
-                else if (part.includes("OCEANFRONT")) { pType = part.includes("TWIN") ? "Oceanfront Twin" : "Oceanfront King"; } 
-                else if (part.includes("BUNGALOW")) pType = "BUNGALOWS";
+                if (part.includes("DORMITORY") || part.includes("4-BED") || part.includes("DORM")) pType = "Standard Quad Dorm"; else if (part.includes("TRIPLE")) pType = "Partial Oceanview Triple Room"; else if (part.includes("SIDE SEA VIEW") || (part.includes("PARTIAL") && !part.includes("TWIN") && !part.includes("TRIPLE"))) pType = "Partial Oceanview King Room"; else if (part.includes("PARTIAL SEA VIEW") || (part.includes("PARTIAL") && part.includes("TWIN"))) pType = "Double or Twin Room with Partial Sea View"; else if (part.includes("DELUXE TWIN") || (part.includes("OCEANVIEW") && part.includes("TWIN"))) pType = "Oceanview Twin Room"; else if (part.includes("DELUXE DOUBLE") || (part.includes("OCEANVIEW") && !part.includes("TWIN"))) pType = "Oceanview King Room"; else if (part.includes("TWIN ROOM WITH BALCONY") || (part.includes("GARDEN") && part.includes("TWIN"))) pType = "Gardenview Twin Room"; else if (part.includes("KING ROOM WITH BALCONY") || (part.includes("GARDEN") && !part.includes("TWIN"))) pType = "Gardenview King Room"; else if (part.includes("OCEANFRONT")) pType = part.includes("TWIN") ? "Oceanfront Twin" : "Oceanfront King"; else if (part.includes("BUNGALOW")) pType = "BUNGALOWS";
                 
                 let pBed = null; 
-                if (nt.includes("THE GUEST ASKED FOR 1 EXTRA-LARGE DOUBLE BED") || nt.includes("1 EXTRA-LARGE") || nt.includes("1 DOUBLE") || nt.includes("1 KING") || nt.includes("LARGE DOUBLE")) pBed = "KING"; 
-                else if (nt.includes("TWIN") || nt.includes("SEPARATE") || nt.includes("2 SINGLE") || nt.includes("TWO SINGLE") || nt.includes("2 BEDS") || nt.includes("SINGLES")) pBed = "TWIN"; 
-                else if (nt.includes("BUNK") && nt.includes("SINGLE")) pBed = "BUNK+T"; 
-                else if (nt.includes("BUNK")) pBed = "BUNK+T"; 
-                else if (nt.includes("KING") || nt.includes("DOUBLE") || nt.includes("LARGE") || nt.includes("1 BED") || nt.includes("ONE BED")) pBed = "KING";
-                
+                if (nt.includes("THE GUEST ASKED FOR 1 EXTRA-LARGE DOUBLE BED") || nt.includes("1 EXTRA-LARGE") || nt.includes("1 DOUBLE") || nt.includes("1 KING") || nt.includes("LARGE DOUBLE")) pBed = "KING"; else if (nt.includes("TWIN") || nt.includes("SEPARATE") || nt.includes("2 SINGLE") || nt.includes("TWO SINGLE") || nt.includes("2 BEDS") || nt.includes("SINGLES")) pBed = "TWIN"; else if (nt.includes("BUNK") && nt.includes("SINGLE")) pBed = "BUNK+T"; else if (nt.includes("BUNK")) pBed = "BUNK+T"; else if (nt.includes("KING") || nt.includes("DOUBLE") || nt.includes("LARGE") || nt.includes("1 BED") || nt.includes("ONE BED")) pBed = "KING";
                 if (!pBed) { if (part.includes("KING") || (part.includes("DOUBLE") && !part.includes("TWIN"))) pBed = "KING"; else if (part.includes("TWIN") && !part.includes("DOUBLE")) pBed = "TWIN"; }
                 
-                let match = (pType && pBed) ? available.find(r => r.type === pType && r.bed && r.bed.includes(pBed)) : null; 
-                if (!match && pType) match = available.find(r => r.type === pType);
-                if (match) { 
-                    assignedRoomIds.push(match.id); 
-                    available = available.filter(r => r.id !== match.id);
-                }
+                let match = (pType && pBed) ? available.find(r => r.type === pType && r.bed && r.bed.includes(pBed)) : null; if (!match && pType) match = available.find(r => r.type === pType);
+                if (match) { assignedRoomIds.push(match.id); available = available.filter(r => r.id !== match.id); }
             });
 
-            if (assignedRoomIds.length > 0) { 
-                const selects = document.querySelectorAll('.assigned-room-select'); 
-                assignedRoomIds.forEach((id, index) => { if (selects[index]) selects[index].value = id; }); 
-                window.updateAvailableRooms(); 
-            }
+            if (assignedRoomIds.length > 0) { const selects = document.querySelectorAll('.assigned-room-select'); assignedRoomIds.forEach((id, index) => { if (selects[index]) selects[index].value = id; }); window.updateAvailableRooms(); }
         };
 
         window.parseEmail = () => {
@@ -1012,66 +850,45 @@
                     
                 case 'airbnb-email':
                     src = 'airbnb'; 
-                    gName = extract(/Reservation confirmed - (.*?)\s+arrives/i); 
-                    if(!gName) gName = extract(/welcome\s+(.*?)\./i);
-                    if(!gName) gName = extract(/confirmed!\s+(.*?)\s+arrives/i);
+                    const abnbLines = text.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
                     
-                    checkIn = parseDateRelative(extract(/Check-in[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false); 
-                    checkOut = parseDateRelative(extract(/Checkout[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
-                    bId = extract(/Confirmation code[\s\S]*?([A-Z0-9]+)/i); 
-                    bDate = parseDateRelative(extract(/Airbnb[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true); 
-                    if(!bDate) bDate = new Date().toISOString().split('T')[0]; 
-                    pax = parseInt(extract(/Guests[\s\S]*?(\d+)/i)) || 1;
+                    let nameLineIdx = abnbLines.findIndex(l => l.includes('Identity verified') || l.includes('reviews'));
+                    if (nameLineIdx > 0) {
+                        gName = abnbLines[nameLineIdx - 1];
+                    } else {
+                        gName = extract(/Reservation confirmed - (.*?)\s+arrives/i); 
+                        if(!gName) gName = extract(/welcome\s+(.*?)\./i); 
+                        if(!gName) gName = extract(/confirmed!\s+(.*?)\s+arrives/i);
+                    }
+
+                    checkIn = parseDateRelative(extract(/Check-in[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false); checkOut = parseDateRelative(extract(/Checkout[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), false);
+                    bId = extract(/Confirmation code[\s\S]*?([A-Z0-9]+)/i); bDate = parseDateRelative(extract(/Airbnb[\s\S]*?([A-Za-z]{3},\s*[A-Za-z]{3}\s*\d+(?:,\s*\d{4})?)/i), true); if(!bDate) bDate = new Date().toISOString().split('T')[0]; pax = parseInt(extract(/Guests[\s\S]*?(\d+)/i)) || 1;
                     
-                    let totalStr = extract(/Total\s*(?:\([A-Z]+\))?[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i); 
-                    if (!totalStr) totalStr = extract(/Guest paid[\s\S]{0,60}?nights[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
-                    total = cleanMoney(totalStr); 
-                    comm = Number((total - cleanMoney(extract(/You earn[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i))).toFixed(2)); 
-                    bType = extract(/([^\n]+?)\s*Room\s*Check-in/i);
+                    let totalStr = extract(/Total\s*(?:\([A-Z]+\))?[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i); if (!totalStr) totalStr = extract(/Guest paid[\s\S]{0,60}?nights[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i);
+                    total = cleanMoney(totalStr); comm = Number((total - cleanMoney(extract(/You earn[\s\S]{0,30}?(?:THB|฿|\$|€|£|[A-Z]{3})\s*([\d,.]+)/i))).toFixed(2)); bType = extract(/([^\n]+?)\s*Room\s*Check-in/i);
                     
-                    let abnbLines = text.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
-                    if (gName) {
-                        let nameIdx = abnbLines.findIndex(l => l === gName || (l.includes(gName) && !l.includes('confirmed') && !l.includes('welcome') && !l.includes('message')));
-                        if (nameIdx > -1) {
-                            let nextLineIdx = nameIdx + 1;
-                            if (nextLineIdx < abnbLines.length && /verified|reviews|Joined|superhost/i.test(abnbLines[nextLineIdx])) {
+                    if (nameLineIdx > 0) {
+                        let nextLineIdx = nameLineIdx + 1;
+                        if (nextLineIdx < abnbLines.length) {
+                            let possibleCountry = abnbLines[nextLineIdx];
+                            if (!/^(Hello|Hi|Dear|Message|Automatically|Guest|Send|Identity|Host)/i.test(possibleCountry)) {
+                                let cParts = possibleCountry.split(','); 
+                                countryCode = cParts[cParts.length - 1].trim();
                                 nextLineIdx++;
                             }
-                            if (nextLineIdx < abnbLines.length) {
-                                let possibleCountry = abnbLines[nextLineIdx];
-                                if (possibleCountry && possibleCountry.length < 40 && !/^(Hello|Hi|Dear|Message|Automatically|Guest|Send|Identity)/i.test(possibleCountry)) {
-                                    let cParts = possibleCountry.split(',');
-                                    countryCode = cParts[cParts.length - 1].trim();
-                                }
-                            }
-                            
-                            let startRecording = false;
-                            let msgLines = [];
-                            for (let i = nextLineIdx; i < abnbLines.length; i++) {
-                                let l = abnbLines[i];
-                                if (!startRecording) {
-                                    if (l === countryCode || l.endsWith(countryCode)) {
-                                        startRecording = true;
-                                    }
-                                } else {
-                                    if (l.includes('Automatically translated') || l.includes('Send a Message') || l.includes('Messages from') || l.includes('Hosting requirements')) break;
-                                    if (l.trim()) msgLines.push(l.trim());
-                                }
-                            }
-                            if (msgLines.length > 0) notes = msgLines.join('\n');
                         }
+                        let msgLines = [];
+                        for (let i = nextLineIdx; i < abnbLines.length; i++) {
+                            let l = abnbLines[i];
+                            if (l.includes('Automatically translated') || l.includes('Send a Message') || l.includes('Messages from guest') || l.includes('Hosting requirements')) break;
+                            if (l.trim() && !l.includes('Original message follows:')) msgLines.push(l.trim());
+                        }
+                        if (msgLines.length > 0) notes = msgLines.join('\n');
                     }
 
-                    if (!notes) {
-                        let abnbNotes = extract(/\n([^\n]+)\n\s*Send.*?a Message/i); 
-                        if(abnbNotes && !abnbNotes.includes('Translated') && !abnbNotes.includes('Add guest')) notes = abnbNotes; 
-                    }
+                    if (!notes) { let abnbNotes = extract(/\n([^\n]+)\n\s*Send.*?a Message/i); if(abnbNotes && !abnbNotes.includes('Translated') && !abnbNotes.includes('Add guest')) notes = abnbNotes; }
 
-                    const polMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i); 
-                    if (polMatch) { 
-                        const pol = polMatch[1].toLowerCase(); 
-                        refundability = (pol.includes('strict') || pol.includes('firm') || pol.includes('non-refundable')) ? 1 : 2; 
-                    }
+                    const polMatch = text.match(/cancellation policy for guests is\s*(.*?)\./i); if (polMatch) { const pol = polMatch[1].toLowerCase(); refundability = (pol.includes('strict') || pol.includes('firm') || pol.includes('non-refundable')) ? 1 : 2; }
                     if (text.toLowerCase().includes('reservation canceled') || text.toLowerCase().includes('reservation cancelled')) parsedStatus = 'cancelled';
                     break;
 
@@ -1101,66 +918,44 @@
             document.getElementById('email-modal').style.display = 'none';
 
             let idxStart = notes.toLowerCase().indexOf('thanks so much for booking with us');
-            if (idxStart > -1) {
-                let pStart = notes.lastIndexOf('Hi ', idxStart); if (pStart === -1) pStart = notes.lastIndexOf('GUEST MSG:', idxStart);
-                let pEnd = notes.indexOf('SWIMS! a Social Beach Resort', idxStart);
-                if (pEnd > -1) { pEnd += 'SWIMS! a Social Beach Resort'.length; notes = (notes.substring(0, pStart !== -1 ? pStart : idxStart) + notes.substring(pEnd)).trim(); }
-            }
-            notes = notes.replace(/_+\s*Your Check-in:[^\n]+\s*Your Check-out:[^\n]+/gi, '');
-            notes = notes.replace(/'?Before Check-in'? was sent automatically based on your messaging preferences\.?/gi, '');
-            notes = notes.trim();
+            if (idxStart > -1) { let pStart = notes.lastIndexOf('Hi ', idxStart); if (pStart === -1) pStart = notes.lastIndexOf('GUEST MSG:', idxStart); let pEnd = notes.indexOf('SWIMS! a Social Beach Resort', idxStart); if (pEnd > -1) { pEnd += 'SWIMS! a Social Beach Resort'.length; notes = (notes.substring(0, pStart !== -1 ? pStart : idxStart) + notes.substring(pEnd)).trim(); } }
+            notes = notes.replace(/_+\s*Your Check-in:[^\n]+\s*Your Check-out:[^\n]+/gi, '').replace(/'?Before Check-in'? was sent automatically based on your messaging preferences\.?/gi, '').trim();
 
             let last = gName.trim(), first = ""; if(gName.includes(',')) { const p = gName.split(','); last = p[0].trim(); first = p.slice(1).join(',').trim(); } else { const p = gName.split(' '); first = p[0].trim(); last = p.length>1 ? p.slice(1).join(' ').trim() : ""; }
-            document.getElementById('first-name').value = first.toUpperCase(); document.getElementById('last-name').value = last.toUpperCase(); document.getElementById('check-in').value = checkIn; document.getElementById('check-out').value = checkOut; document.getElementById('pax-count').value = pax; document.getElementById('booking-source').value = src || 'other'; document.getElementById('booking-date').value = bDate; document.getElementById('booking-id').value = bId; document.getElementById('booked-type').value = (bType || "").toUpperCase(); document.getElementById('guest-status').value = parsedStatus; window.updateStatusColor(document.getElementById('guest-status')); document.getElementById('phone').value = phone; document.getElementById('email').value = email;
             
-            let cCode = countryCode || "";
-            if (cCode.length === 2) {
-                try { document.getElementById('guest-country').value = new Intl.DisplayNames(['en'], {type: 'region'}).of(cCode.toUpperCase()); } 
-                catch(e) { document.getElementById('guest-country').value = cCode.toUpperCase(); }
-            } else if (cCode.length > 2) {
-                document.getElementById('guest-country').value = cCode.charAt(0).toUpperCase() + cCode.slice(1).toLowerCase();
-            } else {
-                document.getElementById('guest-country').value = ""; 
-            }
+            let cCode = countryCode || "", parsedCountry = cCode;
+            if (cCode.length === 2) { try { parsedCountry = new Intl.DisplayNames(['en'], {type: 'region'}).of(cCode.toUpperCase()); } catch(e) { parsedCountry = cCode.toUpperCase(); } } 
+            else if (cCode.length > 2) parsedCountry = cCode.charAt(0).toUpperCase() + cCode.slice(1).toLowerCase(); else parsedCountry = "";
+
+            [ ['first-name', first.toUpperCase()], ['last-name', last.toUpperCase()], ['check-in', checkIn], ['check-out', checkOut], ['pax-count', pax], ['booking-source', src || 'other'], ['booking-date', bDate], ['booking-id', bId], ['booked-type', (bType || "").toUpperCase()], ['guest-status', parsedStatus], ['phone', phone], ['email', email], ['guest-country', parsedCountry], ['total-price', total.toFixed(2)], ['net-price', Math.max(0, total - comm).toFixed(2)], ['guest-notes', notes] ].forEach(([id, val]) => { if(document.getElementById(id)) document.getElementById(id).value = val; });
             
-            document.getElementById('total-price').value = total.toFixed(2); document.getElementById('net-price').value = Math.max(0, total - comm).toFixed(2); document.getElementById('guest-notes').value = notes;
+            window.updateStatusColor(document.getElementById('guest-status'));
             setMulti('refund-btn', refundability, ['REFUNDABILITY: ?', 'NON-REFUNDABLE', 'REFUNDABLE'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400']);
             if (parsedUpgrade > 0) setMulti('upgrade-btn', parsedUpgrade, ['NO UPGRADE', 'FREE UPGRADE', 'PAID UPGRADE'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400', 'bg-orange-100 text-orange-700 border-orange-400']);
             
             if (comm > 0) { let kpMethod = 'other'; if (src === 'booking.com') kpMethod = 'bdc-kp'; if (src === 'agoda') kpMethod = 'agoda-kp'; if (src === 'airbnb') kpMethod = 'airbnb-kp'; if (src === 'hostelworld') kpMethod = 'hw-kp'; window.addPaymentRow(checkIn || new Date().toISOString().split('T')[0], comm.toFixed(2), kpMethod); }
             if ((hasBdcPayment || src === 'airbnb') && (total - comm) > 0) { let payMethod = src === 'agoda' ? 'agoda-pay' : (src === 'airbnb' ? 'airbnb-pay' : 'bdc-pay'); window.addPaymentRow(checkIn || new Date().toISOString().split('T')[0], (total - comm).toFixed(2), payMethod); }
 
-            document.getElementById('assigned-rooms-container').innerHTML = ''; 
-            for(let k=0; k < Math.max(1, units); k++) window.addRoomSelect("");
+            document.getElementById('assigned-rooms-container').innerHTML = ''; for(let k=0; k < Math.max(1, units); k++) window.addRoomSelect("");
 
-            window.updateHeaderName(); window.syncLabels(); window.calcFinancials(); window.updateAvailableRooms(); 
+            window.updateHeaderName(); window.calcFinancials(); window.updateAvailableRooms(); 
             window.autoSuggestRoom((bType || "").toUpperCase(), notes.toUpperCase(), checkIn, checkOut);
             
             if (checkIn) { const d = new Date(checkIn + "T12:00:00"); d.setDate(d.getDate() - 7); viewStart = d; window.render(); } 
-            
             document.getElementById('guest-modal').style.display = 'flex';
 
-            let warnings = [];
-            let dup = bId ? staff.find(s => s.bookId === bId && s.status !== 'cancelled' && s.status !== 'noshow') : null;
-            if (dup) {
-                document.getElementById('guest-id').value = dup.id;
-                warnings.push(`⚠️ DUPLICATE BOOKING DETECTED!\n\nBooking ID: ${bId} is already in the system for ${dup.firstName} ${dup.lastName}.\n\nThe new details have been loaded into the form. Clicking SAVE will UPDATE the existing record.`);
-            }
+            let warnings = [], dup = bId ? staff.find(s => s.bookId === bId && s.status !== 'cancelled' && s.status !== 'noshow') : null;
+            if (dup) { document.getElementById('guest-id').value = dup.id; warnings.push(`⚠️ DUPLICATE BOOKING DETECTED!\n\nBooking ID: ${bId} is already in the system for ${dup.firstName} ${dup.lastName}.\n\nThe new details have been loaded into the form. Clicking SAVE will UPDATE the existing record.`); }
             
             if (checkIn && checkOut) {
                 let cinMs = parseYMD(checkIn), coutMs = parseYMD(checkOut), isFmpRisk = false;
-                for(let fmp of fmpDates) {
-                    let fMs = parseYMD(fmp);
-                    if (coutMs === fMs || coutMs === fMs - 86400000) { isFmpRisk = true; break; }
-                    if (cinMs === fMs + 86400000) { isFmpRisk = true; break; }
-                }
+                for(let fmp of fmpDates) { let fMs = parseYMD(fmp); if (coutMs === fMs || coutMs === fMs - 86400000 || cinMs === fMs + 86400000) { isFmpRisk = true; break; } }
                 if (isFmpRisk) warnings.push(`🌕 FULL MOON PARTY RISK!\n\nThis guest arrives or departs immediately around the Full Moon Party.\n\nPlease contact them to verify their dates and ferry times!`);
             }
-            
             if (warnings.length > 0) setTimeout(() => window.showAlert(warnings.join('\n\n------------------------\n\n')), 400);
         };
 
-        window.showAlert = (msg, isConfirm = false, onConfirm = null) => { const modal = document.getElementById('alert-modal'); document.getElementById('alert-message').innerText = msg; const confirmBtn = document.getElementById('alert-confirm'); const cancelBtn = document.getElementById('alert-cancel'); cancelBtn.className = isConfirm ? 'btn-modal bg-slate-200 text-slate-700' : 'hidden'; confirmBtn.innerText = isConfirm ? 'Yes' : 'Okay'; confirmBtn.className = isConfirm ? 'btn-modal bg-red-600 text-white px-10' : 'btn-modal bg-blue-600 text-white px-10'; confirmBtn.onclick = () => { if (onConfirm) onConfirm(); window.closeAlert(); }; modal.style.display = 'flex'; };
+        window.showAlert = (msg, isConfirm = false, onConfirm = null) => { document.getElementById('alert-message').innerText = msg; const confirmBtn = document.getElementById('alert-confirm'), cancelBtn = document.getElementById('alert-cancel'); cancelBtn.className = isConfirm ? 'btn-modal bg-slate-200 text-slate-700' : 'hidden'; confirmBtn.innerText = isConfirm ? 'Yes' : 'Okay'; confirmBtn.className = isConfirm ? 'btn-modal bg-red-600 text-white px-10' : 'btn-modal bg-blue-600 text-white px-10'; confirmBtn.onclick = () => { if (onConfirm) onConfirm(); window.closeAlert(); }; document.getElementById('alert-modal').style.display = 'flex'; };
         window.closeAlert = () => { document.getElementById('alert-modal').style.display = 'none'; };
 
         init();
