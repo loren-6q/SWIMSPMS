@@ -59,7 +59,6 @@
             </div>
             <div class="p-3 flex flex-col gap-3">
                 <textarea id="audit-text" class="w-full h-16 sm:h-20 bg-white border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500 whitespace-pre text-xs text-slate-400 font-mono resize-none transition-all" placeholder="Paste Extranet data here..." oninput="window.checkMissing()"></textarea>
-                <!-- Removed max height and internal scrollbar so it naturally pushes down the grid below -->
                 <div id="audit-result" class="flex flex-col gap-2"></div>
             </div>
         </div>
@@ -83,15 +82,17 @@
                     <thead id="sync-head"></thead>
                     <tbody id="sync-body"></tbody>
                 </table>
+            </div>
 
-                <div id="no-changes-msg" class="hidden absolute inset-0 flex items-center justify-center bg-slate-50/95 z-40">
-                    <div class="text-center p-6 bg-white rounded-xl shadow-xl border border-slate-200">
-                        <div class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="shield-check" size="32"></i></div>
-                        <h3 id="no-data-title" class="text-2xl font-black text-slate-800 uppercase tracking-tight">Everything is Synced</h3>
-                        <p id="no-data-desc" class="text-sm font-bold text-slate-500 mt-1">No changes detected since your last sync.</p>
-                    </div>
+            <!-- Context-Aware Overlay moved out of scroll container but inside relative container -->
+            <div id="no-changes-msg" class="hidden absolute inset-0 top-[45px] flex items-center justify-center bg-slate-50/95 z-40">
+                <div class="text-center p-6 bg-white rounded-xl shadow-xl border border-slate-200">
+                    <div class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="shield-check" size="32"></i></div>
+                    <h3 id="no-data-title" class="text-2xl font-black text-slate-800 uppercase tracking-tight">Everything is Synced</h3>
+                    <p id="no-data-desc" class="text-sm font-bold text-slate-500 mt-1">No changes detected since your last sync.</p>
                 </div>
             </div>
+
         </div>
 
     </div>
@@ -118,6 +119,13 @@
 
         const parseYMD = (str) => { if(!str) return 0; const p = str.split('-'); return Date.UTC(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])); };
         const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+        const dbToUiRoom = (rid) => {
+            if (!rid) return rid; let nid = rid.toUpperCase();
+            if (/^[ABFD]\d$/.test(nid)) return nid[0] + '0' + nid.substring(1);
+            if (/^(101|[23]\d{2}(?:-\d)?)$/.test(nid)) return 'C' + nid;
+            return nid;
+        };
 
         signInAnonymously(auth).then(() => {
             getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ota_sync', 'baseline')).then(snap => {
@@ -190,11 +198,9 @@
                 
                 if (rList.length > 0 && rList[0] !== "") {
                     rList.forEach(rid => {
-                        let actualId = rid;
-                        if (actualId.startsWith('C')) actualId = actualId.substring(1);
-                        else if (/^[ABFD]0\d$/.test(actualId)) actualId = actualId[0] + actualId.substring(2);
-                        
-                        const roomDef = hotelRooms.find(hr => hr.id === actualId || hr.id === rid);
+                        // Apply the powerful reverse-decoder so DB IDs properly match full Room names
+                        const uiId = dbToUiRoom(rid);
+                        const roomDef = hotelRooms.find(hr => hr.id === uiId);
                         if(roomDef) typesToDeduct.push(roomDef.type);
                     });
                 } else if (s.bookedType) {
@@ -244,6 +250,7 @@
                     rawTypes.forEach(t => {
                         let live = liveInventory[d][t] || 0;
                         let snap = snapshotData[d] && snapshotData[d][t] !== undefined ? snapshotData[d][t] : totalRoomsByType[t];
+                        // If room category only has 2 or fewer rooms in total, NEVER mark it urgent
                         let isUrgent = live <= 2 && totalRoomsByType[t] > 2;
                         if (filter === 'changes' && live !== snap) show = true;
                         if (filter === 'urgent' && isUrgent) show = true;
@@ -270,22 +277,20 @@
                 noMsg.classList.add('hidden');
             }
 
-            // HEADER ROW: Skinny columns (30% skinnier)
             let trHead = `<tr class="frozen-row"><th class="frozen-corner w-32 min-w-[10rem] max-w-[14rem] text-sm whitespace-normal break-words text-left">ROOM TYPE</th>`;
             colsToShow.forEach(d => {
                 const dt = new Date(d + "T12:00:00");
-                // Shrunk padding to px-0, enforced width w-[32px] min-w-[32px]
                 trHead += `<th class="w-[32px] min-w-[32px] px-0 py-1 leading-tight text-center border-b border-slate-400"><span class="text-blue-300 text-[10px] uppercase font-bold tracking-tight block">${mNames[dt.getMonth()]}</span><span class="text-sm font-black">${dt.getDate()}</span></th>`;
             });
             trHead += `</tr>`;
             head.innerHTML = trHead;
 
-            // BODY ROWS: Wrapped room names, larger text for numbers
             rawTypes.forEach(t => {
                 let tr = `<tr><td class="frozen-col font-bold text-xs leading-snug whitespace-normal break-words" title="${t}">${t}<br><span class="text-slate-400 font-normal text-[10px] uppercase mt-1 inline-block">Total Capacity: ${totalRoomsByType[t]}</span></td>`;
                 colsToShow.forEach(d => {
                     let live = liveInventory[d][t] || 0;
                     let snap = snapshotData[d] && snapshotData[d][t] !== undefined ? snapshotData[d][t] : totalRoomsByType[t];
+                    // If room category only has 2 or fewer rooms in total, NEVER mark it urgent
                     let isUrgent = live <= 2 && totalRoomsByType[t] > 2;
                     
                     let cellClass = ""; let content = `<span class="font-bold text-sm text-slate-700">${live}</span>`;
@@ -318,7 +323,6 @@
             
             snapshotData = JSON.parse(JSON.stringify(liveInventory));
             try {
-                // Safely save snapshot to the dedicated ota_sync configuration folder
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ota_sync', 'baseline'), { matrix: snapshotData, dismissed: dismissedIds, updatedAt: new Date().toISOString() });
                 window.renderGrid();
             } catch(e) {
@@ -335,54 +339,74 @@
             let lines = text.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
             let foundIds = new Set();
             let missingHtml = [];
-            let missingCount = 0;
+            let actionCount = 0;
 
-            // Blacklist property ID and known false positives
             const ignoreIds = ['16646458'];
-
-            // Extract numeric strings that are at least 8 digits long
             const numRegex = /\d{8,20}/g;
             
             for (let i = 0; i < lines.length; i++) {
                 let match;
                 while ((match = numRegex.exec(lines[i])) !== null) {
                     let rawNum = match[0];
-                    // If it is massively long (squished text), pull the last 10 digits as the ID
                     let id = rawNum.length > 11 ? rawNum.slice(-10) : rawNum;
                     
                     if (ignoreIds.includes(id) || dismissedIds.includes(id)) continue;
 
-                    // Check if it already exists in our PMS database
-                    let exists = staff.some(s => s.bookId === id || s.id === id);
-                    if (!exists && !foundIds.has(id)) {
-                        foundIds.add(id);
-                        
-                        let guestName = "UNKNOWN GUEST";
-                        
-                        // Trace backwards to find "adult" or "child", which implies the Guest Name is immediately above it
-                        for (let j = i; j >= Math.max(0, i - 12); j--) {
-                            if (/\b(adult|child|adults|children)\b/i.test(lines[j])) {
-                                if (j - 1 >= 0) {
-                                    // Found the line containing the guest's name! Strip everything except pure letters.
-                                    let rawLine = lines[j - 1];
-                                    guestName = rawLine
-                                        .replace(/THB/gi, '')
-                                        .replace(/Payment via Booking\.com/i, '')
-                                        .replace(/Bank transfer/i, '')
-                                        .replace(/StatusPriceCommission and chargesBooking number/i, '')
-                                        .replace(/[\d,.]+/g, '') // strip all numbers and commas
-                                        .trim();
+                    let pmsBooking = staff.find(s => s.bookId === id || s.id === id);
+                    
+                    let guestName = "UNKNOWN GUEST";
+                    let isCancelled = false;
+                    
+                    // Trace backward to find guest name
+                    for (let j = i; j >= Math.max(0, i - 12); j--) {
+                        if (/\b(adult|child|adults|children)\b/i.test(lines[j])) {
+                            if (j - 1 >= 0) {
+                                let rawLine = lines[j - 1];
+                                guestName = rawLine
+                                    .replace(/THB/gi, '')
+                                    .replace(/Payment via Booking\.com/i, '')
+                                    .replace(/Bank transfer/i, '')
+                                    .replace(/StatusPriceCommission and chargesBooking number/i, '')
+                                    .replace(/[\d,.]+/g, '')
+                                    .trim();
+                                
+                                for(let k = Math.max(0, j - 2); k <= i; k++) {
+                                    if (lines[k] && /cancelled|canceled/i.test(lines[k])) isCancelled = true;
                                 }
-                                break;
                             }
+                            break;
                         }
-                        if(!guestName || guestName.length < 2) guestName = "UNKNOWN GUEST";
+                    }
+                    if(!guestName || guestName.length < 2) guestName = "UNKNOWN GUEST";
+                    
+                    let alertType = null;
+                    if (!pmsBooking && !isCancelled) alertType = 'missing';
+                    else if (!pmsBooking && isCancelled) alertType = 'missing_cancelled';
+                    else if (pmsBooking && isCancelled && pmsBooking.status !== 'cancelled') alertType = 'active_but_cancelled';
+
+                    if (alertType && !foundIds.has(id)) {
+                        foundIds.add(id);
+                        actionCount++;
                         
-                        missingCount++;
+                        let cardStyle = '', icon = '', badge = '';
+                        if (alertType === 'missing') {
+                            cardStyle = 'bg-rose-50 border-rose-200 text-rose-900';
+                            icon = '<span class="text-rose-500">➔</span>';
+                            badge = '<span class="bg-rose-200 text-rose-800 text-[10px] px-2 py-0.5 rounded ml-2 uppercase font-black tracking-widest shrink-0">Missing</span>';
+                        } else if (alertType === 'active_but_cancelled') {
+                            cardStyle = 'bg-amber-50 border-amber-300 text-amber-900';
+                            icon = '<span class="text-amber-500">➔</span>';
+                            badge = '<span class="bg-amber-200 text-amber-800 text-[10px] px-2 py-0.5 rounded ml-2 uppercase font-black tracking-widest shrink-0 animate-pulse">Cancel in PMS!</span>';
+                        } else if (alertType === 'missing_cancelled') {
+                            cardStyle = 'bg-slate-100 border-slate-300 text-slate-700 opacity-80';
+                            icon = '<span class="text-slate-400">➔</span>';
+                            badge = '<span class="bg-slate-300 text-slate-700 text-[10px] px-2 py-0.5 rounded ml-2 uppercase font-black tracking-widest shrink-0">OTA Cancelled</span>';
+                        }
+
                         missingHtml.push(
-                            `<div class="bg-red-50 px-4 py-3 rounded-lg border border-red-200 shadow-sm flex items-center justify-between gap-4">
-                                <div class="font-bold text-sm text-red-900 truncate">
-                                    <span class="mr-2 text-red-500">➔</span> ${guestName} <span class="text-red-400 font-mono text-xs ml-1">(${id})</span>
+                            `<div class="${cardStyle} px-4 py-3 rounded-lg border shadow-sm flex items-center justify-between gap-4">
+                                <div class="font-bold text-sm truncate flex items-center">
+                                    ${icon} <span class="ml-2">${guestName}</span> <span class="opacity-60 font-mono text-xs ml-2">(${id})</span> ${badge}
                                 </div>
                                 <button onclick="window.dismissBooking('${id}')" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-500 text-[10px] font-black uppercase rounded shadow-sm border border-slate-200 transition-colors shrink-0 flex items-center gap-1">
                                     Dismiss <i data-lucide="x" size="12"></i>
@@ -393,19 +417,19 @@
                 }
             }
 
-            if (missingCount === 0) {
+            if (actionCount === 0) {
                 resultDiv.innerHTML = `
                     <div class="bg-emerald-50 border-2 border-emerald-500 text-emerald-800 p-4 rounded-xl shadow-sm text-center">
                         <div class="font-black text-xl mb-1 flex items-center justify-center gap-2">
                             <i data-lucide="check-circle" size="24" class="text-emerald-500"></i> ALL CLEAR
                         </div>
-                        <p class="font-bold text-sm text-emerald-600">Every booking in this list is accounted for.</p>
+                        <p class="font-bold text-sm text-emerald-600">No missing or pending cancelled bookings found.</p>
                     </div>`;
             } else {
                 resultDiv.innerHTML = `
                     <div class="bg-rose-50 border-2 border-rose-500 p-4 rounded-xl shadow-sm">
                         <div class="font-black text-lg text-rose-800 mb-3 flex items-center gap-2">
-                            <i data-lucide="alert-triangle" size="20" class="text-rose-600"></i> ${missingCount} MISSING BOOKING${missingCount > 1 ? 'S' : ''} FOUND
+                            <i data-lucide="alert-triangle" size="20" class="text-rose-600"></i> ${actionCount} ACTION ITEM${actionCount > 1 ? 'S' : ''} FOUND
                         </div>
                         <div class="flex flex-col gap-2">
                             ${missingHtml.join('')}
