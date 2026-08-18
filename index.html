@@ -82,11 +82,7 @@
         .link-glow { box-shadow: 0 0 0 3px #fbbf24 !important; z-index: 40 !important; filter: brightness(1.1); }
         #custom-tooltip { position: fixed; z-index: 99999; pointer-events: none; background: rgba(15, 23, 42, 0.95); color: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); font-size: 13px; font-family: 'Roboto Condensed', sans-serif; display: none; white-space: pre-wrap; transform: translate(10px, 10px); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px); }
         .month-divider { border-left: 3px solid white; display: flex; align-items: center; justify-content: center; height: 100%; }
-        select option:disabled { color: #94a3b8; font-style: italic; }
-        .multi-select-dropdown { background-color: #1e293b; color: white; z-index: 99999; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); max-height: 250px; overflow-y: auto; border-radius: 4px; display: none; font-size: 0.75rem; position: absolute; }
-        .multi-select-dropdown label { display: flex; align-items: center; padding: 6px 8px; cursor: pointer; text-transform: uppercase; border-bottom: 1px solid #334155; }
-        .multi-select-dropdown label:hover { background-color: #334155; }
-
+        
         @keyframes red-pulse { 0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0.8); } 70% { box-shadow: inset 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); } }
         @keyframes orange-pulse { 0% { box-shadow: inset 0 0 0 0 rgba(249, 115, 22, 0.9); } 70% { box-shadow: inset 0 0 0 6px rgba(249, 115, 22, 0); } 100% { box-shadow: inset 0 0 0 0 rgba(249, 115, 22, 0); } }
         .overdue-checkout-past { animation: red-pulse 1.5s infinite; background-color: #fca5a5 !important; color: #7f1d1d !important; border-color: #ef4444 !important; }
@@ -104,16 +100,15 @@
     <div id="boot-loader" class="loading-overlay"><div class="spinner"></div><div class="mt-4 font-black text-slate-800 uppercase tracking-widest text-center px-4"><span id="sync-status">Authenticating...</span></div></div>
 
     <div class="flex-1 flex flex-col min-h-0 mx-auto w-full max-w-[1950px]">
-        <!-- TOP HEADER -->
         <div class="bg-white px-2 py-1.5 rounded-none sm:rounded-lg shadow-sm border-b sm:border border-slate-200 mb-1 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2 shrink-0 z-50 unselectable">
             <div class="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-start">
                 <div class="flex items-center gap-2">
                     <img src="apple-touch-icon.png" class="w-8 h-8 rounded shadow-inner" alt="Logo" onerror="this.style.display='none'">
-                    <div class="flex bg-slate-100 rounded-lg p-1 ml-2">
+                    <div class="flex bg-slate-100 rounded-lg p-1 ml-2 items-center">
                         <button id="tab-cal" onclick="window.switchTab('calendar')" class="tab-btn active">CAL</button>
                         <button id="tab-db" onclick="window.switchTab('database')" class="tab-btn">DB</button>
-                        <a href="accounting.html" id="tab-acc" class="tab-btn" target="_blank" title="Accounting Dashboard">ACCT <i data-lucide="external-link" size="10" class="inline mb-0.5"></i></a>
-                        <a href="sync.html" id="tab-sync" class="tab-btn hidden" target="_blank" title="OTA Sync Dashboard">SYNC <i data-lucide="external-link" size="10" class="inline mb-0.5"></i></a>
+                        <a href="accounting.html" id="tab-acc" class="tab-btn hover:text-blue-600 transition-colors hidden" target="_blank" title="Accounting Dashboard">ACCT <i data-lucide="external-link" size="10" class="inline mb-0.5"></i></a>
+                        <a href="sync.html" id="tab-sync" class="tab-btn hover:text-blue-600 transition-colors hidden" target="_blank" title="OTA Sync Dashboard">SYNC <i data-lucide="external-link" size="10" class="inline mb-0.5"></i></a>
                     </div>
                 </div>
             </div>
@@ -145,7 +140,6 @@
             </div>
         </div>
 
-        <!-- CALENDAR VIEW -->
         <div id="calendar-view" class="flex-1 flex flex-col min-h-0 unselectable block">
             <div id="calendar-scroll-container" class="flex-1 bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-auto relative overscroll-none">
                 <div id="calendar-header-months" class="timeline-grid sticky top-0 z-40 bg-slate-800 shadow-sm border-b border-slate-700 h-[26px] box-border"></div>
@@ -158,76 +152,80 @@
             </footer>
         </div>
 
-        <!-- DATABASE VIEW -->
         <div id="database-view" class="flex-1 flex flex-col min-h-0 bg-white sm:rounded shadow border-y sm:border border-slate-300 overflow-hidden hidden">
+            <!-- Filter Bar -->
+            <div class="p-2 bg-slate-100 border-b border-slate-300 flex flex-wrap gap-2 items-center text-xs unselectable shrink-0">
+                <div class="relative multi-select-container">
+                    <button onclick="window.toggleMultiSelect('db-room-dropdown', this)" class="bg-white border border-slate-300 px-2 py-1 rounded font-bold text-slate-700 hover:bg-slate-50 flex items-center justify-between w-36"><span id="db-room-label" class="truncate">ALL ROOMS</span> <i data-lucide="chevron-down" size="14"></i></button>
+                    <div id="db-room-dropdown" class="multi-select-dropdown absolute mt-1 w-48 bg-white border border-slate-300 rounded shadow-lg z-50 hidden"></div>
+                </div>
+                <div class="relative multi-select-container">
+                    <button onclick="window.toggleMultiSelect('db-source-dropdown', this)" class="bg-white border border-slate-300 px-2 py-1 rounded font-bold text-slate-700 hover:bg-slate-50 flex items-center justify-between w-32"><span id="db-source-label" class="truncate">ALL SOURCES</span> <i data-lucide="chevron-down" size="14"></i></button>
+                    <div id="db-source-dropdown" class="multi-select-dropdown absolute mt-1 w-40 bg-white border border-slate-300 rounded shadow-lg z-50 hidden">
+                        <label><input type="checkbox" value="direct" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> DIRECT</label>
+                        <label><input type="checkbox" value="booking.com" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> BOOKING.COM</label>
+                        <label><input type="checkbox" value="agoda" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> AGODA</label>
+                        <label><input type="checkbox" value="hostelworld" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> HOSTELWORLD</label>
+                        <label><input type="checkbox" value="airbnb" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> AIRBNB</label>
+                        <label><input type="checkbox" value="walkin" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> WALK-IN</label>
+                    </div>
+                </div>
+                <select id="db-filter-month" class="bg-white border border-slate-300 px-2 py-1 rounded font-bold text-slate-700 outline-none cursor-pointer" onchange="window.renderDatabase()"></select>
+                <input type="text" id="db-filter-name" placeholder="GUEST / ID..." class="bg-white border border-slate-300 px-2 py-1 rounded font-bold outline-none focus:ring-2 focus:ring-blue-500 uppercase w-32" oninput="window.renderDatabase()">
+                
+                <div class="flex items-center gap-1 border border-slate-300 bg-white rounded px-1">
+                    <span class="text-slate-400 font-black pl-1">฿</span>
+                    <input type="number" id="db-filter-min" placeholder="MIN" class="w-16 py-1 font-bold outline-none text-center" oninput="window.renderDatabase()">
+                    <span class="text-slate-300">-</span>
+                    <input type="number" id="db-filter-max" placeholder="MAX" class="w-16 py-1 font-bold outline-none text-center" oninput="window.renderDatabase()">
+                </div>
+                
+                <select id="db-filter-due" class="bg-white border border-slate-300 px-2 py-1 rounded font-bold text-slate-700 outline-none cursor-pointer" onchange="window.renderDatabase()">
+                    <option value="">ALL BALANCES</option>
+                    <option value="zero">PAID / ZERO DUE</option>
+                    <option value="owes">OWES BALANCE</option>
+                </select>
+                
+                <div class="relative multi-select-container">
+                    <button onclick="window.toggleMultiSelect('db-status-dropdown', this)" class="bg-white border border-slate-300 px-2 py-1 rounded font-bold text-slate-700 hover:bg-slate-50 flex items-center justify-between w-32"><span id="db-status-label" class="truncate">ALL STATUS</span> <i data-lucide="chevron-down" size="14"></i></button>
+                    <div id="db-status-dropdown" class="multi-select-dropdown absolute mt-1 w-40 bg-white border border-slate-300 rounded shadow-lg z-50 hidden">
+                        <label><input type="checkbox" value="future" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> FUTURE</label>
+                        <label><input type="checkbox" value="here" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> HERE</label>
+                        <label><input type="checkbox" value="left" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> LEFT</label>
+                        <label><input type="checkbox" value="unconfirmed" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> UNCONFIRM</label>
+                        <label><input type="checkbox" value="cancelled" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CANCELLED</label>
+                        <label><input type="checkbox" value="noshow" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> NO-SHOW</label>
+                        <label><input type="checkbox" value="charged" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CHARGED</label>
+                        <label><input type="checkbox" value="special" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> SPECIAL</label>
+                        <label><input type="checkbox" value="blocked" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> BLOCKED</label>
+                    </div>
+                </div>
+            </div>
+
             <div class="p-2 bg-slate-100 border-b border-slate-300 flex justify-between items-center shrink-0 unselectable">
                 <h2 class="font-black text-slate-700 uppercase tracking-widest text-sm">Database Editor</h2>
                 <button id="admin-bulk-delete" onclick="window.bulkDelete()" class="hidden btn-action bg-orange-600 whitespace-nowrap"><i data-lucide="list-x" size="14"></i> Delete Visible</button>
             </div>
+            
             <div class="flex-1 overflow-auto">
                 <table class="w-full text-left border-collapse min-w-[900px]">
-                    <thead class="unselectable sticky top-0 z-10 shadow-sm">
-                        <tr class="bg-slate-800 text-white text-base font-black uppercase tracking-widest cursor-pointer">
-                            <th onclick="window.sortDatabase('name')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[18%]">Guest Name <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                            <th onclick="window.sortDatabase('source')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[12%]">Source <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                            <th onclick="window.sortDatabase('checkIn')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[18%]">Stay Dates <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                            <th onclick="window.sortDatabase('room')" class="p-2 border-r border-slate-700 hover:bg-slate-700 w-[10%]">Rooms <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                            <th onclick="window.sortDatabase('totalPrice')" class="p-2 border-r border-slate-700 text-right hover:bg-slate-700 w-[14%]">Total <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                            <th onclick="window.sortDatabase('due')" class="p-2 border-r border-slate-700 text-right hover:bg-slate-700 w-[14%]">Due <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                            <th onclick="window.sortDatabase('status')" class="p-2 hover:bg-slate-700 w-[14%]">Status <span class="text-[10px] opacity-50 ml-1">⇅</span></th>
-                        </tr>
-                        <tr class="bg-slate-700 text-slate-300 text-[10px] uppercase">
-                            <th class="p-1 border-r border-slate-600 font-normal"><input type="text" id="db-filter-name" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" placeholder="FILTER NAME OR ID..." oninput="window.renderDatabase()"></th>
-                            <th class="p-1 border-r border-slate-600 font-normal">
-                                <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-[10px]" onclick="window.toggleMultiSelect('db-source-dropdown', this)">
-                                    <span id="db-source-label" class="truncate">ALL SOURCES</span><span class="text-[8px] ml-1">▼</span>
-                                </div>
-                            </th>
-                            <th class="p-1 border-r border-slate-600 font-normal"><select id="db-filter-month" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderDatabase()"></select></th>
-                            <th class="p-1 border-r border-slate-600 font-normal">
-                                <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-[10px]" onclick="window.toggleMultiSelect('db-room-dropdown', this)">
-                                    <span id="db-room-label" class="truncate">ALL ROOMS</span><span class="text-[8px] ml-1">▼</span>
-                                </div>
-                            </th>
-                            <th class="p-1 border-r border-slate-600 font-normal flex gap-1"><input type="number" id="db-filter-min" placeholder="MIN ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderDatabase()"><input type="number" id="db-filter-max" placeholder="MAX ฿" class="w-1/2 bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none placeholder-slate-400 text-[10px]" oninput="window.renderDatabase()"></th>
-                            <th class="p-1 border-r border-slate-600 font-normal"><select id="db-filter-due" class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none text-[10px]" onchange="window.renderDatabase()"><option value="">ALL</option><option value="zero">PAID</option><option value="owes">OWES</option></select></th>
-                            <th class="p-1 font-normal">
-                                <div class="w-full bg-slate-800 text-white px-1 py-1 rounded border border-slate-600 outline-none cursor-pointer flex justify-between items-center text-[10px]" onclick="window.toggleMultiSelect('db-status-dropdown', this)">
-                                    <span id="db-status-label" class="truncate">ALL STATUS</span><span class="text-[8px] ml-1">▼</span>
-                                </div>
-                            </th>
+                    <thead class="bg-slate-200 sticky top-0 z-10 shadow-sm border-b border-slate-300 text-xs font-black text-slate-600 uppercase tracking-wider unselectable">
+                        <tr>
+                            <th class="p-2 border-r border-slate-300 cursor-pointer hover:bg-slate-300" onclick="window.sortDatabase('name')">Name / ID <i data-lucide="arrow-up-down" size="10" class="inline"></i></th>
+                            <th class="p-2 border-r border-slate-300 cursor-pointer hover:bg-slate-300" onclick="window.sortDatabase('source')">Source <i data-lucide="arrow-up-down" size="10" class="inline"></i></th>
+                            <th class="p-2 border-r border-slate-300 cursor-pointer hover:bg-slate-300" onclick="window.sortDatabase('checkIn')">Dates <i data-lucide="arrow-up-down" size="10" class="inline"></i></th>
+                            <th class="p-2 border-r border-slate-300 cursor-pointer hover:bg-slate-300" onclick="window.sortDatabase('room')">Assigned <i data-lucide="arrow-up-down" size="10" class="inline"></i></th>
+                            <th class="p-2 border-r border-slate-300 text-right cursor-pointer hover:bg-slate-300" onclick="window.sortDatabase('totalPrice')">Total <i data-lucide="arrow-up-down" size="10" class="inline"></i></th>
+                            <th class="p-2 border-r border-slate-300 text-right cursor-pointer hover:bg-slate-300" onclick="window.sortDatabase('due')">Due <i data-lucide="arrow-up-down" size="10" class="inline"></i></th>
+                            <th class="p-2 cursor-pointer hover:bg-slate-300" onclick="window.sortDatabase('status')">Status <i data-lucide="arrow-up-down" size="10" class="inline"></i></th>
                         </tr>
                     </thead>
-                    <tbody id="database-body" class="text-sm font-bold text-slate-700"></tbody>
+                    <tbody id="database-body" class="text-xs"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Hidden Multi-Select Dropdowns -->
-    <div id="db-source-dropdown" class="multi-select-dropdown">
-        <label><input type="checkbox" value="booking.com" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> BDC</label>
-        <label><input type="checkbox" value="agoda" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> AGODA</label>
-        <label><input type="checkbox" value="airbnb" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> AIRBNB</label>
-        <label><input type="checkbox" value="hostelworld" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> HW</label>
-        <label><input type="checkbox" value="direct" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> DIRECT</label>
-        <label><input type="checkbox" value="walkin" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> WALK-IN</label>
-        <label><input type="checkbox" value="other" onchange="window.updateMultiLabel('db-source-dropdown', 'db-source-label', 'ALL SOURCES'); window.renderDatabase();" class="mr-1.5"> OTHER</label>
-    </div>
-    <div id="db-room-dropdown" class="multi-select-dropdown"></div>
-    <div id="db-status-dropdown" class="multi-select-dropdown">
-        <label><input type="checkbox" value="future" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> FUTURE</label>
-        <label><input type="checkbox" value="here" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> HERE</label>
-        <label><input type="checkbox" value="left" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> LEFT</label>
-        <label><input type="checkbox" value="unconfirmed" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> UNCONFIRMED</label>
-        <label><input type="checkbox" value="cancelled" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CANCELLED</label>
-        <label><input type="checkbox" value="noshow" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> NO-SHOW</label>
-        <label><input type="checkbox" value="charged" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CHARGED</label>
-        <label><input type="checkbox" value="special" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> SPECIAL</label>
-        <label><input type="checkbox" value="blocked" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> BLOCKED</label>
-    </div>
-
-    <!-- Draggable Floating Guest Modal -->
     <div id="guest-modal" class="modal-overlay">
         <div id="guest-modal-content" class="modal-content bg-white rounded-xl shadow-2xl border-2 border-slate-800">
             <div id="modal-header-btn" class="bg-slate-900 p-2 text-white flex justify-between items-center cursor-move rounded-t-lg unselectable" onmousedown="window.startDrag(event)">
@@ -242,9 +240,11 @@
 
             <form id="guest-form" class="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-2 no-scrollbar relative">
                 <input type="hidden" id="guest-id"> <input type="hidden" id="created-at"> <input type="hidden" id="created-by">
+                
                 <div class="section-header rounded-t-md mt-1" onclick="window.toggleSection('guest-profile-section', 'profile-chevron')">
                     <span>Guest</span><i data-lucide="chevron-down" id="profile-chevron" size="14" class="transition-transform duration-200"></i>
                 </div>
+                
                 <div id="guest-profile-section" class="bg-slate-50 p-1.5 border-x border-b border-slate-200 rounded-b-md space-y-1.5 mt-0 block">
                     <div class="grid grid-cols-2 gap-1.5">
                         <div><label class="field-label">First Name</label><input type="text" id="first-name" class="input-base uppercase" oninput="window.updateHeaderName()"></div>
@@ -254,15 +254,12 @@
                         <div><label class="field-label">Phone</label><input type="text" id="phone" class="input-base"></div>
                         <div>
                             <label class="field-label">Country</label>
-                            <input type="text" id="guest-country" class="input-base" list="country-list" placeholder="Type or select...">
-                            <datalist id="country-list">
-                                <option value="Thailand"><option value="France"><option value="Germany"><option value="United Kingdom"><option value="United States">
-                                <option value="Australia"><option value="Netherlands"><option value="Israel"><option value="Spain"><option value="Italy">
-                                <option value="Switzerland"><option value="Canada"><option value="Sweden"><option value="Denmark"><option value="Russia">
-                            </datalist>
+                            <input type="text" id="guest-country" class="input-base" list="country-list" placeholder="Type country...">
+                            <datalist id="country-list"></datalist>
                         </div>
                     </div>
                     <div><label class="field-label">Email</label><input type="text" id="email" class="input-base" oninput="window.checkEmailProxy(this.value)"></div>
+                    
                     <div class="grid grid-cols-3 gap-1 pt-1 border-t border-slate-200 mt-1 unselectable overflow-x-auto no-scrollbar">
                         <div id="email-confirm-btn" class="flex-1 min-w-[80px] multi-state-btn px-0.5 py-1 rounded text-[9px] font-black uppercase border border-slate-300 text-slate-400 whitespace-nowrap" data-state="0" onclick="window.cycleMulti(this, ['CONFIRM: --', 'CONFIRM: SENT'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400'])">CONFIRM: --</div>
                         <div id="email-prepost-btn" class="flex-1 min-w-[80px] multi-state-btn px-0.5 py-1 rounded text-[9px] font-black uppercase border border-slate-300 text-slate-400 whitespace-nowrap" data-state="0" onclick="window.cycleMulti(this, ['PRE/POST: --', 'PRE/POST: SENT', 'PRE/POST: CONF'], ['text-slate-400', 'bg-red-100 text-red-700 border-red-400', 'bg-green-100 text-green-700 border-green-400'])">PRE/POST: --</div>
@@ -360,7 +357,6 @@
         </div>
     </div>
 
-    <!-- EMAIL IMPORT MODAL -->
     <div id="email-modal" class="alert-modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-slate-800 flex flex-col">
             <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm">
@@ -385,7 +381,6 @@
         </div>
     </div>
 
-    <!-- SUB-MODALS -->
     <div id="alert-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div id="alert-header" class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Attention</div><div class="p-6 text-center"><p id="alert-message" class="font-black text-slate-700 leading-tight text-md whitespace-pre-wrap"></p><div id="alert-actions" class="mt-6 flex gap-2 justify-center"><button id="alert-cancel" onclick="window.closeAlert()" class="hidden btn-modal bg-slate-200 text-slate-700">Cancel</button><button id="alert-confirm" onclick="window.closeAlert()" class="btn-modal bg-blue-600 text-white px-10">Okay</button></div></div></div></div>
     <div id="split-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Split Stay</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select date to split booking.<br><span class="text-xs font-bold text-slate-500 mt-2 block">Creates a zero-balance linked segment to move guests mid-stay.</span></p><input type="date" id="split-date" class="input-base !text-lg !p-2 mb-6"><div class="flex gap-2 justify-center"><button onclick="document.getElementById('split-modal').style.display='none'" class="btn-modal bg-slate-200 text-slate-700 px-6">Cancel</button><button onclick="window.confirmSplit()" class="btn-modal bg-orange-600 text-white px-10">Split</button></div></div></div></div>
     <div id="merge-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Merge Bookings</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select a booking to absorb.<br><span class="text-xs font-bold text-slate-500 mt-2 block">Absorbed booking will be deleted!</span></p><select id="merge-target" class="input-base !text-sm !p-2 mb-6 cursor-pointer"></select><div class="flex gap-2 justify-center"><button onclick="document.getElementById('merge-modal').style.display='none'" class="btn-modal bg-slate-200 text-slate-700 px-6">Cancel</button><button id="merge-confirm-btn" onclick="window.confirmMerge()" class="btn-modal bg-indigo-600 text-white px-10">Merge</button></div></div></div></div>
@@ -406,13 +401,16 @@
         let viewStart = new Date(); viewStart.setHours(12,0,0,0);
         let searchTerm = ""; let searchMatchIndex = 0; let sortKey = "checkIn"; let sortAsc = false; let isZoomWide = false;
         
+        // 0: ALL, 1: OCC, 2: EMP, 3: HID
+        window.masterState = 0; 
+        
         const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         const fmpDates = ["2026-01-03", "2026-02-02", "2026-03-03", "2026-04-02", "2026-05-01", "2026-06-01", "2026-06-29", "2026-07-31", "2026-08-28", "2026-09-26", "2026-10-27", "2026-11-24", "2026-12-24", "2026-12-31", "2027-01-22", "2027-02-22", "2027-03-22", "2027-04-21", "2027-05-21", "2027-06-19", "2027-07-20", "2027-08-17", "2027-09-15", "2027-10-16", "2027-11-13", "2027-12-13", "2027-12-31"];
 
         const SVGS = {
             upFree: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M12 2L4 12h5v10h6V12h5z" fill="#facc15" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
             upPaid: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M12 2L4 12h5v10h6V12h5z" fill="#4ade80" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
-            ext: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M2 12l10-8v5h10v6H12v5z" fill="#3b82f6" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
+            ext: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M22 12L12 4v5H2v6h10v5z" fill="#3b82f6" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/></svg>`,
             link: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke="#64748b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
             mailConf: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><rect x="1" y="4" width="22" height="16" rx="2" fill="#fff" stroke="#000" stroke-width="2"/><path d="M1 6l11 8 11-8" fill="none" stroke="#000" stroke-width="2"/></svg>`,
             mailPre: `<svg viewBox="0 0 24 24" class="w-full h-full" overflow="visible"><rect x="1" y="4" width="22" height="16" rx="2" fill="#f87171" stroke="#000" stroke-width="2"/><path d="M1 6l11 8 11-8" fill="none" stroke="#000" stroke-width="2"/></svg>`,
@@ -476,10 +474,23 @@
         document.addEventListener('mousemove', (e) => { if (!isDragging) return; const modal = document.getElementById('guest-modal-content'); let newLeft = e.clientX - dragOffsetX, newTop = e.clientY - dragOffsetY; if (newTop < 0) newTop = 0; if (newTop > window.innerHeight - 50) newTop = window.innerHeight - 50; modal.style.left = newLeft + 'px'; modal.style.top = newTop + 'px'; });
         document.addEventListener('mouseup', () => { if(isDragging) isDragging = false; });
 
+        window.updateCountryList = () => {
+            const baseCountries = ["France", "Germany", "United Kingdom", "United States", "Australia", "Netherlands", "Israel", "Spain", "Italy", "Switzerland", "Canada", "Sweden", "Denmark", "Russia", "Thailand", "Belgium", "Austria", "Ireland", "Norway", "Finland", "Brazil", "Argentina", "South Korea", "Japan", "China", "India", "Mexico", "New Zealand", "South Africa", "Portugal", "Greece"];
+            const dbCountries = staff.map(s => s.country).filter(Boolean).map(c => {
+                // Ensure proper casing for db entries just in case
+                if (c.length > 2) return c.charAt(0).toUpperCase() + c.slice(1).toLowerCase();
+                return c;
+            });
+            const allUnique = [...new Set([...baseCountries, ...dbCountries])].sort();
+            const dl = document.getElementById('country-list');
+            if (dl) { dl.innerHTML = allUnique.map(c => `<option value="${c}"></option>`).join(''); }
+        };
+
         const init = async () => {
             const processSnapshot = (snap) => { 
                 let rawStaff = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
                 staff = rawStaff.map(s => { let mappedRooms = (s.rooms?.length ? s.rooms : (s.room ? [s.room] : [])).map(dbToUiRoom); s.room = mappedRooms[0] || ""; s.rooms = mappedRooms; return s; });
+                window.updateCountryList();
                 window.render(); 
                 const urlParams = new URLSearchParams(window.location.search); const editId = urlParams.get('edit');
                 if (editId) { window.editStaff(editId); try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {} }
@@ -514,8 +525,77 @@
             setupDropdown('db-room-dropdown'); window.addEventListener('resize', window.render); lucide.createIcons();
         };
 
-        window.toggleSection = (secId, iconId, forceState = null) => { const sec = document.getElementById(secId), icon = document.getElementById(iconId); if(!sec) return; const shouldShow = forceState !== null ? forceState : sec.style.display === 'none'; sec.style.display = shouldShow ? 'block' : 'none'; if(icon) icon.style.transform = shouldShow ? 'rotate(0deg)' : 'rotate(-90deg)'; };
-        window.toggleGroup = (groupName) => { const rows = document.querySelectorAll(`.group-${groupName}`), icon = document.getElementById(`icon-${groupName}`); if (rows.length === 0) return; let currentState = rows[0].dataset.state || 'expanded', nextState = 'expanded'; if (currentState === 'expanded') nextState = 'filtered'; else if (currentState === 'filtered') nextState = 'collapsed'; rows.forEach(r => { r.dataset.state = nextState; if (nextState === 'collapsed') r.style.display = 'none'; else if (nextState === 'filtered') r.style.display = r.querySelector('.staff-bar') ? '' : 'none'; else r.style.display = ''; }); if (icon) { if (nextState === 'expanded') icon.style.transform = 'rotate(0deg)'; else if (nextState === 'filtered') icon.style.transform = 'rotate(0deg)'; else icon.style.transform = 'rotate(180deg)'; } };
+        window.toggleSection = (sectionId, chevronId, forceState = null) => {
+            const sec = document.getElementById(sectionId);
+            const icon = document.getElementById(chevronId);
+            if (!sec) return;
+            
+            const isCurrentlyHidden = sec.style.display === 'none' || sec.classList.contains('hidden');
+            const shouldShow = forceState !== null ? forceState : isCurrentlyHidden;
+            
+            if (shouldShow) {
+                sec.style.display = 'block';
+                sec.classList.remove('hidden');
+                if(icon) icon.style.transform = 'rotate(0deg)';
+            } else {
+                sec.style.display = 'none';
+                sec.classList.add('hidden');
+                if(icon) icon.style.transform = 'rotate(-90deg)';
+            }
+        };
+
+        window.toggleAllGroups = () => {
+            window.masterState = (window.masterState + 1) % 4;
+            const states = ['expanded', 'booked', 'unbooked', 'collapsed'];
+            const targetState = states[window.masterState];
+            
+            let allGroups = new Set();
+            document.querySelectorAll('.group-header').forEach(el => {
+                if (el.dataset.group) allGroups.add(el.dataset.group);
+            });
+            allGroups.forEach(g => window.toggleGroup(g, targetState));
+        };
+
+        window.toggleGroup = (groupName, forceState = null) => {
+            const rows = document.querySelectorAll(`.group-${groupName}`);
+            const availRow = document.querySelector(`.avail-row-${groupName}`);
+            const icon = document.getElementById(`icon-${groupName}`);
+            const stateLabel = document.getElementById(`state-${groupName}`);
+            
+            let currentState = rows.length > 0 ? (rows[0].dataset.state || 'expanded') : (availRow && availRow.style.display !== 'none' ? 'collapsed' : 'expanded');
+            
+            let nextState = forceState;
+            if (!nextState) {
+                if (currentState === 'expanded') nextState = 'booked';
+                else if (currentState === 'booked') nextState = 'unbooked';
+                else if (currentState === 'unbooked') nextState = 'collapsed';
+                else if (currentState === 'collapsed') nextState = 'expanded';
+            }
+
+            rows.forEach(r => {
+                r.dataset.state = nextState;
+                const bars = r.querySelectorAll('.staff-bar');
+                const hasBooking = bars.length > 0;
+                
+                if (nextState === 'collapsed') r.style.display = 'none';
+                else if (nextState === 'booked') r.style.display = hasBooking ? '' : 'none';
+                else if (nextState === 'unbooked') r.style.display = !hasBooking ? '' : 'none';
+                else r.style.display = '';
+            });
+
+            if (availRow) {
+                availRow.style.display = nextState === 'collapsed' ? 'grid' : 'none';
+            }
+
+            if (icon) icon.style.transform = nextState === 'collapsed' ? 'rotate(180deg)' : 'rotate(0deg)';
+            if (stateLabel) {
+                if (nextState === 'expanded') { stateLabel.innerText = 'ALL'; stateLabel.className = 'text-[8px] bg-slate-600 text-slate-300 px-1 rounded'; }
+                else if (nextState === 'booked') { stateLabel.innerText = 'OCC'; stateLabel.className = 'text-[8px] bg-blue-900 text-blue-200 px-1 rounded'; }
+                else if (nextState === 'unbooked') { stateLabel.innerText = 'EMP'; stateLabel.className = 'text-[8px] bg-emerald-900 text-emerald-200 px-1 rounded'; }
+                else if (nextState === 'collapsed') { stateLabel.innerText = 'HID'; stateLabel.className = 'text-[8px] bg-slate-700 text-slate-400 px-1 rounded'; }
+            }
+        };
+
         window.toggleMultiSelect = (id, btnEventEl) => { event.stopPropagation(); const drop = document.getElementById(id); if(!drop) return; const isHidden = drop.style.display === 'none' || drop.style.display === ''; document.querySelectorAll('.multi-select-dropdown').forEach(d => { d.style.display = 'none'; }); if(isHidden) { const rect = btnEventEl.getBoundingClientRect(); document.body.appendChild(drop); drop.style.position = 'absolute'; drop.style.top = (rect.bottom + window.scrollY) + 'px'; drop.style.left = (rect.left + window.scrollX) + 'px'; drop.style.width = Math.max(rect.width, 140) + 'px'; if (rect.left + 150 > window.innerWidth) drop.style.left = (window.scrollX + rect.right - 150) + 'px'; drop.style.display = 'block'; } };
         window.updateMultiLabel = (dropId, labelId, defaultText) => { const checked = document.querySelectorAll(`#${dropId} input[type="checkbox"]:checked`), label = document.getElementById(labelId); if(!label) return; label.innerText = checked.length === 0 ? defaultText : (checked.length === 1 ? checked[0].parentNode.textContent.trim().toUpperCase() : checked.length + ' SELECTED'); };
         window.getMultiValues = (id) => Array.from(document.getElementById(id)?.querySelectorAll('input[type="checkbox"]:checked') || []).map(cb => cb.value);
@@ -539,17 +619,30 @@
         const renderTimeline = (daysToShow) => {
             const monthsGrid = document.getElementById('calendar-header-months'), daysGrid = document.getElementById('calendar-header-days'), body = document.getElementById('timeline-body');
             monthsGrid.innerHTML = `<div class="border-r border-slate-700 flex items-center justify-center h-full sticky left-0 z-50 bg-slate-800 w-[var(--sidebar-w)]"></div>`;
-            daysGrid.innerHTML = `<div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-between border-r border-slate-400 bg-slate-100 h-full sticky left-0 z-40 w-[var(--sidebar-w)]"><span>ROOM</span><button onclick="window.toggleZoom()" class="hover:text-blue-500 transition-colors bg-slate-200 hover:bg-slate-300 p-0.5 rounded shadow-sm" title="Toggle Zoom"><i data-lucide="zoom-in" size="14"></i></button></div>`;
+            daysGrid.innerHTML = `<div class="p-1 text-[12px] font-black text-slate-500 uppercase flex items-center justify-between border-r border-slate-400 bg-slate-100 h-full sticky left-0 z-40 w-[var(--sidebar-w)]"><span>ROOM</span><div class="flex items-center gap-1"><button onclick="window.toggleAllGroups()" class="hover:text-blue-500 transition-colors bg-slate-200 hover:bg-slate-300 p-0.5 rounded shadow-sm" title="Master Toggle"><i data-lucide="layers" size="14"></i></button><button onclick="window.toggleZoom()" class="hover:text-blue-500 transition-colors bg-slate-200 hover:bg-slate-300 p-0.5 rounded shadow-sm" title="Toggle Zoom"><i data-lucide="zoom-in" size="14"></i></button></div></div>`;
             body.innerHTML = '';
 
             const days = Array.from({length: daysToShow}, (_, i) => new Date(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate() + i, 12, 0, 0));
             let currentMonth = -1, currentSpan = 0;
             days.forEach((d, i) => { if (d.getMonth() !== currentMonth) { if (currentMonth !== -1) monthsGrid.innerHTML += `<div style="grid-column: span ${currentSpan}" class="unselectable flex items-center justify-center month-divider py-1 border-b border-slate-700 text-white text-[11px] font-bold uppercase tracking-widest">${mNames[currentMonth]} ${days[i-1].getFullYear()}</div>`; currentMonth = d.getMonth(); currentSpan = 1; } else currentSpan++; if (i === days.length - 1) monthsGrid.innerHTML += `<div style="grid-column: span ${currentSpan}" class="unselectable flex items-center justify-center month-divider py-1 border-b border-slate-700 text-white text-[11px] font-bold uppercase tracking-widest">${mNames[currentMonth]} ${d.getFullYear()}</div>`; });
-            days.forEach(d => { const isToday = d.toDateString() === new Date().toDateString(); daysGrid.innerHTML += `<div class="flex flex-col items-center justify-center border-r border-slate-400 ${isToday ? 'bg-blue-100' : ''}"><div class="text-[10px] font-black text-slate-500 uppercase leading-none">${d.toLocaleDateString('en-US', {weekday:'short'})}</div><div class="text-[16px] font-black ${isToday ? 'text-blue-600' : 'text-slate-800'} leading-tight">${d.getDate()}</div></div>`; });
+            
+            const getLocalYMD = (d) => { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+            const todayD = new Date(); const todayStr = getLocalYMD(todayD);
+            const yesterdayD = new Date(); yesterdayD.setDate(todayD.getDate() - 1);
+            const yesterdayStr = getLocalYMD(yesterdayD);
+            
+            days.forEach(d => { const isToday = getLocalYMD(d) === todayStr; daysGrid.innerHTML += `<div class="flex flex-col items-center justify-center border-r border-slate-400 ${isToday ? 'bg-blue-100' : ''}"><div class="text-[10px] font-black text-slate-500 uppercase leading-none">${d.toLocaleDateString('en-US', {weekday:'short'})}</div><div class="text-[16px] font-black ${isToday ? 'text-blue-600' : 'text-slate-800'} leading-tight">${d.getDate()}</div></div>`; });
 
-            const activeStaff = staff.filter(s => s.status !== 'cancelled'); const viewStartUTC = Date.UTC(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate()); const viewEndUTC = viewStartUTC + daysToShow * 86400000;
+            const activeStaff = staff.filter(s => s.status !== 'cancelled' && s.status !== 'noshow'); 
+            const viewStartUTC = Date.UTC(viewStart.getFullYear(), viewStart.getMonth(), viewStart.getDate()); const viewEndUTC = viewStartUTC + daysToShow * 86400000;
             const timelineRows = []; const unconfirmed = [];
-            activeStaff.forEach(s => { if (parseYMD(s.checkIn) > viewEndUTC || parseYMD(s.checkOut) < viewStartUTC) return; const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : [""]); if (s.status === 'unconfirmed' || s.status === 'noshow' || s.status === 'charged') for(let i=0; i < Math.max(1, rList.length); i++) unconfirmed.push(s); else { const unassignedCount = rList.filter(rid => !rid).length; for(let i=0; i < unassignedCount; i++) unconfirmed.push(s); } });
+            
+            activeStaff.forEach(s => { 
+                if (parseYMD(s.checkIn) > viewEndUTC || parseYMD(s.checkOut) < viewStartUTC) return; 
+                const rList = s.rooms && s.rooms.length > 0 ? s.rooms : (s.room ? [s.room] : [""]); 
+                if (s.status === 'unconfirmed' || s.status === 'charged') for(let i=0; i < Math.max(1, rList.length); i++) unconfirmed.push(s); 
+                else { const unassignedCount = rList.filter(rid => !rid).length; for(let i=0; i < unassignedCount; i++) unconfirmed.push(s); } 
+            });
 
             if(unconfirmed.length > 0) {
                 timelineRows.push({ isDivider: true, label: "UNCONFIRMED / HOLD", isUnconfirmedZone: true }); const rows = [];
@@ -559,31 +652,78 @@
             
             hotelRooms.forEach((r, idx, arr) => {
                 if (r.type !== (idx > 0 ? arr[idx-1].type : null)) timelineRows.push({ isDivider: true, label: r.type });
-                timelineRows.push({ isRoom: true, id: r.id, type: r.type, bed: r.bed, floor: r.floor, bookings: activeStaff.filter(s => { const rL = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []); return rL.includes(r.id) && s.status !== 'unconfirmed' && s.status !== 'noshow' && s.status !== 'charged' && parseYMD(s.checkIn) <= viewEndUTC && parseYMD(s.checkOut) >= viewStartUTC; }) });
+                timelineRows.push({ isRoom: true, id: r.id, type: r.type, bed: r.bed, floor: r.floor, bookings: activeStaff.filter(s => { const rL = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []); return rL.includes(r.id) && s.status !== 'unconfirmed' && s.status !== 'charged' && parseYMD(s.checkIn) <= viewEndUTC && parseYMD(s.checkOut) >= viewStartUTC; }) });
             });
 
             const tooltip = document.getElementById('custom-tooltip'); let currentGroup = '';
-            
-            const todayStr = new Date().toISOString().split('T')[0];
-            const yesterdayD = new Date(); yesterdayD.setDate(yesterdayD.getDate() - 1);
-            const yesterdayStr = yesterdayD.toISOString().split('T')[0];
 
             timelineRows.forEach(rowDef => {
-                const row = document.createElement('div'); 
                 if (rowDef.isDivider) {
-                    currentGroup = rowDef.label.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase(); let isDefaultCollapsed = currentGroup === 'unconfirmed-hold';
-                    row.className = `timeline-grid ${rowDef.isUnconfirmedZone ? 'mt-4' : ''} cursor-pointer transition-colors unselectable`;
-                    row.innerHTML = `<div class="${rowDef.isUnconfirmedZone ? 'unassigned-header bg-slate-300 hover:bg-slate-400 text-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-white border-t border-slate-600'} p-0.5 text-[10px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-20 transition-colors" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')"><span>${rowDef.label}</span><i data-lucide="chevron-up" class="transition-transform duration-200" id="icon-${currentGroup}" size="14" style="${isDefaultCollapsed ? 'transform: rotate(180deg);' : ''}"></i></div>`;
-                    return body.appendChild(row);
+                    currentGroup = rowDef.label.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase(); 
+                    let isDefaultCollapsed = currentGroup === 'unconfirmed-hold';
+                    
+                    const headerRow = document.createElement('div');
+                    headerRow.className = `timeline-grid ${rowDef.isUnconfirmedZone ? 'mt-4' : ''} cursor-pointer transition-colors unselectable group-header`;
+                    headerRow.dataset.group = currentGroup;
+                    
+                    if (rowDef.isUnconfirmedZone) {
+                        headerRow.innerHTML = `<div class="unassigned-header bg-slate-300 hover:bg-slate-400 text-slate-800 p-0.5 text-[10px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-30 transition-colors" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')"><span>${rowDef.label}</span><i data-lucide="chevron-up" class="transition-transform duration-200" id="icon-${currentGroup}" size="14" style="${isDefaultCollapsed ? 'transform: rotate(180deg);' : ''}"></i></div>`;
+                        return body.appendChild(headerRow);
+                    } else {
+                        // Regular Black Header Row
+                        headerRow.innerHTML = `<div class="bg-slate-800 hover:bg-slate-700 text-white border-t border-slate-600 p-0.5 text-[11px] font-black uppercase flex items-center justify-between px-2 sticky left-0 z-30 transition-colors shadow-[2px_0_4px_rgba(0,0,0,0.1)] w-[var(--sidebar-w)]" style="grid-column: 1 / -1; width: fit-content; min-width: 100vw; height: 100%;" onclick="window.toggleGroup('${currentGroup}')"><span class="truncate pr-1">${rowDef.label}</span><div class="flex items-center gap-1 shrink-0"><span id="state-${currentGroup}" class="text-[8px] bg-slate-600 px-1 rounded text-slate-300">ALL</span><i data-lucide="chevron-up" class="transition-transform duration-200" id="icon-${currentGroup}" size="14"></i></div></div>`;
+                        body.appendChild(headerRow);
+
+                        const typeRooms = hotelRooms.filter(hr => hr.type === rowDef.label);
+                        const capacity = typeRooms.length;
+                        const typeRoomIds = typeRooms.map(hr => hr.id);
+                        
+                        const availRow = document.createElement('div');
+                        availRow.className = `timeline-grid avail-row-${currentGroup} bg-black border-b border-slate-700 h-[18px]`;
+                        availRow.style.display = 'none';
+                        
+                        let cellHtml = `<div class="bg-slate-900 border-r border-slate-700 flex items-center justify-end pr-2 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.1)] w-[var(--sidebar-w)] text-[9px] text-slate-400 font-black uppercase tracking-widest unselectable">AVAIL &rarr;</div>`;
+
+                        for(let i=0; i<daysToShow; i++) {
+                            let dTime = days[i].getTime();
+                            let occupiedRooms = new Set();
+                            
+                            activeStaff.forEach(s => {
+                                if(s.status === 'unconfirmed' || s.status === 'charged') return;
+                                let inMs = parseYMD(s.checkIn), outMs = parseYMD(s.checkOut);
+                                if (dTime >= inMs && dTime < outMs) {
+                                    let rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []);
+                                    rList.forEach(r => { if (r && typeRoomIds.includes(r)) occupiedRooms.add(r); });
+                                }
+                            });
+                            
+                            let avail = capacity - occupiedRooms.size;
+                            let ratio = capacity > 0 ? avail / capacity : 0;
+                            let colorClass = '';
+                            
+                            // Advanced Heatmap Logic
+                            if (avail === capacity) colorClass = 'bg-[#22c55e] text-black'; 
+                            else if (ratio >= 0.75) colorClass = 'bg-black text-[#4ade80]'; 
+                            else if (ratio >= 0.50) colorClass = 'bg-black text-white'; 
+                            else if (ratio >= 0.25) colorClass = 'bg-[#7f1d1d] text-white'; 
+                            else if (avail > 0) colorClass = 'bg-[#dc2626] text-white'; 
+                            else colorClass = 'bg-[#ef4444] text-black border-x border-[#b91c1c] font-black'; 
+
+                            cellHtml += `<div class="flex items-center justify-center border-r border-slate-700 border-opacity-50 text-[10px] font-black ${colorClass}">${avail}</div>`;
+                        }
+                        availRow.innerHTML = cellHtml;
+                        return body.appendChild(availRow);
+                    }
                 }
 
+                const row = document.createElement('div'); 
                 row.className = `timeline-grid bed-row group-${currentGroup} ${rowDef.isRoom && rowDef.id.endsWith('-4') ? '!border-b-[3px] !border-slate-400' : ''}`;
                 if (currentGroup === 'unconfirmed-hold') row.style.display = 'none';
 
                 const headerHtml = rowDef.isRoom ? `<div class="flex items-center justify-between px-1 w-full gap-1"><div class="flex items-center gap-0.5 shrink-0"><span class="text-[13px] font-black text-slate-700">${rowDef.id}</span>${getFloorIcon(rowDef.floor)}</div><span class="text-[10px] font-bold text-slate-600 text-right leading-none tracking-tighter truncate">${rowDef.bed}</span></div>` : `<span class="text-[11px] font-black text-amber-700">${rowDef.label}</span>`;
-                row.innerHTML = `<div class="border-r border-slate-400 ${rowDef.isUnassigned ? 'bg-amber-100' : 'bg-slate-50'} flex items-center justify-center uppercase overflow-hidden shrink-0 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.05)] unselectable">${headerHtml}</div>`;
+                row.innerHTML = `<div class="border-r border-slate-400 ${rowDef.isUnassigned ? 'bg-amber-100' : 'bg-slate-50'} flex items-center justify-center uppercase overflow-hidden shrink-0 sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.05)] unselectable w-[var(--sidebar-w)]">${headerHtml}</div>`;
                 
-                for(let i=0; i<daysToShow; i++) { const cell = document.createElement('div'), isToday = days[i].toDateString() === new Date().toDateString(); cell.className = `day-column ${getFMPShade(days[i])} ${isToday ? 'day-today' : ''} ${rowDef.isUnassigned ? 'bg-amber-50/50' : ''}`; cell.dataset.colIndex = i; cell.dataset.dateNum = days[i].getDate(); cell.onmouseenter = () => document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.add('hover-col')); cell.onmouseleave = () => document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.remove('hover-col')); cell.onclick = () => window.quickAdd(rowDef.isUnassigned ? "" : rowDef.id, days[i]); row.appendChild(cell); }
+                for(let i=0; i<daysToShow; i++) { const cell = document.createElement('div'), isToday = getLocalYMD(days[i]) === todayStr; cell.className = `day-column ${getFMPShade(days[i])} ${isToday ? 'day-today' : ''} ${rowDef.isUnassigned ? 'bg-amber-50/50' : ''}`; cell.dataset.colIndex = i; cell.dataset.dateNum = days[i].getDate(); cell.onmouseenter = () => document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.add('hover-col')); cell.onmouseleave = () => document.querySelectorAll(`[data-col-index="${i}"]`).forEach(el => el.classList.remove('hover-col')); cell.onclick = () => window.quickAdd(rowDef.isUnassigned ? "" : rowDef.id, days[i]); row.appendChild(cell); }
 
                 rowDef.bookings.forEach(s => {
                     const exStart = getDayIndex(s.checkIn) + 0.3, exEnd = getDayIndex(s.checkOut) + 0.25; if (exStart >= daysToShow || exEnd <= 0) return;
@@ -634,6 +774,16 @@
                     bar.onclick = (e) => { e.stopPropagation(); tooltip.style.display = 'none'; if(typeof window.editStaff === 'function') window.editStaff(s.id); }; row.appendChild(bar);
                 }); body.appendChild(row);
             });
+            
+            if (window.masterState !== 0) {
+                const states = ['expanded', 'booked', 'unbooked', 'collapsed'];
+                const targetState = states[window.masterState];
+                let allGroups = new Set();
+                document.querySelectorAll('.group-header').forEach(el => {
+                    if (el.dataset.group) allGroups.add(el.dataset.group);
+                });
+                allGroups.forEach(g => window.toggleGroup(g, targetState));
+            }
         };
 
         window.getFilteredBookings = (v, sKey, sAsc) => {
@@ -689,7 +839,7 @@
             const del = document.createElement('button'); del.type = "button"; del.className = "w-6 flex justify-center items-center text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded border border-red-200 flex-shrink-0 shadow-sm transition-colors"; del.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>`; del.onclick = () => { wrapper.remove(); if(container.children.length === 0) window.addRoomSelect(); window.updateAvailableRooms(); }; wrapper.appendChild(sel); wrapper.appendChild(del); container.appendChild(wrapper); window.updateAvailableRooms();
         };
 
-        window.calcExtension = () => { const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value; const ms = parseYMD(cout) - parseYMD(cin); const avg = ms > 0 ? (Number(document.getElementById('total-price').value) || 0) / Math.round(ms / 86400000) : 0; const days = parseInt(document.getElementById('ext-days').value) || 1; let crossesFMP = false; if (cout) { const startD = parseYMD(cout); const endD = startD + (days * 86400000); for (let f of fmpDates) { const fTime = new Date(f + "T12:00:00").getTime(); if ((startD <= fTime && endD >= fTime) || (Math.abs(startD - fTime) <= 3 * 86400000) || (Math.abs(endD - fTime) <= 3 * 86400000)) { crossesFMP = true; break; } } } if (crossesFMP) { document.getElementById('ext-avg-rate').value = 'FMP!'; document.getElementById('ext-avg-rate').classList.add('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = ''; document.getElementById('ext-price').placeholder = 'CHECK RATE ->'; document.getElementById('btn-check-bdc').classList.replace('bg-slate-200', 'bg-pink-500'); document.getElementById('btn-check-bdc').classList.replace('text-slate-700', 'text-white'); document.getElementById('btn-check-bdc').classList.add('animate-pulse'); } else { document.getElementById('ext-avg-rate').value = Math.round(avg); document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = Math.round(avg * days); document.getElementById('ext-price').placeholder = ''; document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse'); } };
+        window.calcExtension = () => { const cin = document.getElementById('check-in').value, cout = document.getElementById('check-out').value; const ms = parseYMD(cout) - parseYMD(cin); const avg = ms > 0 ? (Number(document.getElementById('total-price').value) || 0) / Math.round(ms / 86400000) : 0; const days = parseInt(document.getElementById('ext-days').value) || 1; let crossesFMP = false; if (cout) { const startD = parseYMD(cout); const endD = startD + (days * 86400000); for (let f of fmpDates) { const fTime = new Date(f + "T12:00:00").getTime(); if ((startD <= fTime && endD >= fTime) || (Math.abs(startD - fTime) <= 3 * 86400000) || (Math.abs(endD - fTime) <= 3 * 86400000)) { crossesFMP = true; break; } } } if (crossesFMP) { document.getElementById('ext-avg-rate').value = 'FMP!'; document.getElementById('ext-avg-rate').classList.add('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = ''; document.getElementById('ext-price').placeholder = 'CHECK RATE ->'; document.getElementById('btn-check-bdc').classList.replace('bg-slate-200', 'bg-pink-500'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.add('animate-pulse'); } else { document.getElementById('ext-avg-rate').value = Math.round(avg); document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); document.getElementById('ext-price').value = Math.round(avg * days); document.getElementById('ext-price').placeholder = ''; document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse'); } };
         window.checkBdcPrice = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + (parseInt(document.getElementById('ext-days').value) || 1)); window.open(`https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${cout}&checkout=${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}&group_adults=${document.getElementById('pax-count').value || 1}&group_children=0&no_rooms=${Array.from(document.querySelectorAll('.assigned-room-select')).filter(sel => sel.value !== "").length || 1}`, '_blank'); };
         window.confirmExtension = () => { const cout = document.getElementById('check-out').value; if(!cout) return window.showAlert("Please set a check-out date first."); const addPrice = document.getElementById('ext-price').value; if(addPrice === '') return window.showAlert("Please enter the Extension Price first."); const days = parseInt(document.getElementById('ext-days').value) || 1, d = new Date(cout + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + days); const newCout = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; document.getElementById('check-out').value = newCout; document.getElementById('total-price').value = ((Number(document.getElementById('total-price').value) || 0) + Number(addPrice)).toFixed(2); setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); window.syncLabels(); window.updateAvailableRooms(); window.calcFinancials(); window.calcExtension(); window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${newCout}.\nAdded ฿${addPrice} to Total Price.`); };
 
@@ -709,7 +859,12 @@
             document.getElementById('ext-days').value = 1; document.getElementById('ext-avg-rate').value = ''; document.getElementById('ext-price').value = ''; document.getElementById('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); document.getElementById('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); document.getElementById('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); document.getElementById('btn-check-bdc').classList.remove('animate-pulse');
 
             window.updateHeaderName(); window.checkEmailProxy(s.email || ""); window.calcFinancials(); window.syncLabels(); window.updateAvailableRooms(); window.calcExtension && window.calcExtension();
-            window.toggleSection('guest-profile-section', 'profile-chevron', true); window.toggleSection('ext-section', 'ext-chevron', false); window.toggleSection('fin-section', 'fin-chevron', true); window.toggleSection('meta-section', 'meta-chevron', true);
+            
+            window.toggleSection('guest-profile-section', 'profile-chevron', true); 
+            window.toggleSection('ext-section', 'ext-chevron', false); 
+            window.toggleSection('fin-section', 'fin-chevron', true); 
+            window.toggleSection('meta-section', 'meta-chevron', true);
+            
             ['delete-btn', 'split-btn', 'merge-btn', 'dup-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.style.visibility = isNew ? 'hidden' : 'visible'; });
             document.getElementById('audit-log').innerText = isNew ? `NEW RECORD | CREATING AS ${currentUserEmail.toUpperCase()}` : `CREATED BY ${s.createdBy||'UNKNOWN'} ON ${s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-GB').slice(0,5) : '--'}` + (s.lastEditedBy ? ` | LAST EDIT: ${s.lastEditedBy} ON ${new Date(s.lastEditedAt).toLocaleDateString('en-GB').slice(0,5)}` : '');
             if(currentUserRole === 'staff') { ['delete-btn', 'split-btn', 'merge-btn'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.visibility = 'hidden'; }); document.querySelector('#save-btn').style.display = 'none'; }
@@ -751,15 +906,55 @@
         window.executePriceCheck = () => { const cin = document.getElementById('pc-in').value, cout = document.getElementById('pc-out').value; if (!cin || !cout) return window.showAlert("Please select dates first."); window.open(`https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${cin}&checkout=${cout}&group_adults=${document.getElementById('pc-pax').value || 1}&group_children=0&no_rooms=1`, '_blank'); };
 
         window.openEmailParserModal = () => { document.getElementById('email-textarea').value = ''; document.getElementById('email-modal').style.display = 'flex'; setTimeout(() => document.getElementById('email-textarea').focus(), 50); };
+        
         window.autoSuggestRoom = (bt, nt, cin, cout) => {
-            if (!cin || !cout) return; const startUTC = parseYMD(cin), endUTC = parseYMD(cout), occ = new Set();
-            staff.forEach(s => { if(s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed' || s.status === 'charged') return; if(startUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < endUTC) (s.rooms || [s.room]).forEach(r => { if(r) occ.add(r); }); });
-            const available = hotelRooms.filter(r => !occ.has(r.id)); if (available.length === 0) return; let pType = null;
-            if (bt.includes("DORMITORY") || bt.includes("4-BED") || bt.includes("DORM")) pType = "Standard Quad Dorm"; else if (bt.includes("TRIPLE")) pType = "Partial Oceanview Triple Room"; else if (bt.includes("SIDE SEA VIEW") || (bt.includes("PARTIAL") && !bt.includes("TWIN") && !bt.includes("TRIPLE"))) pType = "Partial Oceanview King Room"; else if (bt.includes("PARTIAL SEA VIEW") || (bt.includes("PARTIAL") && bt.includes("TWIN"))) pType = "Double or Twin Room with Partial Sea View"; else if (bt.includes("DELUXE TWIN") || (bt.includes("OCEANVIEW") && bt.includes("TWIN"))) pType = "Oceanview Twin Room"; else if (bt.includes("DELUXE DOUBLE") || (bt.includes("OCEANVIEW") && !bt.includes("TWIN"))) pType = "Oceanview King Room"; else if (bt.includes("TWIN ROOM WITH BALCONY") || (bt.includes("GARDEN") && bt.includes("TWIN"))) pType = "Gardenview Twin Room"; else if (bt.includes("KING ROOM WITH BALCONY") || (bt.includes("GARDEN") && !bt.includes("TWIN"))) pType = "Gardenview King Room"; else if (bt.includes("OCEANFRONT")) { pType = bt.includes("TWIN") ? "Oceanfront Twin" : "Oceanfront King"; } else if (bt.includes("BUNGALOW")) pType = "BUNGALOWS";
-            let pBed = null; if (nt.includes("THE GUEST ASKED FOR 1 EXTRA-LARGE DOUBLE BED") || nt.includes("1 EXTRA-LARGE") || nt.includes("1 DOUBLE") || nt.includes("1 KING") || nt.includes("LARGE DOUBLE")) pBed = "KING"; else if (nt.includes("TWIN") || nt.includes("SEPARATE") || nt.includes("2 SINGLE") || nt.includes("TWO SINGLE") || nt.includes("2 BEDS") || nt.includes("SINGLES")) pBed = "TWIN"; else if (nt.includes("BUNK") && nt.includes("SINGLE")) pBed = "BUNK+T"; else if (nt.includes("BUNK")) pBed = "BUNK+T"; else if (nt.includes("KING") || nt.includes("DOUBLE") || nt.includes("LARGE") || nt.includes("1 BED") || nt.includes("ONE BED")) pBed = "KING";
-            if (!pBed) { if (bt.includes("KING") || (bt.includes("DOUBLE") && !bt.includes("TWIN"))) pBed = "KING"; else if (bt.includes("TWIN") && !bt.includes("DOUBLE")) pBed = "TWIN"; }
-            let match = (pType && pBed) ? available.find(r => r.type === pType && r.bed && r.bed.includes(pBed)) : null; if (!match && pType) match = available.find(r => r.type === pType);
-            if (match) { const selects = document.querySelectorAll('.assigned-room-select'); if (selects.length > 0) { selects[0].value = match.id; window.updateAvailableRooms(); } }
+            if (!cin || !cout || !bt) return; 
+            const startUTC = parseYMD(cin), endUTC = parseYMD(cout), occ = new Set();
+            staff.forEach(s => { 
+                if(s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed' || s.status === 'charged') return; 
+                if(startUTC < parseYMD(s.checkOut) && parseYMD(s.checkIn) < endUTC) (s.rooms?.length ? s.rooms : [s.room]).forEach(r => { if(r) occ.add(r); }); 
+            });
+            let available = hotelRooms.filter(r => !occ.has(r.id)); 
+            if (available.length === 0) return; 
+            
+            const btParts = bt.split(' + ');
+            let assignedRoomIds = [];
+            
+            btParts.forEach(part => {
+                let pType = null;
+                if (part.includes("DORMITORY") || part.includes("4-BED") || part.includes("DORM")) pType = "Standard Quad Dorm"; 
+                else if (part.includes("TRIPLE")) pType = "Partial Oceanview Triple Room"; 
+                else if (part.includes("SIDE SEA VIEW") || (part.includes("PARTIAL") && !part.includes("TWIN") && !part.includes("TRIPLE"))) pType = "Partial Oceanview King Room"; 
+                else if (part.includes("PARTIAL SEA VIEW") || (part.includes("PARTIAL") && part.includes("TWIN"))) pType = "Double or Twin Room with Partial Sea View"; 
+                else if (part.includes("DELUXE TWIN") || (part.includes("OCEANVIEW") && part.includes("TWIN"))) pType = "Oceanview Twin Room"; 
+                else if (part.includes("DELUXE DOUBLE") || (part.includes("OCEANVIEW") && !part.includes("TWIN"))) pType = "Oceanview King Room"; 
+                else if (part.includes("TWIN ROOM WITH BALCONY") || (part.includes("GARDEN") && part.includes("TWIN"))) pType = "Gardenview Twin Room"; 
+                else if (part.includes("KING ROOM WITH BALCONY") || (part.includes("GARDEN") && !part.includes("TWIN"))) pType = "Gardenview King Room"; 
+                else if (part.includes("OCEANFRONT")) { pType = part.includes("TWIN") ? "Oceanfront Twin" : "Oceanfront King"; } 
+                else if (part.includes("BUNGALOW")) pType = "BUNGALOWS";
+                
+                let pBed = null; 
+                if (nt.includes("THE GUEST ASKED FOR 1 EXTRA-LARGE DOUBLE BED") || nt.includes("1 EXTRA-LARGE") || nt.includes("1 DOUBLE") || nt.includes("1 KING") || nt.includes("LARGE DOUBLE")) pBed = "KING"; 
+                else if (nt.includes("TWIN") || nt.includes("SEPARATE") || nt.includes("2 SINGLE") || nt.includes("TWO SINGLE") || nt.includes("2 BEDS") || nt.includes("SINGLES")) pBed = "TWIN"; 
+                else if (nt.includes("BUNK") && nt.includes("SINGLE")) pBed = "BUNK+T"; 
+                else if (nt.includes("BUNK")) pBed = "BUNK+T"; 
+                else if (nt.includes("KING") || nt.includes("DOUBLE") || nt.includes("LARGE") || nt.includes("1 BED") || nt.includes("ONE BED")) pBed = "KING";
+                
+                if (!pBed) { if (part.includes("KING") || (part.includes("DOUBLE") && !part.includes("TWIN"))) pBed = "KING"; else if (part.includes("TWIN") && !part.includes("DOUBLE")) pBed = "TWIN"; }
+                
+                let match = (pType && pBed) ? available.find(r => r.type === pType && r.bed && r.bed.includes(pBed)) : null; 
+                if (!match && pType) match = available.find(r => r.type === pType);
+                if (match) { 
+                    assignedRoomIds.push(match.id); 
+                    available = available.filter(r => r.id !== match.id);
+                }
+            });
+
+            if (assignedRoomIds.length > 0) { 
+                const selects = document.querySelectorAll('.assigned-room-select'); 
+                assignedRoomIds.forEach((id, index) => { if (selects[index]) selects[index].value = id; }); 
+                window.updateAvailableRooms(); 
+            }
         };
 
         window.parseEmail = () => {
@@ -769,7 +964,7 @@
             const formatStrictDate = (dStr) => { if(!dStr) return ''; const d = new Date(dStr + " 12:00:00Z"); return isNaN(d.getTime()) ? '' : `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; };
             window.populateStaffForm({}); const parseDateRelative = (dateStr, isPast = false) => { if(!dateStr) return ''; const mths = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'}; let cleanStr = dateStr.replace(/,/g, '').replace(/(st|nd|rd|th)\b/gi, '').replace(/['´`’]/g, '').replace(/\s+/g, ' ').trim(), parts = cleanStr.split(' '), mthIndex = -1; for (let i=0; i<parts.length; i++) { if (parts[i].length >= 3 && mths[parts[i].toLowerCase().substring(0,3)]) { mthIndex = i; break; } } if (mthIndex === -1) return ''; let mth = mths[parts[mthIndex].toLowerCase().substring(0,3)], dayVal = 1, yrVal = 0, candidates = parts.filter((p, i) => i !== mthIndex && /^\d+$/.test(p)); if (candidates.length > 0) { dayVal = parseInt(candidates[0]); if (candidates.length > 1) { let y = parseInt(candidates[1]); if (y < 100) yrVal = 2000 + y; else if (y >= 2000) yrVal = y; } } let now = new Date(), yr = yrVal > 0 ? yrVal : now.getFullYear(); if (yrVal === 0) { let tD = new Date(`${yr}-${mth}-${dayVal.toString().padStart(2, '0')}`); if (isPast && tD > now) yr--; else if (!isPast && tD.getMonth() < now.getMonth() && tD < now) yr++; } return `${yr}-${mth}-${dayVal.toString().padStart(2, '0')}`; };
 
-            let src = '', gName = '', checkIn = '', checkOut = '', pax = 1, phone = '', email = '', total = 0, comm = 0, bId = '', notes = '', bType = '', bDate = '', countryCode = '', refundability = 0, parsedUpgrade = 0, parsedStatus = 'future', hasBdcPayment = false;
+            let src = '', gName = '', checkIn = '', checkOut = '', pax = 1, phone = '', email = '', total = 0, comm = 0, bId = '', notes = '', bType = '', bDate = '', countryCode = '', refundability = 0, parsedUpgrade = 0, parsedStatus = 'future', hasBdcPayment = false, units = 1;
 
             switch (format) {
                 case 'bdc-extranet':
@@ -777,11 +972,36 @@
                     let getLineData = (kws) => { let idx = lines.findIndex(l => kws.some(k => l.toLowerCase() === k.toLowerCase() || l.toLowerCase().startsWith(k.toLowerCase()))); if (idx > -1) { let match = kws.find(k => lines[idx].toLowerCase().startsWith(k.toLowerCase())); let rem = lines[idx].substring(match.length).trim(); return rem ? rem : (idx + 1 < lines.length ? lines[idx + 1] : ""); } return ""; };
                     checkIn = formatStrictDate(parseDateRelative(getLineData(['Check-in']))); checkOut = formatStrictDate(parseDateRelative(getLineData(['Check-out']))); bDate = formatStrictDate(parseDateRelative(getLineData(['Received', 'Booked on']), true));
                     bId = getLineData(['Booking number:']); pax = parseInt(getLineData(['Total guests:'])) || 1; total = cleanMoney(getLineData(['Total price'])); comm = cleanMoney(getLineData(['Commission and charges:']));
+                    
                     let guestIdx = lines.findIndex(l => l.toLowerCase().startsWith('guest name:'));
                     if (guestIdx > -1) { let rem = lines[guestIdx].substring('guest name:'.length).trim(); if (rem) { gName = rem; email = extract(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/, lines[guestIdx]); phone = extract(/(\+[\d\s]+)/, lines[guestIdx]); let ccMatch = lines[guestIdx].replace(email, '').replace(phone, '').match(/\s+([a-zA-Z]{2})$/); if (ccMatch) countryCode = ccMatch[1].toUpperCase(); gName = gName.replace(email, '').replace(phone, '').replace(/\s+[a-zA-Z]{2}$/, '').trim(); } else { gName = lines[guestIdx + 1]; for (let i = guestIdx + 2; i < guestIdx + 6; i++) { if (!lines[i] || lines[i].includes('Preferred language') || lines[i].includes('Channel:')) break; if (lines[i].length === 2 && !countryCode) countryCode = lines[i].toUpperCase(); else if (lines[i].includes('@') && !email) email = lines[i]; else if (lines[i].includes('+') && !phone) phone = lines[i]; } } }
-                    let bTypeIdx = lines.findIndex((l, i) => /^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\d{1,2}\s+[A-Za-z]{3}/i.test(l) && i >= 2 && /(?:THB|฿|\$|€|£|[A-Z]{3})[\s]*[\d,.]+/i.test(lines[i-1])); if(bTypeIdx > -1) bTypeIdx -= 2;
-                    if (bTypeIdx === -1) { let pIdx = lines.findIndex(l => l.toLowerCase().endsWith('cancellation policy.') || l.toLowerCase().includes('bank transfer payout')); if (pIdx > -1 && pIdx + 1 < lines.length) bTypeIdx = pIdx + 1; }
-                    if (bTypeIdx > -1) { let bRaw = lines[bTypeIdx]; if (bRaw.toLowerCase().includes('free upgrade')) { parsedUpgrade = 1; if (bTypeIdx > 0 && !lines[bTypeIdx - 1].toLowerCase().includes('price')) bRaw = lines[bTypeIdx - 1]; } const fP = bRaw.indexOf('('), lP = bRaw.lastIndexOf(')'); bType = (fP > -1 && lP > fP) ? bRaw.substring(fP + 1, lP).trim() : bRaw.trim(); }
+                    
+                    units = parseInt(getLineData(['Total units', 'Total rooms:'])) || 1;
+                    
+                    let bTypes = [];
+                    for (let i = 0; i < lines.length; i++) {
+                        if (/^\s*(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\d{1,2}\s+[A-Za-z]{3}/i.test(lines[i])) {
+                            if (i >= 2 && /(?:THB|฿|\$|€|£|[A-Z]{3})[\s]*[\d,.]+/i.test(lines[i-1])) {
+                                let rLine = lines[i-2].replace(/^\d+\s*(?:x\s*)?/, '').trim();
+                                bTypes.push(rLine);
+                            }
+                        }
+                    }
+                    
+                    if (bTypes.length === 0) {
+                        let bTypeIdx = lines.findIndex((l, i) => /^\s*(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\d{1,2}\s+[A-Za-z]{3}/i.test(l) && i >= 2 && /(?:THB|฿|\$|€|£|[A-Z]{3})[\s]*[\d,.]+/i.test(lines[i-1])); 
+                        if(bTypeIdx > -1) bTypeIdx -= 2;
+                        if (bTypeIdx === -1) { let pIdx = lines.findIndex(l => l.toLowerCase().endsWith('cancellation policy.') || l.toLowerCase().includes('bank transfer payout')); if (pIdx > -1 && pIdx + 1 < lines.length) bTypeIdx = pIdx + 1; }
+                        if (bTypeIdx > -1) { 
+                            let bRaw = lines[bTypeIdx]; 
+                            if (bRaw.toLowerCase().includes('free upgrade')) { parsedUpgrade = 1; if (bTypeIdx > 0 && !lines[bTypeIdx - 1].toLowerCase().includes('price')) bRaw = lines[bTypeIdx - 1]; } 
+                            bTypes.push(bRaw.trim());
+                        }
+                    }
+                    
+                    bType = bTypes.join(' + ');
+                    if (bTypes.length > units) units = bTypes.length;
+
                     if (text.toLowerCase().includes('free upgrade')) parsedUpgrade = 1; if (/\b(?:status:\s*canceled|status:\s*cancelled|booking canceled|booking cancelled)\b/i.test(text)) parsedStatus = 'cancelled';
                     let lowText = text.toLowerCase(); if (lowText.includes('free of charge until') || lowText.includes('free cancellation')) { refundability = 2; } else if (lowText.includes('cancel at any time') || lowText.includes('cancel anytime') || lowText.includes('non-refundable') || lowText.includes('non refundable') || lowText.includes('charged the total price')) { refundability = 1; }
                     let allNotes = []; lines.forEach(l => { if (l.toUpperCase().includes('BED PREFERENCE:') || l.toUpperCase().includes('BED-PREFERENCE REQUEST:')) allNotes.push(l.replace(/Reply$/i, '').trim()); });
@@ -812,32 +1032,37 @@
                     let abnbLines = text.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
                     if (gName) {
                         let nameIdx = abnbLines.findIndex(l => l === gName || (l.includes(gName) && !l.includes('confirmed') && !l.includes('welcome') && !l.includes('message')));
-                        if (nameIdx > -1 && nameIdx + 1 < abnbLines.length) {
-                            let possibleCountry = abnbLines[nameIdx + 1];
-                            if (/verified|reviews|Joined|superhost/i.test(possibleCountry) && nameIdx + 2 < abnbLines.length) {
-                                possibleCountry = abnbLines[nameIdx + 2];
+                        if (nameIdx > -1) {
+                            let nextLineIdx = nameIdx + 1;
+                            if (nextLineIdx < abnbLines.length && /verified|reviews|Joined|superhost/i.test(abnbLines[nextLineIdx])) {
+                                nextLineIdx++;
                             }
-                            if (possibleCountry && possibleCountry.length < 40 && !/^(Hello|Hi|Dear|Message|Automatically|Guest|Send|Identity)/i.test(possibleCountry)) {
-                                let cParts = possibleCountry.split(',');
-                                countryCode = cParts[cParts.length - 1].trim();
+                            if (nextLineIdx < abnbLines.length) {
+                                let possibleCountry = abnbLines[nextLineIdx];
+                                if (possibleCountry && possibleCountry.length < 40 && !/^(Hello|Hi|Dear|Message|Automatically|Guest|Send|Identity)/i.test(possibleCountry)) {
+                                    let cParts = possibleCountry.split(',');
+                                    countryCode = cParts[cParts.length - 1].trim();
+                                }
                             }
+                            
+                            let startRecording = false;
+                            let msgLines = [];
+                            for (let i = nextLineIdx; i < abnbLines.length; i++) {
+                                let l = abnbLines[i];
+                                if (!startRecording) {
+                                    if (l === countryCode || l.endsWith(countryCode)) {
+                                        startRecording = true;
+                                    }
+                                } else {
+                                    if (l.includes('Automatically translated') || l.includes('Send a Message') || l.includes('Messages from') || l.includes('Hosting requirements')) break;
+                                    if (l.trim()) msgLines.push(l.trim());
+                                }
+                            }
+                            if (msgLines.length > 0) notes = msgLines.join('\n');
                         }
                     }
-                    
-                    let msgLines = [];
-                    let startRecording = false;
-                    for (let l of abnbLines) {
-                        if (!startRecording && countryCode && (l === countryCode || l.endsWith(countryCode))) {
-                            startRecording = true;
-                            continue;
-                        }
-                        if (startRecording) {
-                            if (l.includes('Automatically translated') || l.includes('Send ') || l.includes('Messages from') || l.includes('Hosting requirements')) break;
-                            if (l.trim()) msgLines.push(l.trim());
-                        }
-                    }
-                    if (msgLines.length > 0) notes = msgLines.join('\n');
-                    else {
+
+                    if (!notes) {
                         let abnbNotes = extract(/\n([^\n]+)\n\s*Send.*?a Message/i); 
                         if(abnbNotes && !abnbNotes.includes('Translated') && !abnbNotes.includes('Add guest')) notes = abnbNotes; 
                     }
@@ -905,7 +1130,12 @@
             if (comm > 0) { let kpMethod = 'other'; if (src === 'booking.com') kpMethod = 'bdc-kp'; if (src === 'agoda') kpMethod = 'agoda-kp'; if (src === 'airbnb') kpMethod = 'airbnb-kp'; if (src === 'hostelworld') kpMethod = 'hw-kp'; window.addPaymentRow(checkIn || new Date().toISOString().split('T')[0], comm.toFixed(2), kpMethod); }
             if ((hasBdcPayment || src === 'airbnb') && (total - comm) > 0) { let payMethod = src === 'agoda' ? 'agoda-pay' : (src === 'airbnb' ? 'airbnb-pay' : 'bdc-pay'); window.addPaymentRow(checkIn || new Date().toISOString().split('T')[0], (total - comm).toFixed(2), payMethod); }
 
-            window.updateHeaderName(); window.syncLabels(); window.calcFinancials(); window.updateAvailableRooms(); window.autoSuggestRoom((bType || "").toUpperCase(), notes.toUpperCase(), checkIn, checkOut);
+            document.getElementById('assigned-rooms-container').innerHTML = ''; 
+            for(let k=0; k < Math.max(1, units); k++) window.addRoomSelect("");
+
+            window.updateHeaderName(); window.syncLabels(); window.calcFinancials(); window.updateAvailableRooms(); 
+            window.autoSuggestRoom((bType || "").toUpperCase(), notes.toUpperCase(), checkIn, checkOut);
+            
             if (checkIn) { const d = new Date(checkIn + "T12:00:00"); d.setDate(d.getDate() - 7); viewStart = d; window.render(); } 
             
             document.getElementById('guest-modal').style.display = 'flex';
