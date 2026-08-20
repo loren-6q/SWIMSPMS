@@ -7,8 +7,10 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style type="text/tailwindcss">
         @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Roboto+Condensed:wght@400;700;900&display=swap');
+        
         body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; }
         
         @layer components {
@@ -36,7 +38,24 @@
     </style>
 </head>
 <body class="p-2 sm:p-4 h-screen flex flex-col overflow-hidden">
-    <div id="loader" class="loading-overlay active"><div class="spinner"></div><div id="sync-status" class="mt-4 font-black text-blue-800 uppercase tracking-widest text-center">CONNECTING...</div></div>
+    <div id="loader" class="loading-overlay active">
+        <div class="spinner"></div>
+        <div id="sync-status" class="mt-4 font-black text-blue-800 uppercase tracking-widest text-center">CONNECTING...</div>
+    </div>
+
+    <!-- Alert Modal for replacing native alert/confirm -->
+    <div id="alert-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800">
+            <div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Attention</div>
+            <div class="p-6 text-center">
+                <p id="alert-message" class="font-black text-slate-700 leading-tight text-md whitespace-pre-wrap"></p>
+                <div class="mt-6 flex gap-2 justify-center">
+                    <button id="alert-cancel" onclick="window.closeAlert()" class="hidden px-6 py-2 rounded-lg font-black text-sm uppercase bg-slate-200 text-slate-700">Cancel</button>
+                    <button id="alert-confirm" class="px-10 py-2 rounded-lg font-black text-sm uppercase bg-blue-600 text-white">Okay</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="flex items-center justify-between bg-slate-900 p-3 sm:p-4 rounded-t-xl shrink-0 text-white">
         <div class="flex items-center gap-3">
@@ -58,7 +77,7 @@
                 <span class="text-[10px] text-slate-500">Paste Extranet list below</span>
             </div>
             <div class="p-3 flex flex-col gap-3">
-                <textarea id="audit-text" class="w-full h-16 sm:h-20 bg-white border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500 whitespace-pre text-xs text-slate-400 font-mono resize-none transition-all" placeholder="Paste Extranet data here..." oninput="window.checkMissing()"></textarea>
+                <textarea id="audit-text" class="w-full h-16 sm:h-20 bg-white border border-slate-300 rounded p-2 outline-none focus:ring-2 focus:ring-blue-500 whitespace-pre text-xs text-slate-400 font-mono resize-none transition-all" placeholder="Paste Booking.com, Hostelworld, or Airbnb list data here..." oninput="window.checkMissing()"></textarea>
                 <div id="audit-result" class="flex flex-col gap-2"></div>
             </div>
         </div>
@@ -92,9 +111,7 @@
                     <p id="no-data-desc" class="text-sm font-bold text-slate-500 mt-1">No changes detected since your last sync.</p>
                 </div>
             </div>
-
         </div>
-
     </div>
 
     <script type="module">
@@ -112,6 +129,7 @@
         // Exact matched arrays from main app
         const rawRooms = "B01|Oceanfront King|KING|2|101^A01|Oceanfront King|KING|1|102^A02|Oceanfront King|KING|1|103^B02|Oceanfront Twin|TWIN|2|201^B03|Oceanview King Room|KING|2|301^B05|Oceanview King Room|KING|2|302^B07|Oceanview King Room|KING|2|303^A03|Oceanview King Room|KING|1|304^A04|Oceanview King Room|KING|1|305^A06|Oceanview King Room|KING|1|306^A08|Oceanview King Room|KING|1|307^A10|Oceanview King Room|KING|1|308^A12|Oceanview King Room|KING|1|309^C206|Oceanview King Room|KING|2|310^C306|Oceanview King Room|KING|3|311^C311|Oceanview King Room|KING|3|312^B04|Oceanview Twin Room|TWIN|2|401^B06|Oceanview Twin Room|TWIN|2|402^B08|Oceanview Twin Room|TWIN|2|403^C212|Oceanview Twin Room|TWIN|2|404^A05|Partial Oceanview King Room|KING|1|501^A07|Partial Oceanview King Room|KING|1|502^A09|Partial Oceanview King Room|KING|1|503^A11|Partial Oceanview King Room|KING|1|504^C203|Partial Oceanview King Room|KING|2|505^C204|Partial Oceanview King Room|KING|2|506^C205|Partial Oceanview King Room|KING|2|507^B09|Gardenview King Room|KING|2|601^B11|Gardenview King Room|KING|2|602^B13|Gardenview King Room|KING|2|603^B15|Gardenview King Room|KING|2|604^B17|Gardenview King Room|KING|2|605^B19|Gardenview King Room|KING|2|606^B21|Gardenview King Room|KING|2|607^B22|Gardenview King Room|KING|2|608^B10|Gardenview Twin Room|TWIN|2|701^B12|Gardenview Twin Room|TWIN|2|702^B14|Gardenview Twin Room|TWIN|2|703^B16|Gardenview Twin Room|TWIN|2|704^B18|Gardenview Twin Room|TWIN|2|705^B20|Gardenview Twin Room|TWIN|2|706^C201|Gardenview Twin Room|TWIN|2|707^C202|Gardenview Twin Room|TWIN|2|708^C207|Gardenview Twin Room|TWIN|2|709^C208|Gardenview Twin Room|TWIN|2|710^C209|Gardenview Twin Room|TWIN|2|711^C210|Gardenview Twin Room|TWIN|2|712^C211|Gardenview Twin Room|TWIN|2|713^C101|Gardenview Twin Room|TWIN|1|714^C307|Partial Oceanview Triple Room|BUNK+T|3|801^C308|Partial Oceanview Triple Room|BUNK+T|3|802^C305|Partial Oceanview Triple Room|K+T|3|803^C309|Partial Oceanview Triple Room|K+T|3|804^C310|Partial Oceanview Triple Room|K+T|3|805^C301-1|Standard Quad Dorm|QUAD|3|901^C301-2|Standard Quad Dorm|QUAD|3|902^C301-3|Standard Quad Dorm|QUAD|3|903^C301-4|Standard Quad Dorm|QUAD|3|904^C302-1|Standard Quad Dorm|QUAD|3|905^C302-2|Standard Quad Dorm|QUAD|3|906^C302-3|Standard Quad Dorm|QUAD|3|907^C302-4|Standard Quad Dorm|QUAD|3|908^C303-1|Standard Quad Dorm|QUAD|3|909^C303-2|Standard Quad Dorm|QUAD|3|910^C303-3|Standard Quad Dorm|QUAD|3|911^C303-4|Standard Quad Dorm|QUAD|3|912^C304-1|Standard Quad Dorm|QUAD|3|913^C304-2|Standard Quad Dorm|QUAD|3|914^C304-3|Standard Quad Dorm|QUAD|3|915^C304-4|Standard Quad Dorm|QUAD|3|916^D01|BUNGALOWS||1|1001^D02|BUNGALOWS||1|1002^D03|BUNGALOWS||1|1003^D04|BUNGALOWS||1|1004^D05|BUNGALOWS||1|1005^D06|BUNGALOWS||1|1006^D07|BUNGALOWS||1|1007^D08|BUNGALOWS||1|1008^D09|BUNGALOWS||1|1009^D10|BUNGALOWS||1|1010^D11|BUNGALOWS||1|1011";
         const hotelRooms = rawRooms.split('^').map(r => { const p = r.split('|'); return { id: p[0], type: p[1] }; });
+        
         hotelRooms.forEach(r => { 
             if (!rawTypes.includes(r.type)) rawTypes.push(r.type);
             totalRoomsByType[r.type] = (totalRoomsByType[r.type] || 0) + 1;
@@ -125,6 +143,32 @@
             if (/^[ABFD]\d$/.test(nid)) return nid[0] + '0' + nid.substring(1);
             if (/^(101|[23]\d{2}(?:-\d)?)$/.test(nid)) return 'C' + nid;
             return nid;
+        };
+
+        window.showAlert = (msg, isConfirm = false, onConfirm = null) => {
+            document.getElementById('alert-message').innerText = msg;
+            const cancelBtn = document.getElementById('alert-cancel');
+            const confirmBtn = document.getElementById('alert-confirm');
+            
+            if (isConfirm) {
+                cancelBtn.classList.remove('hidden');
+                confirmBtn.innerText = 'Yes';
+                confirmBtn.className = 'px-10 py-2 rounded-lg font-black text-sm uppercase bg-red-600 text-white';
+            } else {
+                cancelBtn.classList.add('hidden');
+                confirmBtn.innerText = 'Okay';
+                confirmBtn.className = 'px-10 py-2 rounded-lg font-black text-sm uppercase bg-blue-600 text-white';
+            }
+            
+            confirmBtn.onclick = () => {
+                if (onConfirm) onConfirm();
+                window.closeAlert();
+            };
+            document.getElementById('alert-modal').classList.remove('hidden');
+        };
+
+        window.closeAlert = () => {
+            document.getElementById('alert-modal').classList.add('hidden');
         };
 
         signInAnonymously(auth).then(() => {
@@ -142,7 +186,7 @@
                 });
             }).catch(e => {
                 document.getElementById('sync-status').innerText = 'DB PERMISSION ERROR';
-                alert("Firebase Rules block reading 'ota_sync'. Please update rules as discussed.");
+                window.showAlert("Firebase Rules block reading 'ota_sync'. Please update rules as discussed.");
             });
         }).catch(() => { document.getElementById('sync-status').innerText = 'AUTH ERROR'; });
 
@@ -159,7 +203,7 @@
                 updateDismissedUI();
                 window.checkMissing();
             } catch(e) {
-                alert("Failed to dismiss. Check database permissions.");
+                window.showAlert("Failed to dismiss. Check database permissions.");
             }
         };
 
@@ -170,7 +214,7 @@
                 updateDismissedUI();
                 window.checkMissing();
             } catch(e) {
-                alert("Failed to reset. Check database permissions.");
+                window.showAlert("Failed to reset. Check database permissions.");
             }
         };
 
@@ -316,103 +360,161 @@
             lucide.createIcons();
         };
 
-        window.markSynced = async () => {
-            if(!confirm("Mark all current availability as synced? This will clear your 'Changes' list until new bookings arrive.")) return;
-            document.getElementById('loader').classList.add('active');
-            document.getElementById('sync-status').innerText = 'SAVING SYNC...';
-            
-            snapshotData = JSON.parse(JSON.stringify(liveInventory));
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ota_sync', 'baseline'), { matrix: snapshotData, dismissed: dismissedIds, updatedAt: new Date().toISOString() });
-                window.renderGrid();
-            } catch(e) {
-                alert("Save failed. Check permissions on 'ota_sync' collection.");
-            }
-            document.getElementById('loader').classList.remove('active');
+        window.markSynced = () => {
+            window.showAlert("Mark all current availability as synced? This will clear your 'Changes' list until new bookings arrive.", true, async () => {
+                document.getElementById('loader').classList.add('active');
+                document.getElementById('sync-status').innerText = 'SAVING SYNC...';
+                
+                snapshotData = JSON.parse(JSON.stringify(liveInventory));
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ota_sync', 'baseline'), { matrix: snapshotData, dismissed: dismissedIds, updatedAt: new Date().toISOString() });
+                    window.renderGrid();
+                } catch(e) {
+                    window.showAlert("Save failed. Check permissions on 'ota_sync' collection.");
+                }
+                document.getElementById('loader').classList.remove('active');
+            });
         };
 
         window.checkMissing = () => {
-            const text = document.getElementById('audit-text').value;
+            const rawText = document.getElementById('audit-text').value;
             const resultDiv = document.getElementById('audit-result');
-            if (!text.trim()) { resultDiv.innerHTML = ''; return; }
+            if (!rawText.trim()) { resultDiv.innerHTML = ''; return; }
 
-            let lines = text.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
             let foundIds = new Set();
             let missingHtml = [];
             let actionCount = 0;
 
             const ignoreIds = ['16646458'];
-            const numRegex = /\d{8,20}/g;
-            
-            for (let i = 0; i < lines.length; i++) {
-                let match;
-                while ((match = numRegex.exec(lines[i])) !== null) {
-                    let rawNum = match[0];
-                    let id = rawNum.length > 11 ? rawNum.slice(-10) : rawNum;
-                    
-                    if (ignoreIds.includes(id) || dismissedIds.includes(id)) continue;
+            const dismissed = dismissedIds || [];
 
-                    let pmsBooking = staff.find(s => s.bookId === id || s.id === id);
+            // 1. Detect Source FIRST
+            const lowerText = rawText.toLowerCase();
+            let source = 'bdc'; // Default fallback
+            if (lowerText.includes('hostelworld') || rawText.includes('339615-')) {
+                source = 'hw';
+            } else if (lowerText.includes('airbnb') || lowerText.includes('switch to traveling') || lowerText.includes('upcoming reservations')) {
+                source = 'airbnb';
+            } else if (lowerText.includes('booking.com') || lowerText.includes('extranet')) {
+                source = 'bdc';
+            }
+
+            const addMissing = (id, guestName, badge, type, displayId) => {
+                if (ignoreIds.includes(id) || dismissed.includes(id) || foundIds.has(id)) return;
+                foundIds.add(id);
+                actionCount++;
+                
+                let cardStyle = '', icon = '';
+                if (type === 'missing') {
+                    cardStyle = 'bg-rose-50 border-rose-200 text-rose-900';
+                    icon = '<i data-lucide="arrow-right" class="text-rose-500 shrink-0" size="16"></i>';
+                } else if (type === 'cancel') {
+                    cardStyle = 'bg-amber-50 border-amber-300 text-amber-900';
+                    icon = '<i data-lucide="arrow-right" class="text-amber-500 shrink-0" size="16"></i>';
+                } else if (type === 'ota_cancel') {
+                    cardStyle = 'bg-slate-100 border-slate-300 text-slate-700 opacity-80';
+                    icon = '<i data-lucide="arrow-right" class="text-slate-400 shrink-0" size="16"></i>';
+                }
+                
+                missingHtml.push(`
+                    <div class="${cardStyle} px-4 py-3 rounded-lg border shadow-sm flex items-center justify-between gap-4">
+                        <div class="font-bold text-sm truncate flex items-center gap-2 w-full">
+                            ${icon} <span class="truncate">${guestName}</span> <span class="opacity-60 font-mono text-xs shrink-0">(${displayId})</span> 
+                            <span class="bg-white/50 text-[10px] px-2 py-0.5 rounded uppercase font-black tracking-widest shrink-0 border border-black/10">${badge}</span>
+                        </div>
+                        <button onclick="window.dismissBooking('${id}')" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-500 text-[10px] font-black uppercase rounded shadow-sm border border-slate-200 transition-colors shrink-0 flex items-center gap-1">
+                            Dismiss <i data-lucide="x" size="12"></i>
+                        </button>
+                    </div>
+                `);
+            };
+
+            // 2. Parse strictly based on source
+            if (source === 'hw') {
+                const hwRegex = /(339615-\d+)/g;
+                let match;
+                while ((match = hwRegex.exec(rawText)) !== null) {
+                    let id = match[1];
+                    let startIndex = match.index + id.length;
+                    let textAfterId = rawText.substring(startIndex);
+                    let firstDigitIndex = textAfterId.search(/\d/);
+                    let rawName = firstDigitIndex > -1 ? textAfterId.substring(0, firstDigitIndex) : textAfterId.substring(0, 50);
                     
-                    let guestName = "UNKNOWN GUEST";
-                    let isCancelled = false;
+                    let guestName = rawName
+                        .replace(/Visa|Mastercard|Amex|JCB|Diners|UnionPay|Discover|Maestro|Cash|None/gi, '')
+                        .replace(/Late|Reference|Card|Type/gi, '')
+                        .replace(/[\n\r\t]/g, ' ')
+                        .trim();
                     
-                    // Trace backward to find guest name
-                    for (let j = i; j >= Math.max(0, i - 12); j--) {
-                        if (/\b(adult|child|adults|children)\b/i.test(lines[j])) {
-                            if (j - 1 >= 0) {
-                                let rawLine = lines[j - 1];
-                                guestName = rawLine
-                                    .replace(/THB/gi, '')
-                                    .replace(/Payment via Booking\.com/i, '')
-                                    .replace(/Bank transfer/i, '')
-                                    .replace(/StatusPriceCommission and chargesBooking number/i, '')
-                                    .replace(/[\d,.]+/g, '')
-                                    .trim();
-                                
-                                for(let k = Math.max(0, j - 2); k <= i; k++) {
-                                    if (lines[k] && /cancelled|canceled/i.test(lines[k])) isCancelled = true;
-                                }
-                            }
-                            break;
+                    if (!guestName || guestName.length < 2) guestName = "UNKNOWN GUEST";
+
+                    let pmsBooking = staff.find(s => s.bookId === id || s.id === id || s.bookId === id.split('-')[1]);
+                    if (!pmsBooking) {
+                        addMissing(id, guestName, 'Missing in PMS', 'missing', id);
+                    }
+                }
+            } 
+            else if (source === 'airbnb') {
+                let lines = rawText.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].toLowerCase().includes('sunset')) {
+                        let rawName = lines[i-1];
+                        if(!rawName) continue;
+                        
+                        let guestName = rawName.split(/['’]s group/i)[0].trim();
+                        let pmsBooking = staff.find(s => 
+                            s.source === 'airbnb' && s.status !== 'cancelled' && s.status !== 'noshow' &&
+                            (s.firstName.toLowerCase().includes(guestName.toLowerCase()) || 
+                             s.lastName.toLowerCase().includes(guestName.toLowerCase()) ||
+                             guestName.toLowerCase().includes(s.firstName.toLowerCase()) ||
+                             guestName.toLowerCase().includes(s.lastName.toLowerCase()))
+                        );
+
+                        if (!pmsBooking) {
+                            let pseudoId = 'ABNB_' + guestName.replace(/\s+/g, '').toUpperCase();
+                            addMissing(pseudoId, guestName, 'Missing Airbnb', 'missing', 'AirBnB');
                         }
                     }
-                    if(!guestName || guestName.length < 2) guestName = "UNKNOWN GUEST";
-                    
-                    let alertType = null;
-                    if (!pmsBooking && !isCancelled) alertType = 'missing';
-                    else if (!pmsBooking && isCancelled) alertType = 'missing_cancelled';
-                    else if (pmsBooking && isCancelled && pmsBooking.status !== 'cancelled') alertType = 'active_but_cancelled';
-
-                    if (alertType && !foundIds.has(id)) {
-                        foundIds.add(id);
-                        actionCount++;
+                }
+            }
+            else {
+                // Booking.com
+                let lines = rawText.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean);
+                const numRegex = /\b\d{10}\b/g; 
+                
+                for (let i = 0; i < lines.length; i++) {
+                    let match;
+                    while ((match = numRegex.exec(lines[i])) !== null) {
+                        let id = match[0];
+                        let pmsBooking = staff.find(s => s.bookId === id || s.id === id);
                         
-                        let cardStyle = '', icon = '', badge = '';
-                        if (alertType === 'missing') {
-                            cardStyle = 'bg-rose-50 border-rose-200 text-rose-900';
-                            icon = '<span class="text-rose-500">➔</span>';
-                            badge = '<span class="bg-rose-200 text-rose-800 text-[10px] px-2 py-0.5 rounded ml-2 uppercase font-black tracking-widest shrink-0">Missing</span>';
-                        } else if (alertType === 'active_but_cancelled') {
-                            cardStyle = 'bg-amber-50 border-amber-300 text-amber-900';
-                            icon = '<span class="text-amber-500">➔</span>';
-                            badge = '<span class="bg-amber-200 text-amber-800 text-[10px] px-2 py-0.5 rounded ml-2 uppercase font-black tracking-widest shrink-0 animate-pulse">Cancel in PMS!</span>';
-                        } else if (alertType === 'missing_cancelled') {
-                            cardStyle = 'bg-slate-100 border-slate-300 text-slate-700 opacity-80';
-                            icon = '<span class="text-slate-400">➔</span>';
-                            badge = '<span class="bg-slate-300 text-slate-700 text-[10px] px-2 py-0.5 rounded ml-2 uppercase font-black tracking-widest shrink-0">OTA Cancelled</span>';
+                        let guestName = "UNKNOWN GUEST";
+                        let isCancelled = false;
+                        
+                        for (let j = i; j >= Math.max(0, i - 12); j--) {
+                            if (/\b(adult|child|adults|children)\b/i.test(lines[j])) {
+                                if (j - 1 >= 0) {
+                                    let rawLine = lines[j - 1];
+                                    guestName = rawLine
+                                        .replace(/THB|฿/gi, '')
+                                        .replace(/Payment via Booking\.com/i, '')
+                                        .replace(/Bank transfer/i, '')
+                                        .replace(/StatusPriceCommission and chargesBooking number/i, '')
+                                        .replace(/[\d,.]+/g, '')
+                                        .trim();
+                                    
+                                    for(let k = Math.max(0, j - 2); k <= i; k++) {
+                                        if (lines[k] && /cancelled|canceled/i.test(lines[k])) isCancelled = true;
+                                    }
+                                }
+                                break;
+                            }
                         }
-
-                        missingHtml.push(
-                            `<div class="${cardStyle} px-4 py-3 rounded-lg border shadow-sm flex items-center justify-between gap-4">
-                                <div class="font-bold text-sm truncate flex items-center">
-                                    ${icon} <span class="ml-2">${guestName}</span> <span class="opacity-60 font-mono text-xs ml-2">(${id})</span> ${badge}
-                                </div>
-                                <button onclick="window.dismissBooking('${id}')" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-500 text-[10px] font-black uppercase rounded shadow-sm border border-slate-200 transition-colors shrink-0 flex items-center gap-1">
-                                    Dismiss <i data-lucide="x" size="12"></i>
-                                </button>
-                            </div>`
-                        );
+                        if(!guestName || guestName.length < 2) guestName = "UNKNOWN GUEST";
+                        
+                        if (!pmsBooking && !isCancelled) addMissing(id, guestName, 'Missing', 'missing', id);
+                        else if (!pmsBooking && isCancelled) addMissing(id, guestName, 'OTA Cancelled', 'ota_cancel', id);
+                        else if (pmsBooking && isCancelled && pmsBooking.status !== 'cancelled') addMissing(id, guestName, 'Cancel in PMS!', 'cancel', id);
                     }
                 }
             }
@@ -427,8 +529,8 @@
                     </div>`;
             } else {
                 resultDiv.innerHTML = `
-                    <div class="bg-rose-50 border-2 border-rose-500 p-4 rounded-xl shadow-sm">
-                        <div class="font-black text-lg text-rose-800 mb-3 flex items-center gap-2">
+                    <div class="bg-slate-50 border-2 border-slate-300 p-4 rounded-xl shadow-sm">
+                        <div class="font-black text-lg text-slate-800 mb-3 flex items-center gap-2">
                             <i data-lucide="alert-triangle" size="20" class="text-rose-600"></i> ${actionCount} ACTION ITEM${actionCount > 1 ? 'S' : ''} FOUND
                         </div>
                         <div class="flex flex-col gap-2">
