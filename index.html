@@ -16,7 +16,7 @@
         @layer components {
             .btn-action { @apply px-2 py-1 text-white rounded shadow text-xs font-black uppercase flex items-center gap-1 hover:brightness-110 active:scale-95 transition-all cursor-pointer; }
             .btn-modal { @apply px-6 py-2 rounded-lg font-black text-sm uppercase transition-colors cursor-pointer; }
-            .btn-tool { @apply w-full sm:w-auto px-2 sm:px-4 py-1.5 rounded hover:brightness-95 shadow-sm flex items-center justify-center transition-colors cursor-pointer; }
+            .btn-tool { @apply w-7 h-7 sm:w-8 sm:h-8 rounded hover:brightness-95 shadow-sm flex items-center justify-center transition-colors cursor-pointer shrink-0; }
             .input-base { @apply w-full bg-slate-50 border border-slate-300 font-bold text-xs px-1.5 py-1 rounded outline-none focus:ring-2 focus:ring-blue-500; }
             .label-base { @apply text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest block; }
             .field-label { @apply text-[11px] font-black text-slate-500 uppercase block mb-[-2px]; }
@@ -414,16 +414,16 @@
             </form>
             
             <div class="bg-slate-100 p-2 flex gap-2 justify-between items-center border-t border-slate-300 rounded-b-lg unselectable">
-                <div class="grid grid-cols-5 items-center gap-1 w-full sm:w-auto">
-                    <button type="button" id="delete-btn" title="Delete" onclick="window.requestDelete()" class="btn-tool bg-red-600 text-white hover:bg-red-700"><i data-lucide="trash-2" size="14"></i></button>
-                    <button type="button" id="split-btn" title="Split" onclick="window.requestSplit()" class="btn-tool bg-orange-100 text-orange-700 hover:bg-orange-200"><i data-lucide="scissors" size="14"></i></button>
-                    <button type="button" id="merge-btn" title="Merge" onclick="window.requestMerge()" class="btn-tool bg-indigo-100 text-indigo-700 hover:bg-indigo-200"><i data-lucide="merge" size="14"></i></button>
-                    <button type="button" id="dup-btn" title="Duplicate" onclick="window.requestDuplicate()" class="btn-tool bg-blue-100 text-blue-700 hover:bg-blue-200"><i data-lucide="copy" size="14"></i></button>
-                    <button type="button" id="hist-btn" title="History" onclick="window.showAuditHistory()" class="btn-tool bg-slate-200 text-slate-700 hover:bg-slate-300"><i data-lucide="clock" size="14"></i></button>
+                <div class="flex items-center gap-1 shrink-0">
+                    <button type="button" id="delete-btn" title="Delete" onclick="window.requestDelete()" class="btn-tool bg-red-600 text-white hover:bg-red-700"><i data-lucide="trash-2" size="14" class="shrink-0"></i></button>
+                    <button type="button" id="split-btn" title="Split" onclick="window.requestSplit()" class="btn-tool bg-orange-100 text-orange-700 hover:bg-orange-200"><i data-lucide="scissors" size="14" class="shrink-0"></i></button>
+                    <button type="button" id="merge-btn" title="Merge" onclick="window.requestMerge()" class="btn-tool bg-indigo-100 text-indigo-700 hover:bg-indigo-200"><i data-lucide="merge" size="14" class="shrink-0"></i></button>
+                    <button type="button" id="dup-btn" title="Duplicate" onclick="window.requestDuplicate()" class="btn-tool bg-blue-100 text-blue-700 hover:bg-blue-200"><i data-lucide="copy" size="14" class="shrink-0"></i></button>
+                    <button type="button" id="hist-btn" title="History" onclick="window.showAuditHistory()" class="btn-tool bg-slate-200 text-slate-700 hover:bg-slate-300"><i data-lucide="clock" size="14" class="shrink-0"></i></button>
                 </div>
-                <div class="flex gap-1 w-full sm:w-auto mt-1 sm:mt-0 ml-auto">
-                    <button type="button" onclick="window.closeGuestModal()" class="px-3 py-1.5 bg-slate-200 rounded font-bold text-xs uppercase hover:bg-slate-300 transition-colors cursor-pointer">Cancel</button>
-                    <button type="button" onclick="window.saveBooking()" id="save-btn" class="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs uppercase shadow-lg flex items-center justify-center gap-1 transition-colors cursor-pointer"><i data-lucide="save" size="14"></i> Save</button>
+                <div class="flex gap-1 shrink-0 ml-auto">
+                    <button type="button" onclick="window.closeGuestModal()" class="px-3 py-1.5 bg-slate-200 rounded font-bold text-xs uppercase hover:bg-slate-300 transition-colors cursor-pointer shrink-0">Cancel</button>
+                    <button type="button" onclick="window.saveBooking()" id="save-btn" class="px-4 sm:px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs uppercase shadow-lg flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0"><i data-lucide="save" size="14" class="shrink-0"></i> Save</button>
                 </div>
             </div>
             <div id="audit-log" class="bg-slate-800 text-[9px] text-slate-400 font-bold uppercase text-center py-0.5 rounded-b-lg unselectable"></div>
