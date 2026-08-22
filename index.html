@@ -137,7 +137,7 @@
                 <!-- Mobile Search Toggle Button -->
                 <button onclick="window.toggleSearchMode()" class="p-1 sm:hidden text-slate-500 hover:text-blue-600 bg-slate-100 rounded shrink-0 cursor-pointer"><i data-lucide="search" class="!w-4 !h-4"></i></button>
 
-                <!-- Search Input Container (Floating on mobile, inline on desktop) -->
+                <!-- Search Input Container -->
                 <div id="search-container" class="hidden sm:flex absolute sm:relative right-0 top-10 sm:top-auto bg-slate-800 sm:bg-transparent p-2 sm:p-0 rounded-lg sm:rounded-none shadow-2xl sm:shadow-none border sm:border-none border-slate-700 sm:border-transparent z-[100] sm:z-auto w-[220px] sm:w-28 md:w-36 shrink-0 group">
                     <i data-lucide="search" class="absolute left-4 sm:left-2 top-3 sm:top-1.5 text-slate-400 !w-3 !h-3 sm:!w-[14px] sm:!h-[14px] hidden sm:block"></i>
                     <input type="text" id="guest-search" placeholder="FIND GUEST / ID..." oninput="window.handleSearch(this.value)" class="pl-2 sm:pl-7 pr-7 py-1.5 sm:py-1 w-full bg-white border border-slate-200 rounded font-black text-[10px] sm:text-xs uppercase outline-none focus:ring-2 focus:ring-blue-500 shadow-inner sm:shadow-none">
@@ -369,6 +369,7 @@
                     <span class="text-blue-700"><i data-lucide="calendar-plus" size="14" class="inline mb-0.5 mr-1"></i>Extend Stay</span><i data-lucide="chevron-down" id="ext-chevron" size="14" class="transition-transform duration-200" style="transform: rotate(-90deg);"></i>
                 </div>
                 <div id="ext-section" class="bg-blue-50/50 p-1.5 border-x border-b border-blue-200 rounded-b-md mt-0 hidden" style="display: none;">
+                    <div id="ext-room-dropdown-container"></div>
                     <div class="flex gap-1.5 items-end">
                         <div class="w-16"><label class="field-label">Days</label><input type="number" id="ext-days" value="1" min="1" class="input-base text-center" oninput="window.calcExtension()"></div>
                         <div class="w-24"><label class="field-label text-slate-400 text-[10px]">Avg Daily ฿</label><input type="text" id="ext-avg-rate" class="input-base text-slate-500" readonly></div>
@@ -475,7 +476,7 @@
     <div id="split-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Split Stay</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select date to split booking.<br><span class="text-xs font-bold text-slate-500 mt-2 block">Creates a zero-balance linked segment to move guests mid-stay.</span></p><input type="date" id="split-date" class="input-base !text-lg !p-2 mb-6"><div class="flex gap-2 justify-center"><button onclick="window.closeModal('split-modal')" class="btn-modal bg-slate-200 text-slate-700 px-6">Cancel</button><button onclick="window.confirmSplit()" class="btn-modal bg-orange-600 text-white px-10">Split</button></div></div></div></div>
     <div id="merge-modal" class="alert-modal-overlay"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800"><div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Merge Bookings</div><div class="p-6 text-center"><p class="font-black text-slate-700 leading-tight text-md mb-4">Select a booking to absorb.<br><span class="text-xs font-bold text-slate-500 mt-2 block">Absorbed booking will be deleted!</span></p><select id="merge-target" class="input-base !text-sm !p-2 mb-6 cursor-pointer"></select><div class="flex gap-2 justify-center"><button onclick="window.closeModal('merge-modal')" class="btn-modal bg-slate-200 text-slate-700 px-6">Cancel</button><button id="merge-confirm-btn" onclick="window.confirmMerge()" class="btn-modal bg-indigo-600 text-white px-10">Merge</button></div></div></div></div>
 
-        <div id="custom-tooltip"></div>
+    <div id="custom-tooltip"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -489,7 +490,7 @@
         const appId = 'hotel-pms-v1'; const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
 
         let currentUserRole = null; let currentUserEmail = 'unknown'; let staff = []; let dailyRates = {};
-        let viewStart = new Date(); viewStart.setHours(12,0,0,0);
+        let viewStart = new Date(); viewStart.setDate(viewStart.getDate() - 3); viewStart.setHours(12,0,0,0);
         let searchTerm = ""; let searchMatchIndex = 0; let sortKey = "checkIn"; let sortAsc = false; let isZoomWide = false;
         
         window.masterState = 0; 
@@ -584,7 +585,26 @@
             window.addEventListener('resize', window.render); lucide.createIcons();
         };
 
-        window.toggleSection = (sectionId, chevronId, forceState = null) => { const sec = $(sectionId), icon = $(chevronId); if (!sec) return; const shouldShow = forceState !== null ? forceState : (sec.style.display === 'none' || sec.classList.contains('hidden')); if (shouldShow) { sec.style.display = 'block'; sec.classList.remove('hidden'); if(icon) icon.style.transform = 'rotate(0deg)'; } else { sec.style.display = 'none'; sec.classList.add('hidden'); if(icon) icon.style.transform = 'rotate(-90deg)'; } };
+        window.toggleSection = (sectionId, chevronId, forceState = null) => { 
+            const sec = $(sectionId), icon = $(chevronId); if (!sec) return; 
+            const shouldShow = forceState !== null ? forceState : (sec.style.display === 'none' || sec.classList.contains('hidden')); 
+            if (shouldShow) { 
+                sec.style.display = 'block'; sec.classList.remove('hidden'); if(icon) icon.style.transform = 'rotate(0deg)'; 
+                if (sectionId === 'ext-section') {
+                    const rL = Array.from($$('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
+                    let extHtml = '';
+                    if (rL.length > 1) {
+                        extHtml = `<div class="w-full mb-1.5"><label class="field-label text-blue-600">Room to Extend</label><select id="ext-room-select" class="input-base text-blue-800 border-blue-300"><option value="ALL">Extend ALL Rooms</option>` + rL.map(r => `<option value="${r}">Extend Room ${r} Only</option>`).join('') + `</select></div>`;
+                    } else {
+                        extHtml = `<div class="hidden"><select id="ext-room-select"><option value="ALL">ALL</option></select></div>`;
+                    }
+                    const container = $('ext-room-dropdown-container');
+                    if(container) container.innerHTML = extHtml;
+                }
+            } else { 
+                sec.style.display = 'none'; sec.classList.add('hidden'); if(icon) icon.style.transform = 'rotate(-90deg)'; 
+            } 
+        };
         window.toggleMultiSelect = (id, btn) => { event.stopPropagation(); const d = $(id); if(!d) return; const isH = d.style.display === 'none' || d.style.display === ''; $$('.multi-select-dropdown').forEach(x => x.style.display = 'none'); if(isH) { const r = btn.getBoundingClientRect(); document.body.appendChild(d); d.style.position = 'absolute'; d.style.top = (r.bottom + window.scrollY) + 'px'; d.style.left = (r.left + window.scrollX) + 'px'; d.style.width = Math.max(r.width, 160) + 'px'; if (r.left + 160 > window.innerWidth) d.style.left = (window.scrollX + r.right - 160) + 'px'; d.style.display = 'block'; } };
         window.updateMultiLabel = (dId, lId, def) => { const c = $$(`#${dId} input[type="checkbox"]:checked`), l = $(lId); if(l) l.innerText = c.length === 0 ? def : (c.length === 1 ? c[0].parentNode.textContent.trim().toUpperCase() : c.length + ' SELECTED'); };
         window.getMultiValues = id => Array.from($(id)?.querySelectorAll('input[type="checkbox"]:checked') || []).map(cb => cb.value);
@@ -611,7 +631,6 @@
             const todayStr = getLocalYMD(new Date()); $('dash-date-display').innerText = todayStr;
             const arr = [], dep = [], stay = [], act = [];
             
-            // Sort staff by room mathematically so A01 is before B02
             const sortedStaff = [...staff].sort((a, b) => {
                 let ra = a.rooms?.[0] || a.room || 'ZZZ';
                 let rb = b.rooms?.[0] || b.room || 'ZZZ';
@@ -662,7 +681,7 @@
             if (aR) aR.forEach(r => r.style.display = s.showAvail ? 'grid' : 'none');
             
             rws.forEach(r => {
-                if (grp === 'unconfirmed-hold') { r.style.display = s.showOcc ? 'grid' : 'none'; return; }
+                if (grp === 'unconfirmed-hold') { r.style.display = (cS === 0 || cS === 1) ? 'grid' : 'none'; return; }
                 const isE = r.querySelectorAll('.staff-bar').length === 0;
                 r.style.display = (isE ? s.showEmp : s.showOcc) ? 'grid' : 'none';
             });
@@ -808,6 +827,9 @@
                 }); body.appendChild(row);
             });
             if (window.masterState !== 0) { const g = new Set(); $$('.group-header').forEach(el => { if (el.dataset.group) g.add(el.dataset.group); }); g.forEach(grp => window.toggleGroup(grp, window.masterState)); }
+            
+            // Render icons at the very end to ensure dynamically generated UI (like zoom/collapse) has SVG graphics
+            lucide.createIcons();
         };
 
         window.getFilteredBookings = (v, sKey, sAsc) => {
@@ -825,7 +847,17 @@
             return iM === oM ? `${iM}/${iDay}-${oDay}` : `${iM}/${iDay}-${oM}/${oDay}`;
         };
 
-        window.renderDatabase = () => { const body = $('database-body'); if (!body) return; body.innerHTML = ''; window.getFilteredBookings('db', sortKey, sortAsc).forEach(s => { const due = window.getDue(s), paid = window.getPaid(s), asg = (s.rooms?.length ? s.rooms : (s.room ? [s.room] : [])).filter(Boolean).join(', ') || '--'; const tr = document.createElement('tr'); tr.className = "border-b hover:bg-slate-50 cursor-pointer"; tr.onclick = () => window.editStaff(s.id); tr.dataset.recordId = s.id; tr.innerHTML = `<td class="p-2 border-r border-slate-200">${s.firstName||''} ${s.lastName||''}</td><td class="p-2 border-r border-slate-200 uppercase">${s.source||''}</td><td class="p-2 border-r border-slate-200">${formatDbDate(s.checkIn, s.checkOut)}</td><td class="p-2 border-r border-slate-200 font-black max-w-[96px] break-words whitespace-normal leading-tight">${asg}</td><td class="p-2 border-r border-slate-200 text-right font-black">฿${Number(s.totalPrice||0).toFixed(2)}</td><td class="p-2 border-r border-slate-200 text-right font-black text-green-600">฿${paid.toFixed(2)}</td><td class="p-2 border-r border-slate-200 text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due.toFixed(2)}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`; body.appendChild(tr); }); };
+        window.renderDatabase = () => { 
+            const body = $('database-body'); if (!body) return; body.innerHTML = ''; 
+            window.getFilteredBookings('db', sortKey, sortAsc).forEach(s => { 
+                const due = window.getDue(s), paid = window.getPaid(s), asg = (s.rooms?.length ? s.rooms : (s.room ? [s.room] : [])).filter(Boolean).join(', ') || '--'; 
+                const tr = document.createElement('tr'); tr.className = "border-b hover:bg-slate-50 cursor-pointer"; tr.onclick = () => window.editStaff(s.id); tr.dataset.recordId = s.id; 
+                tr.innerHTML = `<td class="p-2 border-r border-slate-200">${s.firstName||''} ${s.lastName||''}</td><td class="p-2 border-r border-slate-200 uppercase">${s.source||''}</td><td class="p-2 border-r border-slate-200">${formatDbDate(s.checkIn, s.checkOut)}</td><td class="p-2 border-r border-slate-200 font-black max-w-[96px] break-words whitespace-normal leading-tight">${asg}</td><td class="p-2 border-r border-slate-200 text-right font-black">฿${Number(s.totalPrice||0).toFixed(2)}</td><td class="p-2 border-r border-slate-200 text-right font-black text-green-600">฿${paid.toFixed(2)}</td><td class="p-2 border-r border-slate-200 text-right font-black ${due>0?'text-red-600':''} ${s.badCC?'underline decoration-dashed decoration-red-500':''}">฿${due.toFixed(2)}</td><td class="p-2 uppercase"><span class="px-2 py-0.5 rounded text-[10px] text-white status-${s.status}">${s.status}</span></td>`; 
+                body.appendChild(tr); 
+            }); 
+            lucide.createIcons();
+        };
+
         window.bulkDelete = () => { if(currentUserRole !== 'admin') return; const rows = $$('#database-body tr'); if(rows.length === 0) return window.showAlert("Nothing to delete."); window.showAlert(`PERMANENTLY DELETE ${rows.length} RECORDS?\n\nThis will wipe all visible bookings!`, true, async () => { try { $('boot-loader').style.display = 'flex'; await Promise.all(Array.from(rows).map(tr => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', tr.dataset.recordId)))); $('boot-loader').style.display = 'none'; window.closeAlert(); } catch (e) { $('boot-loader').style.display = 'none'; window.showAlert("Delete blocked by Firebase Rules."); } }); };
         window.sortDatabase = k => { if(sortKey === k) sortAsc = !sortAsc; else { sortKey = k; sortAsc = true; } window.renderDatabase(); };
         
@@ -853,7 +885,7 @@
         window.toggleSearchMode = () => { const c = $('search-container'); if (c.classList.contains('hidden')) { c.classList.replace('hidden', 'flex'); setTimeout(() => $('guest-search').focus(), 50); } else c.classList.replace('flex', 'hidden'); };
         window.clearSearchAndClose = () => { window.clearSearch(); if(window.innerWidth < 640) $('search-container').classList.replace('flex', 'hidden'); };
         window.jumpToSearchMatch = () => { const m = staff.filter(s => (s.firstName+' '+s.lastName).toUpperCase().includes(searchTerm) || (s.bookId||'').toUpperCase().includes(searchTerm)).sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')); if (m.length > 0) { const d = new Date(m[searchMatchIndex % m.length].checkIn + "T12:00:00"); d.setDate(d.getDate() - 3); viewStart = d; searchMatchIndex++; const mc = $('match-counter'); if(mc) mc.innerText = `Match ${(searchMatchIndex % m.length) + 1} of ${m.length}`; window.render(); } };
-        window.prevPeriod = () => { viewStart.setDate(viewStart.getDate() - 7); window.render(); }; window.nextPeriod = () => { viewStart.setDate(viewStart.getDate() + 7); window.render(); }; window.goToday = () => { viewStart = new Date(); viewStart.setDate(viewStart.getDate() - 7); viewStart.setHours(12,0,0,0); window.render(); }; window.updateHeaderName = () => { $('modal-guest-name-display').innerText = `${$('first-name').value.trim().toUpperCase()} ${$('last-name').value.trim().toUpperCase()}`.trim() || "NEW BOOKING"; }; window.checkEmailProxy = val => { const el = $('email'), v = val.toLowerCase(), isOTA = v.includes('booking.com') || v.includes('agoda'); el.classList.remove('text-red-600', 'text-green-600', 'font-black'); if (isOTA) el.classList.add('text-red-600', 'font-black'); else if (v.includes('@')) el.classList.add('text-green-600', 'font-black'); };
+        window.prevPeriod = () => { viewStart.setDate(viewStart.getDate() - 7); window.render(); }; window.nextPeriod = () => { viewStart.setDate(viewStart.getDate() + 7); window.render(); }; window.goToday = () => { viewStart = new Date(); viewStart.setDate(viewStart.getDate() - 3); viewStart.setHours(12,0,0,0); window.render(); }; window.updateHeaderName = () => { $('modal-guest-name-display').innerText = `${$('first-name').value.trim().toUpperCase()} ${$('last-name').value.trim().toUpperCase()}`.trim() || "NEW BOOKING"; }; window.checkEmailProxy = val => { const el = $('email'), v = val.toLowerCase(), isOTA = v.includes('booking.com') || v.includes('agoda'); el.classList.remove('text-red-600', 'text-green-600', 'font-black'); if (isOTA) el.classList.add('text-red-600', 'font-black'); else if (v.includes('@')) el.classList.add('text-green-600', 'font-black'); };
         
         const setMulti = (id, state, labels, classes) => { const el = $(id); if (!el) return; el.dataset.state = state; el.innerText = labels[state]; el.className = id.includes('email') ? `flex-1 min-w-[80px] unselectable multi-state-btn px-0.5 py-1 rounded text-[9px] font-black uppercase border text-center whitespace-nowrap ${classes[state]}` : `flex-1 unselectable multi-state-btn px-1 py-1.5 rounded text-[10px] font-black uppercase border ${classes[state]}`; };
         window.cycleMulti = (el, labels, classes) => { if (!el) return; let s = parseInt(el.dataset.state) + 1; if(s >= labels.length) s = 0; setMulti(el.id, s, labels, classes); };
@@ -874,11 +906,11 @@
             const id = `pay-${pCount++}`, div = document.createElement('div'); div.className = `payment-row flex gap-1 items-center bg-white p-1 rounded border border-slate-200 transition-opacity ${loc ? 'opacity-70' : ''}`; div.id = id;
             if (!d) d = getLocalYMD(new Date());
             if (a === '') { const due = (Number($('total-price').value) || 0) - Array.from($$('.payment-row')).reduce((s, r) => s + (Number(r.querySelector('.pay-amt').value) || 0), 0); if (due > 0) a = Number(due.toFixed(2)); }
-            div.innerHTML = `<input type="date" class="pay-date w-24 text-xs !p-1" value="${d}" ${loc ? 'disabled' : ''}><input type="number" class="pay-amt w-16 text-xs !p-1 font-black" value="${a}" placeholder="0" oninput="window.calcFinancials()" ${loc ? 'disabled' : ''}><select class="pay-method flex-1 text-xs !p-1 uppercase" onchange="window.calcFinancials()" ${loc ? 'disabled' : ''}>` + ['cash','card','scan','cc-fee','hw-kp','bdc-kp','bdc-pay','agoda-kp','agoda-pay','airbnb-kp','airbnb-pay','other'].map(x => `<option value="${x}" ${m===x?'selected':''}>${x.replace('-', ' ').toUpperCase()}</option>`).join('') + `${loc ? `<button type="button" onclick="window.unlockPayment('${id}')" class="p-1 text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 rounded flex-shrink-0 border border-slate-200 cursor-pointer"><i data-lucide="lock" size="12"></i></button>` : `<button type="button" onclick="window.removePaymentRow('${id}')" class="p-1 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded flex-shrink-0 border border-red-200 cursor-pointer"><i data-lucide="trash-2" size="12"></i></button>`}`;
+            div.innerHTML = `<input type="date" class="pay-date w-24 text-xs !p-1" value="${d}" ${loc ? 'disabled' : ''}><input type="number" class="pay-amt w-16 text-xs !p-1 font-black" value="${a}" placeholder="0" oninput="window.calcFinancials()" ${loc ? 'disabled' : ''}><select class="pay-method flex-1 text-xs !p-1 uppercase" onchange="window.calcFinancials()" ${loc ? 'disabled' : ''}>` + ['cash','card','scan','cc-fee','hw-kp','bdc-kp','bdc-pay','agoda-kp','agoda-pay','airbnb-kp','airbnb-pay','other'].map(x => `<option value="${x}" ${m===x?'selected':''}>${x.replace('-', ' ').toUpperCase()}</option>`).join('') + `</select>${loc ? `<button type="button" onclick="window.unlockPayment('${id}')" class="p-1 text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 rounded flex-shrink-0 border border-slate-200 cursor-pointer" title="Edit Payment"><i data-lucide="edit" size="12"></i></button>` : `<button type="button" onclick="window.removePaymentRow('${id}')" class="p-1 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded flex-shrink-0 border border-red-200 cursor-pointer" title="Delete Payment"><i data-lucide="trash-2" size="12"></i></button>`}`;
             $('payments-list').appendChild(div); window.calcFinancials(); lucide.createIcons();
         };
 
-        window.unlockPayment = id => { const r = $(id); r.classList.remove('opacity-70'); r.querySelectorAll('input, select').forEach(el => el.disabled = false); r.lastElementChild.outerHTML = `<button type="button" onclick="window.removePaymentRow('${id}')" class="p-1 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded flex-shrink-0 border border-red-200 cursor-pointer"><i data-lucide="trash-2" size="12"></i></button>`; lucide.createIcons(); };
+        window.unlockPayment = id => { const r = $(id); r.classList.remove('opacity-70'); r.querySelectorAll('input, select').forEach(el => el.disabled = false); r.lastElementChild.outerHTML = `<button type="button" onclick="window.removePaymentRow('${id}')" class="p-1 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded flex-shrink-0 border border-red-200 cursor-pointer" title="Delete Payment"><i data-lucide="trash-2" size="12"></i></button>`; lucide.createIcons(); };
         window.removePaymentRow = id => { window.showAlert("Delete this payment entry?", true, () => { $(id).remove(); window.calcFinancials(); }); };
         
         window.updateAvailableRooms = () => {
@@ -896,7 +928,42 @@
 
         window.calcExtension = () => { const cI = $('check-in').value, cO = $('check-out').value, ms = parseYMD(cO) - parseYMD(cI), avg = ms > 0 ? (Number($('total-price').value) || 0) / Math.round(ms / 86400000) : 0, days = parseInt($('ext-days').value) || 1; let xFMP = false; if (cO) { const sD = parseYMD(cO), eD = sD + (days * 86400000); for (let f of fmpDates) { const fT = new Date(f + "T12:00:00").getTime(); if ((sD <= fT && eD >= fT) || (Math.abs(sD - fT) <= 3 * 86400000) || (Math.abs(eD - fT) <= 3 * 86400000)) { xFMP = true; break; } } } if (xFMP) { $('ext-avg-rate').value = 'FMP!'; $('ext-avg-rate').classList.add('text-pink-600', 'bg-pink-100'); $('ext-price').value = ''; $('ext-price').placeholder = 'CHECK RATE ->'; $('btn-check-bdc').classList.replace('bg-slate-200', 'bg-pink-500'); $('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); $('btn-check-bdc').classList.add('animate-pulse'); } else { $('ext-avg-rate').value = Math.round(avg); $('ext-avg-rate').classList.remove('text-pink-600', 'bg-pink-100'); $('ext-price').value = Math.round(avg * days); $('ext-price').placeholder = ''; $('btn-check-bdc').classList.replace('bg-pink-500', 'bg-slate-200'); $('btn-check-bdc').classList.replace('text-white', 'text-slate-700'); $('btn-check-bdc').classList.remove('animate-pulse'); } };
         window.checkBdcPrice = () => { const cO = $('check-out').value; if(!cO) return window.showAlert("Please set a check-out date first."); const d = new Date(cO + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + (parseInt($('ext-days').value) || 1)); window.open(`https://www.booking.com/hotel/th/swims-a-social-beach-resort.html?checkin=${cO}&checkout=${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}&group_adults=${$('pax-count').value || 1}&group_children=0&no_rooms=${Array.from($$('.assigned-room-select')).filter(sel => sel.value !== "").length || 1}`, '_blank'); };
-        window.confirmExtension = () => { const cO = $('check-out').value; if(!cO) return window.showAlert("Please set a check-out date first."); const aP = $('ext-price').value; if(aP === '') return window.showAlert("Please enter the Extension Price first."); const days = parseInt($('ext-days').value) || 1, d = new Date(cO + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + days); const nCo = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; $('check-out').value = nCo; $('total-price').value = ((Number($('total-price').value) || 0) + Number(aP)).toFixed(2); setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); window.updateAvailableRooms(); window.calcFinancials(); window.calcExtension(); window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${nCo}.\nAdded ฿${aP} to Total Price.`); };
+        
+        window.confirmExtension = async () => { 
+            const cO = $('check-out').value; if(!cO) return window.showAlert("Please set a check-out date first."); 
+            const aP = $('ext-price').value; if(aP === '') return window.showAlert("Please enter the Extension Price first."); 
+            const days = parseInt($('ext-days').value) || 1; 
+            const d = new Date(cO + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + days); 
+            const nCo = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; 
+            
+            const extRoomSel = $('ext-room-select');
+            if (extRoomSel && extRoomSel.value !== "ALL" && !extRoomSel.parentElement.classList.contains('hidden')) {
+                const s = staff.find(x => x.id === $('guest-id').value);
+                if (!s) return window.showAlert("Error: Please save booking first before splitting.");
+                
+                let lC = s.linkedId || Math.random().toString(36).substr(2, 4).toUpperCase();
+                const nId = Math.random().toString(36).substr(2, 9);
+                const selRoom = extRoomSel.value;
+                const dbRoom = uiToDbRoom(selRoom);
+                
+                const newBooking = { ...s, id: nId, checkIn: cO, checkOut: nCo, room: dbRoom, rooms: [dbRoom], linkedId: lC, totalPrice: Number(aP), netPrice: Number(aP), netOverride: false, payments: [], extended: true, notes: "Extended segment from multi-room booking.\n" + (s.notes || ""), createdAt: new Date().toISOString(), createdBy: currentUserEmail, auditLog: [] };
+                
+                try {
+                    const sB = $('save-btn'), oH = sB.innerHTML; sB.disabled = true; sB.innerHTML = 'SAVING...';
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', s.id), { ...s, linkedId: lC, extended: true }, { merge: true });
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', nId), newBooking);
+                    window.showAlert(`Room ${selRoom} extended by ${days} day(s) as a new linked booking.\n\nOriginal booking preserved.`);
+                    window.closeGuestModal();
+                } catch(e) { window.showAlert("Extension failed due to database rules."); }
+                return;
+            }
+
+            $('check-out').value = nCo; 
+            $('total-price').value = ((Number($('total-price').value) || 0) + Number(aP)).toFixed(2); 
+            setMulti('ext-btn', 1, ['NOT EXTENDED', 'EXTENDED'], ['text-slate-400', 'bg-blue-100 text-blue-700 border-blue-400']); 
+            window.updateAvailableRooms(); window.calcFinancials(); window.calcExtension(); 
+            window.showAlert(`Booking extended by ${days} day(s).\n\nCheckout is now ${nCo}.\nAdded ฿${aP} to Total Price.`); 
+        };
 
         window.populateStaffForm = (s = {}) => {
             const isN = !s.id, f = $('guest-form'); if(f) f.reset(); const mC = $('guest-modal-content'); mC.style.position = 'relative'; mC.style.left = 'auto'; mC.style.top = 'auto'; mC.style.margin = '0';
@@ -946,7 +1013,10 @@
         };
 
         window.saveBooking = async () => {
-            if(currentUserRole === 'staff') return; const sB = $('save-btn'), oH = sB.innerHTML; sB.disabled = true; sB.innerHTML = 'SAVING...';
+            if(currentUserRole === 'staff') return; 
+            const sB = $('save-btn'); 
+            if(sB.disabled) return;
+            sB.disabled = true; sB.innerHTML = 'SAVING...';
             try {
                 const cI = $('check-in').value, cO = $('check-out').value; if (cI >= cO) return window.showAlert("INVALID DATES:\nDeparture must be after arrival.");
                 const idI = $('guest-id'), id = idI.value || Math.random().toString(36).substr(2, 9); idI.value = id;
@@ -960,13 +1030,24 @@
                 }
 
                 const ext = staff.find(s => s.id === id), now = new Date().toISOString();
-                const ent = { id, firstName: $('first-name').value.trim().toUpperCase(), lastName: $('last-name').value.trim().toUpperCase(), status: stat, bookedType: $('booked-type').value, room: dbRL[0] || "", rooms: dbRL, checkIn: cI, checkOut: cO, pax: parseInt($('pax-count').value) || 1, country: $('guest-country').value, phone: $('phone').value, email: $('email').value, source: $('booking-source').value, bookDate: $('booking-date').value, bookId: $('booking-id').value, linkedId: $('link-code').value.trim().toUpperCase(), totalPrice: Number($('total-price').value) || 0, netPrice: Number($('net-price').value) || 0, netOverride: $('net-price').dataset.override === 'true', badCC: $('bad-cc-box').dataset.bad === 'true', payments: Array.from($$('.payment-row')).map(r => ({ date: r.querySelector('.pay-date').value, amt: Number(r.querySelector('.pay-amt').value) || 0, method: r.querySelector('.pay-method').value })), emailConfirm: parseInt($('email-confirm-btn')?.dataset?.state || 0) === 1, emailPrePost: parseInt($('email-prepost-btn')?.dataset?.state || 0) > 0 ? (parseInt($('email-prepost-btn')?.dataset?.state) === 1 ? 'sent' : 'confirmed') : false, emailSpecial: parseInt($('email-special-btn')?.dataset?.state || 0) === 1, refundability: parseInt($('refund-btn')?.dataset?.state || 0) == 1 ? 'non-ref' : (parseInt($('refund-btn')?.dataset?.state || 0) == 2 ? 'ref' : 'unknown'), upgrade: parseInt($('upgrade-btn')?.dataset?.state || 0) > 0 ? (parseInt($('upgrade-btn')?.dataset?.state) === 1 ? 'free' : 'paid') : 'none', rating: parseInt($('rating-btn')?.dataset?.state || 0) > 0 ? (parseInt($('rating-btn')?.dataset?.state) === 1 ? 'good' : 'bad') : 'none', extended: parseInt($('ext-btn')?.dataset?.state || 0) === 1, notes: $('guest-notes').value, createdAt: ext?.createdAt || now, createdBy: ext?.createdBy || currentUserEmail, lastEditedAt: now, lastEditedBy: currentUserEmail, auditLog: ext?.auditLog || [] };
+                const ent = { id, firstName: $('first-name').value.trim().toUpperCase(), lastName: $('last-name').value.trim().toUpperCase(), status: stat, bookedType: $('booked-type').value, room: dbRL[0] || "", rooms: dbRL, checkIn: cI, checkOut: cO, pax: parseInt($('pax-count').value) || 1, country: $('guest-country').value, phone: $('phone').value, email: $('email').value, source: $('booking-source').value, bookDate: $('booking-date').value, bookId: $('booking-id').value, linkedId: $('link-code').value.trim().toUpperCase(), totalPrice: Number($('total-price').value) || 0, netPrice: Number($('net-price').value) || 0, netOverride: $('net-price').dataset.override === 'true', badCC: $('bad-cc-box').dataset.bad === 'true', payments: Array.from($$('.payment-row')).map(r => ({ date: r.querySelector('.pay-date').value, amt: Number(r.querySelector('.pay-amt').value) || 0, method: r.querySelector('.pay-method').value })), emailConfirm: parseInt($('email-confirm-btn')?.dataset?.state || 0) === 1, emailPrePost: parseInt($('email-prepost-btn')?.dataset?.state || 0) > 0 ? (parseInt($('email-prepost-btn')?.dataset?.state) === 1 ? 'sent' : 'confirmed') : false, emailSpecial: parseInt($('email-special-btn')?.dataset?.state || 0) === 1, refundability: parseInt($('refund-btn')?.dataset?.state || 0) == 1 ? 'non-ref' : (parseInt($('refund-btn')?.dataset?.state || 0) == 2 ? 'ref' : 'unknown'), upgrade: parseInt($('upgrade-btn')?.dataset?.state || 0) > 0 ? (parseInt($('upgrade-btn')?.dataset?.state) === 1 ? 'free' : 'paid') : 'none', rating: parseInt($('rating-btn')?.dataset?.state || 0) > 0 ? (parseInt($('rating-btn')?.dataset?.state) === 1 ? 'good' : 'bad') : 'none', extended: parseInt($('ext-btn')?.dataset?.state || 0) === 1, notes: $('guest-notes').value, createdAt: ext?.createdAt || now, createdBy: ext?.createdBy || currentUserEmail, lastEditedAt: now, lastEditedBy: currentUserEmail, auditLog: Array.isArray(ext?.auditLog) ? ext.auditLog : [] };
                 
                 const diff = window.generateAuditDiff(ext, ent);
                 ent.auditLog.push({ ts: now, user: currentUserEmail, msg: diff });
 
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), ent); window.closeGuestModal();
-            } catch (err) { window.showAlert("Save process timed out or encountered an error. Please verify connection."); } finally { sB.disabled = false; sB.innerHTML = oH; lucide.createIcons(); }
+                const savePromise = setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', id), ent);
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 15000));
+                
+                await Promise.race([savePromise, timeoutPromise]);
+                window.closeGuestModal();
+            } catch (err) { 
+                console.error("Save Error:", err);
+                window.showAlert("Save process timed out or encountered an error. Please verify your connection.\n\nError: " + err.message); 
+            } finally { 
+                sB.disabled = false; 
+                sB.innerHTML = '<i data-lucide="save" size="14" class="shrink-0"></i> Save'; 
+                lucide.createIcons(); 
+            }
         };
 
         window.requestDelete = () => { if(currentUserRole === 'staff') return; window.showAlert(`Permanently delete this record?`, true, async () => { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', $('guest-id').value)); window.closeGuestModal(); } catch (e) { window.showAlert("Delete blocked by Firebase Rules."); } }); };
