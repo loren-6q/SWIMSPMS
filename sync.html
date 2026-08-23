@@ -29,7 +29,7 @@
         /* Grid Styles */
         table { border-spacing: 0; width: 100%; }
         th, td { padding: 4px 0px; text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; vertical-align: middle; }
-        .frozen-col { position: sticky; left: 0; background: #f8fafc; z-index: 10; text-align: left; border-right: 2px solid #94a3b8; padding: 4px 6px; }
+        .frozen-col { position: sticky; left: 0; z-index: 10; text-align: left; border-right: 2px solid #94a3b8; padding: 4px 6px; }
         .frozen-row { position: sticky; top: 0; background: #1e293b; color: white; z-index: 20; }
         .frozen-corner { position: sticky; top: 0; left: 0; background: #0f172a; color: white; z-index: 30; border-right: 2px solid #94a3b8; padding: 4px 6px; }
         
@@ -231,7 +231,8 @@
                 rawTypes.forEach(t => liveInventory[dStr][t] = totalRoomsByType[t]);
             }
 
-            const activeStaff = staff.filter(s => s.status !== 'cancelled' && s.status !== 'noshow');
+            // Exclude unconfirmed holds from consuming OTA inventory
+            const activeStaff = staff.filter(s => s.status !== 'cancelled' && s.status !== 'noshow' && s.status !== 'unconfirmed');
             
             activeStaff.forEach(s => {
                 if(!s.checkIn || !s.checkOut) return;
@@ -242,7 +243,6 @@
                 
                 if (rList.length > 0 && rList[0] !== "") {
                     rList.forEach(rid => {
-                        // Apply the powerful reverse-decoder so DB IDs properly match full Room names
                         const uiId = dbToUiRoom(rid);
                         const roomDef = hotelRooms.find(hr => hr.id === uiId);
                         if(roomDef) typesToDeduct.push(roomDef.type);
@@ -286,24 +286,27 @@
             
             head.innerHTML = ''; body.innerHTML = '';
             
-            let colsToShow = [];
+            // Determine which exact dates have activity to show
+            let colsToShowRaw = [];
             viewDates.forEach(d => {
                 let show = false;
                 if (filter === 'all') show = true;
                 else {
                     rawTypes.forEach(t => {
+                        if (t === 'BUNGALOWS') return; // Completely ignore BUNGALOWS for triggering columns
+
                         let live = liveInventory[d][t] || 0;
                         let snap = snapshotData[d] && snapshotData[d][t] !== undefined ? snapshotData[d][t] : totalRoomsByType[t];
-                        // If room category only has 2 or fewer rooms in total, NEVER mark it urgent
                         let isUrgent = live <= 2 && totalRoomsByType[t] > 2;
+
                         if (filter === 'changes' && live !== snap) show = true;
                         if (filter === 'urgent' && isUrgent) show = true;
                     });
                 }
-                if(show) colsToShow.push(d);
+                if(show) colsToShowRaw.push(d);
             });
 
-            if (colsToShow.length === 0) {
+            if (colsToShowRaw.length === 0) {
                 noMsg.classList.remove('hidden');
                 const title = document.getElementById('no-data-title');
                 const desc = document.getElementById('no-data-desc');
@@ -321,37 +324,69 @@
                 noMsg.classList.add('hidden');
             }
 
-            let trHead = `<tr class="frozen-row"><th class="frozen-corner w-32 min-w-[10rem] max-w-[14rem] text-sm whitespace-normal break-words text-left">ROOM TYPE</th>`;
-            colsToShow.forEach(d => {
-                const dt = new Date(d + "T12:00:00");
-                trHead += `<th class="w-[32px] min-w-[32px] px-0 py-1 leading-tight text-center border-b border-slate-400"><span class="text-blue-300 text-[10px] uppercase font-bold tracking-tight block">${mNames[dt.getMonth()]}</span><span class="text-sm font-black">${dt.getDate()}</span></th>`;
+            // Insert Visual Gaps for skipped dates
+            let finalCols = [];
+            for (let i = 0; i < colsToShowRaw.length; i++) {
+                if (i > 0) {
+                    let prevD = new Date(colsToShowRaw[i-1] + "T12:00:00Z");
+                    let currD = new Date(colsToShowRaw[i] + "T12:00:00Z");
+                    let diff = Math.round((currD - prevD) / 86400000);
+                    if (diff > 1) {
+                        finalCols.push({ type: 'gap' });
+                    }
+                }
+                finalCols.push({ type: 'date', val: colsToShowRaw[i] });
+            }
+
+            // Build Header
+            let trHead = `<tr class="frozen-row"><th class="frozen-corner w-24 min-w-[7rem] max-w-[9rem] text-[11px] whitespace-normal break-words text-left leading-tight">ROOM TYPE</th>`;
+            finalCols.forEach(col => {
+                if (col.type === 'gap') {
+                    trHead += `<th class="w-2 min-w-[8px] bg-amber-400 border-x-[2px] border-white" title="Skipped Dates"></th>`;
+                } else {
+                    const dt = new Date(col.val + "T12:00:00Z");
+                    trHead += `<th class="w-[32px] min-w-[32px] px-0 py-1 leading-tight text-center border-b border-slate-400"><span class="text-blue-300 text-[10px] uppercase font-bold tracking-tight block">${mNames[dt.getUTCMonth()]}</span><span class="text-sm font-black">${dt.getUTCDate()}</span></th>`;
+                }
             });
             trHead += `</tr>`;
             head.innerHTML = trHead;
 
-            rawTypes.forEach(t => {
-                let tr = `<tr><td class="frozen-col font-bold text-xs leading-snug whitespace-normal break-words" title="${t}">${t}<br><span class="text-slate-400 font-normal text-[10px] uppercase mt-1 inline-block">Total Capacity: ${totalRoomsByType[t]}</span></td>`;
-                colsToShow.forEach(d => {
-                    let live = liveInventory[d][t] || 0;
-                    let snap = snapshotData[d] && snapshotData[d][t] !== undefined ? snapshotData[d][t] : totalRoomsByType[t];
-                    // If room category only has 2 or fewer rooms in total, NEVER mark it urgent
-                    let isUrgent = live <= 2 && totalRoomsByType[t] > 2;
-                    
-                    let cellClass = ""; let content = `<span class="font-bold text-sm text-slate-700">${live}</span>`;
-                    
-                    if (live !== snap) {
-                        cellClass = "cell-changed";
-                        content = `<div class="flex flex-col items-center justify-center leading-none"><span class="text-[10px] font-bold text-blue-400 line-through mb-0.5">${snap}</span><span class="font-black text-blue-700 text-base">${live}</span></div>`;
+            // Build Body
+            rawTypes.forEach((t, index) => {
+                let isMuted = t === 'BUNGALOWS';
+                let rowBg = isMuted ? 'bg-slate-200' : (index % 2 === 0 ? 'bg-white' : 'bg-slate-50');
+                let rowOpacity = isMuted ? 'opacity-50 grayscale' : '';
+                
+                // Smart abbreviation for horizontal space saving
+                let shortName = t.replace("Partial Oceanview", "Partial OV").replace("Standard Quad Dorm", "Quad Dorm").replace(" Room", "");
+                
+                let tr = `<tr class="${rowOpacity} ${rowBg} hover:bg-slate-100 transition-colors"><td class="frozen-col font-black text-[11px] sm:text-xs leading-snug whitespace-normal break-words ${rowBg}" title="${t}">${shortName}<br><span class="text-slate-400 font-bold text-[9px] uppercase mt-0.5 inline-block tracking-widest">CAPACITY: ${totalRoomsByType[t]}</span>${isMuted ? '<br><span class="text-rose-500 font-black text-[9px] uppercase tracking-widest mt-0.5 inline-block">Muted</span>' : ''}</td>`;
+                
+                finalCols.forEach(col => {
+                    if (col.type === 'gap') {
+                        tr += `<td class="bg-amber-100 border-x-[2px] border-white"></td>`;
+                    } else {
+                        let d = col.val;
+                        let live = liveInventory[d][t] || 0;
+                        let snap = snapshotData[d] && snapshotData[d][t] !== undefined ? snapshotData[d][t] : totalRoomsByType[t];
+                        let isUrgent = live <= 2 && totalRoomsByType[t] > 2 && !isMuted;
+                        
+                        let cellClass = ""; let content = `<span class="font-bold text-sm text-slate-700">${live}</span>`;
+                        
+                        if (live !== snap && !isMuted) {
+                            cellClass = "cell-changed";
+                            content = `<div class="flex flex-col items-center justify-center leading-none"><span class="text-[10px] font-bold text-blue-400 line-through mb-0.5">${snap}</span><span class="font-black text-blue-700 text-base">${live}</span></div>`;
+                        }
+                        if (filter === 'urgent' && isUrgent) {
+                            cellClass += " cell-urgent";
+                            content = `<span class="font-black text-red-700 text-base">${live}</span>`;
+                        }
+                        if (live !== snap && filter === 'urgent' && isUrgent) {
+                            content = `<div class="flex flex-col items-center justify-center leading-none"><span class="text-[10px] font-bold text-red-400 line-through mb-0.5">${snap}</span><span class="font-black text-red-700 text-base">${live}</span></div>`;
+                        }
+                        
+                        tr += `<td class="${cellClass}">${content}</td>`;
                     }
-                    if (filter === 'urgent' && isUrgent) {
-                        cellClass += " cell-urgent";
-                        content = `<span class="font-black text-red-700 text-base">${live}</span>`;
-                    }
-                    if (live !== snap && filter === 'urgent' && isUrgent) {
-                        content = `<div class="flex flex-col items-center justify-center leading-none"><span class="text-[10px] font-bold text-red-400 line-through mb-0.5">${snap}</span><span class="font-black text-red-700 text-base">${live}</span></div>`;
-                    }
-                    
-                    tr += `<td class="${cellClass}">${content}</td>`;
                 });
                 tr += `</tr>`;
                 body.innerHTML += tr;
