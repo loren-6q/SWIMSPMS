@@ -32,9 +32,6 @@
         .frozen-col { position: sticky; left: 0; z-index: 10; text-align: left; border-right: 2px solid #94a3b8; padding: 4px 6px; }
         .frozen-row { position: sticky; top: 0; background: #1e293b; color: white; z-index: 20; }
         .frozen-corner { position: sticky; top: 0; left: 0; background: #0f172a; color: white; z-index: 30; border-right: 2px solid #94a3b8; padding: 4px 6px; }
-        
-        .cell-changed { background-color: #eff6ff !important; } /* Soft Blue */
-        .cell-urgent { background-color: #fef2f2 !important; }  /* Soft Red */
     </style>
 </head>
 <body class="p-2 sm:p-4 h-screen flex flex-col overflow-hidden">
@@ -236,12 +233,18 @@
             
             activeStaff.forEach(s => {
                 if(!s.checkIn || !s.checkOut) return;
-                const inMs = parseYMD(s.checkIn), outMs = parseYMD(s.checkOut);
                 
                 const rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []);
+                const isUnassigned = rList.length === 0 || rList[0] === "";
+                
+                // SAFE VOLUNTEER EXCLUSION: Ignore 'Special' status bookings that are Unassigned
+                if (s.status === 'special' && isUnassigned) return;
+
+                const inMs = parseYMD(s.checkIn), outMs = parseYMD(s.checkOut);
+                
                 const typesToDeduct = [];
                 
-                if (rList.length > 0 && rList[0] !== "") {
+                if (!isUnassigned) {
                     rList.forEach(rid => {
                         const uiId = dbToUiRoom(rid);
                         const roomDef = hotelRooms.find(hr => hr.id === uiId);
@@ -354,17 +357,17 @@
             // Build Body
             rawTypes.forEach((t, index) => {
                 let isMuted = t === 'BUNGALOWS';
-                let rowBg = isMuted ? 'bg-slate-200' : (index % 2 === 0 ? 'bg-white' : 'bg-slate-50');
+                let rowBg = isMuted ? 'bg-slate-200' : (index % 2 === 0 ? 'bg-white' : 'bg-slate-100');
                 let rowOpacity = isMuted ? 'opacity-50 grayscale' : '';
                 
                 // Smart abbreviation for horizontal space saving
                 let shortName = t.replace("Partial Oceanview", "Partial OV").replace("Standard Quad Dorm", "Quad Dorm").replace(" Room", "");
                 
-                let tr = `<tr class="${rowOpacity} ${rowBg} hover:bg-slate-100 transition-colors"><td class="frozen-col font-black text-[11px] sm:text-xs leading-snug whitespace-normal break-words ${rowBg}" title="${t}">${shortName}<br><span class="text-slate-400 font-bold text-[9px] uppercase mt-0.5 inline-block tracking-widest">CAPACITY: ${totalRoomsByType[t]}</span>${isMuted ? '<br><span class="text-rose-500 font-black text-[9px] uppercase tracking-widest mt-0.5 inline-block">Muted</span>' : ''}</td>`;
+                let tr = `<tr class="${rowOpacity} ${rowBg} hover:bg-slate-200 transition-colors"><td class="frozen-col font-black text-[11px] sm:text-xs leading-snug whitespace-normal break-words ${rowBg}" title="${t}">${shortName}<br><span class="text-slate-400 font-bold text-[9px] uppercase mt-0.5 inline-block tracking-widest">CAPACITY: ${totalRoomsByType[t]}</span>${isMuted ? '<br><span class="text-rose-500 font-black text-[9px] uppercase tracking-widest mt-0.5 inline-block">Muted</span>' : ''}</td>`;
                 
                 finalCols.forEach(col => {
                     if (col.type === 'gap') {
-                        tr += `<td class="bg-amber-100 border-x-[2px] border-white"></td>`;
+                        tr += `<td class="bg-amber-300 border-x-[2px] border-white"></td>`;
                     } else {
                         let d = col.val;
                         let live = liveInventory[d][t] || 0;
@@ -374,15 +377,13 @@
                         let cellClass = ""; let content = `<span class="font-bold text-sm text-slate-700">${live}</span>`;
                         
                         if (live !== snap && !isMuted) {
-                            cellClass = "cell-changed";
-                            content = `<div class="flex flex-col items-center justify-center leading-none"><span class="text-[10px] font-bold text-blue-400 line-through mb-0.5">${snap}</span><span class="font-black text-blue-700 text-base">${live}</span></div>`;
+                            content = `<div class="flex flex-col items-center justify-center leading-none"><span class="text-[10px] font-bold text-red-400 line-through mb-0.5">${snap}</span><span class="font-black text-red-600 text-base">${live}</span></div>`;
                         }
                         if (filter === 'urgent' && isUrgent) {
-                            cellClass += " cell-urgent";
-                            content = `<span class="font-black text-red-700 text-base">${live}</span>`;
+                            content = `<span class="font-black text-orange-600 text-base">${live}</span>`;
                         }
                         if (live !== snap && filter === 'urgent' && isUrgent) {
-                            content = `<div class="flex flex-col items-center justify-center leading-none"><span class="text-[10px] font-bold text-red-400 line-through mb-0.5">${snap}</span><span class="font-black text-red-700 text-base">${live}</span></div>`;
+                            content = `<div class="flex flex-col items-center justify-center leading-none"><span class="text-[10px] font-bold text-red-400 line-through mb-0.5">${snap}</span><span class="font-black text-red-600 text-base">${live}</span></div>`;
                         }
                         
                         tr += `<td class="${cellClass}">${content}</td>`;
