@@ -14,16 +14,15 @@
         @layer components {
             .input-base { @apply w-full bg-slate-50 border border-slate-300 font-bold text-sm px-2 py-1.5 rounded outline-none focus:ring-2 focus:ring-indigo-500 transition-all; }
             .label-base { @apply text-[11px] font-black text-slate-500 mb-1 uppercase tracking-widest block; }
-            .grid-toggle { @apply appearance-none w-3 h-3 border border-slate-300 rounded-sm cursor-pointer checked:bg-slate-700 checked:border-slate-700 transition-colors relative flex items-center justify-center; }
-            .grid-toggle:checked::after { content: ''; @apply block w-1.5 h-0.5 bg-white transform rotate-45 absolute; }
-            .grid-toggle:checked::before { content: ''; @apply block w-1.5 h-0.5 bg-white transform -rotate-45 absolute; }
+            .grid-toggle { @apply appearance-none w-4 h-4 border-2 border-slate-400 rounded-sm cursor-pointer checked:bg-indigo-500 checked:border-indigo-500 transition-colors relative flex items-center justify-center; }
+            .grid-toggle:checked::after { content: 'x'; @apply block text-[12px] font-black text-white absolute leading-none pb-[2px]; }
             .tab-btn { @apply px-4 py-2 font-black text-xs uppercase rounded-t-lg transition-colors border-b-4 border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200 cursor-pointer; }
             .tab-btn.active { @apply text-indigo-700 bg-white border-indigo-600; }
             
-            .view-btn { @apply px-3 py-1.5 font-black text-[10px] uppercase rounded transition-colors text-slate-500 hover:text-slate-800 cursor-pointer flex items-center gap-1.5 border border-slate-200; }
+            .view-btn { @apply px-3 py-1.5 font-black text-[11px] uppercase rounded transition-colors text-slate-500 hover:text-slate-800 cursor-pointer flex items-center gap-1.5 border border-slate-200 bg-white; }
             .view-btn.active-bdc { @apply bg-[#003580] border-[#003580] text-white hover:text-white shadow-md; }
             .view-btn.active-hw { @apply bg-[#F15A24] border-[#F15A24] text-white hover:text-white shadow-md; }
-            .view-btn.active-dir { @apply bg-emerald-600 border-emerald-600 text-white hover:text-white shadow-md; }
+            .view-btn.active-direct { @apply bg-emerald-500 border-emerald-500 text-white hover:text-white shadow-md; }
         }
 
         body { font-family: 'Roboto Condensed', sans-serif; background: #f8fafc; color: #0f172a; }
@@ -34,39 +33,79 @@
         .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Hyper Compact Grid */
+        /* Hyper Compact & Legible Grid - STRICT HEIGHTS */
         .rate-grid-table { border-spacing: 0; width: max-content; }
-        .rate-grid-table th, .rate-grid-table td { border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 0px; text-align: center; }
+        .rate-grid-table th, .rate-grid-table td { 
+            border-right: 1px solid #cbd5e1; 
+            border-bottom: 1px solid #cbd5e1; 
+            padding: 2px 0px; 
+            text-align: center; 
+            height: 26px;
+            box-sizing: border-box;
+        }
         
-        .rate-grid-table td input[type="number"] { width: 34px; text-align: center; font-size: 11px; padding: 2px 0px; border: 1px solid transparent; border-radius: 0px; outline: none; transition: all 0.2s; -moz-appearance: textfield; background: transparent; }
+        .rate-grid-table td input[type="number"] { 
+            width: 36px; 
+            height: 24px;
+            text-align: center; 
+            font-size: 14px; 
+            font-stretch: condensed; 
+            padding: 0; 
+            border: 1px solid transparent; 
+            border-radius: 0px; 
+            outline: none; 
+            transition: all 0.2s; 
+            -moz-appearance: textfield; 
+            font-weight: 900; 
+            background: transparent;
+        }
         .rate-grid-table td input[type="number"]::-webkit-outer-spin-button, .rate-grid-table td input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .rate-grid-table td input[type="number"]:focus { background: #fff; box-shadow: inset 0 0 0 2px #4f46e5; z-index: 10; position: relative; }
+        .rate-grid-table td input[type="number"]:focus { box-shadow: inset 0 0 0 2px #4f46e5; background: #fff !important; z-index: 10; position: relative; }
         
-        /* Layer 3 Exceptions (Yellow Overrides) */
         .is-override { color: #d97706 !important; background-color: #fef3c7 !important; font-weight: 900 !important; }
 
-        .frozen-col { position: sticky; left: 0; background: #f8fafc; z-index: 20; text-align: left !important; border-right: 1px solid #cbd5e1 !important; padding: 1px 4px !important; min-width: 65px; max-width: 65px; font-size: 9px; font-weight: 800; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; cursor: help; }
-        .frozen-col-header { position: sticky; left: 0; background: #1e293b; color: #fff; z-index: 30; border-right: 1px solid #cbd5e1 !important; }
+        .frozen-col { position: sticky; left: 0; z-index: 20; background: inherit; }
+        .frozen-col-2 { position: sticky; left: 28px; z-index: 21; border-right: 2px solid #94a3b8 !important; background: inherit; }
+        .frozen-col-header { position: sticky; background: #1e293b; color: #fff; z-index: 30; }
         .sticky-header { position: sticky; top: 0; background: #1e293b; color: #fff; z-index: 25; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
-        /* Soothing Color Scheme */
-        .row-std { background-color: #ffffff; }
-        .row-std input { color: #334155; font-weight: 700; } 
-        .row-fmp { background-color: #fdf4ff; } 
-        .row-fmp input { color: #831843; font-weight: 800; } 
-        .row-restr { background-color: #f8fafc; } 
-        .row-restr input { color: #64748b; font-weight: 600; } 
+        .vertical-text-wrapper {
+            height: 52px;
+            width: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: inherit;
+        }
         
-        .room-divider { background-color: #e2e8f0; }
-        .room-divider td { color: #1e293b !important; font-size: 9px; font-weight: 900; padding: 1px 0; border-top: 2px solid #94a3b8; }
-        .day-header-cell { background-color: #e2e8f0; color: #475569; border-right: 1px solid #cbd5e1 !important; border-bottom: none !important; font-size: 9px; font-weight: 900; padding: 1px 0 !important; }
+        .vertical-text { 
+            writing-mode: vertical-rl; 
+            transform: rotate(180deg); 
+            text-align: center; 
+            font-size: 10px; 
+            font-weight: 900;
+            white-space: normal;
+            line-height: 1.1;
+        }
+        
+        /* Zebra Striping */
+        .room-group-even td:not(.fmp-peak):not(.fmp-week) { background-color: #ffffff; }
+        .room-group-odd td:not(.fmp-peak):not(.fmp-week) { background-color: #f1f5f9; }
+        
+        /* FMP Glows */
+        td.fmp-peak, th.fmp-peak { background-color: #fcd34d !important; } 
+        td.fmp-week, th.fmp-week { background-color: #fef08a !important; } 
+        th.fmp-peak { color: #b45309 !important; }
+        th.fmp-week { color: #ca8a04 !important; }
+        
+        .fmp-text input[type="number"] { color: #db2777 !important; }
     </style>
 </head>
 <body class="p-2 sm:p-4 h-screen flex flex-col overflow-hidden">
     
     <div id="loader" class="loading-overlay active"><div class="spinner"></div><div id="sync-status" class="mt-4 font-black text-indigo-800 uppercase tracking-widest text-center">LOADING PRICING...</div></div>
     
-    <!-- Custom UI Modal -->
     <div id="custom-alert" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
         <div class="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full text-center border-2 border-slate-800">
             <div class="bg-indigo-100 text-indigo-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="info" size="24"></i></div>
@@ -96,12 +135,11 @@
         
         <div class="flex px-2 pt-2 bg-slate-100 border-b border-slate-300 shrink-0 gap-1 overflow-x-auto no-scrollbar">
             <button onclick="window.switchTab('grid')" id="tab-grid" class="tab-btn active !px-3 shrink-0">Calendar</button>
-            <button onclick="window.switchTab('smart')" id="tab-smart" class="tab-btn !px-3 shrink-0"><i data-lucide="wand-2" size="12" class="inline mb-0.5 text-amber-500"></i> Auto-Painter</button>
-            <button onclick="window.switchTab('relational')" id="tab-relational" class="tab-btn !px-3 shrink-0">Relationships</button>
+            <button onclick="window.switchTab('smart')" id="tab-smart" class="tab-btn !px-3 shrink-0"><i data-lucide="wand-2" size="12" class="inline mb-0.5 text-amber-500"></i> Autofiller</button>
+            <button onclick="window.switchTab('relational')" id="tab-relational" class="tab-btn !px-3 shrink-0"><i data-lucide="link" size="12" class="inline mb-0.5 text-indigo-500"></i> Linking</button>
         </div>
 
-        <div id="view-grid" class="flex-1 flex flex-col min-h-0">
-            <!-- Toolbar -->
+        <div id="view-grid" class="flex-1 flex flex-col min-h-0 relative">
             <div class="flex flex-wrap items-center justify-between gap-2 px-2 py-1.5 bg-white border-b border-slate-200 shrink-0 shadow-sm z-30 relative">
                 <div class="flex items-center gap-1">
                     <button onclick="window.shiftTape(-7)" class="p-1 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"><i data-lucide="chevron-left" size="16"></i></button>
@@ -110,44 +148,47 @@
                 </div>
 
                 <div class="flex items-center gap-1.5">
-                    <button onclick="window.setView('direct')" id="view-direct" class="view-btn"><i data-lucide="globe" size="12"></i> Direct (-10%)</button>
-                    <button onclick="window.setView('bdc')" id="view-bdc" class="view-btn active-bdc"><i data-lucide="building" size="12"></i> Booking.com</button>
-                    <button onclick="window.setView('hw')" id="view-hw" class="view-btn"><i data-lucide="tent" size="12"></i> Hostelworld (+25%)</button>
+                    <button onclick="window.setView('direct')" id="view-direct" class="view-btn active-direct"><i data-lucide="globe" size="14"></i> DIR</button>
+                    <button onclick="window.setView('bdc')" id="view-bdc" class="view-btn"><i data-lucide="building" size="14"></i> BDC</button>
+                    <button onclick="window.setView('hw')" id="view-hw" class="view-btn"><i data-lucide="tent" size="14"></i> HW</button>
                 </div>
                 
                 <div class="flex items-center gap-2">
-                    <button onclick="window.toggleQuickBulk()" class="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded border border-indigo-200 transition-colors cursor-pointer"><i data-lucide="zap" size="12"></i> Quick Bulk</button>
-                    <span class="text-[9px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Exceptions Safe</span>
+                    <button id="ripple-toggle" onclick="window.toggleRipple()" class="view-btn !bg-indigo-100 !text-indigo-700 !border-indigo-300"><i data-lucide="link" size="12"></i> Auto-Link: ON</button>
+                    <button onclick="window.toggleQuickBulk()" class="flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-slate-700 bg-slate-100 hover:bg-slate-200 px-2 py-1.5 rounded border border-slate-300 transition-colors cursor-pointer"><i data-lucide="zap" size="14"></i> Quick Bulk</button>
                 </div>
             </div>
 
-            <!-- Quick Bulk Panel -->
-            <div id="quick-bulk-panel" class="hidden bg-slate-100 border-b border-slate-300 p-2 shrink-0 shadow-inner flex-col gap-2">
+            <div id="quick-bulk-panel" class="hidden bg-slate-100 border-b border-slate-300 p-2 shrink-0 shadow-inner flex-col gap-2 z-20 relative">
                 <div class="flex items-end gap-2 w-full flex-wrap">
                     <div class="flex flex-col"><label class="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Start Date</label><input type="date" id="qb-start" class="input-base !py-1 !px-2 !text-xs w-32"></div>
                     <div class="flex flex-col"><label class="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-0.5">End Date</label><input type="date" id="qb-end" class="input-base !py-1 !px-2 !text-xs w-32"></div>
                     <div class="flex flex-col">
                         <label class="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Field to Edit</label>
-                        <select id="qb-field" class="input-base !py-1 !px-2 !text-xs cursor-pointer w-32">
+                        <select id="qb-field" class="input-base !py-1 !px-2 !text-xs cursor-pointer w-32" onchange="window.toggleQBField()">
                             <option value="std">Standard Rate</option>
                             <option value="fmp">FMP Pkg Rate</option>
-                            <option value="min">Min Stay</option>
-                            <option value="cta">Closed to Arr</option>
+                            <option value="min">Global Min Stay</option>
+                            <option value="max">Global Max Stay</option>
+                            <option value="min_arr">Global Min from Arr</option>
+                            <option value="cta">Global CTA</option>
                         </select>
                     </div>
-                    <button onclick="window.runQuickBulk()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded shadow-sm font-black text-[10px] uppercase tracking-widest transition-colors h-[28px] cursor-pointer"><i data-lucide="check" size="14" class="inline"></i> Apply Overrides</button>
-                    <button onclick="window.toggleQuickBulk()" class="p-1.5 text-slate-400 hover:text-slate-700 rounded h-[28px] cursor-pointer ml-auto"><i data-lucide="x" size="14"></i></button>
+                    <button onclick="window.runQuickBulk(false)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded shadow-sm font-black text-[10px] uppercase tracking-widest transition-colors h-[28px] cursor-pointer"><i data-lucide="check" size="14" class="inline"></i> Apply</button>
+                    <button onclick="window.runQuickBulk(true)" class="bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 px-4 py-1.5 rounded shadow-sm font-black text-[10px] uppercase tracking-widest transition-colors h-[28px] cursor-pointer"><i data-lucide="eraser" size="14" class="inline"></i> Clear Overrides</button>
+                    <button onclick="window.toggleQuickBulk(true)" class="p-1.5 text-slate-400 hover:text-slate-700 rounded h-[28px] cursor-pointer ml-auto"><i data-lucide="x" size="14"></i></button>
                 </div>
                 <div class="border-t border-slate-200 pt-2 mt-1">
-                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Leave blank to ignore. Enter values to apply overrides.</p>
-                    <div id="qb-rooms-container" class="flex flex-wrap gap-2">
-                        <!-- Injected dynamically -->
+                    <div id="qb-rooms-container" class="flex flex-wrap gap-2"></div>
+                    <div id="qb-global-container" class="hidden items-center gap-2">
+                        <label class="text-[10px] font-black text-slate-600 uppercase">Apply to entire property:</label>
+                        <input type="text" id="qb-global-val" class="input-base !py-1 !px-2 !text-xs w-32" placeholder="Value (or true/false)">
                     </div>
                 </div>
             </div>
 
-            <!-- Main Calendar Render Grid -->
-            <div class="flex-1 overflow-auto bg-slate-50 relative z-10 overscroll-none" id="grid-container">
+            <!-- pt-[5px] pushes the table down so the header shadow doesn't clip the text -->
+            <div class="flex-1 overflow-auto bg-slate-200 relative z-10 overscroll-none pt-[5px]" id="grid-container">
                 <table class="rate-grid-table" id="rate-table">
                     <thead id="grid-head"></thead>
                     <tbody id="grid-body"></tbody>
@@ -155,14 +196,15 @@
             </div>
         </div>
 
-        <!-- Layer 2 Automator -->
         <div id="view-smart" class="hidden flex-1 overflow-auto bg-slate-50 p-4">
             <div class="max-w-4xl mx-auto space-y-4">
                 <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm">
-                    <h2 class="text-lg font-black uppercase text-slate-800 mb-2 border-b border-slate-200 pb-2 flex items-center gap-2"><i data-lucide="paintbrush" class="text-indigo-500"></i> Anchor Timeline Painter</h2>
+                    <h2 class="text-lg font-black uppercase text-slate-800 mb-2 border-b border-slate-200 pb-2 flex items-center justify-between gap-2">
+                        <span><i data-lucide="paintbrush" class="text-indigo-500 inline mb-1"></i> Timeline Autofiller</span>
+                        <button onclick="window.nukeDatabase()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded font-black text-xs uppercase tracking-widest shadow-md cursor-pointer flex items-center gap-1"><i data-lucide="skull" size="14"></i> WIPE ALL PRICING DATA</button>
+                    </h2>
                     <p class="text-[11px] font-bold text-slate-500 mb-4 leading-snug">
-                        Paint your baseline market rates onto the selected Anchor rooms. The system will scan the selected months, locate every Full Moon Party, paint the dual curves (Private & Dorm) onto the timeline, and instantly ripple the math to all connected rooms.<br>
-                        <span class="text-amber-600 font-black">Yellow manual overrides on the calendar will be preserved and will outrank this automation.</span>
+                        Paint your baseline market rates onto the selected Anchor rooms. The system isolates the FMP packages strictly to +/- 6 days, writes global restrictions, and ripples the math perfectly to all linked rooms.
                     </p>
                     
                     <div class="flex flex-wrap items-center gap-4 mb-6 p-3 bg-slate-100 rounded-lg border border-slate-200">
@@ -175,23 +217,25 @@
                             <select id="w-anchor-dorm" class="input-base !text-sm !py-1 cursor-pointer text-orange-700"></select>
                         </div>
                         <div class="flex-1 min-w-[140px]">
-                            <label class="label-base text-slate-700">Start Month</label>
-                            <input type="month" id="w-start-month" class="input-base !text-sm !py-1 cursor-pointer text-slate-700">
+                            <label class="label-base text-slate-700">Start Date</label>
+                            <input type="date" id="w-start-date" class="input-base !text-sm !py-1 cursor-pointer text-slate-700">
                         </div>
                         <div class="flex-1 min-w-[140px]">
                             <label class="label-base text-slate-700">Duration</label>
                             <select id="w-duration" class="input-base !text-sm !py-1 cursor-pointer text-slate-700">
-                                <option value="1">1 Month</option>
-                                <option value="3" selected>3 Months</option>
-                                <option value="6">6 Months</option>
-                                <option value="12">1 Year</option>
+                                <option value="14">14 Days</option>
+                                <option value="30">30 Days</option>
+                                <option value="60">60 Days</option>
+                                <option value="90" selected>90 Days</option>
+                                <option value="180">180 Days</option>
+                                <option value="365">1 Year</option>
                             </select>
                         </div>
                     </div>
                     
                     <div class="mb-6 relative">
                         <div class="bg-white p-3 rounded-xl shadow-lg border-2 border-indigo-100 w-full overflow-x-auto">
-                            <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-3 text-center w-full block">Dual-Curve FMP Peak Adjustments</span>
+                            <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-3 text-center w-full block">Dual-Curve FMP Adjustments (Auto-Mirrored)</span>
                             <table class="w-full text-center border-separate border-spacing-y-2">
                                 <thead>
                                     <tr>
@@ -200,7 +244,7 @@
                                         <th class="text-[9px] font-black uppercase text-pink-500">FMP Pkg Base</th>
                                         <th class="text-[9px] font-black uppercase text-slate-400">FMP -2</th>
                                         <th class="text-[9px] font-black uppercase text-slate-400">FMP -1</th>
-                                        <th class="text-[9px] font-black uppercase text-amber-500">Peak Day</th>
+                                        <th class="text-[10px] font-black uppercase text-amber-500">Peak Day</th>
                                         <th class="text-[9px] font-black uppercase text-slate-400">FMP +1</th>
                                         <th class="text-[9px] font-black uppercase text-slate-400">FMP +2</th>
                                     </tr>
@@ -210,73 +254,57 @@
                                         <td class="text-xs font-bold text-indigo-700 text-left pl-2 rounded-l-lg">Privates</td>
                                         <td><input type="number" id="w-p-base" class="input-base text-center !py-1 !px-1" value="899" onfocus="this.select()"></td>
                                         <td><input type="number" id="w-p-pkg" class="input-base text-center !py-1 !px-1 text-pink-700" value="1000" onfocus="this.select()"></td>
-                                        <td><input type="number" id="w-p-m2" class="input-base text-center !py-1 !px-1" value="2299" onfocus="this.select()" onchange="if(this.value && !document.getElementById('w-p-p2').value) document.getElementById('w-p-p2').value = this.value"></td>
-                                        <td><input type="number" id="w-p-m1" class="input-base text-center !py-1 !px-1" value="5699" onfocus="this.select()" onchange="if(this.value && !document.getElementById('w-p-p1').value) document.getElementById('w-p-p1').value = this.value"></td>
-                                        <td><input type="number" id="w-p-0" class="input-base text-center !py-1 !px-1 font-black text-amber-700 border-amber-300 relative z-10 scale-110 shadow-md" value="8999" onfocus="this.select()"></td>
-                                        <td><input type="number" id="w-p-p1" class="input-base text-center !py-1 !px-1" value="5699" onfocus="this.select()"></td>
-                                        <td class="rounded-r-lg"><input type="number" id="w-p-p2" class="input-base text-center !py-1 !px-1" value="2299" onfocus="this.select()"></td>
+                                        <td><input type="number" id="w-p-m2" class="input-base text-center !py-1 !px-1" value="1099" onfocus="this.select()" oninput="document.getElementById('w-p-p2').value = this.value"></td>
+                                        <td><input type="number" id="w-p-m1" class="input-base text-center !py-1 !px-1" value="1999" onfocus="this.select()" oninput="document.getElementById('w-p-p1').value = this.value"></td>
+                                        <td><input type="number" id="w-p-0" class="input-base text-center !py-1.5 !px-1 font-black text-amber-700 border-amber-400 relative z-10 scale-110 shadow-md bg-amber-50" value="5999" onfocus="this.select()"></td>
+                                        <td><input type="number" id="w-p-p1" class="input-base text-center !py-1 !px-1" value="1999" onfocus="this.select()" oninput="document.getElementById('w-p-m1').value = this.value"></td>
+                                        <td class="rounded-r-lg"><input type="number" id="w-p-p2" class="input-base text-center !py-1 !px-1" value="1099" onfocus="this.select()" oninput="document.getElementById('w-p-m2').value = this.value"></td>
                                     </tr>
                                     <tr class="bg-orange-50/50">
                                         <td class="text-xs font-bold text-orange-700 text-left pl-2 rounded-l-lg">Dorms</td>
-                                        <td><input type="number" id="w-d-base" class="input-base text-center !py-1 !px-1" value="450" onfocus="this.select()"></td>
-                                        <td><input type="number" id="w-d-pkg" class="input-base text-center !py-1 !px-1 text-pink-700" value="500" onfocus="this.select()"></td>
-                                        <td><input type="number" id="w-d-m2" class="input-base text-center !py-1 !px-1" value="700" onfocus="this.select()" onchange="if(this.value && !document.getElementById('w-d-p2').value) document.getElementById('w-d-p2').value = this.value"></td>
-                                        <td><input type="number" id="w-d-m1" class="input-base text-center !py-1 !px-1" value="1000" onfocus="this.select()" onchange="if(this.value && !document.getElementById('w-d-p1').value) document.getElementById('w-d-p1').value = this.value"></td>
-                                        <td><input type="number" id="w-d-0" class="input-base text-center !py-1 !px-1 font-black text-amber-700 border-amber-300 relative z-10 scale-110 shadow-md" value="1500" onfocus="this.select()"></td>
-                                        <td><input type="number" id="w-d-p1" class="input-base text-center !py-1 !px-1" value="1000" onfocus="this.select()"></td>
-                                        <td class="rounded-r-lg"><input type="number" id="w-d-p2" class="input-base text-center !py-1 !px-1" value="700" onfocus="this.select()"></td>
+                                        <td><input type="number" id="w-d-base" class="input-base text-center !py-1 !px-1" value="199" onfocus="this.select()"></td>
+                                        <td><input type="number" id="w-d-pkg" class="input-base text-center !py-1 !px-1 text-pink-700" value="200" onfocus="this.select()"></td>
+                                        <td><input type="number" id="w-d-m2" class="input-base text-center !py-1 !px-1" value="299" onfocus="this.select()" oninput="document.getElementById('w-d-p2').value = this.value"></td>
+                                        <td><input type="number" id="w-d-m1" class="input-base text-center !py-1 !px-1" value="799" onfocus="this.select()" oninput="document.getElementById('w-d-p1').value = this.value"></td>
+                                        <td><input type="number" id="w-d-0" class="input-base text-center !py-1.5 !px-1 font-black text-amber-700 border-amber-400 relative z-10 scale-110 shadow-md bg-amber-50" value="2499" onfocus="this.select()"></td>
+                                        <td><input type="number" id="w-d-p1" class="input-base text-center !py-1 !px-1" value="799" onfocus="this.select()" oninput="document.getElementById('w-d-m1').value = this.value"></td>
+                                        <td class="rounded-r-lg"><input type="number" id="w-d-p2" class="input-base text-center !py-1 !px-1" value="299" onfocus="this.select()" oninput="document.getElementById('w-d-m2').value = this.value"></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <div class="flex items-start gap-3 bg-indigo-50 p-3 rounded-lg border border-indigo-200 pointer-events-none mb-6">
-                        <i data-lucide="shield-check" class="text-indigo-500 shrink-0 mt-0.5"></i>
-                        <div>
-                            <span class="font-black text-indigo-900 uppercase block text-xs">Dual-Channel Restrictions Auto-Applied</span>
-                            <span class="text-[10px] text-indigo-700 font-bold block mt-0.5 leading-tight">Calculates pre-party stepped min stays (7 down to 2). Calculates Booking.com post-party CTA lock + 5-night backup. Calculates Hostelworld post-party reverse stepped min stays (2 up to 7).</span>
-                        </div>
-                    </div>
-
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <button onclick="window.runAutomator()" class="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-base uppercase flex items-center justify-center gap-2 shadow-xl shadow-indigo-500/30 transition-all active:scale-95 cursor-pointer"><i data-lucide="paint-roller" size="18"></i> Paint Anchor Curve</button>
-                        <button onclick="window.confirmClearOverrides()" class="sm:w-auto px-6 py-4 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 border border-rose-300 transition-colors cursor-pointer"><i data-lucide="eraser" size="16"></i> Clear Overrides</button>
+                        <button onclick="window.runAutomator()" class="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-base uppercase flex items-center justify-center gap-2 shadow-xl shadow-indigo-500/30 transition-all active:scale-95 cursor-pointer"><i data-lucide="paint-roller" size="18"></i> Paint Timeline</button>
+                        <button onclick="window.clearOverrides()" class="sm:w-auto px-6 py-4 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 border border-rose-300 transition-colors cursor-pointer"><i data-lucide="eraser" size="16"></i> Nuke Range Overrides</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Layer 1 Relationships -->
         <div id="view-relational" class="hidden flex-1 overflow-auto bg-slate-50 p-4">
-            <div class="max-w-3xl mx-auto space-y-4">
-                
-                <div class="bg-indigo-50 text-indigo-900 p-4 rounded-xl shadow-sm border border-indigo-200 flex items-start gap-3">
-                    <i data-lucide="network" class="shrink-0 mt-0.5"></i>
-                    <div>
-                        <h2 class="text-sm font-black uppercase tracking-widest text-indigo-800">Omni-Directional Ripple Engine</h2>
-                        <p class="text-[10px] font-bold text-indigo-700 mt-1">Define your relationships here. When you change any room's price on the calendar, the math calculates backwards and forwards automatically to keep everything synced.</p>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-slate-300 rounded-lg shadow-sm overflow-hidden">
+            <div class="max-w-4xl mx-auto space-y-4">
+                <div class="bg-white border border-slate-300 rounded-lg shadow-sm overflow-hidden flex flex-col">
                     <div class="p-3 bg-slate-100 border-b border-slate-300 flex justify-between items-center">
-                        <span class="text-xs font-black uppercase tracking-widest text-slate-700">Room Offset Rules</span>
-                        <button onclick="window.addRelationshipRow()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded font-black text-[10px] uppercase transition-colors shadow-sm cursor-pointer">+ Add Rule</button>
+                        <span class="text-xs font-black uppercase tracking-widest text-slate-700">Pricing Offsets</span>
+                        <button onclick="window.addRelationshipRow()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded font-black text-[10px] uppercase transition-colors shadow-sm cursor-pointer">+ Add Rule</button>
                     </div>
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-800 text-white text-[11px] font-black uppercase tracking-widest">
-                            <tr>
-                                <th class="p-2 w-10 text-center">Del</th>
-                                <th class="p-2 border-r border-slate-700 w-1/3">Target Room</th>
-                                <th class="p-2 text-center border-r border-slate-700 w-1/3">Anchor</th>
-                                <th class="p-2 text-center">Rule</th>
-                            </tr>
-                        </thead>
-                        <tbody id="relationships-body" class="text-sm">
-                            <!-- JS Injected -->
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto p-0">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead class="bg-slate-800 text-white text-[10px] font-black uppercase tracking-widest">
+                                <tr>
+                                    <th class="p-2 w-10 text-center rounded-tl">Del</th>
+                                    <th class="p-2 text-center border-r border-slate-700 w-1/4">Anchor (Base)</th>
+                                    <th class="p-2 text-center border-r border-slate-700 w-1/4">Target Room</th>
+                                    <th class="p-2 text-center border-r border-slate-700">STD Rule</th>
+                                    <th class="p-2 text-center bg-pink-900 rounded-tr">FMP Rule</th>
+                                </tr>
+                            </thead>
+                            <tbody id="relationships-body" class="text-sm">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -288,78 +316,49 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CRITICAL FIREBASE PATH
         const firebaseConfig = { apiKey: "AIzaSyCyz--TlQZf_d-YNxhtGCV29LuFoRBfEeU", authDomain: "swimspms.firebaseapp.com", projectId: "swimspms", storageBucket: "swimspms.firebasestorage.app", messagingSenderId: "989960113115", appId: "1:989960113115:web:a99e08a23a36ff4289f5fe" };
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app); const appId = 'hotel-pms-v1';
 
         const fmpDates = ["2026-01-03", "2026-02-02", "2026-03-03", "2026-04-02", "2026-05-01", "2026-06-01", "2026-06-29", "2026-07-31", "2026-08-28", "2026-09-26", "2026-10-27", "2026-11-24", "2026-12-24", "2026-12-31", "2027-01-22", "2027-02-22", "2027-03-22", "2027-04-21", "2027-05-21", "2027-06-19", "2027-07-20", "2027-08-17", "2027-09-15", "2027-10-16", "2027-11-13", "2027-12-13", "2027-12-31"];
         
-        let roomTypes = [
-            "Oceanfront King", "Oceanfront Twin", "Oceanview King", "Oceanview Twin", 
-            "Partial Oceanview King", "Partial Oceanview Twin", "Gardenview King", "Gardenview Twin", 
-            "Partial Oceanview Triple (King+Twin)", "Partial Oceanview Triple (Bunk+Twin)", 
-            "Standard Quad Dorm", "BUNGALOWS"
-        ];
-
-        // The Unified State Engine
-        let masterPricing = {
-            relationships: [], // [{ target: "OF King", anchor: "GV King", type: "+", val: 1500 }]
-            timeline: {} // dateStr -> room -> {std, fmp, min_bdc, min_hw, cta, isOverride: {}}
-        };
-
-        const daysToRender = 28; 
-        let currentPlatformView = 'bdc'; 
-
-        // Core Utilities
-        const getLocalYMD = (d) => { const o = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)); return o.toISOString().split('T')[0]; };
-        const parseYMD = (str) => { if(!str) return 0; const p = str.split('-'); return Date.UTC(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])); };
+        // Exact names mapped safely to UI display abbreviations
+        const roomTypes = ["Oceanfront King", "Oceanfront Twin", "Oceanview King", "Oceanview Twin", "Partial Oceanview King", "Partial Oceanview Twin", "Gardenview King", "Gardenview Twin", "Partial Oceanview Triple Room", "Standard Quad Dorm", "BUNGALOWS"];
         
-        const abbrevRoom = (name) => {
-            return name
-                .replace("Oceanfront", "OF")
-                .replace("Oceanview", "OV")
-                .replace("Partial Oceanview", "POV")
-                .replace("Gardenview", "GV")
-                .replace(" Room", "")
-                .replace("Standard Quad Dorm", "Dorm")
-                .replace("BUNGALOWS", "Bungs")
-                .replace("Triple", "Trpl")
-                .replace("King", "K")
-                .replace("Twin", "T")
-                .replace("(King+Twin)", "(K+T)")
-                .replace("(Bunk+Twin)", "(B+T)");
+        const displayAbbrev = {
+            "Oceanfront King": "OF King", "Oceanfront Twin": "OF Twin",
+            "Oceanview King": "OV King", "Oceanview Twin": "OV Twin",
+            "Partial Oceanview King": "POV King", "Partial Oceanview Twin": "POV Twin",
+            "Gardenview King": "GV King", "Gardenview Twin": "GV Twin",
+            "Partial Oceanview Triple Room": "POV Triple", "Standard Quad Dorm": "Quad Dorm", "BUNGALOWS": "BGLW"
         };
+        
+        let masterPricing = { relationships: [], timeline: {} };
+        const daysToRender = 42; 
+        let currentPlatformView = 'direct'; 
+        window.isRippleEnabled = true;
+
+        // Strict UTC extraction to prevent any browser timezone shifting (-1 day bugs)
+        const getLocalYMD = (d) => { return d.toISOString().split('T')[0]; };
+        const parseYMD = (str) => { if(!str) return 0; const p = str.split('-'); return Date.UTC(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]), 12, 0, 0); };
 
         window.customAlert = (msg, isConfirm = false, onConfirm = null) => {
             document.getElementById('custom-alert-msg').innerText = msg;
             const cancelBtn = document.getElementById('custom-alert-cancel');
             const confirmBtn = document.getElementById('custom-alert-confirm');
-            
             if (isConfirm) {
-                cancelBtn.classList.remove('hidden');
-                confirmBtn.innerText = 'Yes';
-                confirmBtn.classList.replace('bg-indigo-600', 'bg-red-600');
-                confirmBtn.classList.replace('hover:bg-indigo-700', 'hover:bg-red-700');
+                cancelBtn.classList.remove('hidden'); confirmBtn.innerText = 'Yes';
+                confirmBtn.classList.replace('bg-indigo-600', 'bg-red-600'); confirmBtn.classList.replace('hover:bg-indigo-700', 'hover:bg-red-700');
             } else {
-                cancelBtn.classList.add('hidden');
-                confirmBtn.innerText = 'Okay';
-                confirmBtn.classList.replace('bg-red-600', 'bg-indigo-600');
-                confirmBtn.classList.replace('hover:bg-red-700', 'hover:bg-indigo-700');
+                cancelBtn.classList.add('hidden'); confirmBtn.innerText = 'Okay';
+                confirmBtn.classList.replace('bg-red-600', 'bg-indigo-600'); confirmBtn.classList.replace('hover:bg-red-700', 'hover:bg-indigo-700');
             }
-            
-            confirmBtn.onclick = () => {
-                if (onConfirm) onConfirm();
-                document.getElementById('custom-alert').classList.add('hidden');
-            };
+            confirmBtn.onclick = () => { if (onConfirm) onConfirm(); document.getElementById('custom-alert').classList.add('hidden'); };
             document.getElementById('custom-alert').classList.remove('hidden');
         };
 
-        // --- MATH & GRAPH ENGINE ---
         const applyMath = (baseVal, type, modifier, isReverse = false) => {
-            if (baseVal === "" || baseVal == null) return "";
-            let val = parseFloat(baseVal);
-            if (isNaN(val)) return "";
-            let mod = parseFloat(modifier) || 0;
+            if (baseVal === "" || baseVal == null || isNaN(parseFloat(baseVal))) return "";
+            let val = parseFloat(baseVal); let mod = parseFloat(modifier); if (isNaN(mod)) mod = 0; 
             
             if (type === '=') return Math.round(val);
             if (!isReverse) {
@@ -367,44 +366,66 @@
                 if (type === '-') return Math.max(0, Math.round(val - mod));
                 if (type === '+%') return Math.round(val * (1 + (mod/100)));
                 if (type === '-%') return Math.max(0, Math.round(val * (1 - (mod/100))));
-            } else {
-                if (type === '+') return Math.max(0, Math.round(val - mod)); 
-                if (type === '-') return Math.round(val + mod);
-                if (type === '+%') return Math.round(val / (1 + (mod/100)));
-                if (type === '-%') return Math.round(val / (1 - (mod/100)));
             }
             return Math.round(val);
         };
 
+        const getNearestFMP = (unixMs) => {
+            let minDiff = Infinity;
+            fmpDates.forEach(fmp => {
+                const fmpUnix = parseYMD(fmp);
+                const diff = Math.round((unixMs - fmpUnix) / 86400000);
+                if (Math.abs(diff) < Math.abs(minDiff)) minDiff = diff;
+            });
+            return minDiff; 
+        };
+
         const rippleDay = (dateStr, startRoom) => {
+            if (!window.isRippleEnabled) return;
             masterPricing.timeline[dateStr] = masterPricing.timeline[dateStr] || {};
-            
+            let minDiff = getNearestFMP(parseYMD(dateStr));
+            let isPeak = (minDiff === 0);
+
             const adj = {}; roomTypes.forEach(r => adj[r] = []);
             masterPricing.relationships.forEach(rel => {
-                if (rel.anchor === 'unlinked') return; // Skip unlinked rooms
-                adj[rel.anchor].push({ to: rel.target, type: rel.type, val: rel.val, isReverse: false });
-                adj[rel.target].push({ to: rel.anchor, type: rel.type, val: rel.val, isReverse: true });
+                if (rel.anchor === 'unlinked') return; 
+                let aRoom = rel.anchor;
+                let tRoom = rel.target;
+                if (!adj[aRoom]) adj[aRoom] = [];
+                adj[aRoom].push({ to: tRoom, type: rel.type, val: rel.val, typeFmp: rel.typeFmp, valFmp: rel.valFmp });
             });
 
-            let queue = [startRoom];
-            let visited = new Set([startRoom]);
-
+            let queue = [startRoom]; let visited = new Set([startRoom]);
             while(queue.length > 0) {
                 let cur = queue.shift();
-                let curVals = masterPricing.timeline[dateStr][cur] || { std: "", fmp: "", min_bdc: "", min_hw: "", cta: false, isOverride: {} };
+                let curVals = masterPricing.timeline[dateStr][cur] || { std: "", fmp: "", isOverride: {} };
 
-                adj[cur].forEach(edge => {
+                (adj[cur] || []).forEach(edge => {
+                    if(!roomTypes.includes(edge.to)) return;
+
                     if(!visited.has(edge.to)) {
                         visited.add(edge.to);
+                        masterPricing.timeline[dateStr][edge.to] = masterPricing.timeline[dateStr][edge.to] || { isOverride: {} };
+                        let nextVals = masterPricing.timeline[dateStr][edge.to];
                         
-                        let nextVals = masterPricing.timeline[dateStr][edge.to] || { std: "", fmp: "", min_bdc: "", min_hw: "", cta: false, isOverride: {} };
+                        if (isPeak) {
+                            let ruleType = edge.typeFmp || edge.type;
+                            let ruleVal = edge.valFmp !== undefined && edge.valFmp !== "" ? edge.valFmp : edge.val;
+                            let basePrice = curVals.std !== "" ? curVals.std : curVals.fmp; // Peak uses identical rows, grab either
+                            let targetPrice = applyMath(basePrice, ruleType, ruleVal, false);
+                            
+                            if (!nextVals.isOverride?.std) nextVals.std = targetPrice;
+                            if (!nextVals.isOverride?.fmp) nextVals.fmp = targetPrice;
+                        } else {
+                            if (!nextVals.isOverride?.std && curVals.std !== "") {
+                                nextVals.std = applyMath(curVals.std, edge.type, edge.val, false);
+                            }
+                            if (!nextVals.isOverride?.fmp && curVals.fmp !== "") {
+                                nextVals.fmp = applyMath(curVals.fmp, edge.type, edge.val, false);
+                            }
+                        }
                         
-                        if (!nextVals.isOverride.std) nextVals.std = applyMath(curVals.std, edge.type, edge.val, edge.isReverse);
-                        if (!nextVals.isOverride.fmp) nextVals.fmp = applyMath(curVals.fmp, edge.type, edge.val, edge.isReverse);
-                        
-                        masterPricing.timeline[dateStr][edge.to] = nextVals;
                         queue.push(edge.to);
-                        
                         updateDOMCell(dateStr, edge.to);
                     }
                 });
@@ -413,10 +434,10 @@
 
         const getCellData = (dateStr, room) => {
             const data = (masterPricing.timeline[dateStr] || {})[room] || {};
-            return { std: data.std !== undefined ? data.std : "", fmp: data.fmp !== undefined ? data.fmp : "", min_bdc: data.min_bdc || "", min_hw: data.min_hw || "", cta: data.cta || false, isOverride: data.isOverride || {} };
+            if (room === 'GLOBAL') return { min: data.min !== undefined ? data.min : "", max: data.max !== undefined ? data.max : "", min_arr: data.min_arr !== undefined ? data.min_arr : "", cta: data.cta || false, isOverride: data.isOverride || {} };
+            return { std: data.std !== undefined ? data.std : "", fmp: data.fmp !== undefined ? data.fmp : "", isOverride: data.isOverride || {} };
         };
 
-        // --- UI RENDERING & CONTROLS ---
         window.switchTab = (tab) => {
             ['grid', 'smart', 'relational'].forEach(t => {
                 document.getElementById(`view-${t}`).style.display = t === tab ? 'flex' : 'none';
@@ -424,14 +445,9 @@
             });
             if(tab === 'relational') window.renderRelationships();
             if(tab === 'smart') {
-                const selP = document.getElementById('w-anchor-private');
-                const selD = document.getElementById('w-anchor-dorm');
-                if (selP) {
-                    selP.innerHTML = roomTypes.filter(t => !t.includes('Dorm')).map(t => `<option value="${t}" ${t === 'Gardenview King' ? 'selected' : ''}>${t}</option>`).join('');
-                }
-                if (selD) {
-                    selD.innerHTML = roomTypes.filter(t => t.includes('Dorm')).map(t => `<option value="${t}">${t}</option>`).join('');
-                }
+                const selP = document.getElementById('w-anchor-private'); const selD = document.getElementById('w-anchor-dorm');
+                if (selP) selP.innerHTML = roomTypes.filter(t => !t.includes('Dorm')).map(t => `<option value="${t}" ${t === 'Gardenview King' ? 'selected' : ''}>${t}</option>`).join('');
+                if (selD) selD.innerHTML = roomTypes.filter(t => t.includes('Dorm')).map(t => `<option value="${t}">${t}</option>`).join('');
             }
         };
 
@@ -444,18 +460,25 @@
 
         window.setView = (view) => {
             currentPlatformView = view;
-            ['direct', 'bdc', 'hw'].forEach(v => {
-                document.getElementById(`view-${v}`).classList.remove(`active-${v}`);
-            });
+            ['direct', 'bdc', 'hw'].forEach(v => { document.getElementById(`view-${v}`).classList.remove(`active-${v}`); });
             document.getElementById(`view-${view}`).classList.add(`active-${view}`);
             window.renderGrid();
         };
 
-        const getViewMultiplier = () => {
-            if (currentPlatformView === 'hw') return 1.25;
-            if (currentPlatformView === 'direct') return 0.9;
-            return 1.0; 
+        window.toggleRipple = () => {
+            window.isRippleEnabled = !window.isRippleEnabled;
+            const btn = document.getElementById('ripple-toggle');
+            if (window.isRippleEnabled) {
+                btn.innerHTML = '<i data-lucide="link" size="12"></i> Auto-Link: ON';
+                btn.classList.replace('!bg-slate-100', '!bg-indigo-100'); btn.classList.replace('!text-slate-500', '!text-indigo-700');
+            } else {
+                btn.innerHTML = '<i data-lucide="link-2-off" size="12"></i> Auto-Link: OFF';
+                btn.classList.replace('!bg-indigo-100', '!bg-slate-100'); btn.classList.replace('!text-indigo-700', '!text-slate-500');
+            }
+            lucide.createIcons();
         };
+
+        const getViewMultiplier = () => { return currentPlatformView === 'hw' ? 1.25 : 1.0; };
 
         window.autoSaveTimer = null;
         window.triggerAutoSave = () => {
@@ -470,32 +493,35 @@
             const data = getCellData(dateStr, room);
             const mult = getViewMultiplier();
 
-            const elStd = document.getElementById(`${bId}_std`);
-            if (elStd) {
-                elStd.value = data.std !== "" ? Math.round(data.std * mult) : "";
-                elStd.className = `${data.isOverride.std ? 'is-override' : ''} w-full text-center outline-none focus:bg-indigo-50`;
-            }
-            
-            const elFmp = document.getElementById(`${bId}_fmp`);
-            if (elFmp) {
-                elFmp.value = data.fmp !== "" ? Math.round(data.fmp * mult) : "";
-                elFmp.className = `${data.isOverride.fmp ? 'is-override' : ''} w-full text-center outline-none focus:bg-pink-50`;
-            }
-
-            if (currentPlatformView !== 'direct') {
-                let minKey = currentPlatformView === 'hw' ? 'min_hw' : 'min_bdc';
-                const elMin = document.getElementById(`${bId}_${minKey}`);
-                if (elMin) {
-                    elMin.value = data[minKey] || "";
-                    elMin.className = `${data.isOverride[minKey] ? 'is-override' : ''} w-full text-center outline-none focus:bg-slate-100`;
+            if (room !== 'GLOBAL') {
+                const elStd = document.getElementById(`${bId}_std`);
+                if (elStd) {
+                    elStd.value = data.std !== "" && !isNaN(data.std) ? Math.round(data.std * mult) : "";
+                    if (data.isOverride.std) elStd.classList.add('is-override'); else elStd.classList.remove('is-override');
                 }
-            }
-
-            if (currentPlatformView === 'bdc') {
+                const elFmp = document.getElementById(`${bId}_fmp`);
+                if (elFmp) {
+                    elFmp.value = data.fmp !== "" && !isNaN(data.fmp) ? Math.round(data.fmp * mult) : "";
+                    if (data.isOverride.fmp) elFmp.classList.add('is-override'); else elFmp.classList.remove('is-override');
+                }
+            } else {
+                ['min', 'max', 'min_arr'].forEach(k => {
+                    const el = document.getElementById(`${bId}_${k}`);
+                    if (el) {
+                        let displayVal = (data[k] !== undefined && data[k] !== "") ? data[k] : "";
+                        // Magical HW UI Translator
+                        if (k === 'min' && currentPlatformView === 'hw' && displayVal === "") {
+                            let msDiff = getNearestFMP(parseYMD(dateStr));
+                            if (msDiff > 0 && msDiff <= 6) displayVal = msDiff + 1; // Translates blank to 2,3,4,5,6,7
+                        }
+                        el.value = displayVal;
+                        if (data.isOverride[k]) el.classList.add('is-override'); else el.classList.remove('is-override');
+                    }
+                });
                 const elCta = document.getElementById(`${bId}_cta`);
                 if (elCta) {
                     elCta.checked = data.cta;
-                    elCta.className = `grid-toggle ${data.isOverride.cta ? '!border-amber-500 !bg-amber-100' : ''}`;
+                    if (data.isOverride.cta) elCta.classList.add('!border-amber-500', '!bg-amber-100'); else elCta.classList.remove('!border-amber-500', '!bg-amber-100');
                 }
             }
         };
@@ -509,18 +535,22 @@
             head.innerHTML = ''; body.innerHTML = '';
 
             const mNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-            const dNames = ["S", "M", "T", "W", "T", "F", "S"];
-            
             let dObj = new Date(startStr + "T12:00:00Z");
 
-            // Header Row
-            let trHead = `<tr class="sticky-header"><th class="frozen-col-header px-2 py-1"><span class="text-[10px] font-black uppercase tracking-widest text-slate-300">Room</span></th>`;
+            let trHead = `<tr class="sticky-header"><th class="frozen-col-header z-30 border-r border-slate-600" style="width: 28px; min-width: 28px; left: 0;"></th><th class="frozen-col-header z-30 border-r-2 border-slate-500" style="width: 28px; min-width: 28px; left: 28px;"></th>`;
             for(let i=0; i<daysToRender; i++) {
                 const cur = new Date(dObj); cur.setUTCDate(cur.getUTCDate() + i);
-                const isWeekend = cur.getUTCDay() === 0 || cur.getUTCDay() === 6;
-                trHead += `<th class="px-0 py-1 min-w-[34px] ${isWeekend ? 'bg-slate-800' : 'bg-slate-900'} border-b border-slate-700">
-                    <span class="block text-[8px] font-bold text-slate-400 uppercase leading-none">${mNames[cur.getUTCMonth()]} ${dNames[cur.getUTCDay()]}</span>
-                    <span class="block text-xs font-black text-white leading-tight mt-0.5">${cur.getUTCDate()}</span>
+                const dMs = parseYMD(getLocalYMD(cur));
+                let minDiff = getNearestFMP(dMs);
+                
+                let highlight = 'bg-slate-900 border-slate-700 text-white';
+                
+                if (minDiff === 0) highlight = 'fmp-peak !bg-amber-500';
+                else if (Math.abs(minDiff) <= 2) highlight = 'bg-amber-400 text-amber-900 border-amber-500';
+
+                trHead += `<th class="px-0 py-1 min-w-[36px] border-b ${highlight}">
+                    <span class="block text-[10px] font-bold uppercase leading-none">${mNames[cur.getUTCMonth()]}</span>
+                    <span class="block text-[15px] font-black leading-tight mt-0.5">${cur.getUTCDate()}</span>
                 </th>`;
             }
             trHead += `</tr>`;
@@ -528,298 +558,371 @@
 
             let allRowsHtml = '';
             
-            roomTypes.forEach(room => {
-                const cleanName = abbrevRoom(room);
-                
-                // Thin Header Row per room
-                allRowsHtml += `<tr class="room-divider"><td class="frozen-col !bg-slate-200 z-20" title="${room}">
-                    <span class="truncate pr-1 block pt-[1px]">${cleanName}</span>
-                </td>`;
-                for(let i=0; i<daysToRender; i++) {
-                    const cur = new Date(dObj); cur.setUTCDate(cur.getUTCDate() + i);
-                    allRowsHtml += `<td class="day-header-cell">${cur.getUTCDate()}</td>`;
-                }
-                allRowsHtml += `</tr>`;
+            roomTypes.forEach((room, idx) => {
+                const groupClass = idx % 2 === 0 ? 'room-group-even' : 'room-group-odd';
+                let displayName = displayAbbrev[room] || room;
+                let wrappedName = displayName.replace(' ', '<br>');
 
-                // Data Rows
-                let stdLbl = currentPlatformView === 'hw' ? 'HW STD' : (currentPlatformView === 'direct' ? 'DIR STD' : 'BDC STD');
-                let fmpLbl = currentPlatformView === 'hw' ? 'HW FMP' : (currentPlatformView === 'direct' ? 'DIR FMP' : 'BDC FMP');
-                let minLbl = currentPlatformView === 'hw' ? 'Min HW' : 'Min Nts';
+                let tr1 = `<tr class="${groupClass} border-t border-slate-300">
+                    <td rowspan="2" class="frozen-col !p-0 z-20 align-middle border-r border-slate-300 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-100'}" style="width: 28px; min-width: 28px;">
+                        <div class="vertical-text-wrapper">
+                            <span class="vertical-text">${wrappedName}</span>
+                        </div>
+                    </td>
+                    <td class="frozen-col-2 !p-0 z-20 border-b border-slate-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-100'} align-middle" style="width: 28px; min-width: 28px;">
+                        <span class="text-[9px] font-black text-slate-500 tracking-tighter">STD</span>
+                    </td>`;
 
-                let trStd = `<tr class="row-std"><td class="frozen-col !font-bold !text-slate-500 truncate" title="${stdLbl}">${stdLbl}</td>`;
-                let trFmp = `<tr class="row-fmp"><td class="frozen-col !font-bold !text-pink-800 truncate" title="${fmpLbl}">${fmpLbl}</td>`;
-                let trMin = currentPlatformView !== 'direct' ? `<tr class="row-restr"><td class="frozen-col !font-bold !text-slate-500 border-t border-slate-200 truncate" title="${minLbl}">${minLbl}</td>` : '';
-                let trCta = currentPlatformView === 'bdc' ? `<tr class="row-restr"><td class="frozen-col !font-bold !text-slate-500 truncate" title="Closed to Arrival">CTA</td>` : '';
+                let tr2 = `<tr class="${groupClass} fmp-text">
+                    <td class="frozen-col-2 !p-0 z-20 align-middle border-b border-slate-400 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-100'}" style="width: 28px; min-width: 28px;">
+                        <span class="text-[9px] font-black tracking-tighter text-pink-600">FMP</span>
+                    </td>`;
 
                 for(let i=0; i<daysToRender; i++) {
                     const cur = new Date(dObj); cur.setUTCDate(cur.getUTCDate() + i);
                     const dateStr = getLocalYMD(cur);
                     const bId = `inp_${dateStr}_${room.replace(/\s+/g, '')}`;
-                    const isWeekend = cur.getUTCDay() === 0 || cur.getUTCDay() === 6;
-                    const bgSty = isWeekend ? 'bg-slate-50/50' : '';
                     
-                    trStd += `<td class="${bgSty} border-b-slate-100"><input type="number" id="${bId}_std" class="w-full text-center outline-none focus:bg-indigo-50" onfocus="this.select()" onchange="window.handleCellEdit('${dateStr}', '${room}', 'std', this.value)"></td>`;
-                    trFmp += `<td class="${bgSty} border-b-slate-200"><input type="number" id="${bId}_fmp" class="w-full text-center outline-none focus:bg-pink-50" onfocus="this.select()" onchange="window.handleCellEdit('${dateStr}', '${room}', 'fmp', this.value)"></td>`;
+                    let minDiff = getNearestFMP(parseYMD(dateStr));
+                    let fmpColor = '';
+                    if (minDiff === 0) fmpColor = 'bg-amber-300';
+                    else if (Math.abs(minDiff) <= 2) fmpColor = 'bg-yellow-100';
                     
-                    if (currentPlatformView !== 'direct') {
-                        let minKey = currentPlatformView === 'hw' ? 'min_hw' : 'min_bdc';
-                        trMin += `<td class="border-t border-slate-200 ${bgSty} border-b-slate-100"><input type="number" id="${bId}_${minKey}" class="w-full text-center outline-none focus:bg-slate-100" onfocus="this.select()" onchange="window.handleCellEdit('${dateStr}', '${room}', '${minKey}', this.value)"></td>`;
-                    }
-                    if (currentPlatformView === 'bdc') {
-                        trCta += `<td class="${bgSty}"><div class="flex justify-center h-[20px] items-center"><input type="checkbox" id="${bId}_cta" class="grid-toggle" onchange="window.handleCellEdit('${dateStr}', '${room}', 'cta', this.checked)"></div></td>`;
+                    tr1 += `<td class="${fmpColor} border-b border-slate-200 border-t border-t-slate-300"><input type="number" id="${bId}_std" class="w-full text-center outline-none focus:bg-indigo-50 font-bold !text-slate-900 bg-transparent" onfocus="this.select()" onchange="window.handleCellEdit('${dateStr}', '${room}', 'std', this.value)"></td>`;
+                    tr2 += `<td class="${fmpColor} border-b border-slate-400"><input type="number" id="${bId}_fmp" class="w-full text-center outline-none focus:bg-pink-50 font-black !text-pink-600 bg-transparent" onfocus="this.select()" onchange="window.handleCellEdit('${dateStr}', '${room}', 'fmp', this.value)"></td>`;
+                }
+                allRowsHtml += tr1 + '</tr>' + tr2 + '</tr>';
+            });
+
+            let rowsConf = [
+                { id: 'min', lbl: 'MIN NTS', show: true },
+                { id: 'max', lbl: 'MAX NTS', show: currentPlatformView !== 'hw' },
+                { id: 'min_arr', lbl: 'MIN ARR', show: currentPlatformView !== 'hw' },
+                { id: 'cta', lbl: 'CTA', show: currentPlatformView !== 'hw', isBool: true }
+            ];
+            
+            let visibleRowsConf = rowsConf.filter(rc => rc.show);
+            
+            visibleRowsConf.forEach((rc, rIndex) => {
+                let tr = `<tr class="bg-slate-700 border-b border-slate-600 text-white">`;
+                
+                if (rIndex === 0) {
+                    tr += `<td rowspan="${visibleRowsConf.length}" class="frozen-col !p-0 z-20 bg-slate-700 border-r border-slate-600 border-t-4 border-slate-800 align-middle" style="width: 28px; min-width: 28px;">
+                        <div class="vertical-text-wrapper" style="height: ${visibleRowsConf.length * 26}px;">
+                            <span class="vertical-text !text-slate-300 !font-black tracking-widest text-[10px] !whitespace-nowrap">GLOBAL RESTR</span>
+                        </div>
+                    </td>`;
+                }
+                
+                let labelHtml = rc.lbl.replace(' ', '<br>');
+                tr += `<td class="frozen-col-2 !p-0 z-20 bg-slate-700 border-r-2 border-slate-600 ${rIndex===0?'border-t-4 border-slate-800':''} align-middle border-b border-slate-600" style="width: 28px; min-width: 28px;">
+                    <div class="text-[9px] font-black !text-slate-300 uppercase tracking-tighter text-center leading-none">${labelHtml}</div>
+                </td>`;
+
+                for(let i=0; i<daysToRender; i++) {
+                    const cur = new Date(dObj); cur.setUTCDate(cur.getUTCDate() + i);
+                    const dateStr = getLocalYMD(cur);
+                    const bId = `inp_${dateStr}_GLOBAL_${rc.id}`;
+                    
+                    let minDiff = getNearestFMP(parseYMD(dateStr));
+                    let fmpColor = minDiff === 0 ? 'bg-amber-900/60' : (Math.abs(minDiff) <= 2 ? 'bg-amber-900/30' : 'bg-slate-700');
+                    let bTClass = rIndex===0 ? 'border-t-4 border-slate-800' : '';
+                    
+                    if (rc.isBool) {
+                        tr += `<td class="${fmpColor} ${bTClass} border-b border-slate-600"><div class="flex justify-center h-full items-center"><input type="checkbox" id="${bId}" class="grid-toggle" onchange="window.handleCellEdit('${dateStr}', 'GLOBAL', '${rc.id}', this.checked)"></div></td>`;
+                    } else {
+                        tr += `<td class="${fmpColor} ${bTClass} border-b border-slate-600"><input type="number" id="${bId}" class="w-full text-center outline-none focus:bg-slate-500 font-bold !text-white bg-transparent !text-[14px]" onfocus="this.select()" onchange="window.handleCellEdit('${dateStr}', 'GLOBAL', '${rc.id}', this.value)"></td>`;
                     }
                 }
-
-                allRowsHtml += trStd + '</tr>' + trFmp + '</tr>';
-                if(currentPlatformView !== 'direct') allRowsHtml += trMin + '</tr>';
-                if(currentPlatformView === 'bdc') allRowsHtml += trCta + '</tr>';
+                tr += `</tr>`;
+                allRowsHtml += tr;
             });
 
             body.innerHTML = allRowsHtml;
             
-            // Post-Render Fill
             for(let i=0; i<daysToRender; i++) {
                 const cur = new Date(dObj); cur.setUTCDate(cur.getUTCDate() + i);
                 const dateStr = getLocalYMD(cur);
                 roomTypes.forEach(room => updateDOMCell(dateStr, room));
+                updateDOMCell(dateStr, 'GLOBAL');
+            }
+            lucide.createIcons();
+        };
+
+        window.healDay = (dateStr) => {
+            const anchorP = document.getElementById('w-anchor-private').value, anchorD = document.getElementById('w-anchor-dorm').value;
+            const p_base = parseFloat(document.getElementById('w-p-base').value) || 0, p_pkg = parseFloat(document.getElementById('w-p-pkg').value) || 0, p_m2 = parseFloat(document.getElementById('w-p-m2').value) || p_base, p_m1 = parseFloat(document.getElementById('w-p-m1').value) || p_base, p_0 = parseFloat(document.getElementById('w-p-0').value) || p_base, p_p1 = parseFloat(document.getElementById('w-p-p1').value) || p_base, p_p2 = parseFloat(document.getElementById('w-p-p2').value) || p_base;
+            const d_base = parseFloat(document.getElementById('w-d-base').value) || 0, d_pkg = parseFloat(document.getElementById('w-d-pkg').value) || 0, d_m2 = parseFloat(document.getElementById('w-d-m2').value) || d_base, d_m1 = parseFloat(document.getElementById('w-d-m1').value) || d_base, d_0 = parseFloat(document.getElementById('w-d-0').value) || d_base, d_p1 = parseFloat(document.getElementById('w-d-p1').value) || d_base, d_p2 = parseFloat(document.getElementById('w-d-p2').value) || d_base;
+
+            let minDiff = getNearestFMP(parseYMD(dateStr));
+            let stdP = p_base, fmpP = ""; let stdD = d_base, fmpD = "";
+            
+            if (Math.abs(minDiff) <= 6 && minDiff !== 0) { fmpP = p_pkg; fmpD = d_pkg; } 
+            else if (Math.abs(minDiff) > 6) { fmpP = ""; fmpD = ""; }
+            
+            if (minDiff === -2) { stdP = p_m2; stdD = d_m2; }
+            else if (minDiff === -1) { stdP = p_m1; stdD = d_m1; }
+            else if (minDiff === 1) { stdP = p_p1; stdD = d_p1; }
+            else if (minDiff === 2) { stdP = p_p2; stdD = d_p2; }
+            else if (minDiff === 0) { stdP = p_0; fmpP = p_0; stdD = d_0; fmpD = d_0; }
+
+            masterPricing.timeline[dateStr] = masterPricing.timeline[dateStr] || {};
+            
+            // Restore Anchors to Autofiller math if not overridden
+            if (anchorP) {
+                masterPricing.timeline[dateStr][anchorP] = masterPricing.timeline[dateStr][anchorP] || { isOverride: {} };
+                if (!masterPricing.timeline[dateStr][anchorP].isOverride.std) masterPricing.timeline[dateStr][anchorP].std = stdP;
+                if (!masterPricing.timeline[dateStr][anchorP].isOverride.fmp) masterPricing.timeline[dateStr][anchorP].fmp = fmpP;
+            }
+            if (anchorD) {
+                masterPricing.timeline[dateStr][anchorD] = masterPricing.timeline[dateStr][anchorD] || { isOverride: {} };
+                if (!masterPricing.timeline[dateStr][anchorD].isOverride.std) masterPricing.timeline[dateStr][anchorD].std = stdD;
+                if (!masterPricing.timeline[dateStr][anchorD].isOverride.fmp) masterPricing.timeline[dateStr][anchorD].fmp = fmpD;
             }
             
-            lucide.createIcons();
+            // Ripple to Targets
+            const anchors = new Set(masterPricing.relationships.map(r => r.anchor));
+            anchors.forEach(a => { if (a !== 'unlinked') rippleDay(dateStr, a); });
+            
+            // Update UI
+            roomTypes.forEach(r => updateDOMCell(dateStr, r));
+            updateDOMCell(dateStr, 'GLOBAL');
         };
 
         window.handleCellEdit = (dateStr, room, field, value) => {
             masterPricing.timeline[dateStr] = masterPricing.timeline[dateStr] || {};
-            masterPricing.timeline[dateStr][room] = masterPricing.timeline[dateStr][room] || { std: "", fmp: "", min_bdc: "", min_hw: "", cta: false, isOverride: {} };
+            masterPricing.timeline[dateStr][room] = masterPricing.timeline[dateStr][room] || { isOverride: {} };
 
             const data = masterPricing.timeline[dateStr][room];
 
-            if (value === "" || (field === 'cta' && value === false)) {
-                // Delete override
+            if (value === "") {
                 delete data.isOverride[field];
-                if (field === 'cta') data.cta = false;
+                if (field === 'cta') data.cta = false; else data[field] = ""; 
             } else {
-                // Apply Override
                 data.isOverride[field] = true;
                 const mult = getViewMultiplier();
-                if(field === 'std' || field === 'fmp') {
-                    data[field] = Math.round(parseFloat(value) / mult);
-                } else if (field === 'cta') {
-                    data.cta = value;
+                if(field === 'std' || field === 'fmp') data[field] = Math.round(parseFloat(value) / mult);
+                else if (field === 'cta') data.cta = value;
+                else data[field] = parseInt(value);
+            }
+            
+            // Peak Day Mirror Logic 
+            let minDiff = getNearestFMP(parseYMD(dateStr));
+            if (minDiff === 0 && (field === 'std' || field === 'fmp') && room !== 'GLOBAL') {
+                if (value === "") {
+                    data.isOverride.std = false; data.isOverride.fmp = false;
+                    data.std = ""; data.fmp = "";
                 } else {
-                    data[field] = parseInt(value);
+                    data.std = data[field]; data.fmp = data[field];
+                    data.isOverride.std = true; data.isOverride.fmp = true;
                 }
             }
             
             updateDOMCell(dateStr, room);
-            if (field === 'std' || field === 'fmp') rippleDay(dateStr, room);
+            if ((field === 'std' || field === 'fmp') && room !== 'GLOBAL') {
+                if (value === "") {
+                    window.healDay(dateStr); // Self-heals the blank based on underlying curve
+                } else {
+                    rippleDay(dateStr, room);
+                }
+            }
             window.triggerAutoSave();
         };
 
-        // --- LAYER 3 QUICK BULK ---
-        window.toggleQuickBulk = () => {
+        window.toggleQuickBulk = (forceClose = false) => {
             const panel = document.getElementById('quick-bulk-panel');
-            if (panel.classList.contains('hidden')) {
+            if (!forceClose && panel.classList.contains('hidden')) {
                 panel.classList.remove('hidden'); panel.classList.add('flex');
-                window.renderQuickBulkRooms();
+                window.renderQuickBulkRooms(); window.toggleQBField();
+            } else { panel.classList.add('hidden'); panel.classList.remove('flex'); }
+        };
+
+        window.toggleQBField = () => {
+            const f = document.getElementById('qb-field').value;
+            if (['min', 'max', 'min_arr', 'cta'].includes(f)) {
+                document.getElementById('qb-rooms-container').style.display = 'none'; document.getElementById('qb-global-container').style.display = 'flex';
             } else {
-                panel.classList.add('hidden'); panel.classList.remove('flex');
+                document.getElementById('qb-rooms-container').style.display = 'flex'; document.getElementById('qb-global-container').style.display = 'none';
             }
         };
 
         window.renderQuickBulkRooms = () => {
-            const c = document.getElementById('qb-rooms-container');
-            let html = '';
-            roomTypes.forEach(r => {
-                html += `<div class="flex items-center gap-1.5 w-32"><input type="number" data-room="${r}" class="qb-room-input input-base !py-1 !px-1 text-center text-xs border-indigo-200 w-12"><label class="text-[9px] uppercase font-bold text-slate-500 truncate flex-1" title="${r}">${abbrevRoom(r)}</label></div>`;
+            const c = document.getElementById('qb-rooms-container'); let html = '';
+            roomTypes.forEach(r => { 
+                html += `<div class="flex items-center gap-1 w-32 bg-white px-1.5 py-1 rounded border border-slate-200 shadow-sm">
+                    <input type="checkbox" id="qb_chk_${r.replace(/\s+/g, '')}" value="${r}" class="qb-room-chk cursor-pointer accent-indigo-600">
+                    <input type="number" id="qb_val_${r.replace(/\s+/g, '')}" class="qb-room-input input-base !py-0.5 !px-1 text-center text-[10px] w-12 border-slate-300" placeholder="Val" oninput="if(this.value !== '') document.getElementById('qb_chk_${r.replace(/\s+/g, '')}').checked = true;">
+                    <label for="qb_chk_${r.replace(/\s+/g, '')}" class="text-[9px] uppercase font-bold text-slate-600 truncate flex-1 cursor-pointer" title="${r}">${displayAbbrev[r]||r}</label>
+                </div>`; 
             });
             c.innerHTML = html;
         };
 
-        window.runQuickBulk = () => {
-            const s = document.getElementById('qb-start').value;
-            const e = document.getElementById('qb-end').value;
-            const f = document.getElementById('qb-field').value;
+        window.runQuickBulk = (isClear = false) => {
+            const s = document.getElementById('qb-start').value, e = document.getElementById('qb-end').value, f = document.getElementById('qb-field').value;
             if(!s || !e) return window.customAlert("Please select Start and End dates.");
+            const sU = parseYMD(s), eU = parseYMD(e);
             
-            const sU = parseYMD(s);
-            const eU = parseYMD(e);
-            
-            const updates = [];
-            document.querySelectorAll('.qb-room-input').forEach(el => {
-                if(el.value !== "") updates.push({ room: el.dataset.room, val: el.value });
-            });
-            
-            if(updates.length === 0) return window.customAlert("Enter a value for at least one room to apply overrides.");
-            
-            for(let d=sU; d<=eU; d+=86400000) {
-                let dateStr = getLocalYMD(new Date(d));
-                updates.forEach(u => {
-                    let actualField = f === 'min' ? (currentPlatformView === 'hw' ? 'min_hw' : 'min_bdc') : f;
-                    window.handleCellEdit(dateStr, u.room, actualField, u.val);
+            if (['min', 'max', 'min_arr', 'cta'].includes(f)) {
+                if (isClear) {
+                    for(let d=sU; d<=eU; d+=86400000) window.handleCellEdit(getLocalYMD(new Date(d)), 'GLOBAL', f, "");
+                } else {
+                    let v = document.getElementById('qb-global-val').value;
+                    if (!v && f !== 'cta') return window.customAlert("Enter a value to apply global override.");
+                    let applyVal = f === 'cta' ? (v.toLowerCase() === 'true' || v === '1' || v.toLowerCase() === 'on') : parseInt(v);
+                    for(let d=sU; d<=eU; d+=86400000) window.handleCellEdit(getLocalYMD(new Date(d)), 'GLOBAL', f, applyVal);
+                }
+            } else {
+                const updates = [];
+                document.querySelectorAll('.qb-room-chk:checked').forEach(chk => {
+                    const room = chk.value;
+                    const valInput = document.getElementById(`qb_val_${room.replace(/\s+/g, '')}`);
+                    if (isClear) {
+                        updates.push({ room, val: "" }); // Blank clears it, triggering healDay
+                    } else if (valInput.value !== "") {
+                        updates.push({ room, val: valInput.value });
+                    }
                 });
+                
+                if(updates.length === 0) {
+                    if (isClear) return window.customAlert("Check at least one room to clear.");
+                    else return window.customAlert("Check at least one room and enter a value to apply.");
+                }
+                
+                for(let d=sU; d<=eU; d+=86400000) {
+                    updates.forEach(u => window.handleCellEdit(getLocalYMD(new Date(d)), u.room, f, u.val));
+                }
             }
-            
-            window.toggleQuickBulk();
         };
 
-        // --- LAYER 2 AUTOMATOR ---
-        const getNearestFMP = (unixMs) => {
-            let minDiff = Infinity;
-            fmpDates.forEach(fmp => {
-                const diff = Math.round((unixMs - parseYMD(fmp)) / 86400000);
-                if (Math.abs(diff) < Math.abs(minDiff)) minDiff = diff;
+        window.nukeDatabase = () => {
+            window.customAlert("WIPE ALL PRICING DATA?\n\nThis will completely clear your entire pricing matrix from the database, resetting everything to blank.", true, () => {
+                masterPricing.timeline = {};
+                window.savePricingToCloud();
+                window.renderGrid();
             });
-            return minDiff;
-        };
-
-        window.confirmClearOverrides = () => {
-            window.customAlert("Are you sure you want to clear all yellow manual overrides for the selected date range? This will reset the prices back to the automated curve.", true, window.clearOverrides);
         };
 
         window.clearOverrides = () => {
-            const sMonth = document.getElementById('w-start-month').value;
-            const dur = parseInt(document.getElementById('w-duration').value) || 1;
-            if(!sMonth) return window.customAlert("Please select a Start Month.");
-            
-            const [y, m] = sMonth.split('-');
-            const startUnix = Date.UTC(parseInt(y), parseInt(m)-1, 1);
-            const endUnix = Date.UTC(parseInt(y), parseInt(m)-1 + dur, 0); 
+            const sDate = document.getElementById('w-start-date').value; const dur = parseInt(document.getElementById('w-duration').value) || 30;
+            if(!sDate) return window.customAlert("Please select a Start Date.");
+            const startUnix = parseYMD(sDate), endUnix = startUnix + (dur * 86400000); 
             
             for(let d=startUnix; d<=endUnix; d+=86400000) {
                 let dateStr = getLocalYMD(new Date(d));
                 if (masterPricing.timeline[dateStr]) {
-                    roomTypes.forEach(r => {
-                        if (masterPricing.timeline[dateStr][r]) {
-                            masterPricing.timeline[dateStr][r].isOverride = {};
-                        }
-                    });
+                    roomTypes.forEach(r => { if (masterPricing.timeline[dateStr][r]) masterPricing.timeline[dateStr][r].isOverride = {}; });
+                    if (masterPricing.timeline[dateStr]['GLOBAL']) masterPricing.timeline[dateStr]['GLOBAL'].isOverride = {};
                 }
             }
-            window.triggerAutoSave();
-            window.renderGrid();
-            window.switchTab('grid');
+            window.runAutomator(); 
         };
 
         window.runAutomator = () => {
-            const anchorP = document.getElementById('w-anchor-private').value;
-            const anchorD = document.getElementById('w-anchor-dorm').value;
-            const sMonth = document.getElementById('w-start-month').value;
-            const dur = parseInt(document.getElementById('w-duration').value) || 1;
+            const anchorP = document.getElementById('w-anchor-private').value, anchorD = document.getElementById('w-anchor-dorm').value;
+            const sDate = document.getElementById('w-start-date').value, dur = parseInt(document.getElementById('w-duration').value) || 30;
             
-            // Private Curve Values
-            const p_base = parseFloat(document.getElementById('w-p-base').value) || 0;
-            const p_pkg = parseFloat(document.getElementById('w-p-pkg').value) || 0;
-            const p_m2 = parseFloat(document.getElementById('w-p-m2').value) || p_base;
-            const p_m1 = parseFloat(document.getElementById('w-p-m1').value) || p_base;
-            const p_0 = parseFloat(document.getElementById('w-p-0').value) || p_base;
-            const p_p1 = parseFloat(document.getElementById('w-p-p1').value) || p_base;
-            const p_p2 = parseFloat(document.getElementById('w-p-p2').value) || p_base;
+            const p_base = parseFloat(document.getElementById('w-p-base').value) || 0, p_pkg = parseFloat(document.getElementById('w-p-pkg').value) || 0, p_m2 = parseFloat(document.getElementById('w-p-m2').value) || p_base, p_m1 = parseFloat(document.getElementById('w-p-m1').value) || p_base, p_0 = parseFloat(document.getElementById('w-p-0').value) || p_base, p_p1 = parseFloat(document.getElementById('w-p-p1').value) || p_base, p_p2 = parseFloat(document.getElementById('w-p-p2').value) || p_base;
+            const d_base = parseFloat(document.getElementById('w-d-base').value) || 0, d_pkg = parseFloat(document.getElementById('w-d-pkg').value) || 0, d_m2 = parseFloat(document.getElementById('w-d-m2').value) || d_base, d_m1 = parseFloat(document.getElementById('w-d-m1').value) || d_base, d_0 = parseFloat(document.getElementById('w-d-0').value) || d_base, d_p1 = parseFloat(document.getElementById('w-d-p1').value) || d_base, d_p2 = parseFloat(document.getElementById('w-d-p2').value) || d_base;
             
-            // Dorm Curve Values
-            const d_base = parseFloat(document.getElementById('w-d-base').value) || 0;
-            const d_pkg = parseFloat(document.getElementById('w-d-pkg').value) || 0;
-            const d_m2 = parseFloat(document.getElementById('w-d-m2').value) || d_base;
-            const d_m1 = parseFloat(document.getElementById('w-d-m1').value) || d_base;
-            const d_0 = parseFloat(document.getElementById('w-d-0').value) || d_base;
-            const d_p1 = parseFloat(document.getElementById('w-d-p1').value) || d_base;
-            const d_p2 = parseFloat(document.getElementById('w-d-p2').value) || d_base;
-            
-            if(!sMonth) return window.customAlert("Please select a Start Month.");
-            
-            const [y, m] = sMonth.split('-');
-            const startUnix = Date.UTC(parseInt(y), parseInt(m)-1, 1);
-            const endUnix = Date.UTC(parseInt(y), parseInt(m)-1 + dur, 0); 
+            if(!sDate) return window.customAlert("Please select a Start Date.");
+            const startUnix = parseYMD(sDate), endUnix = startUnix + ((dur - 1) * 86400000); 
             
             for(let d=startUnix; d<=endUnix; d+=86400000) {
                 let dateStr = getLocalYMD(new Date(d));
-                let minDiff = getNearestFMP(d);
+                let minDiff = getNearestFMP(parseYMD(dateStr));
                 
-                let stdP = p_base, fmpP = p_pkg;
-                let stdD = d_base, fmpD = d_pkg;
+                let stdP = p_base, fmpP = ""; let stdD = d_base, fmpD = "";
+                let min = "", min_arr = "", cta = false;
                 
-                let min_bdc = 1;
-                let min_hw = 1;
-                let cta = false;
+                // STRICT FMP PKG ISOLATION (+/- 6 Days ONLY)
+                if (Math.abs(minDiff) <= 6 && minDiff !== 0) { 
+                    fmpP = p_pkg; fmpD = d_pkg; 
+                } else if (Math.abs(minDiff) > 6) {
+                    fmpP = ""; fmpD = ""; // Force blank elsewhere
+                }
                 
-                // Map Private Curve
-                if (minDiff === -2) stdP = p_m2;
-                else if (minDiff === -1) stdP = p_m1;
-                else if (minDiff === 0) { stdP = p_0; fmpP = p_0; }
-                else if (minDiff === 1) stdP = p_p1;
-                else if (minDiff === 2) stdP = p_p2;
+                if (minDiff === -2) { stdP = p_m2; stdD = d_m2; }
+                else if (minDiff === -1) { stdP = p_m1; stdD = d_m1; }
+                else if (minDiff === 1) { stdP = p_p1; stdD = d_p1; }
+                else if (minDiff === 2) { stdP = p_p2; stdD = d_p2; }
+                else if (minDiff === 0) { 
+                    stdP = p_0; fmpP = p_0; 
+                    stdD = d_0; fmpD = d_0; 
+                }
                 
-                // Map Dorm Curve
-                if (minDiff === -2) stdD = d_m2;
-                else if (minDiff === -1) stdD = d_m1;
-                else if (minDiff === 0) { stdD = d_0; fmpD = d_0; }
-                else if (minDiff === 1) stdD = d_p1;
-                else if (minDiff === 2) stdD = d_p2;
-                
-                // Advanced FMP Restrictions Math (Applies to all)
-                if (minDiff <= 0 && minDiff >= -6) {
-                    let step = Math.min(7, Math.abs(minDiff) + 2);
-                    min_bdc = step; min_hw = step;
+                // GLOBAL RESTRICTIONS
+                if (minDiff < 0 && minDiff >= -6) {
+                    min = Math.abs(minDiff) + 1; // 7, 6, 5, 4, 3, 2
+                } else if (minDiff === 0) {
+                    min = 1; // Peak
                 } else if (minDiff > 0 && minDiff <= 6) {
-                    min_bdc = 5; cta = true;
-                    min_hw = Math.min(7, minDiff + 1);
+                    min = ""; 
+                    min_arr = 5; 
+                    cta = true; 
+                } else {
+                    min = ""; min_arr = ""; cta = false;
                 }
 
                 masterPricing.timeline[dateStr] = masterPricing.timeline[dateStr] || {};
+                masterPricing.timeline[dateStr]['GLOBAL'] = masterPricing.timeline[dateStr]['GLOBAL'] || { isOverride: {} };
+                const curG = masterPricing.timeline[dateStr]['GLOBAL'];
+                if (!curG.isOverride.min && min !== "") curG.min = min; else if (!curG.isOverride.min && min === "") curG.min = "";
+                if (!curG.isOverride.min_arr && min_arr !== "") curG.min_arr = min_arr; else if (!curG.isOverride.min_arr && min_arr === "") curG.min_arr = "";
+                if (!curG.isOverride.cta) curG.cta = cta;
                 
-                // Apply & Ripple Privates
                 if (anchorP) {
                     masterPricing.timeline[dateStr][anchorP] = masterPricing.timeline[dateStr][anchorP] || { isOverride: {} };
                     const curP = masterPricing.timeline[dateStr][anchorP];
                     if (!curP.isOverride.std) curP.std = stdP;
                     if (!curP.isOverride.fmp) curP.fmp = fmpP;
-                    if (!curP.isOverride.min_bdc) curP.min_bdc = min_bdc;
-                    if (!curP.isOverride.min_hw) curP.min_hw = min_hw;
-                    if (!curP.isOverride.cta) curP.cta = cta;
                     rippleDay(dateStr, anchorP);
                 }
                 
-                // Apply & Ripple Dorms
                 if (anchorD) {
                     masterPricing.timeline[dateStr][anchorD] = masterPricing.timeline[dateStr][anchorD] || { isOverride: {} };
                     const curD = masterPricing.timeline[dateStr][anchorD];
                     if (!curD.isOverride.std) curD.std = stdD;
                     if (!curD.isOverride.fmp) curD.fmp = fmpD;
-                    if (!curD.isOverride.min_bdc) curD.min_bdc = min_bdc;
-                    if (!curD.isOverride.min_hw) curD.min_hw = min_hw;
-                    if (!curD.isOverride.cta) curD.cta = cta;
                     rippleDay(dateStr, anchorD);
                 }
             }
-            
-            window.triggerAutoSave();
-            window.renderGrid();
-            window.switchTab('grid');
+            window.triggerAutoSave(); window.renderGrid(); window.switchTab('grid');
         };
 
-        // --- LAYER 1 RELATIONSHIPS ---
         window.renderRelationships = () => {
-            const body = document.getElementById('relationships-body');
-            body.innerHTML = '';
-
+            const body = document.getElementById('relationships-body'); body.innerHTML = '';
             masterPricing.relationships.forEach((rel, idx) => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-200 rel-row bg-white hover:bg-slate-50 transition-colors";
+                const tr = document.createElement('tr'); tr.className = "border-b border-slate-200 rel-row bg-white hover:bg-slate-50 transition-colors";
                 tr.innerHTML = `
-                    <td class="p-1 text-center"><button onclick="window.removeRelationship(${idx})" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i data-lucide="trash-2" size="16"></i></button></td>
-                    <td class="p-1 border-r border-slate-200"><select class="rel-target input-base !text-xs !py-1.5 cursor-pointer w-full" onchange="window.saveRelationships()">${roomTypes.map(t => `<option value="${t}" ${t===rel.target?'selected':''}>${t}</option>`).join('')}</select></td>
-                    <td class="p-1 border-r border-slate-200"><select class="rel-anchor input-base !text-xs !py-1.5 cursor-pointer w-full" onchange="window.saveRelationships()"><option value="unlinked" ${rel.anchor==='unlinked'?'selected':''} class="font-black text-amber-600">-- UNLINKED (Manual Only) --</option>${roomTypes.map(t => `<option value="${t}" ${t===rel.anchor?'selected':''}>${t}</option>`).join('')}</select></td>
-                    <td class="p-1 flex gap-1 items-center">
-                        <select class="rel-type input-base !text-xs !py-1.5 w-auto min-w-[60px] text-center cursor-pointer font-black text-indigo-700" onchange="window.saveRelationships()">
-                            <option value="=" ${rel.type==='='?'selected':''}>SYNC (=)</option>
-                            <option value="+%" ${rel.type==='+%'?'selected':''}>+ %</option>
-                            <option value="-%" ${rel.type==='-%'?'selected':''}>- %</option>
-                            <option value="+" ${rel.type==='+'?'selected':''}>+ ฿</option>
-                            <option value="-" ${rel.type==='-'?'selected':''}>- ฿</option>
-                        </select>
-                        <input type="number" class="rel-val input-base !text-sm !py-1.5 w-24 text-center font-black" placeholder="Value" value="${rel.val === 0 ? '' : rel.val}" onchange="window.saveRelationships()">
+                    <td class="p-0 text-center"><button onclick="this.closest('tr').remove(); window.saveRelationships()" class="text-slate-400 hover:text-red-500 transition-colors p-1 cursor-pointer"><i data-lucide="trash-2" size="16"></i></button></td>
+                    <td class="p-0 border-r border-slate-200 w-1/4"><select class="rel-anchor input-base !text-xs !py-1 cursor-pointer w-full" onchange="window.saveRelationships()"><option value="unlinked" ${rel.anchor==='unlinked'?'selected':''} class="font-black text-amber-600">-- UNLINKED --</option>${roomTypes.map(t => `<option value="${t}" ${t===rel.anchor?'selected':''}>${displayAbbrev[t]||t}</option>`).join('')}</select></td>
+                    <td class="p-0 border-r border-slate-200 w-1/4"><select class="rel-target input-base !text-xs !py-1 cursor-pointer w-full" onchange="window.saveRelationships()">${roomTypes.map(t => `<option value="${t}" ${t===rel.target?'selected':''}>${displayAbbrev[t]||t}</option>`).join('')}</select></td>
+                    <td class="p-0 border-r border-slate-200 bg-slate-50">
+                        <div class="flex items-center justify-center">
+                            <select class="rel-type input-base !text-xs !py-1 w-auto min-w-[80px] text-center cursor-pointer font-black text-indigo-700" onchange="window.saveRelationships()">
+                                <option value="=" ${rel.type==='='?'selected':''}>SYNC (=)</option>
+                                <option value="+%" ${rel.type==='+%'?'selected':''}>+ %</option>
+                                <option value="-%" ${rel.type==='-%'?'selected':''}>- %</option>
+                                <option value="+" ${rel.type==='+'?'selected':''}>+ ฿</option>
+                                <option value="-" ${rel.type==='-'?'selected':''}>- ฿</option>
+                            </select>
+                            <input type="number" class="rel-val input-base !text-sm !py-1 w-20 text-center font-black" placeholder="Val" value="${rel.val === 0 ? '' : rel.val}" onchange="window.saveRelationships()">
+                        </div>
                     </td>
-                `;
-                body.appendChild(tr);
+                    <td class="p-0 bg-pink-50/50">
+                        <div class="flex items-center justify-center">
+                            <select class="rel-fmp-type input-base !text-xs !py-1 w-auto min-w-[80px] text-center cursor-pointer font-black text-pink-700" onchange="window.saveRelationships()">
+                                <option value="=" ${rel.typeFmp==='='?'selected':''}>SYNC (=)</option>
+                                <option value="+%" ${rel.typeFmp==='+%'?'selected':''}>+ %</option>
+                                <option value="-%" ${rel.typeFmp==='-%'?'selected':''}>- %</option>
+                                <option value="+" ${rel.typeFmp==='+'?'selected':''}>+ ฿</option>
+                                <option value="-" ${rel.typeFmp==='-'?'selected':''}>- ฿</option>
+                            </select>
+                            <input type="number" class="rel-fmp-val input-base !text-sm !py-1 w-20 text-center font-black" placeholder="Val" value="${rel.valFmp === 0 || rel.valFmp === undefined ? '' : rel.valFmp}" onchange="window.saveRelationships()">
+                        </div>
+                    </td>
+                `; body.appendChild(tr);
             });
             lucide.createIcons();
         };
@@ -828,99 +931,50 @@
             masterPricing.relationships = [];
             document.querySelectorAll('.rel-row').forEach(tr => {
                 masterPricing.relationships.push({
-                    target: tr.querySelector('.rel-target').value,
-                    anchor: tr.querySelector('.rel-anchor').value,
-                    type: tr.querySelector('.rel-type').value,
-                    val: parseFloat(tr.querySelector('.rel-val').value) || 0
+                    anchor: tr.querySelector('.rel-anchor').value, target: tr.querySelector('.rel-target').value,
+                    type: tr.querySelector('.rel-type').value, val: parseFloat(tr.querySelector('.rel-val').value) || 0,
+                    typeFmp: tr.querySelector('.rel-fmp-type').value, valFmp: parseFloat(tr.querySelector('.rel-fmp-val').value) || 0
                 });
             });
             window.triggerAutoSave();
+            window.renderGrid();
         };
 
-        window.removeRelationship = (idx) => {
-            masterPricing.relationships.splice(idx, 1);
-            window.saveRelationships();
-            window.renderRelationships();
-        };
+        window.addRelationshipRow = () => { masterPricing.relationships.push({ anchor: roomTypes[0], target: roomTypes[1] || roomTypes[0], type: "=", val: 0, typeFmp: "=", valFmp: 0 }); window.saveRelationships(); window.renderRelationships(); };
 
-        window.addRelationshipRow = () => {
-            // Save existing first
-            window.saveRelationships();
-            masterPricing.relationships.push({ target: roomTypes[0], anchor: roomTypes[1] || roomTypes[0], type: "=", val: 0 });
-            window.saveRelationships();
-            window.renderRelationships();
-        };
-
-        // --- FIREBASE CLOUD SYNC ---
         const cleanPayload = (obj) => {
             if (Array.isArray(obj)) return obj.map(cleanPayload);
-            if (obj !== null && typeof obj === 'object') {
-                return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined).map(([k, v]) => [k, cleanPayload(v)]));
-            }
+            if (obj !== null && typeof obj === 'object') return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined).map(([k, v]) => [k, cleanPayload(v)]));
             return obj;
         };
 
         window.savePricingToCloud = async (silent = false) => {
-            if (!silent) {
-                document.getElementById('loader').classList.add('active');
-                document.getElementById('sync-status').innerText = 'SAVING TO CLOUD...';
-            }
+            if (!silent) { document.getElementById('loader').classList.add('active'); document.getElementById('sync-status').innerText = 'SAVING TO CLOUD...'; }
             try {
                 const payload = cleanPayload(JSON.parse(JSON.stringify(masterPricing)));
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pricing', 'master_v3'), {
-                    ...payload, updatedAt: new Date().toISOString()
-                });
-                
-                if (!silent) {
-                    document.getElementById('loader').classList.remove('active');
-                    window.customAlert("Success!\n\nYour Master Pricing Matrix has been saved to the cloud.");
-                } else {
-                    const si = document.getElementById('save-indicator');
-                    si.innerText = 'SAVED'; si.classList.replace('text-amber-400', 'text-emerald-400');
-                    setTimeout(() => { si.style.opacity = '0'; }, 2000);
-                }
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pricing', 'master_v4'), { ...payload, updatedAt: new Date().toISOString() });
+                if (!silent) { document.getElementById('loader').classList.remove('active'); window.customAlert("Success!\n\nYour Master Pricing Matrix has been saved to the cloud."); } 
+                else { const si = document.getElementById('save-indicator'); si.innerText = 'SAVED'; si.classList.replace('text-amber-400', 'text-emerald-400'); setTimeout(() => { si.style.opacity = '0'; }, 2000); }
             } catch (err) {
                 console.warn(err);
-                if (!silent) {
-                    document.getElementById('loader').classList.remove('active');
-                    window.customAlert("Saved locally only.\n\nCould not write to Firebase.");
-                }
+                if (!silent) { document.getElementById('loader').classList.remove('active'); window.customAlert("Saved locally only.\n\nCould not write to Firebase."); }
             }
         };
 
-        // Initialization
         const init = async () => {
             try { 
                 await signInAnonymously(auth); 
-                const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pricing', 'master_v3'));
-                if (snap.exists()) {
-                    const d = snap.data();
-                    if (d.timeline) masterPricing.timeline = d.timeline;
-                    if (d.relationships) masterPricing.relationships = d.relationships;
-                }
-            } catch (e) { 
-                console.warn("Using offline mode."); 
-            }
+                const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pricing', 'master_v4'));
+                if (snap.exists()) { const d = snap.data(); if (d.timeline) masterPricing.timeline = d.timeline; if (d.relationships) masterPricing.relationships = d.relationships; }
+            } catch (e) { console.warn("Using offline mode."); }
 
-            // Defaults if empty
-            if(masterPricing.relationships.length === 0) {
-                roomTypes.forEach(t => {
-                    masterPricing.relationships.push({ target: t, anchor: t.includes('Dorm') ? 'unlinked' : 'Gardenview King', type: "=", val: 0 });
-                });
-            }
+            if(masterPricing.relationships.length === 0) roomTypes.forEach(t => masterPricing.relationships.push({ anchor: 'Gardenview King', target: t, type: "=", val: 0, typeFmp: "=", valFmp: 0 }));
             
-            const today = new Date();
-            document.getElementById('qb-start').value = getLocalYMD(today);
-            const nextW = new Date(today); nextW.setDate(today.getDate() + 7);
-            document.getElementById('qb-end').value = getLocalYMD(nextW);
-            document.getElementById('w-start-month').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-
-            today.setDate(today.getDate() - 3);
-            document.getElementById('tape-start').value = getLocalYMD(today);
+            const today = new Date(); document.getElementById('qb-start').value = getLocalYMD(today); document.getElementById('w-start-date').value = getLocalYMD(today);
+            const nextM = new Date(today); nextM.setDate(today.getDate() + 30); document.getElementById('qb-end').value = getLocalYMD(nextM);
+            today.setDate(today.getDate() - 3); document.getElementById('tape-start').value = getLocalYMD(today);
             
-            window.switchTab('grid');
-            window.renderGrid(); 
-            document.getElementById('loader').classList.remove('active');
+            window.switchTab('grid'); window.renderGrid(); document.getElementById('loader').classList.remove('active');
         };
 
         init();
