@@ -940,7 +940,7 @@
             window.renderGrid();
         };
 
-        window.addRelationshipRow = () => { masterPricing.relationships.push({ anchor: roomTypes[0], target: roomTypes[1] || roomTypes[0], type: "=", val: 0, typeFmp: "=", valFmp: 0 }); window.saveRelationships(); window.renderRelationships(); };
+        window.addRelationshipRow = () => { masterPricing.relationships.push({ anchor: roomTypes[0], target: roomTypes[1] || roomTypes[0], type: "=", val: 0, typeFmp: "=", valFmp: 0 }); window.renderRelationships(); window.saveRelationships(); };
 
         const cleanPayload = (obj) => {
             if (Array.isArray(obj)) return obj.map(cleanPayload);
