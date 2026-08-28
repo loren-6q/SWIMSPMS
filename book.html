@@ -6,6 +6,7 @@
     <title>SWIMS | A Social Beach Resort</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     
     <style type="text/tailwindcss">
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;600;700;900&family=Inter:wght@400;500;600&display=swap');
@@ -35,19 +36,24 @@
         @layer components {
             .input-base { @apply w-full bg-slate-50 border border-slate-300 font-sans font-semibold text-sm px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-slate-800 transition-all; }
             .label-base { @apply text-[10px] font-mono font-black text-slate-500 mb-1 uppercase tracking-widest block; }
-            .btn-primary { @apply px-8 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-mono font-bold text-xs uppercase tracking-widest shadow-lg shadow-slate-900/20 transition-all active:scale-95 text-center; }
+            .btn-primary { @apply px-8 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-mono font-bold text-xs uppercase tracking-widest shadow-lg shadow-slate-900/20 transition-all active:scale-95 text-center cursor-pointer; }
         }
 
         .spinner { width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #0f172a; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Stripe Element Container */
+        #card-element { @apply w-full bg-slate-50 border border-slate-300 px-4 py-3 rounded-lg outline-none transition-all; }
+        .StripeElement--focus { @apply ring-2 ring-slate-800 border-slate-800; }
+        .StripeElement--invalid { @apply border-rose-500 ring-rose-200; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
     <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/50 shadow-sm transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0.5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
+                <div class="flex items-center gap-3 cursor-pointer py-1" onclick="window.scrollTo(0,0)">
                     <img src="https://loren-6q.github.io/SWIMSPMS/pics/SWIMSBanner.png" alt="SWIMS Logo" class="h-[72px] w-auto object-contain">
                 </div>
                 <div class="hidden md:flex items-center space-x-8">
@@ -60,13 +66,12 @@
         </div>
     </nav>
 
-    <div class="hero-bg relative pt-32 pb-20 lg:pt-48 flex flex-col items-center justify-center min-h-screen">
-        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center mb-16">
+    <div class="hero-bg relative flex flex-col items-center justify-center min-h-screen">
+        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center mb-8">
             <h1 class="font-display text-5xl md:text-7xl text-white mb-6 tracking-wide drop-shadow-lg leading-tight font-semibold">Stay Wild.<br><span class="italic font-light text-slate-200">Stay Social.</span></h1>
             <p class="text-lg md:text-xl text-slate-200 font-sans font-light mb-10 max-w-2xl drop-shadow">The ultimate beachfront playground on Koh Phangan. Private bungalows, premium dorms, and an iconic infinity pool steps from the ocean.</p>
         </div>
 
-        <!-- Search Widget -->
         <div id="search-widget" class="relative z-20 w-full max-w-4xl mx-auto px-4 translate-y-8">
             <div class="glass-panel p-6 md:p-8 rounded-2xl shadow-2xl flex flex-col md:flex-row gap-4 items-end">
                 <div class="w-full md:flex-1">
@@ -99,39 +104,93 @@
             <span id="results-summary" class="font-mono font-bold text-[11px] text-slate-500 uppercase tracking-widest"></span>
         </div>
 
-        <div id="results-container" class="space-y-8">
-            <!-- Room cards dynamically injected here -->
-        </div>
+        <div id="results-container" class="space-y-8"></div>
     </div>
 
+    <!-- Checkout Modal -->
     <div id="checkout-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div class="bg-white border-b border-slate-200 p-5 flex justify-between items-center shrink-0">
                 <h3 class="font-display text-2xl text-slate-800">Complete Booking</h3>
                 <button onclick="window.closeCheckout()" class="p-2 hover:bg-slate-100 text-slate-500 hover:text-slate-800 rounded-full transition-colors cursor-pointer"><i data-lucide="x" size="20"></i></button>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-6 md:p-8 flex flex-col md:flex-row gap-8 bg-slate-50">
-                <div class="flex-1 space-y-5 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <h4 class="font-mono font-black uppercase text-slate-800 text-[11px] tracking-widest border-b border-slate-100 pb-3">Guest Details</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="label-base">First Name</label><input type="text" id="guest-first" class="input-base uppercase"></div>
-                        <div><label class="label-base">Last Name</label><input type="text" id="guest-last" class="input-base uppercase"></div>
+            <div class="flex-1 overflow-y-auto p-6 md:p-8 flex flex-col lg:flex-row gap-8 bg-slate-50">
+                <div class="flex-1 space-y-6">
+                    <!-- Guest Details -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-5">
+                        <h4 class="font-mono font-black uppercase text-slate-800 text-[11px] tracking-widest border-b border-slate-100 pb-3">Guest Details</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="label-base">First Name</label><input type="text" id="guest-first" class="input-base uppercase"></div>
+                            <div><label class="label-base">Last Name</label><input type="text" id="guest-last" class="input-base uppercase"></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2"><label class="label-base">Email Address</label><input type="email" id="guest-email" class="input-base"></div>
+                            <div><label class="label-base">Phone Number</label><input type="tel" id="guest-phone" class="input-base"></div>
+                        </div>
+                        <div>
+                            <label class="label-base">Country</label>
+                            <select id="guest-country" class="input-base cursor-pointer">
+                                <option value="">-- Select Country --</option>
+                                <option value="United States">United States</option><option value="United Kingdom">United Kingdom</option><option value="Australia">Australia</option><option value="Germany">Germany</option><option value="France">France</option><option value="Netherlands">Netherlands</option><option value="Israel">Israel</option><option value="Canada">Canada</option><option value="Thailand">Thailand</option><option value="Other">Other / Unlisted</option>
+                            </select>
+                        </div>
+                        <div><label class="label-base">Special Requests (Optional)</label><textarea id="guest-notes" rows="2" class="input-base resize-none"></textarea></div>
                     </div>
-                    <div><label class="label-base">Email Address</label><input type="email" id="guest-email" class="input-base"></div>
-                    <div><label class="label-base">Phone Number</label><input type="tel" id="guest-phone" class="input-base"></div>
-                    <div><label class="label-base">Special Requests</label><textarea id="guest-notes" rows="3" class="input-base resize-none"></textarea></div>
+
+                    <!-- Secure Payment / Card Vault -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-5">
+                        <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                            <i data-lucide="lock" size="16" class="text-emerald-600"></i>
+                            <h4 class="font-mono font-black uppercase text-slate-800 text-[11px] tracking-widest">Payment Guarantee</h4>
+                        </div>
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex gap-3 text-sm text-emerald-800 font-sans">
+                            <i data-lucide="info" class="shrink-0 mt-0.5" size="18"></i>
+                            <p><strong>Nothing will be charged today.</strong> We securely hold your card details to guarantee your reservation. You will pay the full balance upon arrival at the property.</p>
+                        </div>
+                        
+                        <div>
+                            <label class="label-base">Credit or Debit Card</label>
+                            <!-- Stripe Elements Placeholder -->
+                            <div id="card-element"></div>
+                            <div id="card-errors" class="text-rose-500 text-xs font-bold mt-2 hidden"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="w-full md:w-80 bg-slate-900 text-white p-6 rounded-xl shadow-lg h-fit space-y-6 shrink-0">
+                <!-- Reservation Summary Side Panel -->
+                <div class="w-full lg:w-80 bg-slate-900 text-white p-6 rounded-xl shadow-lg h-fit space-y-6 shrink-0">
                     <h4 class="font-mono font-black uppercase text-slate-300 text-[11px] tracking-widest border-b border-slate-700 pb-3">Reservation Summary</h4>
                     <div id="checkout-summary" class="font-sans text-sm text-slate-200 space-y-3"></div>
+                    
+                    <!-- Rate Plan Selection -->
+                    <div id="rate-type-container" class="border-t border-slate-700 pt-5 mt-4 space-y-2">
+                        <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg border border-slate-600 bg-slate-800/50 hover:bg-slate-700 transition-colors">
+                            <input type="radio" name="rate_type" value="std" checked class="mt-1 accent-emerald-500" onchange="window.updateRateType()">
+                            <div>
+                                <div class="font-bold text-white text-sm">Standard Rate</div>
+                                <div class="text-[10px] text-slate-400 font-sans">Non-refundable. Pay on arrival.</div>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg border border-slate-600 bg-slate-800/50 hover:bg-slate-700 transition-colors">
+                            <input type="radio" name="rate_type" value="flex" class="mt-1 accent-emerald-500" onchange="window.updateRateType()">
+                            <div>
+                                <div class="font-bold text-white text-sm">Flexible Rate <span class="text-emerald-400">(+20%)</span></div>
+                                <div class="text-[10px] text-slate-400 font-sans">Free cancellation up to 7 days before arrival.</div>
+                            </div>
+                        </label>
+                    </div>
+
                     <div class="border-t border-slate-700 pt-4 flex justify-between items-end">
-                        <span class="font-mono font-bold uppercase text-slate-400 text-[10px] tracking-widest">Total Due</span>
+                        <span class="font-mono font-bold uppercase text-slate-400 text-[10px] tracking-widest">Total Due at Check-in</span>
                         <span id="checkout-total" class="font-display font-bold text-3xl text-white leading-none"></span>
                     </div>
                     <div id="checkout-warning" class="hidden text-[11px] font-sans text-amber-200 bg-amber-900/30 p-3 rounded-lg border border-amber-700/50 leading-relaxed"></div>
-                    <button onclick="window.confirmBooking()" id="confirm-btn" class="w-full py-4 bg-white hover:bg-slate-200 text-slate-900 rounded-lg font-mono font-black text-xs uppercase tracking-widest shadow-lg transition-colors flex items-center justify-center gap-2 mt-2">Confirm Booking</button>
+                    
+                    <button onclick="window.submitBooking()" id="submit-btn" class="w-full py-4 bg-white hover:bg-slate-200 text-slate-900 rounded-lg font-mono font-black text-xs uppercase tracking-widest shadow-lg transition-colors flex items-center justify-center gap-2 mt-4">
+                        <i data-lucide="check-circle" size="16"></i> Complete Booking
+                    </button>
+                    <p class="text-center text-[10px] text-slate-400 font-sans mt-2 opacity-80">By completing this booking, you agree to our terms & conditions.</p>
                 </div>
             </div>
         </div>
@@ -141,47 +200,52 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, getDocs, getDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCyz--TlQZf_d-YNxhtGCV29LuFoRBfEeU", authDomain: "swimspms.firebaseapp.com", projectId: "swimspms", storageBucket: "swimspms.firebasestorage.app", messagingSenderId: "989960113115", appId: "1:989960113115:web:a99e08a23a36ff4289f5fe" };
-        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app); const appId = 'hotel-pms-v1';
-        const BASE_IMG_URL = "https://loren-6q.github.io/SWIMSPMS/pics/";
+        const app = initializeApp(firebaseConfig); 
+        const auth = getAuth(app); 
+        const db = getFirestore(app); 
+        const functions = getFunctions(app); // Initialize Cloud Functions
+        const appId = 'hotel-pms-v1';
+        
+        // --- STRIPE SETUP (Live Mode) ---
+        const stripe = Stripe('pk_live_51Lwf5dHGjqsNQGKUBGak9UCfUSRQXw2O8gEirEeoqhmn5EuDMQkGgknuhXIJb0i3p7ok117vFnAbwWeLOGlfXMiP00VmAiQL8o');
+        const elements = stripe.elements();
+        
+        const cardStyle = {
+            base: { color: '#1e293b', fontFamily: '"Inter", sans-serif', fontSmoothing: 'antialiased', fontSize: '15px', '::placeholder': { color: '#94a3b8' } },
+            invalid: { color: '#f43f5e', iconColor: '#f43f5e' }
+        };
+        const cardElement = elements.create('card', {style: cardStyle, hidePostalCode: true});
 
-        // State
+        // State & Data
         let liveStaff = [];
         let livePricing = { timeline: {}, relationships: [] };
         let selectedRoomData = null;
+        let baseBookingTotal = 0;
+        const BASE_IMG_URL = "https://loren-6q.github.io/SWIMSPMS/pics/";
 
-        // Canonical Room Data (Images updated to match user uploads)
+        // Standardized Room Map EXACTLY matching the PMS
         const roomMetaData = {
             "Oceanfront King": { img: `${BASE_IMG_URL}King.jpg`, price: 3500, desc: "Private beachfront suite with stunning sunrise views.", pax: 2 },
             "Oceanfront Twin": { img: `${BASE_IMG_URL}Twin.jpg`, price: 3500, desc: "Private beachfront suite with two single beds.", pax: 2 },
-            "Oceanview King": { img: `${BASE_IMG_URL}OVKing.jpg`, price: 2800, desc: "Beautiful elevated sea views and private balcony.", pax: 2 },
-            "Oceanview Twin": { img: `${BASE_IMG_URL}Twin.jpg`, price: 2800, desc: "Beautiful elevated sea views and private balcony.", pax: 2 },
-            "Partial Oceanview King": { img: `${BASE_IMG_URL}King.jpg`, price: 2400, desc: "Glimpses of the ocean with a plush king bed.", pax: 2 },
-            "Partial Oceanview Twin": { img: `${BASE_IMG_URL}Twin.jpg`, price: 2400, desc: "Glimpses of the ocean with two twin beds.", pax: 2 },
-            "Gardenview King": { img: `${BASE_IMG_URL}King.jpg`, price: 2000, desc: "Quiet garden views with a plush king bed.", pax: 2 },
-            "Gardenview Twin": { img: `${BASE_IMG_URL}Twin.jpg`, price: 2000, desc: "Quiet garden views with two twin beds.", pax: 2 },
+            "Oceanview King Room": { img: `${BASE_IMG_URL}OVKing.jpg`, price: 2800, desc: "Beautiful elevated sea views and private balcony.", pax: 2 },
+            "Oceanview Twin Room": { img: `${BASE_IMG_URL}Twin.jpg`, price: 2800, desc: "Beautiful elevated sea views and private balcony.", pax: 2 },
+            "Partial Oceanview King Room": { img: `${BASE_IMG_URL}King.jpg`, price: 2400, desc: "Glimpses of the ocean with a plush king bed.", pax: 2 },
+            "Partial Oceanview Twin Room": { img: `${BASE_IMG_URL}Twin.jpg`, price: 2400, desc: "Glimpses of the ocean with two twin beds.", pax: 2 },
+            "Gardenview King Room": { img: `${BASE_IMG_URL}King.jpg`, price: 2000, desc: "Quiet garden views with a plush king bed.", pax: 2 },
+            "Gardenview Twin Room": { img: `${BASE_IMG_URL}Twin.jpg`, price: 2000, desc: "Quiet garden views with two twin beds.", pax: 2 },
             "Partial Oceanview Triple (King+Twin)": { img: `${BASE_IMG_URL}TripleKingTwin.jpg`, price: 3000, desc: "Perfect for groups of three with a King bed, a single bed, and partial ocean views.", pax: 3 },
             "Partial Oceanview Triple (Bunk+Twin)": { img: `${BASE_IMG_URL}TripleBunkTwin.jpg`, price: 3000, desc: "Perfect for groups of three with a bunk bed, a single bed, and partial ocean views.", pax: 3 },
             "Standard Quad Dorm": { img: `${BASE_IMG_URL}QuadDorm.jpg`, price: 450, desc: "4-bed mixed dorm with privacy curtains.", pax: 1 },
             "BUNGALOWS": { img: `${BASE_IMG_URL}CoverPhoto.jpg`, price: 1800, desc: "Private slice of paradise nestled in our tropical gardens.", pax: 2 }
         };
 
-        const rawRoomsData = "B01|Oceanfront King^A01|Oceanfront King^A02|Oceanfront King^B02|Oceanfront Twin^B03|Oceanview King Room^B05|Oceanview King Room^B07|Oceanview King Room^A03|Oceanview King Room^A04|Oceanview King Room^A06|Oceanview King Room^A08|Oceanview King Room^A10|Oceanview King Room^A12|Oceanview King Room^C206|Oceanview King Room^C306|Oceanview King Room^C311|Oceanview King Room^B04|Oceanview Twin Room^B06|Oceanview Twin Room^B08|Oceanview Twin Room^C212|Oceanview Twin Room^A05|Partial Oceanview King Room^A07|Partial Oceanview King Room^A09|Partial Oceanview King Room^A11|Partial Oceanview King Room^C203|Partial Oceanview King Room^C204|Partial Oceanview King Room^C205|Partial Oceanview King Room^B09|Gardenview King Room^B11|Gardenview King Room^B13|Gardenview King Room^B15|Gardenview King Room^B17|Gardenview King Room^B19|Gardenview King Room^B21|Gardenview King Room^B22|Gardenview King Room^B10|Gardenview Twin Room^B12|Gardenview Twin Room^B14|Gardenview Twin Room^B16|Gardenview Twin Room^B18|Gardenview Twin Room^B20|Gardenview Twin Room^C201|Gardenview Twin Room^C202|Gardenview Twin Room^C207|Gardenview Twin Room^C208|Gardenview Twin Room^C209|Gardenview Twin Room^C210|Gardenview Twin Room^C211|Gardenview Twin Room^C101|Gardenview Twin Room^C307|Partial Oceanview Triple (Bunk+Twin)^C308|Partial Oceanview Triple (Bunk+Twin)^C305|Partial Oceanview Triple (King+Twin)^C309|Partial Oceanview Triple (King+Twin)^C310|Partial Oceanview Triple (King+Twin)^C301-1|Standard Quad Dorm^C301-2|Standard Quad Dorm^C301-3|Standard Quad Dorm^C301-4|Standard Quad Dorm^C302-1|Standard Quad Dorm|C302-2|Standard Quad Dorm^C302-3|Standard Quad Dorm^C302-4|Standard Quad Dorm^C303-1|Standard Quad Dorm^C303-2|Standard Quad Dorm^C303-3|Standard Quad Dorm^C303-4|Standard Quad Dorm^C304-1|Standard Quad Dorm^C304-2|Standard Quad Dorm^C304-3|Standard Quad Dorm^C304-4|Standard Quad Dorm^D01|BUNGALOWS^D02|BUNGALOWS^D03|BUNGALOWS^D04|BUNGALOWS^D05|BUNGALOWS^D06|BUNGALOWS^D07|BUNGALOWS^D08|BUNGALOWS^D09|BUNGALOWS^D10|BUNGALOWS^D11|BUNGALOWS";
+        const rawRoomsData = "B01|Oceanfront King^A01|Oceanfront King^A02|Oceanfront King^B02|Oceanfront Twin^B03|Oceanview King Room^B05|Oceanview King Room^B07|Oceanview King Room^A03|Oceanview King Room^A04|Oceanview King Room^A06|Oceanview King Room^A08|Oceanview King Room^A10|Oceanview King Room^A12|Oceanview King Room^C206|Oceanview King Room^C306|Oceanview King Room^C311|Oceanview King Room^B04|Oceanview Twin Room^B06|Oceanview Twin Room^B08|Oceanview Twin Room^C212|Oceanview Twin Room^A05|Partial Oceanview King Room^A07|Partial Oceanview King Room^A09|Partial Oceanview King Room^A11|Partial Oceanview King Room^C203|Partial Oceanview King Room^C204|Partial Oceanview King Room^C205|Partial Oceanview King Room^B09|Gardenview King Room^B11|Gardenview King Room^B13|Gardenview King Room^B15|Gardenview King Room^B17|Gardenview King Room^B19|Gardenview King Room^B21|Gardenview King Room^B22|Gardenview King Room^B10|Gardenview Twin Room^B12|Gardenview Twin Room^B14|Gardenview Twin Room^B16|Gardenview Twin Room^B18|Gardenview Twin Room^B20|Gardenview Twin Room^C201|Gardenview Twin Room^C202|Gardenview Twin Room^C207|Gardenview Twin Room^C208|Gardenview Twin Room^C209|Gardenview Twin Room^C210|Gardenview Twin Room^C211|Gardenview Twin Room^C101|Gardenview Twin Room^C307|Partial Oceanview Triple (Bunk+Twin)^C308|Partial Oceanview Triple (Bunk+Twin)^C305|Partial Oceanview Triple (King+Twin)^C309|Partial Oceanview Triple (King+Twin)^C310|Partial Oceanview Triple (King+Twin)^C301-1|Standard Quad Dorm^C301-2|Standard Quad Dorm^C301-3|Standard Quad Dorm^C301-4|Standard Quad Dorm^C302-1|Standard Quad Dorm^C302-2|Standard Quad Dorm^C302-3|Standard Quad Dorm^C302-4|Standard Quad Dorm^C303-1|Standard Quad Dorm^C303-2|Standard Quad Dorm^C303-3|Standard Quad Dorm^C303-4|Standard Quad Dorm^C304-1|Standard Quad Dorm^C304-2|Standard Quad Dorm^C304-3|Standard Quad Dorm^C304-4|Standard Quad Dorm^D01|BUNGALOWS^D02|BUNGALOWS^D03|BUNGALOWS^D04|BUNGALOWS^D05|BUNGALOWS^D06|BUNGALOWS^D07|BUNGALOWS^D08|BUNGALOWS^D09|BUNGALOWS^D10|BUNGALOWS^D11|BUNGALOWS";
         const hotelRooms = rawRoomsData.split('^').map(r => { const p = r.split('|'); return { id: p[0], type: p[1] }; });
-        
-        const getCanonicalName = (t) => {
-            if (!t) return "Unknown";
-            let stripped = t.replace(/\s+Room$/i, '').trim();
-            if (stripped.includes('Triple')) return stripped; // Fallback handles the new explicit names
-            if (stripped.includes('Quad') || stripped.includes('Dorm')) return "Standard Quad Dorm";
-            if (stripped === 'BUNGALOWS') return "BUNGALOWS";
-            return stripped; // e.g. "Oceanview King" matches the database pricing keys perfectly
-        };
+        const roomTypes = [...new Set(hotelRooms.map(r => r.type))];
 
-        const roomTypes = [...new Set(hotelRooms.map(r => getCanonicalName(r.type)))];
-
-        // Safely converts database room names (e.g. B3) to UI names (e.g. B03) to match hotelRooms
         const dbToUiRoom = (rid) => {
             if (!rid) return rid; let nid = rid.toUpperCase();
             if (/^[ABFD]\d$/.test(nid)) return nid[0] + '0' + nid.substring(1);
@@ -189,7 +253,6 @@
             return nid;
         };
 
-        // Bulletproof Date Functions locked to Thai Timezone
         const getThaiTodayStr = (offsetDays = 0) => {
             const now = new Date();
             const thaiOptions = { timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -197,25 +260,23 @@
             const y = parts.find(p => p.type === 'year').value;
             const m = parts.find(p => p.type === 'month').value;
             const d = parts.find(p => p.type === 'day').value;
-            const baseDate = new Date(`${y}-${m}-${d}T12:00:00Z`);
-            baseDate.setUTCDate(baseDate.getUTCDate() + offsetDays);
-            return `${baseDate.getUTCFullYear()}-${String(baseDate.getUTCMonth()+1).padStart(2,'0')}-${String(baseDate.getUTCDate()).padStart(2,'0')}`;
+            const baseDate = new Date(`${y}-${m}-${d}T12:00:00`); 
+            baseDate.setDate(baseDate.getDate() + offsetDays);
+            return `${baseDate.getFullYear()}-${String(baseDate.getMonth()+1).padStart(2,'0')}-${String(baseDate.getDate()).padStart(2,'0')}`;
         };
 
         const parseYMD = (str) => { 
             if(!str) return 0; 
             const p = str.split('-'); 
-            return Date.UTC(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])); 
+            return new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]), 12, 0, 0).getTime(); 
         };
 
         window.onload = async () => {
             lucide.createIcons();
             const todayStr = getThaiTodayStr(0);
             const tmrwStr = getThaiTodayStr(1);
-            document.getElementById('search-in').value = todayStr;
-            document.getElementById('search-in').min = todayStr;
-            document.getElementById('search-out').value = tmrwStr;
-            document.getElementById('search-out').min = tmrwStr;
+            document.getElementById('search-in').value = todayStr; document.getElementById('search-in').min = todayStr;
+            document.getElementById('search-out').value = tmrwStr; document.getElementById('search-out').min = tmrwStr;
 
             try {
                 await signInAnonymously(auth);
@@ -225,26 +286,68 @@
                 ]);
                 liveStaff = staffSnap.docs.map(d => ({ id: d.id, ...d.data() }));
                 if (priceSnap.exists()) {
-                    const d = priceSnap.data();
-                    livePricing.timeline = d.timeline || {};
-                    livePricing.relationships = d.relationships || [];
+                    livePricing.timeline = priceSnap.data().timeline || {};
                 }
-            } catch (err) {
-                console.error("Firebase connection failed. Using fallback data.", err);
-            }
+            } catch (err) { console.error("Firebase connection failed.", err); }
         };
 
         window.updateCheckoutMin = () => {
             const inDate = document.getElementById('search-in').value;
             if (inDate) {
-                const outEl = document.getElementById('search-out');
                 const parts = inDate.split('-');
-                const nextDay = new Date(`${parts[0]}-${parts[1]}-${parts[2]}T12:00:00Z`);
-                nextDay.setUTCDate(nextDay.getUTCDate() + 1);
-                const minOut = `${nextDay.getUTCFullYear()}-${String(nextDay.getUTCMonth()+1).padStart(2,'0')}-${String(nextDay.getUTCDate()).padStart(2,'0')}`;
+                const nextDay = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+                nextDay.setDate(nextDay.getDate() + 1);
+                const minOut = `${nextDay.getFullYear()}-${String(nextDay.getMonth()+1).padStart(2,'0')}-${String(nextDay.getDate()).padStart(2,'0')}`;
+                
+                const outEl = document.getElementById('search-out');
                 outEl.min = minOut;
                 if (outEl.value <= inDate) outEl.value = minOut;
             }
+        };
+
+        const checkAvailability = (inMs, outMs) => {
+            const occupied = new Set();
+            liveStaff.forEach(s => {
+                if (['cancelled', 'noshow', 'unconfirmed'].includes(s.status)) return;
+                if (inMs < parseYMD(s.checkOut) && outMs > parseYMD(s.checkIn)) {
+                    const rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []);
+                    rList.forEach(r => { if(r) occupied.add(dbToUiRoom(r)); });
+                }
+            });
+
+            const availCounts = {};
+            hotelRooms.forEach(r => {
+                if (!occupied.has(dbToUiRoom(r.id))) {
+                    availCounts[r.type] = (availCounts[r.type] || 0) + 1;
+                }
+            });
+            return availCounts;
+        };
+
+        const calculatePrice = (cIn, nights, roomType) => {
+            const meta = roomMetaData[roomType];
+            let qualifiesForFmp = true, totalStd = 0, totalFmp = 0;
+
+            for (let i = 0; i < nights; i++) {
+                const parts = cIn.split('-');
+                const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+                d.setDate(d.getDate() + i);
+                const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                
+                const rData = (livePricing.timeline[dStr] || {})[roomType] || (livePricing.timeline[dStr] || {})[roomType.replace(' Room', '')] || {};
+                const gData = (livePricing.timeline[dStr] || {})['GLOBAL'] || {};
+
+                let dayStd = rData.std || meta.price;
+                let dayFmp = rData.fmp || dayStd;
+
+                totalStd += dayStd; totalFmp += dayFmp;
+                if (gData.cta && i === 0) qualifiesForFmp = false;
+                if (gData.min && nights < gData.min) qualifiesForFmp = false;
+                if (gData.min_arr && nights < gData.min_arr && i === 0) qualifiesForFmp = false;
+            }
+
+            if (totalFmp === 0 || isNaN(totalFmp)) qualifiesForFmp = false;
+            return { total: qualifiesForFmp ? totalFmp : totalStd, qualifiesForFmp: qualifiesForFmp };
         };
 
         window.searchDates = () => {
@@ -260,86 +363,34 @@
             document.getElementById('search-widget').scrollIntoView({behavior: 'smooth', block: 'start'});
 
             setTimeout(() => {
-                const results = calculateAvailabilityAndPricing(cIn, cOut, pax);
+                const inMs = parseYMD(cIn), outMs = parseYMD(cOut);
+                const nights = Math.round((outMs - inMs) / 86400000);
+                const availCounts = checkAvailability(inMs, outMs);
+                
+                const results = [];
+                roomTypes.forEach(t => {
+                    const count = availCounts[t] || 0;
+                    const meta = roomMetaData[t];
+                    if (!meta || count === 0) return; 
+
+                    const isDorm = t.includes('Dorm');
+                    // Hostel Smart Logic: If Dorm, ensure there are enough beds for the entire PAX count
+                    if (isDorm && count < pax) return; 
+                    // Private Room Logic: Ensure the room capacity can fit the PAX
+                    if (!isDorm && meta.pax < pax) return; 
+
+                    const pricing = calculatePrice(cIn, nights, t);
+                    
+                    // Multiply total by pax if they are booking multiple dorm beds
+                    const finalTotal = isDorm ? pricing.total * pax : pricing.total;
+                    const finalAvg = Math.round(finalTotal / nights);
+
+                    results.push({ type: t, avail: count, meta: meta, total: finalTotal, avg: finalAvg, qualifiesForFmp: pricing.qualifiesForFmp, nights: nights });
+                });
+
+                results.sort((a, b) => a.total - b.total);
                 renderResults(results, cIn, cOut, pax);
             }, 600);
-        };
-
-        const calculateAvailabilityAndPricing = (cIn, cOut, requestedPax) => {
-            const inMs = parseYMD(cIn);
-            const outMs = parseYMD(cOut);
-            const nights = Math.round((outMs - inMs) / 86400000);
-            
-            // 1. Calculate Live Inventory
-            const occupied = new Set();
-            liveStaff.forEach(s => {
-                // PMS explicitly ignores unconfirmed, cancelled, and noshow for availability checks
-                if (['cancelled', 'noshow', 'unconfirmed'].includes(s.status)) return;
-                if (s.status === 'special' && (!s.rooms || s.rooms.length === 0 || s.rooms[0] === "")) return;
-                
-                if (inMs < parseYMD(s.checkOut) && outMs > parseYMD(s.checkIn)) {
-                    const rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []);
-                    rList.forEach(r => { if(r) occupied.add(dbToUiRoom(r)); });
-                }
-            });
-
-            const availCounts = {};
-            hotelRooms.forEach(r => {
-                if (!occupied.has(r.id)) {
-                    const canonical = getCanonicalName(r.type);
-                    availCounts[canonical] = (availCounts[canonical] || 0) + 1;
-                }
-            });
-
-            // 2. Loop Days & Calculate Rate Fencing
-            const results = [];
-            roomTypes.forEach(t => {
-                const count = availCounts[t] || 0;
-                const meta = roomMetaData[t];
-                if (!meta || count === 0 || meta.pax < requestedPax) return; // Must have capacity
-
-                let qualifiesForFmp = true;
-                let totalStd = 0;
-                let totalFmp = 0;
-
-                for (let i = 0; i < nights; i++) {
-                    const parts = cIn.split('-');
-                    const d = new Date(`${parts[0]}-${parts[1]}-${parts[2]}T12:00:00Z`);
-                    d.setUTCDate(d.getUTCDate() + i);
-                    const dStr = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
-                    
-                    const dayData = livePricing.timeline[dStr] || {};
-                    const rData = dayData[t] || {};
-                    const gData = dayData['GLOBAL'] || {};
-
-                    let dayStd = rData.std || meta.price;
-                    let dayFmp = rData.fmp || dayStd;
-
-                    totalStd += dayStd;
-                    totalFmp += dayFmp;
-
-                    if (gData.cta && i === 0) qualifiesForFmp = false;
-                    if (gData.min && nights < gData.min) qualifiesForFmp = false;
-                    if (gData.min_arr && nights < gData.min_arr && i === 0) qualifiesForFmp = false;
-                }
-
-                if (totalFmp === 0 || isNaN(totalFmp)) qualifiesForFmp = false;
-
-                const finalTotal = qualifiesForFmp ? totalFmp : totalStd;
-                const avgNightly = Math.round(finalTotal / nights);
-
-                results.push({
-                    type: t,
-                    avail: count,
-                    meta: meta,
-                    total: finalTotal,
-                    avg: avgNightly,
-                    qualifiesForFmp: qualifiesForFmp,
-                    nights: nights
-                });
-            });
-
-            return results.sort((a, b) => a.total - b.total);
         };
 
         const renderResults = (results, cIn, cOut, pax) => {
@@ -347,35 +398,28 @@
             document.getElementById('loading-spinner').classList.add('hidden');
             document.getElementById('results-header').classList.remove('hidden');
             
-            // Format dates nicely for header
-            const fIn = new Date(`${cIn.split('-')[0]}-${cIn.split('-')[1]}-${cIn.split('-')[2]}T12:00:00Z`).toLocaleDateString('en-US', {month:'short', day:'numeric'});
-            const fOut = new Date(`${cOut.split('-')[0]}-${cOut.split('-')[1]}-${cOut.split('-')[2]}T12:00:00Z`).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+            const partsIn = cIn.split('-'); const fIn = new Date(parseInt(partsIn[0]), parseInt(partsIn[1])-1, parseInt(partsIn[2])).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+            const partsOut = cOut.split('-'); const fOut = new Date(parseInt(partsOut[0]), parseInt(partsOut[1])-1, parseInt(partsOut[2])).toLocaleDateString('en-US', {month:'short', day:'numeric'});
             document.getElementById('results-summary').innerText = `${fIn} to ${fOut} • ${pax} Guest${pax>1?'s':''}`;
 
             if (results.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-24 bg-white rounded-2xl border border-slate-200 shadow-sm">
-                        <i data-lucide="calendar-x" size="48" class="mx-auto text-slate-300 mb-4"></i>
-                        <h3 class="font-display text-2xl text-slate-800 mb-2">No Rooms Available</h3>
-                        <p class="text-slate-500 font-sans">Try adjusting your dates or guest count.</p>
-                    </div>`;
-                lucide.createIcons();
-                return;
+                container.innerHTML = `<div class="text-center py-24 bg-white rounded-2xl border border-slate-200 shadow-sm"><i data-lucide="calendar-x" size="48" class="mx-auto text-slate-300 mb-4"></i><h3 class="font-display text-2xl text-slate-800 mb-2">No Rooms Available</h3><p class="text-slate-500 font-sans">Try adjusting your dates or guest count.</p></div>`;
+                lucide.createIcons(); return;
             }
 
             let html = '';
             results.forEach(res => {
-                const isDorm = res.type.includes('Dorm');
-                const tagLabel = isDorm ? 'Per Bed' : 'Per Room';
                 const fmpWarning = res.qualifiesForFmp ? '' : `<div class="text-[10px] text-amber-700 bg-amber-50 px-2.5 py-1.5 rounded-md font-sans font-semibold mt-3 inline-flex items-center gap-1.5 border border-amber-200/60"><i data-lucide="info" size="12"></i> Standard Rate Applied (Min. Stay Not Met)</div>`;
+                
+                // Add Multi-Bed Badge for Dorms
+                const isDorm = res.type.includes('Dorm');
+                const paxBadge = (isDorm && pax > 1) ? `<div class="mt-2 text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded w-fit border border-emerald-200">Reserving ${pax} Beds</div>` : '';
 
                 html += `
                     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col md:flex-row shadow-sm hover:shadow-xl transition-all duration-300 group">
                         <div class="md:w-5/12 h-64 md:h-auto relative overflow-hidden bg-slate-900">
-                            <img src="${res.meta.img}" onerror="this.src='${BASE_IMG_URL}CoverPhoto.jpg'" alt="${res.type}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100">
-                            <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-md text-[10px] font-mono font-black uppercase tracking-widest text-slate-900 shadow-sm">
-                                ${res.avail} Left
-                            </div>
+                            <img src="${res.meta.img}" onerror="this.src='https://loren-6q.github.io/SWIMSPMS/pics/CoverPhoto.jpg'" alt="${res.type}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100">
+                            <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-md text-[10px] font-mono font-black uppercase tracking-widest text-slate-900 shadow-sm">${res.avail} Left</div>
                         </div>
                         <div class="p-6 md:p-8 md:w-7/12 flex flex-col justify-between">
                             <div>
@@ -393,27 +437,28 @@
                                     <span class="flex items-center gap-1.5"><i data-lucide="waves" size="14"></i> Pool Access</span>
                                 </div>
                                 ${fmpWarning}
+                                ${paxBadge}
                             </div>
                             <div class="border-t border-slate-100 pt-5 mt-6 flex items-center justify-between">
-                                <div>
-                                    <div class="text-[10px] font-mono font-black text-slate-500 uppercase tracking-widest mb-1">${res.nights} Nights Total</div>
-                                    <div class="text-xl font-sans font-bold text-slate-900">฿${res.total.toLocaleString()}</div>
-                                </div>
+                                <div><div class="text-[10px] font-mono font-black text-slate-500 uppercase tracking-widest mb-1">${res.nights} Nights Total</div><div class="text-xl font-sans font-bold text-slate-900">฿${res.total.toLocaleString()}</div></div>
                                 <button onclick='window.openCheckout(${JSON.stringify(res).replace(/'/g, "&#39;")}, "${cIn}", "${cOut}", ${pax})' class="btn-primary !px-10">Select</button>
                             </div>
                         </div>
                     </div>`;
             });
-
-            container.innerHTML = html;
-            lucide.createIcons();
+            container.innerHTML = html; lucide.createIcons();
         };
 
         window.openCheckout = (roomData, cIn, cOut, pax) => {
             selectedRoomData = { ...roomData, cIn, cOut, pax };
+            baseBookingTotal = roomData.total;
             
-            const fIn = new Date(`${cIn.split('-')[0]}-${cIn.split('-')[1]}-${cIn.split('-')[2]}T12:00:00Z`).toLocaleDateString('en-US', {month:'short', day:'numeric'});
-            const fOut = new Date(`${cOut.split('-')[0]}-${cOut.split('-')[1]}-${cOut.split('-')[2]}T12:00:00Z`).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+            // Reset to standard rate default
+            const stdRadio = document.querySelector('input[name="rate_type"][value="std"]');
+            if(stdRadio) stdRadio.checked = true;
+            
+            const partsIn = cIn.split('-'); const fIn = new Date(parseInt(partsIn[0]), parseInt(partsIn[1])-1, parseInt(partsIn[2])).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+            const partsOut = cOut.split('-'); const fOut = new Date(parseInt(partsOut[0]), parseInt(partsOut[1])-1, parseInt(partsOut[2])).toLocaleDateString('en-US', {month:'short', day:'numeric'});
 
             document.getElementById('checkout-summary').innerHTML = `
                 <div class="flex justify-between border-b border-slate-700/50 pb-2"><span>Check-in</span> <span class="text-white font-semibold">${fIn}</span></div>
@@ -423,73 +468,161 @@
                 <div class="flex justify-between pt-1"><span>Nights</span> <span class="text-white font-semibold">${roomData.nights}</span></div>
             `;
             
-            document.getElementById('checkout-total').innerText = `฿${roomData.total.toLocaleString()}`;
-            
+            window.updateRateType(); // Sets initial total text
+
             const warnEl = document.getElementById('checkout-warning');
             if (!roomData.qualifiesForFmp) {
-                warnEl.innerHTML = "<strong>Notice:</strong> Your dates intersect a Full Moon Party but do not meet the minimum stay requirement for the package rate. Standard premium rates apply.";
+                warnEl.innerHTML = "<strong>Notice:</strong> Standard rates apply to short stays during Full Moon periods.";
                 warnEl.classList.remove('hidden');
-            } else {
-                warnEl.classList.add('hidden');
-            }
+            } else { warnEl.classList.add('hidden'); }
 
             document.getElementById('checkout-modal').classList.remove('hidden');
+
+            // Mount Stripe Element inside the modal
+            setTimeout(() => {
+                if(!document.getElementById('card-element').classList.contains('StripeElement')) {
+                    cardElement.mount('#card-element');
+                    cardElement.on('change', function(event) {
+                        var displayError = document.getElementById('card-errors');
+                        if (event.error) {
+                            displayError.textContent = event.error.message;
+                            displayError.classList.remove('hidden');
+                        } else {
+                            displayError.textContent = '';
+                            displayError.classList.add('hidden');
+                        }
+                    });
+                }
+            }, 100);
         };
 
-        window.closeCheckout = () => {
-            document.getElementById('checkout-modal').classList.add('hidden');
+        window.updateRateType = () => {
+            const isFlex = document.querySelector('input[name="rate_type"]:checked').value === 'flex';
+            const finalTotal = isFlex ? Math.round(baseBookingTotal * 1.2) : baseBookingTotal;
+            document.getElementById('checkout-total').innerText = `฿${finalTotal.toLocaleString()}`;
         };
 
-        window.confirmBooking = async () => {
+        window.closeCheckout = () => { document.getElementById('checkout-modal').classList.add('hidden'); };
+
+        window.submitBooking = async () => {
             const first = document.getElementById('guest-first').value.trim();
             const last = document.getElementById('guest-last').value.trim();
             const email = document.getElementById('guest-email').value.trim();
+            const country = document.getElementById('guest-country').value;
             
             if (!first || !last || !email) return alert("Please fill out your Name and Email.");
 
-            const btn = document.getElementById('confirm-btn');
+            const btn = document.getElementById('submit-btn');
             btn.disabled = true;
             btn.innerHTML = '<div class="spinner !w-5 !h-5 !border-2 !border-t-slate-900"></div> Processing...';
 
-            const bookingId = Math.random().toString(36).substr(2, 9).toUpperCase();
-            const payload = {
-                id: bookingId,
-                firstName: first.toUpperCase(),
-                lastName: last.toUpperCase(),
-                email: email,
-                phone: document.getElementById('guest-phone').value.trim(),
-                notes: document.getElementById('guest-notes').value.trim(),
-                checkIn: selectedRoomData.cIn,
-                checkOut: selectedRoomData.cOut,
-                pax: selectedRoomData.pax,
-                bookedType: selectedRoomData.type,
-                room: "", // Unassigned
-                rooms: [""],
-                status: "unconfirmed", // Safely drops into PMS as unconfirmed
-                source: "direct",
-                totalPrice: selectedRoomData.total,
-                netPrice: selectedRoomData.total,
-                payments: [],
-                createdAt: new Date().toISOString(),
-                createdBy: "Direct Booking Engine"
-            };
-
             try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', bookingId), payload);
+                // 1. STRIPE VAULTING LOGIC (Call Firebase Function)
+                const createSetupIntent = httpsCallable(functions, 'createSetupIntent');
+                const intentRes = await createSetupIntent();
+                
+                // Confirm the intent with Stripe securely
+                const {setupIntent, error} = await stripe.confirmCardSetup(intentRes.data.clientSecret, { 
+                    payment_method: { 
+                        card: cardElement, 
+                        billing_details: { name: first + " " + last, email: email } 
+                    } 
+                });
+                
+                if (error) {
+                    throw new Error(error.message);
+                }
+                
+                const stripeToken = setupIntent.payment_method;
+
+                // 2. PMS BOOKING LOGIC
+                
+                // Get next available booking ID sequentially
+                const directBookings = liveStaff.filter(s => s.bookId && s.bookId.startsWith('SW')).sort((a,b) => {
+                    const numA = parseInt(a.bookId.replace('SW', '')) || 0;
+                    const numB = parseInt(b.bookId.replace('SW', '')) || 0;
+                    return numB - numA;
+                });
+                let nextNum = 1;
+                if (directBookings.length > 0) {
+                    nextNum = (parseInt(directBookings[0].bookId.replace('SW', '')) || 0) + 1;
+                }
+                const bookingId = `SW${String(nextNum).padStart(5, '0')}`;
+                
+                const documentId = Math.random().toString(36).substr(2, 9).toUpperCase(); // Internal unique string
+                
+                const isDorm = selectedRoomData.type.includes('Dorm');
+                const isFlex = document.querySelector('input[name="rate_type"]:checked').value === 'flex';
+                const finalTotal = isFlex ? Math.round(baseBookingTotal * 1.2) : baseBookingTotal;
+
+                // AUTO-ASSIGN ROOM LOGIC
+                const sU = parseYMD(selectedRoomData.cIn), eU = parseYMD(selectedRoomData.cOut);
+                const occupied = new Set();
+                liveStaff.forEach(s => {
+                    if (['cancelled', 'noshow'].includes(s.status)) return;
+                    if (sU < parseYMD(s.checkOut) && eU > parseYMD(s.checkIn)) {
+                        const rList = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []);
+                        rList.forEach(r => { if(r) occupied.add(dbToUiRoom(r)); });
+                    }
+                });
+                
+                const availableRoomIds = hotelRooms.filter(r => r.type === selectedRoomData.type && !occupied.has(dbToUiRoom(r.id))).map(r => r.id);
+                let assignedRooms = isDorm ? availableRoomIds.slice(0, selectedRoomData.pax) : [availableRoomIds[0] || ""];
+                while (isDorm && assignedRooms.length < selectedRoomData.pax) assignedRooms.push(""); // Pad with unassigned if running short
+
+                const payload = {
+                    id: documentId,
+                    bookId: bookingId, 
+                    bookDate: getThaiTodayStr(),
+                    firstName: first.toUpperCase(),
+                    lastName: last.toUpperCase(),
+                    email: email,
+                    phone: document.getElementById('guest-phone').value.trim(),
+                    country: country,
+                    notes: "SECURE CARD ON FILE.\n\n" + document.getElementById('guest-notes').value.trim(),
+                    checkIn: selectedRoomData.cIn,
+                    checkOut: selectedRoomData.cOut,
+                    pax: selectedRoomData.pax,
+                    bookedType: selectedRoomData.type,
+                    room: assignedRooms[0], 
+                    rooms: assignedRooms,
+                    status: "new", 
+                    source: "direct",
+                    refundability: isFlex ? 'ref' : 'non-ref',
+                    totalPrice: finalTotal,
+                    netPrice: finalTotal,
+                    payments: [], badCC: false,
+                    stripeToken: stripeToken, // Saved securely here
+                    createdAt: new Date().toISOString(),
+                    createdBy: "Direct Booking Engine",
+                    auditLog: [{ ts: new Date().toISOString(), user: "System", msg: "Direct booking created. Card vaulted." }]
+                };
+
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'staff', documentId), payload);
                 
                 document.getElementById('checkout-modal').innerHTML = `
                     <div class="bg-white rounded-2xl p-10 max-w-md w-full text-center shadow-2xl mx-auto my-auto border border-slate-200">
                         <i data-lucide="check-circle" size="64" class="mx-auto text-emerald-500 mb-6"></i>
-                        <h2 class="font-display text-4xl text-slate-800 mb-4">Request Sent!</h2>
-                        <p class="font-sans text-slate-600 mb-8 leading-relaxed">Your booking ID is <span class="text-slate-900 font-bold bg-slate-100 px-2 py-1 rounded mx-1">${bookingId}</span><br><br>Our team will review your request and send a secure payment link to your email to confirm the reservation.</p>
+                        <h2 class="font-display text-4xl text-slate-800 mb-4">Booking Confirmed!</h2>
+                        <p class="font-sans text-slate-600 mb-8 leading-relaxed">Your booking ID is <span class="text-slate-900 font-bold bg-slate-100 px-2 py-1 rounded mx-1">${bookingId}</span><br><br>We have securely verified your card. We look forward to welcoming you to Koh Phangan! A confirmation email is on the way.</p>
                         <button onclick="location.reload()" class="btn-primary w-full">Return Home</button>
                     </div>`;
                 lucide.createIcons();
+
             } catch (err) {
                 console.error("Booking Error:", err);
-                alert("Failed to submit booking. Please try again.");
+                let errMsg = err.message || "Failed to process card. Please try again.";
+                
+                // Catch iframe/preview sandbox blocking bank popups
+                if (errMsg.toLowerCase().includes("authenticate")) {
+                    errMsg = "Bank authentication blocked. If testing inside a code preview window, please open the website in a full browser tab to allow your bank's security popup.";
+                }
+                
+                document.getElementById('card-errors').textContent = errMsg;
+                document.getElementById('card-errors').classList.remove('hidden');
                 btn.disabled = false;
-                btn.innerHTML = 'Confirm Booking';
+                btn.innerHTML = '<i data-lucide="check-circle" size="16"></i> Complete Booking';
+                lucide.createIcons();
             }
         };
     </script>
