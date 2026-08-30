@@ -901,13 +901,22 @@
         };
         
         window.toggleGroup = (grp, stateIdx = -1) => {
-            const h = $(`icon-${grp}`), rws = $$(`.group-${grp}`), sL = $(`state-${grp}`), aR = $$(`.avail-row-${grp}`); 
-            if(!h) return;
+            const h = $(`icon-${grp}`);
+            const rws = $$(`.group-${grp}`);
+            const sL = $(`state-${grp}`);
+            const aR = $$(`.avail-row-${grp}`); 
+            
+            if (!h) return;
             
             let cS = stateIdx;
             if (cS === -1) { 
-                const txt = sL ? sL.innerText : 'ALL'; 
-                cS = txt === 'ALL' ? 1 : (txt === 'OCC' ? 2 : (txt === 'EMP' ? 3 : 0)); 
+                if (grp === 'unconfirmed-hold') {
+                    // Simple open/close toggle for the unconfirmed section based on current icon rotation
+                    cS = h.style.transform.includes('180deg') ? 0 : 3;
+                } else {
+                    const txt = sL ? sL.innerText : 'ALL'; 
+                    cS = txt === 'ALL' ? 1 : (txt === 'OCC' ? 2 : (txt === 'EMP' ? 3 : 0)); 
+                }
             }
             
             const vM = { 
@@ -920,11 +929,16 @@
             const s = vM[cS]; 
             if (sL) sL.innerText = s.lbl; 
             h.style.transform = `rotate(${s.rot})`;
-            if (aR) aR.forEach(r => r.style.display = s.showAvail ? 'grid' : 'none');
+            if (aR) {
+                aR.forEach(r => {
+                    r.style.display = s.showAvail ? 'grid' : 'none';
+                });
+            }
             
             rws.forEach(r => {
                 if (grp === 'unconfirmed-hold') { 
-                    r.style.display = (cS === 0 || cS === 1) ? 'grid' : 'none'; 
+                    // States 0, 1, and 2 mean "Open", State 3 means "Hidden"
+                    r.style.display = (cS === 3) ? 'none' : 'grid'; 
                     return; 
                 }
                 const isE = r.querySelectorAll('.staff-bar').length === 0;
