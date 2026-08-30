@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWIMS Settings & Property Manager</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style type="text/tailwindcss">
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Roboto+Condensed:wght@400;700;900&display=swap');
+        
+        @layer components {
+            .input-base { @apply w-full bg-slate-50 border border-slate-300 font-bold text-sm px-2 py-1.5 rounded outline-none focus:ring-2 focus:ring-blue-500 uppercase; }
+            .label-base { @apply text-[11px] font-black text-slate-500 mb-1 uppercase tracking-widest block; }
+            .btn-action { @apply px-4 py-2 text-white rounded shadow font-black uppercase flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all cursor-pointer; }
+            .tab-btn { @apply px-4 py-2 font-black text-sm uppercase rounded-t-lg transition-colors border-b-4 border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200 cursor-pointer; }
+            .tab-btn.active { @apply text-blue-700 bg-white border-blue-600; }
+        }
+
+        body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+        .loading-overlay.active { opacity: 1; pointer-events: auto; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .alert-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); align-items: center; justify-content: center; z-index: 200; pointer-events: auto;}
+        .alert-modal-overlay.active { display: flex; }
+    </style>
+</head>
+<body class="p-2 sm:p-4 h-screen flex flex-col overflow-hidden">
+    
+    <div id="loader" class="loading-overlay active">
+        <div class="spinner"></div>
+        <div id="sync-status" class="mt-4 font-black text-blue-800 uppercase tracking-widest text-center">INITIALIZING DB...</div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="alert-modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden border-2 border-slate-800">
+            <div id="alert-header" class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Attention</div>
+            <div class="p-6 text-center">
+                <p id="alert-message" class="font-black text-slate-700 leading-tight text-md whitespace-pre-wrap"></p>
+                <div class="mt-6 flex gap-2 justify-center">
+                    <button id="alert-cancel" onclick="window.closeAlert()" class="hidden px-6 py-2 rounded-lg font-black text-sm uppercase bg-slate-200 text-slate-700">Cancel</button>
+                    <button id="alert-confirm" onclick="window.closeAlert()" class="px-10 py-2 rounded-lg font-black text-sm uppercase bg-blue-600 text-white">Okay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="flex items-center justify-between bg-slate-900 p-3 sm:p-4 rounded-t-xl shrink-0 text-white shadow-lg z-10">
+        <div class="flex items-center gap-3">
+            <div class="bg-purple-500 p-1.5 rounded"><i data-lucide="settings" class="text-white"></i></div>
+            <div>
+                <h1 class="font-black uppercase tracking-widest text-lg sm:text-xl leading-none">Property Manager</h1>
+                <p class="text-[10px] text-purple-300 font-bold uppercase tracking-widest">SaaS Multi-Tenant Engine</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="window.saveToCloud()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-black text-sm uppercase shadow flex items-center gap-2 transition-colors">
+                <i data-lucide="cloud-upload" size="16"></i> Save to Cloud
+            </button>
+            <a href="index.html" class="text-xs font-bold text-slate-400 hover:text-white uppercase transition-colors">← Back to PMS</a>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col bg-white border-x border-b border-slate-300 rounded-b-xl shadow-xl min-h-0 overflow-hidden">
+        
+        <!-- Tabs -->
+        <div class="flex px-4 pt-2 bg-slate-100 border-b border-slate-300 shrink-0 gap-2">
+            <button onclick="window.switchTab('general')" id="tab-general" class="tab-btn active">General</button>
+            <button onclick="window.switchTab('rooms')" id="tab-rooms" class="tab-btn">Room Editor</button>
+            <button onclick="window.switchTab('events')" id="tab-events" class="tab-btn">Events / FMP</button>
+            <button onclick="window.switchTab('rates')" id="tab-rates" class="tab-btn">Rates & Pricing</button>
+        </div>
+
+        <div class="flex-1 overflow-auto bg-slate-50 relative p-4 sm:p-6">
+            
+            <!-- GENERAL SETTINGS -->
+            <div id="view-general" class="max-w-2xl mx-auto space-y-6 block">
+                <div class="bg-white p-6 border border-slate-200 rounded-xl shadow-sm">
+                    <h2 class="text-lg font-black uppercase text-slate-800 mb-4 border-b border-slate-200 pb-2">Property Profile</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="label-base">Property ID (Database Key)</label>
+                            <!-- Unlocked this field for your future Property 2 -->
+                            <input type="text" id="prop-id" value="swims_resort" class="input-base border-purple-300 text-purple-800 bg-purple-50">
+                            <p class="text-[10px] text-slate-400 mt-1 font-bold">This is the unique database identifier (e.g. swims_resort). Change this to create a new property database.</p>
+                        </div>
+                        <div>
+                            <label class="label-base">Display Name</label>
+                            <input type="text" id="prop-name" value="SWIMS! a Social Beach Resort" class="input-base">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="label-base">Timezone</label>
+                                <input type="text" id="prop-tz" value="Asia/Bangkok" class="input-base">
+                            </div>
+                            <div>
+                                <label class="label-base">Currency Symbol</label>
+                                <input type="text" id="prop-currency" value="฿" class="input-base">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 border border-slate-200 rounded-xl shadow-sm">
+                    <h2 class="text-lg font-black uppercase text-slate-800 mb-4 border-b border-slate-200 pb-2">Features</h2>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="feat-longterm" class="w-5 h-5 accent-blue-600 cursor-pointer">
+                            <span class="font-bold text-sm text-slate-700 uppercase">Enable Long-Term / Monthly Rentals (Apartments)</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="feat-volunteers" class="w-5 h-5 accent-blue-600 cursor-pointer">
+                            <span class="font-bold text-sm text-slate-700 uppercase">Enable Volunteer Management Layout</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROOM EDITOR -->
+            <div id="view-rooms" class="max-w-5xl mx-auto hidden flex-col h-full">
+                <div class="flex justify-between items-center mb-4 shrink-0">
+                    <div>
+                        <h2 class="text-lg font-black uppercase text-slate-800 leading-none">Room Layout Manager</h2>
+                        <p class="text-xs font-bold text-slate-500 uppercase mt-1">Configure your physical inventory to match OTA mapping.</p>
+                    </div>
+                    <button onclick="window.addRoomRow()" class="btn-action bg-green-600 hover:bg-green-700 text-xs"><i data-lucide="plus-square" size="14"></i> Add New Room</button>
+                </div>
+
+                <div class="flex-1 overflow-auto bg-white border border-slate-300 rounded-lg shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 z-10 bg-slate-800 text-white shadow-sm">
+                            <tr class="text-xs font-black uppercase tracking-widest">
+                                <th class="p-2 w-10 text-center">Del</th>
+                                <th class="p-2 border-r border-slate-700 w-24">Room ID</th>
+                                <th class="p-2 border-r border-slate-700">Room Category / Type</th>
+                                <th class="p-2 border-r border-slate-700 w-24">Bed Type</th>
+                                <th class="p-2 border-r border-slate-700 w-24 text-center">Floor</th>
+                                <th class="p-2 border-r border-slate-700 w-24 text-center">Sort Order</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rooms-body" class="text-sm">
+                            <!-- Rooms injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- EVENTS / FMP -->
+            <div id="view-events" class="max-w-2xl mx-auto hidden flex-col h-full">
+                <div class="bg-white p-6 border border-slate-200 rounded-xl shadow-sm h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-4 shrink-0 border-b border-slate-200 pb-2">
+                        <div>
+                            <h2 class="text-lg font-black uppercase text-slate-800 leading-none">Special Events Calendar</h2>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase mt-1">Full Moon Parties & Peak Dates</p>
+                        </div>
+                        <button onclick="window.addEventRow()" class="btn-action bg-amber-500 hover:bg-amber-600 text-xs text-white"><i data-lucide="calendar-plus" size="14"></i> Add Date</button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto pr-2" id="events-container">
+                        <!-- Events injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- RATES & PRICING -->
+            <div id="view-rates" class="max-w-4xl mx-auto hidden flex-col h-full">
+                <div class="flex justify-between items-center mb-4 shrink-0">
+                    <div>
+                        <h2 class="text-lg font-black uppercase text-slate-800 leading-none">Rate Plan Manager</h2>
+                        <p class="text-xs font-bold text-slate-500 uppercase mt-1">Set Base, High Season, and Full Moon Party pricing for the direct booking engine.</p>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-auto bg-white border border-slate-300 rounded-lg shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 z-10 bg-slate-800 text-white shadow-sm">
+                            <tr class="text-xs font-black uppercase tracking-widest">
+                                <th class="p-2 border-r border-slate-700">Room Category</th>
+                                <th class="p-2 border-r border-slate-700 w-32 text-center bg-slate-700">Base Rate (฿)</th>
+                                <th class="p-2 border-r border-slate-700 w-32 text-center bg-blue-900">High Season (฿)</th>
+                                <th class="p-2 border-r border-slate-700 w-32 text-center bg-pink-900">FMP Premium (฿)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rates-body" class="text-sm">
+                            <!-- Rates injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCyz--TlQZf_d-YNxhtGCV29LuFoRBfEeU", 
+            authDomain: "swimspms.firebaseapp.com", 
+            projectId: "swimspms", 
+            storageBucket: "swimspms.firebasestorage.app", 
+            messagingSenderId: "989960113115", 
+            appId: "1:989960113115:web:a99e08a23a36ff4289f5fe" 
+        };
+        const app = initializeApp(firebaseConfig); 
+        const auth = getAuth(app); 
+        const db = getFirestore(app); 
+        const appId = 'hotel-pms-v1';
+
+        // LEGACY FALLBACK DATA
+        // Contains the exact split Triple rooms so it initializes correctly!
+        const legacyRawRooms = "B01|Oceanfront King|KING|2|101^A01|Oceanfront King|KING|1|102^A02|Oceanfront King|KING|1|103^B02|Oceanfront Twin|TWIN|2|201^B03|Oceanview King Room|KING|2|301^B05|Oceanview King Room|KING|2|302^B07|Oceanview King Room|KING|2|303^A03|Oceanview King Room|KING|1|304^A04|Oceanview King Room|KING|1|305^A06|Oceanview King Room|KING|1|306^A08|Oceanview King Room|KING|1|307^A10|Oceanview King Room|KING|1|308^A12|Oceanview King Room|KING|1|309^C206|Oceanview King Room|KING|2|310^C306|Oceanview King Room|KING|3|311^C311|Oceanview King Room|KING|3|312^B04|Oceanview Twin Room|TWIN|2|401^B06|Oceanview Twin Room|TWIN|2|402^B08|Oceanview Twin Room|TWIN|2|403^C212|Oceanview Twin Room|TWIN|2|404^A05|Partial Oceanview King Room|KING|1|501^A07|Partial Oceanview King Room|KING|1|502^A09|Partial Oceanview King Room|KING|1|503^A11|Partial Oceanview King Room|KING|1|504^C203|Partial Oceanview King Room|KING|2|505^C204|Partial Oceanview King Room|KING|2|506^C205|Partial Oceanview King Room|KING|2|507^B09|Gardenview King Room|KING|2|601^B11|Gardenview King Room|KING|2|602^B13|Gardenview King Room|KING|2|603^B15|Gardenview King Room|KING|2|604^B17|Gardenview King Room|KING|2|605^B19|Gardenview King Room|KING|2|606^B21|Gardenview King Room|KING|2|607^B22|Gardenview King Room|KING|2|608^B10|Gardenview Twin Room|TWIN|2|701^B12|Gardenview Twin Room|TWIN|2|702^B14|Gardenview Twin Room|TWIN|2|703^B16|Gardenview Twin Room|TWIN|2|704^B18|Gardenview Twin Room|TWIN|2|705^B20|Gardenview Twin Room|TWIN|2|706^C201|Gardenview Twin Room|TWIN|2|707^C202|Gardenview Twin Room|TWIN|2|708^C207|Gardenview Twin Room|TWIN|2|709^C208|Gardenview Twin Room|TWIN|2|710^C209|Gardenview Twin Room|TWIN|2|711^C210|Gardenview Twin Room|TWIN|2|712^C211|Gardenview Twin Room|TWIN|2|713^C101|Gardenview Twin Room|TWIN|1|714^C307|Partial Oceanview Triple (Bunk+Twin)|BUNK+T|3|801^C308|Partial Oceanview Triple (Bunk+Twin)|BUNK+T|3|802^C305|Partial Oceanview Triple (King+Twin)|K+T|3|803^C309|Partial Oceanview Triple (King+Twin)|K+T|3|804^C310|Partial Oceanview Triple (King+Twin)|K+T|3|805^C301-1|Standard Quad Dorm|QUAD|3|901^C301-2|Standard Quad Dorm|QUAD|3|902^C301-3|Standard Quad Dorm|QUAD|3|903^C301-4|Standard Quad Dorm|QUAD|3|904^C302-1|Standard Quad Dorm|QUAD|3|905^C302-2|Standard Quad Dorm|QUAD|3|906^C302-3|Standard Quad Dorm|QUAD|3|907^C302-4|Standard Quad Dorm|QUAD|3|908^C303-1|Standard Quad Dorm|QUAD|3|909^C303-2|Standard Quad Dorm|QUAD|3|910^C303-3|Standard Quad Dorm|QUAD|3|911^C303-4|Standard Quad Dorm|QUAD|3|912^C304-1|Standard Quad Dorm|QUAD|3|913^C304-2|Standard Quad Dorm|QUAD|3|914^C304-3|Standard Quad Dorm|QUAD|3|915^C304-4|Standard Quad Dorm|QUAD|3|916^D01|BUNGALOWS||1|1001^D02|BUNGALOWS||1|1002^D03|BUNGALOWS||1|1003^D04|BUNGALOWS||1|1004^D05|BUNGALOWS||1|1005^D06|BUNGALOWS||1|1006^D07|BUNGALOWS||1|1007^D08|BUNGALOWS||1|1008^D09|BUNGALOWS||1|1009^D10|BUNGALOWS||1|1010^D11|BUNGALOWS||1|1011";
+        const legacyFmpDates = ["2026-01-03", "2026-02-02", "2026-03-03", "2026-04-02", "2026-05-01", "2026-06-01", "2026-06-29", "2026-07-31", "2026-08-28", "2026-09-26", "2026-10-27", "2026-11-24", "2026-12-24", "2026-12-31", "2027-01-22", "2027-02-22", "2027-03-22", "2027-04-21", "2027-05-21", "2027-06-19", "2027-07-20", "2027-08-17", "2027-09-15", "2027-10-16", "2027-11-13", "2027-12-13", "2027-12-31"];
+
+        let currentConfig = {
+            id: 'swims_resort', 
+            name: 'SWIMS! a Social Beach Resort', 
+            timezone: 'Asia/Bangkok', 
+            currency: '฿', 
+            features: { longTerm: false, volunteers: false }, 
+            rooms: [], 
+            events: [], 
+            rates: {}
+        };
+
+        const init = async () => {
+            try {
+                await signInAnonymously(auth);
+                
+                const propId = document.getElementById('prop-id').value.trim();
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'properties', propId);
+                const snap = await getDoc(docRef);
+
+                if (snap.exists()) {
+                    currentConfig = snap.data();
+                    document.getElementById('sync-status').innerText = "LOADED CONFIG FROM CLOUD";
+                } else {
+                    document.getElementById('sync-status').innerText = "NO CLOUD CONFIG - LOADING DEFAULTS";
+                    
+                    // Build default config from legacy strings
+                    currentConfig.rooms = legacyRawRooms.split('^').map(r => { 
+                        const p = r.split('|'); 
+                        return { 
+                            id: p[0], 
+                            type: p[1], 
+                            bed: p[2] || '', 
+                            floor: parseInt(p[3]) || 1, 
+                            order: parseInt(p[4]) || 9999 
+                        }; 
+                    });
+                    
+                    currentConfig.events = legacyFmpDates;
+                    
+                    // Prompt user to save the defaults to cloud
+                    setTimeout(() => {
+                        window.showAlert(`Database Migrator\n\nWe did not find a Cloud Configuration for this property ID.\n\nThe app has loaded your hardcoded default rooms. Please review them and click "SAVE TO CLOUD" to create your master property database.`);
+                    }, 1000);
+                }
+
+                populateUI();
+                document.getElementById('loader').classList.remove('active');
+                
+            } catch (err) {
+                console.error("Init Error:", err);
+                document.getElementById('sync-status').innerText = "AUTH / DB ERROR";
+                window.showAlert("Database connection failed. Please check your rules or connection.");
+            }
+        };
+
+        window.switchTab = (tab) => {
+            ['general', 'rooms', 'events', 'rates'].forEach(t => {
+                document.getElementById(`view-${t}`).style.display = t === tab ? (t === 'general' ? 'block' : 'flex') : 'none';
+                document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+            });
+        };
+
+        const populateUI = () => {
+            document.getElementById('prop-id').value = currentConfig.id || 'swims_resort';
+            document.getElementById('prop-name').value = currentConfig.name || '';
+            document.getElementById('prop-tz').value = currentConfig.timezone || '';
+            document.getElementById('prop-currency').value = currentConfig.currency || '';
+            document.getElementById('feat-longterm').checked = currentConfig.features?.longTerm || false;
+            document.getElementById('feat-volunteers').checked = currentConfig.features?.volunteers || false;
+
+            const tbody = document.getElementById('rooms-body');
+            tbody.innerHTML = '';
+            
+            // Sort rooms by 'order' before injecting
+            const sortedRooms = [...(currentConfig.rooms || [])].sort((a,b) => a.order - b.order);
+            sortedRooms.forEach(r => window.addRoomRow(r));
+
+            const evContainer = document.getElementById('events-container');
+            evContainer.innerHTML = '';
+            const sortedEvents = [...(currentConfig.events || [])].sort();
+            sortedEvents.forEach(e => window.addEventRow(e));
+            
+            const ratesBody = document.getElementById('rates-body');
+            ratesBody.innerHTML = '';
+            
+            // Extract unique room types dynamically
+            const uniqueTypes = [...new Set((currentConfig.rooms || []).map(r => r.type))];
+            
+            uniqueTypes.forEach(type => {
+                const r = (currentConfig.rates || {})[type] || { base: 0, high: 0, fmp: 0 };
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-200 hover:bg-slate-50 rate-row";
+                tr.innerHTML = `
+                    <td class="p-2 border-r border-slate-200 font-bold text-slate-700 rate-type">${type}</td>
+                    <td class="p-1 border-r border-slate-200 bg-slate-50">
+                        <input type="number" class="rate-base input-base !px-2 !py-2 !text-sm !bg-transparent border-none focus:!bg-white focus:!border-blue-300 text-slate-800 text-center font-black" value="${r.base}" placeholder="0">
+                    </td>
+                    <td class="p-1 border-r border-slate-200 bg-blue-50/50">
+                        <input type="number" class="rate-high input-base !px-2 !py-2 !text-sm !bg-transparent border-none focus:!bg-white focus:!border-blue-300 text-blue-800 text-center font-black" value="${r.high}" placeholder="0">
+                    </td>
+                    <td class="p-1 border-r border-slate-200 bg-pink-50/50">
+                        <input type="number" class="rate-fmp input-base !px-2 !py-2 !text-sm !bg-transparent border-none focus:!bg-white focus:!border-blue-300 text-pink-800 text-center font-black" value="${r.fmp}" placeholder="0">
+                    </td>
+                `;
+                ratesBody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        };
+
+        window.addRoomRow = (r = {id: '', type: '', bed: '', floor: 1, order: 9999}) => {
+            const tbody = document.getElementById('rooms-body');
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-slate-200 hover:bg-slate-50 room-row group";
+            tr.innerHTML = `
+                <td class="p-1 text-center">
+                    <button onclick="this.closest('tr').remove()" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i data-lucide="trash-2" size="16"></i></button>
+                </td>
+                <td class="p-1 border-r border-slate-200">
+                    <input type="text" class="room-id input-base !px-1 !py-1 !text-xs !bg-transparent border-none focus:!bg-white focus:!border-blue-300 font-black text-slate-800" value="${r.id}" placeholder="ID">
+                </td>
+                <td class="p-1 border-r border-slate-200">
+                    <input type="text" class="room-type input-base !px-1 !py-1 !text-xs !bg-transparent border-none focus:!bg-white focus:!border-blue-300 text-slate-600" value="${r.type}" placeholder="Category Name">
+                </td>
+                <td class="p-1 border-r border-slate-200">
+                    <input type="text" class="room-bed input-base !px-1 !py-1 !text-xs !bg-transparent border-none focus:!bg-white focus:!border-blue-300 text-slate-600 text-center" value="${r.bed}" placeholder="Bed">
+                </td>
+                <td class="p-1 border-r border-slate-200">
+                    <input type="number" class="room-floor input-base !px-1 !py-1 !text-xs !bg-transparent border-none focus:!bg-white focus:!border-blue-300 text-slate-600 text-center" value="${r.floor}" min="1" max="9">
+                </td>
+                <td class="p-1 border-r border-slate-200">
+                    <input type="number" class="room-order input-base !px-1 !py-1 !text-xs !bg-transparent border-none focus:!bg-white focus:!border-blue-300 text-slate-400 text-center" value="${r.order}">
+                </td>
+            `;
+            tbody.appendChild(tr);
+            lucide.createIcons();
+        };
+
+        window.addEventRow = (dateStr = "") => {
+            const container = document.getElementById('events-container');
+            const div = document.createElement('div');
+            div.className = "flex items-center gap-2 mb-2 event-row";
+            div.innerHTML = `
+                <input type="date" class="event-date input-base max-w-[200px]" value="${dateStr}">
+                <button onclick="this.parentElement.remove()" class="p-2 text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 rounded transition-colors border border-slate-200">
+                    <i data-lucide="trash-2" size="16"></i>
+                </button>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+        };
+
+        window.saveToCloud = async () => {
+            document.getElementById('loader').classList.add('active');
+            document.getElementById('sync-status').innerText = 'SAVING CONFIGURATION...';
+
+            try {
+                // Ensure ID is present and formatted
+                const propId = document.getElementById('prop-id').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+                if (!propId) {
+                    throw new Error("Property ID cannot be blank.");
+                }
+
+                // Gather General Info
+                const newConfig = {
+                    id: propId,
+                    name: document.getElementById('prop-name').value.trim(),
+                    timezone: document.getElementById('prop-tz').value.trim(),
+                    currency: document.getElementById('prop-currency').value.trim(),
+                    features: {
+                        longTerm: document.getElementById('feat-longterm').checked,
+                        volunteers: document.getElementById('feat-volunteers').checked
+                    },
+                    rooms: [],
+                    events: [],
+                    rates: {}
+                };
+
+                // Gather Rooms
+                document.querySelectorAll('.room-row').forEach(tr => {
+                    const id = tr.querySelector('.room-id').value.trim().toUpperCase();
+                    if (!id) return; // Skip blank rows
+                    
+                    newConfig.rooms.push({
+                        id: id,
+                        type: tr.querySelector('.room-type').value.trim(),
+                        bed: tr.querySelector('.room-bed').value.trim().toUpperCase(),
+                        floor: parseInt(tr.querySelector('.room-floor').value) || 1,
+                        order: parseInt(tr.querySelector('.room-order').value) || 9999
+                    });
+                });
+
+                // Gather Events
+                document.querySelectorAll('.event-row').forEach(div => {
+                    const d = div.querySelector('.event-date').value;
+                    if (d) newConfig.events.push(d);
+                });
+                
+                // Gather Rates
+                document.querySelectorAll('.rate-row').forEach(tr => {
+                    const type = tr.querySelector('.rate-type').innerText.trim();
+                    newConfig.rates[type] = {
+                        base: parseInt(tr.querySelector('.rate-base').value) || 0,
+                        high: parseInt(tr.querySelector('.rate-high').value) || 0,
+                        fmp: parseInt(tr.querySelector('.rate-fmp').value) || 0
+                    };
+                });
+                
+                // Deduplicate and Sort Events
+                newConfig.events = [...new Set(newConfig.events)].sort();
+
+                // Save to Firestore using the dynamic propId
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'properties', propId);
+                await setDoc(docRef, newConfig);
+
+                currentConfig = newConfig; // Update local state
+                
+                document.getElementById('loader').classList.remove('active');
+                window.showAlert("Success!\n\nYour property settings and room inventory have been permanently saved to the cloud.\n\nYou are now ready for Phase 2!");
+
+            } catch (err) {
+                console.error("Save Error:", err);
+                document.getElementById('loader').classList.remove('active');
+                window.showAlert("Failed to save: " + err.message);
+            }
+        };
+
+        // Standard Modal Handlers
+        window.showAlert = (msg, isConfirm = false, onConfirm = null) => { 
+            const modal = document.getElementById('alert-modal'); 
+            document.getElementById('alert-message').innerText = msg; 
+            
+            const confirmBtn = document.getElementById('alert-confirm'); 
+            const cancelBtn = document.getElementById('alert-cancel'); 
+            
+            if (isConfirm) {
+                cancelBtn.className = 'px-6 py-2 rounded-lg font-black text-sm uppercase bg-slate-200 text-slate-700'; 
+                confirmBtn.innerText = 'Yes'; 
+                confirmBtn.className = 'px-10 py-2 rounded-lg font-black text-sm uppercase bg-red-600 text-white'; 
+            } else {
+                cancelBtn.className = 'hidden'; 
+                confirmBtn.innerText = 'Okay'; 
+                confirmBtn.className = 'px-10 py-2 rounded-lg font-black text-sm uppercase bg-blue-600 text-white'; 
+            }
+            
+            confirmBtn.onclick = () => { 
+                if (onConfirm) onConfirm(); 
+                window.closeAlert(); 
+            }; 
+            
+            modal.style.display = 'flex'; 
+        };
+        
+        window.closeAlert = () => { 
+            document.getElementById('alert-modal').style.display = 'none'; 
+        };
+
+        // Boot
+        init();
+    </script>
+</body>
+</html>
