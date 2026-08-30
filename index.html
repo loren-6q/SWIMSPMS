@@ -1204,11 +1204,11 @@
                 try {
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'daily_rates', 'current'), { rates: newRates, updated: new Date().toISOString() });
                     $('rates-textarea').value = '';
-                    if ($('dashboard-view') && $('dashboard-view').style.display === 'flex') window.renderDashboard();
+                    if ($('dashboard-view').style.display === 'flex') window.renderDashboard();
                     window.showAlert(`Successfully extracted and saved lowest rates for ${Object.keys(newRates).length} room categories!`);
                 } catch(e) {
                     $('rates-textarea').value = '';
-                    if ($('dashboard-view') && $('dashboard-view').style.display === 'flex') window.renderDashboard();
+                    if ($('dashboard-view').style.display === 'flex') window.renderDashboard();
                     window.showAlert(`Successfully extracted rates for ${Object.keys(newRates).length} categories.\n(Rates are saved locally for this session.)`);
                 }
             } else {
@@ -1220,12 +1220,25 @@
         window.autoSuggestRoom = (bt, nt, cin, cout) => {
             if (!cin || !cout || !bt) return; 
             const sU = parseYMD(cin), eU = parseYMD(cout), occ = new Set();
-            staff.forEach(s => { if(s.status === 'cancelled' || s.status === 'noshow' || s.status === 'unconfirmed' || s.status === 'charged') return; if(sU < parseYMD(s.checkOut) && parseYMD(s.checkIn) < eU) (s.rooms?.length ? s.rooms : [s.room]).forEach(r => { if(r) occ.add(r); }); });
+            staff.forEach(s => { if(['cancelled','noshow','unconfirmed','charged'].includes(s.status)) return; if(sU < parseYMD(s.checkOut) && parseYMD(s.checkIn) < eU) (s.rooms?.length ? s.rooms : [s.room]).forEach(r => { if(r) occ.add(r); }); });
             let av = hotelRooms.filter(r => !occ.has(r.id)), aRId = [];
             
             bt.split(' + ').forEach(part => {
-                let pT = null; if (part.includes("DORMITORY") || part.includes("4-BED") || part.includes("DORM")) pT = "Standard Quad Dorm"; else if (part.includes("TRIPLE") && part.includes("BUNK")) pT = "Partial Oceanview Triple (Bunk+Twin)"; else if (part.includes("TRIPLE")) pT = "Partial Oceanview Triple (King+Twin)"; else if (part.includes("SIDE SEA VIEW") || (part.includes("PARTIAL") && !part.includes("TWIN") && !part.includes("TRIPLE"))) pT = "Partial Oceanview King Room"; else if (part.includes("PARTIAL SEA VIEW") || (part.includes("PARTIAL") && part.includes("TWIN"))) pT = "Double or Twin Room with Partial Sea View"; else if (part.includes("DELUXE TWIN") || (part.includes("OCEANVIEW") && part.includes("TWIN"))) pT = "Oceanview Twin Room"; else if (part.includes("DELUXE DOUBLE") || (part.includes("OCEANVIEW") && !part.includes("TWIN"))) pT = "Oceanview King Room"; else if (part.includes("TWIN ROOM WITH BALCONY") || (part.includes("GARDEN") && part.includes("TWIN"))) pT = "Gardenview Twin Room"; else if (part.includes("KING ROOM WITH BALCONY") || (part.includes("GARDEN") && !part.includes("TWIN"))) pT = "Gardenview King Room"; else if (part.includes("OCEANFRONT")) pT = part.includes("TWIN") ? "Oceanfront Twin" : "Oceanfront King"; else if (part.includes("BUNGALOW")) pT = "BUNGALOWS";
-                let pB = null; if (nt.includes("THE GUEST ASKED FOR 1 EXTRA-LARGE DOUBLE BED") || nt.includes("1 EXTRA-LARGE") || nt.includes("1 DOUBLE") || nt.includes("1 KING") || nt.includes("LARGE DOUBLE")) pB = "KING"; else if (nt.includes("TWIN") || nt.includes("SEPARATE") || nt.includes("2 SINGLE") || nt.includes("TWO SINGLE") || nt.includes("2 BEDS") || nt.includes("SINGLES")) pB = "TWIN"; else if (nt.includes("BUNK") && nt.includes("SINGLE")) pB = "BUNK+T"; else if (nt.includes("BUNK")) pB = "BUNK+T"; else if (nt.includes("KING") || nt.includes("DOUBLE") || nt.includes("LARGE") || nt.includes("1 BED") || nt.includes("ONE BED")) pB = "KING"; if (!pB) { if (part.includes("KING") || (part.includes("DOUBLE") && !part.includes("TWIN"))) pB = "KING"; else if (part.includes("TWIN") && !part.includes("DOUBLE")) pB = "TWIN"; }
+                let pT = null, pB = null;
+                if (/DORM|4-BED/i.test(part)) pT = "Standard Quad Dorm"; 
+                else if (/TRIPLE/i.test(part)) pT = /BUNK/i.test(part) ? "Partial Oceanview Triple (Bunk+Twin)" : "Partial Oceanview Triple (King+Twin)"; 
+                else if (/PARTIAL|SIDE SEA/i.test(part)) pT = /TWIN/i.test(part) ? "Partial Oceanview Twin Room" : "Partial Oceanview King Room"; 
+                else if (/DELUXE|OCEANVIEW/i.test(part)) pT = /TWIN/i.test(part) ? "Oceanview Twin Room" : "Oceanview King Room"; 
+                else if (/GARDEN|BALCONY/i.test(part)) pT = /TWIN/i.test(part) ? "Gardenview Twin Room" : "Gardenview King Room"; 
+                else if (/OCEANFRONT/i.test(part)) pT = /TWIN/i.test(part) ? "Oceanfront Twin" : "Oceanfront King"; 
+                else if (/BUNGALOW/i.test(part)) pT = "BUNGALOWS";
+                
+                if (/EXTRA-LARGE|1 DOUBLE|1 KING|LARGE DOUBLE|1 BED|ONE BED/i.test(nt)) pB = "KING"; 
+                else if (/TWIN|SEPARATE|2 SINGLE|TWO SINGLE|2 BEDS|SINGLES/i.test(nt)) pB = "TWIN"; 
+                else if (/BUNK/i.test(nt)) pB = "BUNK+T"; 
+                
+                if (!pB) { if (/KING|DOUBLE/i.test(part) && !/TWIN/i.test(part)) pB = "KING"; else if (/TWIN/i.test(part) && !/DOUBLE/i.test(part)) pB = "TWIN"; }
+                
                 let m = (pT && pB) ? av.find(r => r.type === pT && r.bed && r.bed.includes(pB)) : null; if (!m && pT) m = av.find(r => r.type === pT);
                 if (m) { aRId.push(m.id); av = av.filter(r => r.id !== m.id); }
             });
@@ -1244,15 +1257,14 @@
 
             const ex = (reg, src = txt) => { const m = src.match(reg); return m ? m[1].trim() : ''; };
             const cM = s => Number(parseFloat((s||'').replace(/[^0-9.-]+/g,"")).toFixed(2)) || 0;
-            const isAutoMsg = str => { const s = str.toLowerCase(); return ['thanks so much for booking with us', 'our staff is there to make sure', 'inform us of any special needs', 'arriving late, please tell us', 'hate finding out weeks later', 'appreciate your positive review', 'amazing time on our magical', 'the swims team', 'your check-in:', 'your check-out:'].some(ig => s.includes(ig)); };
+            const isAutoMsg = str => { const s = str.toLowerCase(); return ['thanks so much for booking with us', 'our staff is there to make sure', 'inform us of any special needs', 'arriving late, please tell us', 'hate finding out weeks later', 'appreciate your positive review', 'amazing time on our magical', 'the swims team', 'your check-in:', 'your check-out:', 'having a fantastic experience', 'hook you up for an extra night', 'settle extensions in advance', 'sent automatically based on your messaging', 'swims! a social beach resort', 'your potential check-out date'].some(ig => s.includes(ig)); };
             
             const fD = dS => {
                 if(!dS) return '';
-                let clean = dS.replace(/´/g, '').replace(/'/g, '').replace(/,/g, '').replace(/(st|nd|rd|th)\b/gi, '').trim();
+                let clean = dS.replace(/´|'|,|(st|nd|rd|th)\b/gi, '').trim();
                 const mths = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-                let parts = clean.split(/\s+/);
                 let d=1, m='01', y=new Date().getFullYear();
-                parts.forEach(p => {
+                clean.split(/\s+/).forEach(p => {
                     let l = p.toLowerCase().substring(0,3);
                     if(mths[l]) m = mths[l];
                     else if(/^\d{1,2}$/.test(p)) d = parseInt(p);
