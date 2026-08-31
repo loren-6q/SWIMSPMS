@@ -45,6 +45,11 @@
             </div>
 
             <!-- Queue Action Buttons -->
+            <button id="import-legacy-btn" onclick="document.getElementById('import-file').click()" class="bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-semibold py-1 px-2 rounded flex items-center gap-1 transition-colors shadow-sm">
+                <i data-lucide="upload-cloud" class="w-3 h-3"></i> Import Legacy
+            </button>
+            <input type="file" id="import-file" accept=".xlsx, .xls, .csv" class="hidden" onchange="window.handleImport(event)">
+            
             <button id="bulk-assign-btn" onclick="openBulkAssignModal()" class="hidden bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-semibold py-1 px-2 rounded flex items-center gap-1 transition-colors shadow-sm">
                 <i data-lucide="layers" class="w-3 h-3"></i> Bulk Edit
             </button>
@@ -239,7 +244,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, where, orderBy, limit, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // CRITICAL UPDATE: Pointed directly to your PMS database (swimspms)
         const firebaseConfig = { apiKey: "AIzaSyCyz--TlQZf_d-YNxhtGCV29LuFoRBfEeU", authDomain: "swimspms.firebaseapp.com", projectId: "swimspms", storageBucket: "swimspms.firebasestorage.app", messagingSenderId: "989960113115", appId: "1:989960113115:web:a99e08a23a36ff4289f5fe" };
@@ -274,6 +279,79 @@
         window.openBulkAssignModal = openBulkAssignModal;
         window.closeBulkAssignModal = closeBulkAssignModal;
         window.applyBulkProperty = applyBulkProperty;
+
+        window.handleImport = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const btn = document.getElementById('import-legacy-btn');
+            const origText = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Importing...`;
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(firstSheet);
+
+                    if (rows.length === 0) {
+                        showToast("Error", "File is empty", "error");
+                        return;
+                    }
+
+                    let importCount = 0;
+                    const subsRef = collection(db, 'artifacts', targetAppId, 'public', 'data', 'submissions');
+
+                    for (let row of rows) {
+                        // Extract DOB from DD/MM/YYYY
+                        let dobD = "", dobM = "", dobY = "";
+                        if (row["Date of Birth"]) {
+                            const parts = row["Date of Birth"].toString().split('/');
+                            if (parts.length === 3) {
+                                dobD = parts[0].padStart(2, '0'); 
+                                dobM = parts[1].padStart(2, '0'); 
+                                dobY = parts[2];
+                            }
+                        }
+
+                        // Map gender back to full word for consistency
+                        let genderStr = row["Gender"] === 'M' ? "MALE" : (row["Gender"] === 'F' ? "FEMALE" : "");
+
+                        await addDoc(subsRef, {
+                            property: "UNASSIGNED",
+                            roomNumber: "", 
+                            firstName: (row["First Name"] || "").toString().toUpperCase(),
+                            middleName: (row["Middle Name"] || "").toString().toUpperCase(),
+                            lastName: (row["Last Name"] || "").toString().toUpperCase(),
+                            passportNumber: (row["Passport No."] || "").toString().toUpperCase().replace(/\s/g, ''),
+                            nationality: (row["Nationality"] || "").toString().toUpperCase(),
+                            dobDay: dobD,
+                            dobMonth: dobM,
+                            dobYear: dobY,
+                            gender: genderStr,
+                            checkoutDate: (row["Check-out Date"] || "").toString(),
+                            phoneNo: (row["Phone No."] || "").toString(),
+                            status: "processing", 
+                            chatId: "",
+                            createdAt: new Date() 
+                        });
+                        importCount++;
+                    }
+                    
+                    showToast("Success", `Imported ${importCount} guests!`, "success");
+                } catch (err) {
+                    console.error("Import error:", err);
+                    showToast("Error", "Failed to parse file. Make sure it's the exact export from the old app.", "error");
+                } finally {
+                    btn.innerHTML = origText;
+                    lucide.createIcons();
+                    event.target.value = ""; 
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
 
         lucide.createIcons();
 
