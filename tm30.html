@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TM30 Dashboard</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .cell-hover:hover { background-color: #1e293b; cursor: pointer; }
+        input[type="checkbox"] { accent-color: #8b5cf6; cursor: pointer; width: 14px; height: 14px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-300 min-h-screen flex flex-col font-sans text-sm">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header Toolbar -->
+    <header class="bg-slate-900 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <div id="connection-dot" class="relative flex h-2 w-2" title="Disconnected">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </div>
+            <h1 id="main-title" class="font-bold text-sm text-slate-100 tracking-tight">TM30 Dashboard</h1>
+            
+            <button onclick="document.getElementById('credentials-modal').classList.remove('hidden')" class="ml-2 bg-slate-800 hover:bg-slate-700 text-slate-300 py-1 px-2 rounded border border-slate-700 transition-colors flex items-center justify-center" title="Immigration Portal Login">
+                <i data-lucide="key" class="w-3.5 h-3.5 text-sky-400"></i>
+            </button>
+            <a href="index.html" class="ml-2 text-xs font-bold text-slate-400 hover:text-white uppercase transition-colors">← PMS</a>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <!-- Global Search Bar -->
+            <div id="global-search-container" class="relative">
+                <i data-lucide="search" class="w-3 h-3 absolute left-2 top-1.5 text-slate-500"></i>
+                <input type="text" id="global-search" onkeyup="applyFilters()" placeholder="Search names, passports..." class="bg-slate-950 border border-slate-700 text-slate-200 text-[11px] rounded pl-6 pr-2 py-1 w-48 focus:outline-none focus:border-sky-500 transition-colors">
+            </div>
+
+            <!-- Queue Action Buttons -->
+            <button id="bulk-assign-btn" onclick="openBulkAssignModal()" class="hidden bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-semibold py-1 px-2 rounded flex items-center gap-1 transition-colors shadow-sm">
+                <i data-lucide="layers" class="w-3 h-3"></i> Bulk Edit
+            </button>
+            <button id="send-ext-btn" onclick="sendToExtension()" class="hidden bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-semibold py-1 px-2 rounded flex items-center gap-1 transition-colors">
+                <i data-lucide="puzzle" class="w-3 h-3"></i> Send to Ext
+            </button>
+            <button id="export-excel-btn" onclick="exportToExcel()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold py-1 px-2 rounded flex items-center gap-1 transition-colors">
+                <i data-lucide="file-spreadsheet" class="w-3 h-3"></i> Batch Excel
+            </button>
+            <button id="clear-queue-btn" onclick="markAllAsFiled()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold py-1 px-2 rounded flex items-center gap-1 transition-colors border border-slate-700">
+                <i data-lucide="check-square" class="w-3 h-3"></i> Clear
+            </button>
+            
+            <!-- View Toggle Button -->
+            <button id="toggle-view-btn" onclick="toggleView()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold py-1 px-2 rounded flex items-center gap-1 transition-colors border border-slate-700">
+                <i data-lucide="database" class="w-3 h-3"></i> <span id="toggle-view-text">Archive</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Data Table Container -->
+    <main class="flex-1 overflow-auto p-2">
+        <div class="bg-slate-900 border border-slate-800 rounded shadow-sm overflow-x-auto">
+            <table class="w-full text-left border-collapse whitespace-nowrap text-[12px]">
+                <thead>
+                    <tr class="bg-slate-950 text-slate-400 border-b border-slate-800">
+                        <!-- Bulk Checkbox -->
+                        <th class="py-1.5 px-2 font-semibold w-8 border-r border-slate-800 text-center">
+                            <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" title="Select all in view">
+                        </th>
+                        
+                        <th class="py-1.5 px-2 font-semibold w-12 border-r border-slate-800">Acts</th>
+                        
+                        <!-- Sortable Headers -->
+                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 cursor-pointer hover:text-white group select-none" onclick="sortTable('property')">
+                            <div class="flex items-center justify-between">Property <i id="sort-icon-property" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-600 group-hover:text-slate-400"></i></div>
+                        </th>
+                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 cursor-pointer hover:text-white group select-none" onclick="sortTable('name')">
+                            <div class="flex items-center justify-between">Name <i id="sort-icon-name" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-600 group-hover:text-slate-400"></i></div>
+                        </th>
+                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 cursor-pointer hover:text-white group select-none" onclick="sortTable('passportNumber')">
+                            <div class="flex items-center justify-between">Passport <i id="sort-icon-passportNumber" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-600 group-hover:text-slate-400"></i></div>
+                        </th>
+                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 cursor-pointer hover:text-white group select-none" onclick="sortTable('nationality')">
+                            <div class="flex items-center justify-between">Nationality <i id="sort-icon-nationality" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-600 group-hover:text-slate-400"></i></div>
+                        </th>
+                        
+                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800">DOB</th>
+                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 w-12 text-center">Sex</th>
+                        
+                        <th class="py-1.5 px-2 font-semibold cursor-pointer hover:text-white group select-none" onclick="sortTable('createdAt')">
+                            <div class="flex items-center justify-between">Time <i id="sort-icon-createdAt" data-lucide="arrow-down" class="w-3 h-3 text-sky-400"></i></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr>
+                        <td colspan="9" class="text-center py-8 text-slate-500 font-medium">
+                            <i data-lucide="inbox" class="w-6 h-6 mx-auto mb-2 opacity-50"></i>
+                            Waiting for passports from Telegram...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Credentials Modal -->
+    <div id="credentials-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-4 w-full max-w-sm">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-bold text-white flex items-center gap-1.5"><i data-lucide="key" class="w-3.5 h-3.5 text-sky-400"></i> TM30 Credentials</h3>
+                <button onclick="document.getElementById('credentials-modal').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <a href="https://tm30.immigration.go.th/" target="_blank" class="text-sky-400 hover:text-sky-300 text-xs flex items-center gap-1 font-medium mb-3"><i data-lucide="external-link" class="w-3 h-3"></i> tm30.immigration.go.th</a>
+                </div>
+                
+                <!-- WET POOL PARTY -->
+                <div class="bg-slate-950 p-2 rounded border border-slate-800">
+                    <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-1.5">Wet Pool Party</div>
+                    <div class="flex flex-col gap-1 text-xs">
+                        <div class="flex justify-between items-center hover:bg-slate-800 p-1.5 rounded cursor-pointer transition-colors" onclick="copyText('pontip031217@gmail.com', 'Wet Pool Username copied')">
+                            <span class="text-slate-500 font-medium">User:</span> <span class="text-slate-300 font-mono">pontip031217@gmail.com</span>
+                        </div>
+                        <div class="flex justify-between items-center hover:bg-slate-800 p-1.5 rounded cursor-pointer transition-colors" onclick="copyText('Pontip@chongkonphuet03', 'Wet Pool Password copied')">
+                            <span class="text-slate-500 font-medium">Pass:</span> <span class="text-slate-300 font-mono">Pontip@chongkonphuet03</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SWIMS -->
+                <div class="bg-slate-950 p-2 rounded border border-slate-800">
+                    <div class="text-[10px] text-sky-400 font-bold uppercase tracking-wider mb-1.5">Swims</div>
+                    <div class="flex flex-col gap-1 text-xs">
+                        <div class="flex justify-between items-center hover:bg-slate-800 p-1.5 rounded cursor-pointer transition-colors" onclick="copyText('maxfriendlyresort@gmail.com', 'Swims Username copied')">
+                            <span class="text-slate-500 font-medium">User:</span> <span class="text-slate-300 font-mono">maxfriendlyresort@gmail.com</span>
+                        </div>
+                        <div class="flex justify-between items-center hover:bg-slate-800 p-1.5 rounded cursor-pointer transition-colors" onclick="copyText('Max0838888341!', 'Swims Password copied')">
+                            <span class="text-slate-500 font-medium">Pass:</span> <span class="text-slate-300 font-mono">Max0838888341!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Assign Modal -->
+    <div id="bulk-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-4 w-full max-w-xs">
+            <h3 class="text-sm font-bold text-white mb-2">Bulk Edit Property</h3>
+            <p class="text-xs text-slate-400 mb-3">Assign a property to <span id="bulk-count" class="font-bold text-white">0</span> selected guests.</p>
+            <input type="text" id="bulk-property" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white text-xs mb-4" placeholder="e.g. WET or SWIMS">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeBulkAssignModal()" class="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white">Cancel</button>
+                <button onclick="applyBulkProperty()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-1.5 rounded text-xs font-semibold">Apply to All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal (Expanded to match Immigration Fields) -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-4 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 class="text-sm font-bold text-white mb-3">Edit Guest Details</h3>
+            <input type="hidden" id="edit-doc-id">
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                
+                <div class="col-span-2">
+                    <label class="block text-slate-500 mb-1">Property Assignment</label>
+                    <input type="text" id="edit-property" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white" placeholder="e.g. SWIMS">
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">First Name <span class="text-red-400">*</span></label>
+                    <input type="text" id="edit-first" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-500 mb-1">Middle Name</label>
+                    <input type="text" id="edit-middle" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-slate-500 mb-1">Last Name <span class="text-red-400">*</span></label>
+                    <input type="text" id="edit-last" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
+                </div>
+                
+                <div>
+                    <label class="block text-slate-500 mb-1">Passport <span class="text-red-400">*</span></label>
+                    <input type="text" id="edit-passport" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-500 mb-1">Nationality <span class="text-red-400">*</span></label>
+                    <input type="text" id="edit-nationality" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
+                </div>
+                
+                <div>
+                    <label class="block text-slate-500 mb-1">Check-out (DD/MM/YYYY)</label>
+                    <input type="text" id="edit-checkout" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white" placeholder="DD/MM/YYYY">
+                </div>
+                <div>
+                    <label class="block text-slate-500 mb-1">Phone No.</label>
+                    <input type="text" id="edit-phone" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
+                </div>
+
+                <div class="col-span-2 flex gap-2">
+                    <div class="flex-1">
+                        <label class="block text-slate-500 mb-1">Day</label>
+                        <input type="text" id="edit-day" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-slate-500 mb-1">Month</label>
+                        <input type="text" id="edit-month" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-slate-500 mb-1">Year <span class="text-red-400">*</span></label>
+                        <input type="text" id="edit-year" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-slate-500 mb-1">Sex <span class="text-red-400">*</span></label>
+                        <input type="text" id="edit-gender" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button onclick="closeEditModal()" class="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white">Cancel</button>
+                <button onclick="saveEdit()" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-1.5 rounded text-xs font-semibold">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // CRITICAL UPDATE: Pointed directly to your PMS database (swimspms)
+        const firebaseConfig = { apiKey: "AIzaSyCyz--TlQZf_d-YNxhtGCV29LuFoRBfEeU", authDomain: "swimspms.firebaseapp.com", projectId: "swimspms", storageBucket: "swimspms.firebasestorage.app", messagingSenderId: "989960113115", appId: "1:989960113115:web:a99e08a23a36ff4289f5fe" };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // App ID matches your PMS structure
+        const targetAppId = 'hotel-pms-v1';
+        let currentSubmissionsList = [];
+        let historyList = [];
+        let viewMode = 'queue';
+        
+        let searchTerm = '';
+        let sortCol = 'createdAt'; 
+        let sortDesc = true;
+
+        window.copyText = copyText;
+        window.deleteGuest = deleteGuest;
+        window.openEditModal = openEditModal;
+        window.closeEditModal = closeEditModal;
+        window.saveEdit = saveEdit;
+        window.markAllAsFiled = markAllAsFiled;
+        window.exportToExcel = exportToExcel;
+        window.sendToExtension = sendToExtension;
+        window.toggleView = toggleView;
+        window.applyFilters = applyFilters;
+        window.sortTable = sortTable;
+        window.toggleSelectAll = toggleSelectAll;
+        window.updateBulkActionVisibility = updateBulkActionVisibility;
+        window.openBulkAssignModal = openBulkAssignModal;
+        window.closeBulkAssignModal = closeBulkAssignModal;
+        window.applyBulkProperty = applyBulkProperty;
+
+        lucide.createIcons();
+
+        signInAnonymously(auth).catch(error => showToast("Connection Error", "Failed to authenticate.", "error"));
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('connection-dot').querySelector('.bg-red-500').classList.replace('bg-red-500', 'bg-sky-500');
+                document.getElementById('connection-dot').querySelector('.bg-red-400').classList.replace('bg-red-400', 'bg-sky-400');
+                document.getElementById('connection-dot').title = "Online";
+                startListening();
+            }
+        });
+
+        function startListening() {
+            const subsRef = collection(db, 'artifacts', targetAppId, 'public', 'data', 'submissions');
+            // Using onSnapshot for realtime updates of the Active Queue
+            onSnapshot(subsRef, (snapshot) => {
+                let submissions = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.status !== 'completed' && data.status !== 'failed') {
+                        submissions.push({ id: doc.id, ...data });
+                    }
+                });
+                currentSubmissionsList = submissions;
+                
+                if (viewMode === 'queue') {
+                    renderCurrentView();
+                }
+            }, (error) => {
+                console.error("Listener error:", error);
+            });
+        }
+
+        async function toggleView() {
+            const btnText = document.getElementById('toggle-view-text');
+            const title = document.getElementById('main-title');
+            
+            // Reset bulk selections when switching views
+            document.getElementById('select-all').checked = false;
+            updateBulkActionVisibility();
+
+            if (viewMode === 'queue') {
+                viewMode = 'history';
+                btnText.innerText = "Back to Queue";
+                title.innerText = "TM30 Archive (Past 300)";
+                
+                document.getElementById('table-body').innerHTML = '<tr><td colspan="9" class="text-center py-8 text-slate-500 font-medium"><i data-lucide="loader-2" class="w-6 h-6 mx-auto mb-2 animate-spin"></i>Loading archive...</td></tr>';
+                lucide.createIcons();
+
+                try {
+                    const q = query(collection(db, 'artifacts', targetAppId, 'public', 'data', 'submissions'), 
+                        where("status", "==", "completed"), 
+                        orderBy("createdAt", "desc"), 
+                        limit(300)
+                    );
+                    const snapshot = await getDocs(q);
+                    historyList = [];
+                    snapshot.forEach(doc => historyList.push({ id: doc.id, ...doc.data() }));
+                    renderCurrentView();
+                } catch(e) {
+                    showToast("Error", "Could not load archive history.", "error");
+                    console.error(e);
+                }
+            } else {
+                viewMode = 'queue';
+                btnText.innerText = "Archive";
+                title.innerText = "TM30 Dashboard";
+                renderCurrentView();
+            }
+        }
+
+        function applyFilters() {
+            searchTerm = document.getElementById('global-search').value.toLowerCase();
+            renderCurrentView();
+        }
+
+        function sortTable(col) {
+            if (sortCol === col) {
+                sortDesc = !sortDesc;
+            } else {
+                sortCol = col;
+                sortDesc = false;
+            }
+            updateSortIcons();
+            renderCurrentView();
+        }
+
+        function updateSortIcons() {
+            const columns = ['property', 'name', 'passportNumber', 'nationality', 'createdAt'];
+            columns.forEach(c => {
+                const iconEl = document.getElementById(`sort-icon-${c}`);
+                if (iconEl) {
+                    if (sortCol === c) {
+                        iconEl.setAttribute('data-lucide', sortDesc ? 'arrow-down' : 'arrow-up');
+                        iconEl.classList.remove('text-slate-600');
+                        iconEl.classList.add('text-sky-400');
+                    } else {
+                        iconEl.setAttribute('data-lucide', 'arrow-up-down');
+                        iconEl.classList.remove('text-sky-400');
+                        iconEl.classList.add('text-slate-600');
+                    }
+                }
+            });
+            lucide.createIcons();
+        }
+
+        function renderCurrentView() {
+            let list = viewMode === 'queue' ? currentSubmissionsList : historyList;
+
+            // Apply Search Filter
+            if (searchTerm) {
+                list = list.filter(g =>
+                    (g.firstName || "").toLowerCase().includes(searchTerm) ||
+                    (g.lastName || "").toLowerCase().includes(searchTerm) ||
+                    (g.passportNumber || "").toLowerCase().includes(searchTerm) ||
+                    (g.property || "").toLowerCase().includes(searchTerm) ||
+                    (g.nationality || "").toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Apply Sorting
+            list = [...list].sort((a, b) => {
+                let valA, valB;
+                if (sortCol === 'createdAt') {
+                    valA = a.createdAt?.toMillis() || 0;
+                    valB = b.createdAt?.toMillis() || 0;
+                } else if (sortCol === 'name') {
+                    valA = `${a.firstName || ''} ${a.lastName || ''}`.trim();
+                    valB = `${b.firstName || ''} ${b.lastName || ''}`.trim();
+                } else {
+                    valA = a[sortCol] || "";
+                    valB = b[sortCol] || "";
+                }
+
+                if (valA < valB) return sortDesc ? 1 : -1;
+                if (valA > valB) return sortDesc ? -1 : 1;
+                return 0;
+            });
+
+            // Update UI Button Visibility based on contents
+            const extBtn = document.getElementById('send-ext-btn');
+            const excelBtn = document.getElementById('export-excel-btn');
+            const clearBtn = document.getElementById('clear-queue-btn');
+            
+            if (list.length > 0) {
+                extBtn.classList.remove('hidden');
+                excelBtn.classList.remove('hidden');
+                if (viewMode === 'queue') clearBtn.classList.remove('hidden');
+                else clearBtn.classList.add('hidden'); // Never clear from archive
+            } else {
+                extBtn.classList.add('hidden');
+                excelBtn.classList.add('hidden');
+                clearBtn.classList.add('hidden');
+            }
+
+            // Reset master checkbox on re-render to prevent ghost selections
+            const masterCheckbox = document.getElementById('select-all');
+            if (masterCheckbox) masterCheckbox.checked = false;
+            updateBulkActionVisibility();
+
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-8 text-slate-500 font-medium">
+                            <i data-lucide="${viewMode === 'history' || searchTerm ? 'search' : 'check-circle'}" class="w-6 h-6 mx-auto mb-2 opacity-80 ${viewMode === 'history' || searchTerm ? 'text-slate-600' : 'text-emerald-500'}"></i>
+                            ${searchTerm ? 'No results match your search.' : viewMode === 'history' ? 'No historical records found.' : 'Queue is empty. Ready for passports.'}
+                        </td>
+                    </tr>`;
+                lucide.createIcons();
+                return;
+            }
+
+            list.forEach(guest => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-800 hover:bg-slate-900/50 transition-colors";
+                
+                const timeStr = guest.createdAt ? new Date(guest.createdAt.toDate()).toLocaleDateString([], {day:'2-digit', month:'2-digit'}) + ' ' + new Date(guest.createdAt.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
+                
+                let actsColumn = '';
+                if (viewMode === 'history') {
+                    actsColumn = `<td class="py-1 px-2 border-r border-slate-800 text-center"><span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">FILED</span></td>`;
+                } else {
+                    actsColumn = `
+                    <td class="py-1 px-2 border-r border-slate-800">
+                        <div class="flex gap-2 items-center justify-center">
+                            <button onclick='openEditModal(${JSON.stringify(guest).replace(/'/g, "&#39;")})' class="text-slate-400 hover:text-sky-400" title="Edit"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            <button id="del-${guest.id}" onclick="deleteGuest('${guest.id}')" class="text-slate-500 hover:text-red-400" title="Delete (Double tap)"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </td>`;
+                }
+
+                const fullName = `${guest.firstName || ''} ${guest.middleName ? guest.middleName + ' ' : ''}${guest.lastName || ''}`.trim();
+
+                tr.innerHTML = `
+                    <td class="py-1 px-2 border-r border-slate-800 text-center bg-slate-900/20">
+                        <input type="checkbox" class="row-checkbox" value="${guest.id}" onchange="updateBulkActionVisibility()">
+                    </td>
+                    ${actsColumn}
+                    <td class="py-1 px-2 border-r border-slate-800 font-bold text-sky-400 cell-hover" onclick="copyText('${guest.property || 'UNASSIGNED'}', 'Property copied')">${guest.property || 'UNASSIGNED'}</td>
+                    <td class="py-1 px-2 border-r border-slate-800 cell-hover" onclick="copyText('${fullName}', 'Name copied')">${fullName}</td>
+                    <td class="py-1 px-2 border-r border-slate-800 cell-hover font-mono text-[11px]" onclick="copyText('${guest.passportNumber}', 'Passport copied')">${guest.passportNumber || '-'}</td>
+                    <td class="py-1 px-2 border-r border-slate-800 cell-hover" onclick="copyText('${guest.nationality}', 'Nationality copied')">${guest.nationality || '-'}</td>
+                    <td class="py-1 px-2 border-r border-slate-800 cell-hover" onclick="copyText('${guest.dobDay}/${guest.dobMonth}/${guest.dobYear}', 'DOB copied')">${guest.dobDay}/${guest.dobMonth}/${guest.dobYear}</td>
+                    <td class="py-1 px-2 border-r border-slate-800 cell-hover text-center" onclick="copyText('${guest.gender}', 'Gender copied')">${guest.gender || '-'}</td>
+                    <td class="py-1 px-2 text-slate-500 text-[11px]">${timeStr}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            lucide.createIcons();
+        }
+
+        function toggleSelectAll(masterCheckbox) {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+            updateBulkActionVisibility();
+        }
+
+        function updateBulkActionVisibility() {
+            const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+            const btn = document.getElementById('bulk-assign-btn');
+            
+            if (checkedCount > 0) {
+                btn.classList.remove('hidden');
+                btn.innerHTML = `<i data-lucide="layers" class="w-3 h-3"></i> Bulk Edit (${checkedCount})`;
+                lucide.createIcons();
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+
+        function openBulkAssignModal() {
+            const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+            document.getElementById('bulk-count').innerText = checkedCount;
+            document.getElementById('bulk-property').value = '';
+            document.getElementById('bulk-modal').classList.remove('hidden');
+            document.getElementById('bulk-property').focus();
+        }
+
+        function closeBulkAssignModal() {
+            document.getElementById('bulk-modal').classList.add('hidden');
+        }
+
+        async function applyBulkProperty() {
+            const propertyName = document.getElementById('bulk-property').value.toUpperCase().trim();
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            
+            if (!propertyName) {
+                showToast("Error", "Property name cannot be blank.", "error");
+                return;
+            }
+
+            closeBulkAssignModal();
+            const originalText = document.getElementById('bulk-assign-btn').innerHTML;
+            document.getElementById('bulk-assign-btn').innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Saving...`;
+
+            try {
+                const promises = [];
+                checkedBoxes.forEach(cb => {
+                    const id = cb.value;
+                    const docRef = doc(db, 'artifacts', targetAppId, 'public', 'data', 'submissions', id);
+                    promises.push(updateDoc(docRef, { property: propertyName }));
+                });
+                
+                await Promise.all(promises);
+                
+                showToast("Success", `Assigned ${propertyName} to ${checkedBoxes.length} guests.`, "success");
+                
+                // Clear selections
+                document.getElementById('select-all').checked = false;
+                updateBulkActionVisibility();
+                
+            } catch (error) {
+                console.error("Bulk update failed:", error);
+                showToast("Error", "Could not assign property to all guests.", "error");
+            }
+            
+            document.getElementById('bulk-assign-btn').innerHTML = originalText;
+            lucide.createIcons();
+        }
+
+        let deleteTimers = {};
+        async function deleteGuest(id) {
+            const btn = document.getElementById(`del-${id}`);
+            if (deleteTimers[id]) {
+                clearTimeout(deleteTimers[id]);
+                delete deleteTimers[id];
+                try {
+                    await deleteDoc(doc(db, 'artifacts', targetAppId, 'public', 'data', 'submissions', id));
+                    showToast("Deleted", "Guest removed permanently.", "success");
+                } catch (e) {
+                    showToast("Error", "Could not delete record.", "error");
+                }
+            } else {
+                btn.classList.add('text-red-500');
+                btn.innerHTML = `<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>`;
+                lucide.createIcons();
+                deleteTimers[id] = setTimeout(() => {
+                    delete deleteTimers[id];
+                    btn.classList.remove('text-red-500');
+                    btn.innerHTML = `<i data-lucide="trash" class="w-3.5 h-3.5"></i>`;
+                    lucide.createIcons();
+                }, 3000);
+            }
+        }
+
+        function openEditModal(guest) {
+            document.getElementById('edit-doc-id').value = guest.id;
+            document.getElementById('edit-property').value = guest.property || '';
+            document.getElementById('edit-first').value = guest.firstName || '';
+            document.getElementById('edit-middle').value = guest.middleName || '';
+            document.getElementById('edit-last').value = guest.lastName || '';
+            document.getElementById('edit-passport').value = guest.passportNumber || '';
+            document.getElementById('edit-nationality').value = guest.nationality || '';
+            document.getElementById('edit-checkout').value = guest.checkoutDate || '';
+            document.getElementById('edit-phone').value = guest.phoneNo || '';
+            document.getElementById('edit-day').value = guest.dobDay || '';
+            document.getElementById('edit-month').value = guest.dobMonth || '';
+            document.getElementById('edit-year').value = guest.dobYear || '';
+            document.getElementById('edit-gender').value = guest.gender || '';
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+        }
+
+        async function saveEdit() {
+            const id = document.getElementById('edit-doc-id').value;
+            const docRef = doc(db, 'artifacts', targetAppId, 'public', 'data', 'submissions', id);
+            try {
+                await updateDoc(docRef, {
+                    property: document.getElementById('edit-property').value.toUpperCase().trim(),
+                    firstName: document.getElementById('edit-first').value.toUpperCase().trim(),
+                    middleName: document.getElementById('edit-middle').value.toUpperCase().trim(),
+                    lastName: document.getElementById('edit-last').value.toUpperCase().trim(),
+                    passportNumber: document.getElementById('edit-passport').value.toUpperCase().trim(),
+                    nationality: document.getElementById('edit-nationality').value.toUpperCase().trim(),
+                    checkoutDate: document.getElementById('edit-checkout').value.trim(),
+                    phoneNo: document.getElementById('edit-phone').value.trim(),
+                    dobDay: document.getElementById('edit-day').value.trim(),
+                    dobMonth: document.getElementById('edit-month').value.trim(),
+                    dobYear: document.getElementById('edit-year').value.trim(),
+                    gender: document.getElementById('edit-gender').value.toUpperCase().trim()
+                });
+                closeEditModal();
+                showToast("Saved", "Guest details updated.", "success");
+            } catch(e) {
+                showToast("Error", "Could not save edits.", "error");
+            }
+        }
+
+        async function markAllAsFiled() {
+            const btn = document.getElementById('clear-queue-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Clearing...`;
+            
+            try {
+                // Clear everything currently visible in the queue
+                let listToClear = currentSubmissionsList;
+                if (searchTerm) {
+                    listToClear = listToClear.filter(g =>
+                        (g.firstName || "").toLowerCase().includes(searchTerm) ||
+                        (g.passportNumber || "").toLowerCase().includes(searchTerm) ||
+                        (g.property || "").toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                for (let guest of listToClear) {
+                    const docRef = doc(db, 'artifacts', targetAppId, 'public', 'data', 'submissions', guest.id);
+                    await updateDoc(docRef, { status: 'completed' });
+                }
+                showToast("Cleared", "Queue moved to Archive.", "success");
+                
+                // Reset search and checkboxes after clearing
+                document.getElementById('global-search').value = '';
+                document.getElementById('select-all').checked = false;
+                applyFilters(); 
+                updateBulkActionVisibility();
+
+            } catch(e) {
+                showToast("Error", "Could not clear queue.", "error");
+            }
+            btn.innerHTML = originalText;
+            lucide.createIcons();
+        }
+
+        function exportToExcel() {
+            let listToExport = viewMode === 'queue' ? currentSubmissionsList : historyList;
+            
+            if (searchTerm) {
+                listToExport = listToExport.filter(g =>
+                    (g.firstName || "").toLowerCase().includes(searchTerm) ||
+                    (g.lastName || "").toLowerCase().includes(searchTerm) ||
+                    (g.passportNumber || "").toLowerCase().includes(searchTerm) ||
+                    (g.property || "").toLowerCase().includes(searchTerm) ||
+                    (g.nationality || "").toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (listToExport.length === 0) {
+                showToast("Error", "No guests to export.", "error");
+                return;
+            }
+
+            // Exactly maps to the Thai Immigration Excel Headers
+            const rows = listToExport.map((g, i) => {
+                const today = new Date();
+                const checkInDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+                
+                const dobDay = String(g.dobDay || "").padStart(2, '0');
+                const dobMonth = String(g.dobMonth || "").padStart(2, '0');
+                const dobYear = String(g.dobYear || "");
+                const dobString = (dobDay && dobMonth && dobYear) ? `${dobDay}/${dobMonth}/${dobYear}` : "";
+
+                let title = "";
+                if (g.gender === 'F' || g.gender === 'FEMALE') title = 'Ms.';
+                else if (g.gender === 'M' || g.gender === 'MALE') title = 'Mr.';
+
+                return {
+                    "No.": i + 1,
+                    "Check-In Date": checkInDate,
+                    "Title": title,
+                    "First Name": g.firstName || "",
+                    "Middle Name": g.middleName || "",
+                    "Last Name": g.lastName || "",
+                    "Passport No.": g.passportNumber || "",
+                    "Nationality": g.nationality || "",
+                    "Date of Birth": dobString,
+                    "Gender": g.gender ? g.gender.charAt(0) : "",
+                    "Check-out Date": g.checkoutDate || "",
+                    "Phone No.": g.phoneNo || ""
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(rows);
+            
+            // Set explicit column widths for readability
+            const colWidths = [
+                { wch: 5 }, { wch: 15 }, { wch: 10 }, { wch: 20 }, 
+                { wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, 
+                { wch: 15 }, { wch: 10 }, { wch: 15 }, { wch: 15 }
+            ];
+            worksheet['!cols'] = colWidths;
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "TM30_Guests");
+            
+            const dateStr = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(workbook, `TM30_Batch_${dateStr}.xlsx`);
+            showToast("Exported", `Batch of ${rows.length} ready for upload.`, "success");
+        }
+
+        function sendToExtension() {
+            let listToExport = viewMode === 'queue' ? currentSubmissionsList : historyList;
+            
+            if (searchTerm) {
+                listToExport = listToExport.filter(g =>
+                    (g.firstName || "").toLowerCase().includes(searchTerm) ||
+                    (g.lastName || "").toLowerCase().includes(searchTerm) ||
+                    (g.passportNumber || "").toLowerCase().includes(searchTerm) ||
+                    (g.property || "").toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if(listToExport.length === 0) return;
+            const btn = document.getElementById('send-ext-btn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Loading...`;
+            
+            const payload = listToExport.map(guest => ({
+                tm30Payload: true,
+                firstName: guest.firstName || "",
+                middleName: guest.middleName || "",
+                lastName: guest.lastName || "",
+                passport: guest.passportNumber || "",
+                nationality: guest.nationality || "",
+                dobDay: String(guest.dobDay || "").padStart(2, '0'),
+                dobMonth: String(guest.dobMonth || "").padStart(2, '0'),
+                dobYear: String(guest.dobYear || ""),
+                gender: (guest.gender || "M").toUpperCase().charAt(0)
+            }));
+
+            copyText(JSON.stringify(payload), `Loaded ${payload.length} guests for extension.`);
+            
+            btn.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i> Ready`;
+            btn.classList.replace('bg-sky-600', 'bg-emerald-600');
+
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.classList.replace('bg-emerald-600', 'bg-sky-600');
+                lucide.createIcons();
+            }, 3000);
+        }
+
+        function copyText(text, successMsg) {
+            if(!text) return;
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+            showToast("Copied", successMsg, "success");
+        }
+
+        function showToast(title, text, type = "success") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === "success" ? "bg-emerald-900/90 border-emerald-700" : "bg-red-900/90 border-red-700";
+            const icon = type === "success" ? `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>` : `<i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>`;
+            
+            toast.className = `${bgColor} border backdrop-blur-md text-white p-3 rounded shadow-lg transform transition-all duration-300 translate-x-full opacity-0 max-w-xs`;
+            toast.innerHTML = `
+                <div class="flex items-start gap-2">
+                    <div class="mt-0.5">${icon}</div>
+                    <div>
+                        <h4 class="text-xs font-bold">${title}</h4>
+                        <p class="text-[11px] text-slate-200 mt-0.5 leading-tight">${text}</p>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
