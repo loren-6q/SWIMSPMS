@@ -246,7 +246,10 @@
                         <label><input type="checkbox" value="unconfirmed" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> UNCONFIRMED</label>
                         <label><input type="checkbox" value="cancelled" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CANCELLED</label>
                         <label><input type="checkbox" value="noshow" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> NO-SHOW</label>
+                        <label><input type="checkbox" value="charged" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> CHARGED</label>
+                        <label><input type="checkbox" value="special" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> SPECIAL</label>
                         <label><input type="checkbox" value="vol" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> VOLUNTEER</label>
+                        <label><input type="checkbox" value="blocked" onchange="window.updateMultiLabel('db-status-dropdown', 'db-status-label', 'ALL STATUS'); window.renderDatabase();" class="mr-1.5"> BLOCKED</label>
                     </div>
                 </div>
 
@@ -410,6 +413,10 @@
                     <span>More</span><i data-lucide="chevron-down" id="meta-chevron" size="14" class="transition-transform duration-200"></i>
                 </div>
                 <div id="meta-section" class="bg-slate-50 p-1.5 border-x border-b border-slate-200 rounded-b-md mt-0 block">
+                    <div class="flex justify-between items-end mb-1">
+                        <label class="field-label mb-0">Guest Notes</label>
+                        <button type="button" onclick="window.syncTM30()" id="sync-tm30-btn" class="text-[9px] font-black uppercase text-purple-600 bg-purple-100 px-2 py-0.5 rounded hover:bg-purple-200 border border-purple-200 shadow-sm transition-colors cursor-pointer flex items-center gap-1"><i data-lucide="scan-line" size="10"></i> SYNC PASSPORTS</button>
+                    </div>
                     <textarea id="guest-notes" class="smart-notes w-full bg-white border border-slate-300 font-bold text-xs p-1.5 mb-1.5 rounded outline-none focus:ring-2 focus:ring-blue-500" placeholder="NOTES..."></textarea>
                     <div class="grid grid-cols-3 gap-1.5">
                         <div class="flex flex-col"><label class="field-label">Source</label><select id="booking-source" class="w-full text-xs font-bold bg-transparent border-none p-0 outline-none uppercase cursor-pointer" onchange="window.calcFinancials()"><option value="direct">DIRECT</option><option value="booking.com">BOOKING.COM</option><option value="agoda">AGODA</option><option value="hostelworld">HOSTELWORLD</option><option value="airbnb">AIRBNB</option><option value="walkin">WALK-IN</option><option value="other">OTHER</option></select></div>
@@ -487,7 +494,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc, getDoc, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s);
         
@@ -760,7 +767,7 @@
                     } else {
                         extHtml = `<div class="hidden"><select id="ext-room-select"><option value="ALL">ALL</option></select></div>`;
                     }
-                    const container = $('split-room-dropdown-container'); // Corrected from ext-room to split-room to match user's previous patch
+                    const container = $('split-room-dropdown-container'); 
                     if(container) container.innerHTML = extHtml;
                 }
             } else { 
@@ -1914,6 +1921,88 @@
             $('alert-confirm').innerText = 'Close'; 
             $('alert-confirm').className = 'px-10 py-2 rounded-lg font-black text-sm uppercase bg-slate-800 text-white';
             $('alert-modal').style.display = 'flex';
+        };
+
+        window.syncTM30 = async () => {
+            const btn = $('sync-tm30-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" size="10" class="animate-spin inline"></i> SYNCING...';
+            btn.disabled = true;
+
+            try {
+                const rL = Array.from($$('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
+                if (rL.length === 0) {
+                    window.showAlert("Please assign a room first to sync passports.");
+                    btn.innerHTML = originalText; btn.disabled = false; lucide.createIcons(); return;
+                }
+
+                const checkOut = $('check-out').value;
+                const phone = $('phone').value;
+
+                // Format checkout to DD/MM/YYYY for Thai Immigration Form
+                let checkoutFormatted = "";
+                if (checkOut) {
+                    const parts = checkOut.split('-');
+                    checkoutFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+
+                let foundPassports = [];
+                let updatePromises = [];
+
+                for (let room of rL) {
+                    // Fuzzy match: if room is A01, also search for A1. If A1, search A01.
+                    let searchRooms = [room];
+                    if (/^[a-zA-Z]0\d$/.test(room)) searchRooms.push(room[0] + room[2]);
+                    else if (/^[a-zA-Z]\d$/.test(room)) searchRooms.push(room[0] + '0' + room[1]);
+
+                    // ADDED SAFETY LOCK: Fetch by room, filter by property in memory to avoid index errors
+                    const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'submissions'), 
+                        where("roomNumber", "in", searchRooms)
+                    );
+                    const snap = await getDocs(q);
+                    
+                    snap.forEach(docSnap => {
+                        const data = docSnap.data();
+                        // Only sync active items from the queue AND ensure it belongs to SWIMS
+                        if (data.property === "SWIMS" && data.status !== 'completed' && data.status !== 'failed') {
+                            foundPassports.push(data);
+                            // Update TM30 record and clear room to prevent future overlap
+                            updatePromises.push(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'submissions', docSnap.id), {
+                                checkoutDate: checkoutFormatted,
+                                phoneNo: phone,
+                                roomNumber: "", // Cleared so it doesn't get synced again for the next guest
+                                status: "completed" // Clears it directly into the Archive!
+                            }));
+                        }
+                    });
+                }
+
+                if (foundPassports.length === 0) {
+                    window.showAlert(`No pending passports found in the TM30 queue for Room(s): ${rL.join(', ')}\n\n(Did staff forget to caption the Telegram photo with the room number, or is it not assigned to SWIMS?)`);
+                    btn.innerHTML = originalText; btn.disabled = false; lucide.createIcons(); return;
+                }
+
+                await Promise.all(updatePromises);
+
+                let appendNotes = `\n\n[PASSPORT SYNC - ${new Date().toLocaleDateString('en-GB')}]\n`;
+                foundPassports.forEach(p => {
+                    const fName = `${p.firstName || ''} ${p.middleName || ''} ${p.lastName || ''}`.replace(/\s+/g, ' ').trim();
+                    appendNotes += `• ${fName} (${p.passportNumber || 'N/A'})\n`;
+                });
+
+                const notesEl = $('guest-notes');
+                notesEl.value = (notesEl.value + appendNotes).trim();
+
+                window.showAlert(`✅ Successfully synced ${foundPassports.length} passport(s)!\n\nThe checkout dates have been pushed to TM30, and the guest names have been added to your notes.\n\nDon't forget to click Save!`);
+
+            } catch (e) {
+                console.error("Sync Error", e);
+                window.showAlert("Error syncing passports. Please check your connection.");
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            lucide.createIcons();
         };
 
         window.saveBooking = async () => {
