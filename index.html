@@ -139,10 +139,8 @@
                     <span id="match-counter">Match?</span>
                 </div>
 
-                <!-- Mobile Search Toggle Button -->
                 <button onclick="window.toggleSearchMode()" class="p-1 sm:hidden text-slate-500 hover:text-blue-600 bg-slate-100 rounded shrink-0 cursor-pointer"><i data-lucide="search" class="!w-4 !h-4"></i></button>
 
-                <!-- Search Input Container -->
                 <div id="search-container" class="hidden sm:flex absolute sm:relative right-0 top-10 sm:top-auto bg-slate-800 sm:bg-transparent p-2 sm:p-0 rounded-lg sm:rounded-none shadow-2xl sm:shadow-none border sm:border-none border-slate-700 sm:border-transparent z-[100] sm:z-auto w-[220px] sm:w-28 md:w-36 shrink-0 group">
                     <i data-lucide="search" class="absolute left-4 sm:left-2 top-3 sm:top-1.5 text-slate-400 !w-3 !h-3 sm:!w-[14px] sm:!h-[14px] hidden sm:block"></i>
                     <input type="text" id="guest-search" placeholder="FIND GUEST / ID..." oninput="window.handleSearch(this.value)" class="pl-2 sm:pl-7 pr-7 py-1.5 sm:py-1 w-full bg-white border border-slate-200 rounded font-black text-[10px] sm:text-xs uppercase outline-none focus:ring-2 focus:ring-blue-500 shadow-inner sm:shadow-none">
@@ -153,6 +151,7 @@
                     <button onclick="window.openEmailParserModal()" class="p-1 sm:p-1.5 text-slate-500 hover:text-purple-600 bg-slate-100 hover:bg-purple-50 rounded shadow-sm transition-colors cursor-pointer" title="Import Booking"><i data-lucide="mail-plus" class="!w-4 !h-4 sm:!w-[18px] sm:!h-[18px]"></i></button>
                     <button onclick="window.openPriceCheckModal()" class="p-1 sm:p-1.5 text-slate-500 hover:text-pink-600 bg-slate-100 hover:bg-pink-50 rounded shadow-sm transition-colors cursor-pointer" title="Price Check"><i data-lucide="tag" class="!w-4 !h-4 sm:!w-[18px] sm:!h-[18px]"></i></button>
                     <a href="sync.html" target="_blank" class="p-1 sm:p-1.5 text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 rounded shadow-sm transition-colors cursor-pointer" title="OTA Sync"><i data-lucide="refresh-cw" class="!w-4 !h-4 sm:!w-[18px] sm:!h-[18px]"></i></a>
+                    <a href="tm30.html" target="_blank" class="p-1 sm:p-1.5 text-slate-500 hover:text-emerald-600 bg-slate-100 hover:bg-emerald-50 rounded shadow-sm transition-colors cursor-pointer" title="TM30 Dashboard"><i data-lucide="id-card" class="!w-4 !h-4 sm:!w-[18px] sm:!h-[18px]"></i></a>
 
                     <div class="relative multi-select-container shrink-0 ml-0 sm:ml-1">
                         <button onclick="window.toggleMultiSelect('app-menu-dropdown', this)" class="bg-slate-900 text-white p-1 sm:p-1.5 rounded shadow-sm hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer">
@@ -415,7 +414,7 @@
                 <div id="meta-section" class="bg-slate-50 p-1.5 border-x border-b border-slate-200 rounded-b-md mt-0 block">
                     <div class="flex justify-between items-end mb-1">
                         <label class="field-label mb-0">Guest Notes</label>
-                        <button type="button" onclick="window.syncTM30()" id="sync-tm30-btn" class="text-[9px] font-black uppercase text-purple-600 bg-purple-100 px-2 py-0.5 rounded hover:bg-purple-200 border border-purple-200 shadow-sm transition-colors cursor-pointer flex items-center gap-1"><i data-lucide="scan-line" size="10"></i> SYNC PASSPORTS</button>
+                        <button type="button" onclick="window.syncTM30()" id="sync-tm30-btn" class="text-[9px] font-black uppercase text-purple-600 bg-purple-100 px-2 py-0.5 rounded hover:bg-purple-200 border border-purple-200 shadow-sm transition-colors cursor-pointer flex items-center gap-1"><i data-lucide="scan-line" size="10"></i> AUTO-SYNC PASSPORTS</button>
                     </div>
                     <textarea id="guest-notes" class="smart-notes w-full bg-white border border-slate-300 font-bold text-xs p-1.5 mb-1.5 rounded outline-none focus:ring-2 focus:ring-blue-500" placeholder="NOTES..."></textarea>
                     <div class="grid grid-cols-3 gap-1.5">
@@ -554,35 +553,6 @@
             { val: 'blocked', bg: '#475569', txt: '#fff' },
             { val: 'vol', bg: '#fbcfe8', txt: '#831843' }
         ];
-
-        $('calendar-legend').innerHTML = `
-            <div class="flex flex-wrap items-center justify-center gap-3">
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#ec4899] border border-[#be185d]"></span> NEW</div>
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#7fc6f5] border border-[#38bdf8]"></span> FUTURE</div>
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#059669] border border-[#047857]"></span> HERE</div>
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#aba39d] border border-[#78716c]"></span> LEFT</div>
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#f3e8ff] border border-[#d8b4fe]"></span> UNCONFIRMED</div>
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#0f172a] border border-[#f59e0b]"></span> CHARGED</div>
-                <div class="legend-item"><span class="w-3 h-3 rounded-full bg-[#fbcfe8] border border-[#f472b6]"></span> VOLUNTEER</div>
-            </div>
-            <div class="w-px h-4 bg-slate-300 hidden md:block"></div>
-            <div class="flex flex-wrap items-center justify-center gap-3">
-                <div class="legend-item"><div class="w-3.5 h-4 shrink-0">${SVGS.upFree}</div> FREE UP</div>
-                <div class="legend-item"><div class="w-3.5 h-4 shrink-0">${SVGS.upPaid}</div> PAID UP</div>
-                <div class="legend-item"><div class="w-4 h-4 shrink-0">${SVGS.link}</div> LINKED</div>
-                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.ext}</div> EXTENDED</div>
-                <div class="legend-item font-black text-[10px] md:text-[11px] text-slate-800"><em>REFUNDABLE (it.)</em></div>
-                <div class="legend-item"><div class="border-[2px] border-red-500 w-3 h-3"></div> DUE</div>
-                <div class="legend-item"><div class="border-[2px] border-red-500 border-dashed w-3 h-3"></div> BAD CC</div>
-            </div>
-            <div class="w-px h-4 bg-slate-300 hidden xl:block"></div>
-            <div class="flex flex-wrap items-center justify-center gap-3">
-                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailConf}</div> CONFIRM</div>
-                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailPre}</div> PRE/POST SENT</div>
-                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailPreConf}</div> PRE/POST CONF</div>
-                <div class="legend-item"><div class="w-4 h-3.5 shrink-0">${SVGS.mailSpec}</div> SPECIAL</div>
-            </div>
-        `;
 
         window.getPaid = s => (s.payments || []).reduce((sum, p) => sum + Number(p.amt), 0);
         window.getDue = s => Number((Number(s.totalPrice || 0) - window.getPaid(s)).toFixed(2));
@@ -1926,78 +1896,98 @@
         window.syncTM30 = async () => {
             const btn = $('sync-tm30-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i data-lucide="loader-2" size="10" class="animate-spin inline"></i> SYNCING...';
+            btn.innerHTML = '<i data-lucide="loader-2" size="10" class="animate-spin inline"></i> SYNCING ALL...';
             btn.disabled = true;
 
             try {
-                const rL = Array.from($$('.assigned-room-select')).map(sel => sel.value).filter(Boolean);
-                if (rL.length === 0) {
-                    window.showAlert("Please assign a room first to sync passports.");
+                // 1. Get ALL active passports in the queue that belong to this property
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'submissions'), 
+                    where("property", "==", "SWIMS")
+                );
+                const passSnap = await getDocs(q);
+                
+                let foundPassports = [];
+                passSnap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.status !== 'completed' && data.status !== 'failed') {
+                        foundPassports.push({ id: docSnap.id, ...data });
+                    }
+                });
+
+                if (foundPassports.length === 0) {
+                    window.showAlert(`No pending passports found in the TM30 Dashboard for SWIMS.`);
                     btn.innerHTML = originalText; btn.disabled = false; lucide.createIcons(); return;
                 }
 
-                const checkOut = $('check-out').value;
-                const phone = $('phone').value;
-
-                // Format checkout to DD/MM/YYYY for Thai Immigration Form
-                let checkoutFormatted = "";
-                if (checkOut) {
-                    const parts = checkOut.split('-');
-                    checkoutFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
-                }
-
-                let foundPassports = [];
+                let syncCount = 0;
                 let updatePromises = [];
+                let appendNotes = `\n\n[GLOBAL SYNC - ${new Date().toLocaleDateString('en-GB')}]\n`;
 
-                for (let room of rL) {
-                    // Fuzzy match: if room is A01, also search for A1. If A1, search A01.
-                    let searchRooms = [room];
-                    if (/^[a-zA-Z]0\d$/.test(room)) searchRooms.push(room[0] + room[2]);
-                    else if (/^[a-zA-Z]\d$/.test(room)) searchRooms.push(room[0] + '0' + room[1]);
+                // 2. Loop through every passport and try to find a matching booking
+                for (let p of foundPassports) {
+                    let matchedBooking = null;
 
-                    // ADDED SAFETY LOCK: Fetch by room, filter by property in memory to avoid index errors
-                    const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'submissions'), 
-                        where("roomNumber", "in", searchRooms)
-                    );
-                    const snap = await getDocs(q);
-                    
-                    snap.forEach(docSnap => {
-                        const data = docSnap.data();
-                        // Only sync active items from the queue AND ensure it belongs to SWIMS
-                        if (data.property === "SWIMS" && data.status !== 'completed' && data.status !== 'failed') {
-                            foundPassports.push(data);
-                            // Update TM30 record and clear room to prevent future overlap
-                            updatePromises.push(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'submissions', docSnap.id), {
-                                checkoutDate: checkoutFormatted,
-                                phoneNo: phone,
-                                roomNumber: "", // Cleared so it doesn't get synced again for the next guest
-                                status: "completed" // Clears it directly into the Archive!
-                            }));
+                    // Match Attempt A: By assigned room number (Strongest match)
+                    if (p.roomNumber) {
+                        let searchRooms = [p.roomNumber];
+                        // Add fuzzy room matches
+                        if (/^[a-zA-Z]0\d$/.test(p.roomNumber)) searchRooms.push(p.roomNumber[0] + p.roomNumber[2]);
+                        else if (/^[a-zA-Z]\d$/.test(p.roomNumber)) searchRooms.push(p.roomNumber[0] + '0' + p.roomNumber[1]);
+
+                        matchedBooking = staff.find(s => {
+                            if (s.status === 'cancelled' || s.status === 'noshow') return false;
+                            const rL = s.rooms?.length ? s.rooms : (s.room ? [s.room] : []);
+                            return rL.some(r => searchRooms.includes(r));
+                        });
+                    }
+
+                    // Match Attempt B: By Name (Fallback if room number is missing or wrong)
+                    if (!matchedBooking && p.firstName && p.lastName) {
+                        const pName = (p.firstName + " " + p.lastName).toUpperCase();
+                        matchedBooking = staff.find(s => {
+                            if (s.status === 'cancelled' || s.status === 'noshow') return false;
+                            const bName = (s.firstName + " " + s.lastName).toUpperCase();
+                            // Very simple fuzzy match: Is the passport name inside the booking name or vice versa?
+                            return bName.includes(p.lastName.toUpperCase()) && bName.includes(p.firstName.toUpperCase());
+                        });
+                    }
+
+                    if (matchedBooking) {
+                        syncCount++;
+                        // Format checkout to DD/MM/YYYY for Thai Immigration Form
+                        let checkoutFormatted = "";
+                        if (matchedBooking.checkOut) {
+                            const parts = matchedBooking.checkOut.split('-');
+                            checkoutFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
                         }
-                    });
+
+                        // Update the TM30 passport document
+                        updatePromises.push(updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'submissions', p.id), {
+                            checkoutDate: checkoutFormatted,
+                            phoneNo: matchedBooking.phone || "",
+                            roomNumber: "", // Clear room so it doesn't get grabbed by mistake later
+                            status: "completed" // Move directly to archive
+                        }));
+
+                        appendNotes += `• Synced: ${p.firstName} ${p.lastName} (${p.passportNumber || 'N/A'}) -> Matched to Booking: ${matchedBooking.firstName} ${matchedBooking.lastName}\n`;
+                    }
                 }
 
-                if (foundPassports.length === 0) {
-                    window.showAlert(`No pending passports found in the TM30 queue for Room(s): ${rL.join(', ')}\n\n(Did staff forget to caption the Telegram photo with the room number, or is it not assigned to SWIMS?)`);
+                if (syncCount === 0) {
+                    window.showAlert(`Found ${foundPassports.length} pending passport(s) in TM30, but could not match ANY of them to active bookings in the PMS. Please ensure names or room numbers match.`);
                     btn.innerHTML = originalText; btn.disabled = false; lucide.createIcons(); return;
                 }
 
                 await Promise.all(updatePromises);
 
-                let appendNotes = `\n\n[PASSPORT SYNC - ${new Date().toLocaleDateString('en-GB')}]\n`;
-                foundPassports.forEach(p => {
-                    const fName = `${p.firstName || ''} ${p.middleName || ''} ${p.lastName || ''}`.replace(/\s+/g, ' ').trim();
-                    appendNotes += `• ${fName} (${p.passportNumber || 'N/A'})\n`;
-                });
-
                 const notesEl = $('guest-notes');
                 notesEl.value = (notesEl.value + appendNotes).trim();
 
-                window.showAlert(`✅ Successfully synced ${foundPassports.length} passport(s)!\n\nThe checkout dates have been pushed to TM30, and the guest names have been added to your notes.\n\nDon't forget to click Save!`);
+                window.showAlert(`✅ Successfully matched and synced ${syncCount} out of ${foundPassports.length} passport(s)!\n\nThe checkout dates and phone numbers have been pushed to TM30, and they are now ready for export.\n\nDon't forget to click Save to record these notes!`);
 
             } catch (e) {
-                console.error("Sync Error", e);
-                window.showAlert("Error syncing passports. Please check your connection.");
+                console.error("Global Sync Error", e);
+                window.showAlert("Error syncing passports globally. Please check your connection.");
             }
 
             btn.innerHTML = originalText;
