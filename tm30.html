@@ -3,154 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TM30 Dashboard</title>
+    <title>Wild & Wandering | TM30 Dashboard</title>
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
+    
+    <!-- STANDARD W&W THEME BLOCK -->
+    <style type="text/tailwindcss">
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Roboto+Condensed:wght@400;700;900&display=swap');
+        
+        @layer components {
+            .btn-action { @apply px-2 py-1 text-white rounded shadow text-xs font-black uppercase flex items-center justify-center gap-1 hover:brightness-110 active:scale-95 transition-all cursor-pointer; }
+            .btn-modal { @apply px-6 py-2 rounded-lg font-black text-sm uppercase transition-colors cursor-pointer shadow-sm; }
+            .input-base { @apply w-full bg-slate-50 border border-slate-300 font-bold text-xs px-2 py-1.5 rounded outline-none focus:ring-2 focus:ring-blue-500 transition-shadow; }
+            .label-base { @apply text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest block; }
+        }
+
+        body { font-family: 'Roboto Condensed', sans-serif; background: #f1f5f9; color: #1e293b; overscroll-behavior-y: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
-        .cell-hover:hover { background-color: #1e293b; cursor: pointer; }
-        input[type="checkbox"] { accent-color: #ef4444; cursor: pointer; width: 14px; height: 14px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .alert-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); align-items: center; justify-content: center; z-index: 200; pointer-events: auto; padding: 1rem;}
+        .alert-modal-overlay.active { display: flex; }
+        
+        .row-checkbox { accent-color: #3b82f6; cursor: pointer; width: 14px; height: 14px; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-300 min-h-screen flex flex-col font-sans text-sm">
-    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+<body class="p-0 sm:p-2 h-[100dvh] fixed inset-0 flex flex-col overflow-hidden">
+    <div id="toast-container" class="fixed top-4 right-4 z-[999] flex flex-col gap-2 pointer-events-none"></div>
 
-    <header class="bg-slate-900 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between sticky top-0 z-40">
-        <div class="flex items-center gap-3 shrink-0">
-            <div id="connection-dot" class="relative flex h-2 w-2" title="Disconnected">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-            </div>
-            <h1 id="main-title" class="font-bold text-sm text-slate-100 tracking-tight hidden sm:block">TM30 Dashboard</h1>
-            
-            <button onclick="document.getElementById('credentials-modal').classList.remove('hidden')" class="ml-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-1 px-2 rounded border border-slate-700 transition-colors flex items-center justify-center" title="Immigration Portal Login">
-                <i data-lucide="key" class="w-3.5 h-3.5 text-sky-400"></i>
-            </button>
-            <a href="index.html" class="ml-1 text-[10px] font-bold text-slate-400 hover:text-white uppercase transition-colors">← PMS</a>
-        </div>
+    <div class="flex-1 flex flex-col min-h-0 mx-auto w-full max-w-[1950px]">
         
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
-            <div id="global-search-container" class="relative shrink-0">
-                <i data-lucide="search" class="w-3 h-3 absolute left-2 top-1.5 text-slate-500"></i>
-                <input type="text" id="global-search" onkeyup="applyFilters()" placeholder="Search..." class="bg-slate-950 border border-slate-700 text-slate-200 text-[11px] rounded pl-6 pr-2 py-1 w-24 sm:w-40 focus:outline-none focus:border-sky-500 transition-colors">
-            </div>
-
-            <div class="flex items-center gap-1 shrink-0 flex-nowrap">
-                <button id="bulk-assign-btn" onclick="openBulkAssignModal()" class="hidden bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold py-1 px-2 rounded flex items-center gap-1 transition-colors shadow-sm whitespace-nowrap">
-                    <i data-lucide="layers" class="w-3 h-3"></i> EDIT
-                </button>
-                <button id="bulk-delete-btn" onclick="confirmBulkDelete()" class="hidden bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold py-1 px-2 rounded flex items-center gap-1 transition-colors shadow-sm whitespace-nowrap">
-                    <i data-lucide="trash" class="w-3 h-3"></i> DELETE
-                </button>
-                <button id="send-ext-btn" onclick="sendToExtension()" class="hidden bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold py-1 px-1.5 rounded flex items-center gap-1 transition-colors whitespace-nowrap">
-                    <i data-lucide="puzzle" class="w-3 h-3"></i> EXT
-                </button>
-                <button id="export-excel-btn" onclick="exportToExcel()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold py-1 px-1.5 rounded flex items-center gap-1 transition-colors whitespace-nowrap">
-                    <i data-lucide="file-spreadsheet" class="w-3 h-3"></i> TM30 XLS
-                </button>
-                <button id="clear-queue-btn" onclick="markAllAsFiled()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1 px-1.5 rounded flex items-center gap-1 transition-colors border border-slate-700 whitespace-nowrap">
-                    <i data-lucide="check-square" class="w-3 h-3"></i> CLEAR
-                </button>
-                <button id="toggle-view-btn" onclick="toggleView()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1 px-2 rounded flex items-center gap-1 transition-colors border border-slate-700 whitespace-nowrap">
-                    <i data-lucide="database" class="w-3 h-3"></i> <span id="toggle-view-text">ARCHIVE</span>
+        <!-- HEADER (UNIFIED DESIGN) -->
+        <header class="flex items-center justify-between bg-slate-900 px-3 py-2 sm:p-4 rounded-none sm:rounded-t-xl shrink-0 text-white shadow-lg z-40 flex-wrap gap-3">
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
+                <div id="connection-dot" class="relative flex h-2.5 w-2.5 shrink-0" title="Disconnected">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                </div>
+                
+                <a href="index.html" class="flex flex-col min-w-0 mr-1 sm:mr-2 hover:brightness-110 transition-all cursor-pointer">
+                    <img src="https://loren-6q.github.io/SWIMSPMS/gfx/WWicon.png" alt="Wild & Wandering" class="h-6 sm:h-9 object-contain">
+                </a>
+                
+                <div class="hidden sm:flex flex-col min-w-0 border-l border-slate-700 pl-3">
+                    <h1 id="main-title" class="font-black text-sm sm:text-base text-slate-100 tracking-widest uppercase leading-none">TM30 Queue</h1>
+                    <p class="text-[9px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5">Immigration Export</p>
+                </div>
+                
+                <button onclick="document.getElementById('credentials-modal').classList.add('active')" class="ml-1 sm:ml-2 bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded border border-slate-600 shadow transition-colors flex items-center justify-center cursor-pointer" title="Immigration Portal Login">
+                    <i data-lucide="key" class="w-4 h-4 text-emerald-400"></i>
                 </button>
             </div>
-        </div>
-    </header>
+            
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto ml-auto justify-between sm:justify-end">
+                
+                <!-- COMPACT PROPERTY TOGGLE -->
+                <select id="property-filter" onchange="window.setPropFilter(this.value)" class="bg-slate-800 border border-slate-600 text-white text-[11px] font-black uppercase tracking-widest rounded px-2 py-1.5 focus:outline-none focus:border-emerald-500 transition-colors shrink-0 outline-none cursor-pointer shadow w-24 text-center appearance-none text-ellipsis">
+                    <option value="ALL">ALL</option>
+                    <option value="WET">WET</option>
+                    <option value="SWIMS">SWIMS</option>
+                    <option value="LOUD">LOUD</option>
+                    <option value="BIGC">BIGC</option>
+                </select>
 
-    <main class="flex-1 overflow-auto p-2">
-        <div class="bg-slate-900 border border-slate-800 rounded shadow-sm overflow-x-auto">
-            <table class="w-full text-left border-collapse whitespace-nowrap text-[12px]">
-                <thead>
-                    <tr class="bg-slate-950 text-slate-400 border-b border-slate-800">
-                        <th class="py-1.5 px-2 font-semibold w-8 border-r border-slate-800 text-center">
-                            <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" title="Select all in view">
-                        </th>
-                        <th class="py-1.5 px-2 font-semibold w-12 border-r border-slate-800 text-center">Acts</th>
-                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 cursor-pointer hover:text-white group select-none" onclick="sortTable('property')">
-                            <div class="flex items-center justify-between">Property <i id="sort-icon-property" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-600 group-hover:text-slate-400"></i></div>
-                        </th>
-                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 cursor-pointer hover:text-white group select-none" onclick="sortTable('firstName')">
-                            <div class="flex items-center justify-between">First Name <i id="sort-icon-firstName" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-600 group-hover:text-slate-400"></i></div>
-                        </th>
-                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800">Middle Name</th>
-                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 cursor-pointer hover:text-white group select-none" onclick="sortTable('lastName')">
-                            <div class="flex items-center justify-between">Last Name <i id="sort-icon-lastName" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-600 group-hover:text-slate-400"></i></div>
-                        </th>
-                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 text-center">Gender</th>
-                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 cursor-pointer hover:text-white group select-none" onclick="sortTable('passportNumber')">
-                            <div class="flex items-center justify-between">Passport No. <i id="sort-icon-passportNumber" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-600 group-hover:text-slate-400"></i></div>
-                        </th>
-                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800 cursor-pointer hover:text-white group select-none" onclick="sortTable('nationality')">
-                            <div class="flex items-center justify-between">Nationality <i id="sort-icon-nationality" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-600 group-hover:text-slate-400"></i></div>
-                        </th>
-                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800">Birth Date</th>
-                        <th class="py-1.5 px-2 font-semibold border-r border-slate-800">Check-out Date</th>
-                        <th class="py-1.5 px-2 font-semibold">Phone No.</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <tr>
-                        <td colspan="12" class="text-center py-8 text-slate-500 font-medium">
-                            <i data-lucide="inbox" class="w-6 h-6 mx-auto mb-2 opacity-50"></i>
-                            Waiting for passports from Telegram...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
+                <div id="global-search-container" class="relative shrink-0">
+                    <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-1.5 text-slate-400"></i>
+                    <input type="text" id="global-search" onkeyup="applyFilters()" placeholder="Search..." class="bg-white border border-slate-300 text-slate-800 text-[11px] font-bold rounded pl-8 pr-2 py-1.5 w-28 sm:w-40 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-shadow">
+                </div>
+
+                <div class="flex items-center gap-1.5 shrink-0 flex-nowrap">
+                    <button id="bulk-assign-btn" onclick="openBulkAssignModal()" class="hidden btn-action bg-purple-600 hover:bg-purple-700 whitespace-nowrap">
+                        <i data-lucide="layers" class="w-3.5 h-3.5"></i> EDIT
+                    </button>
+                    <button id="bulk-delete-btn" onclick="confirmBulkDelete()" class="hidden btn-action bg-red-600 hover:bg-red-700 whitespace-nowrap">
+                        <i data-lucide="trash" class="w-3.5 h-3.5"></i> DEL
+                    </button>
+                    <button id="send-ext-btn" onclick="sendToExtension()" class="hidden btn-action bg-sky-600 hover:bg-sky-700 whitespace-nowrap">
+                        <i data-lucide="puzzle" class="w-3.5 h-3.5"></i> EXT
+                    </button>
+                    <button id="export-excel-btn" onclick="exportToExcel()" class="hidden btn-action bg-emerald-600 hover:bg-emerald-700 whitespace-nowrap">
+                        <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> XLS
+                    </button>
+                    <button id="clear-queue-btn" onclick="markAllAsFiled()" class="hidden btn-action bg-slate-700 hover:bg-slate-600 border border-slate-500 whitespace-nowrap">
+                        <i data-lucide="check-square" class="w-3.5 h-3.5"></i> CLEAR
+                    </button>
+                    <button id="toggle-view-btn" onclick="toggleView()" class="btn-action bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 whitespace-nowrap ml-1">
+                        <i data-lucide="database" class="w-3.5 h-3.5"></i> <span id="toggle-view-text">ARCHIVE</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- TABLE AREA -->
+        <main class="flex-1 flex flex-col min-h-0 bg-white border-x border-b border-slate-300 rounded-none sm:rounded-b-xl shadow-xl overflow-hidden">
+            <div class="flex-1 overflow-auto bg-slate-50">
+                <table class="w-full text-left border-collapse whitespace-nowrap text-[12px]">
+                    <thead class="sticky top-0 z-10 bg-slate-200 shadow-sm border-b border-slate-300">
+                        <tr class="text-slate-600 uppercase tracking-wider text-[11px] font-black">
+                            <th class="py-2 px-2 w-8 border-r border-slate-300 text-center bg-slate-300">
+                                <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" title="Select all in view" class="row-checkbox cursor-pointer">
+                            </th>
+                            <th class="py-2 px-2 w-16 border-r border-slate-300 text-center">Acts</th>
+                            <th class="py-2 px-2 border-r border-slate-300 cursor-pointer hover:bg-slate-300 group select-none transition-colors" onclick="sortTable('property')">
+                                <div class="flex items-center justify-between">Property <i id="sort-icon-property" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-400 group-hover:text-slate-600"></i></div>
+                            </th>
+                            <th class="py-2 px-2 border-r border-slate-300 cursor-pointer hover:bg-slate-300 group select-none transition-colors" onclick="sortTable('firstName')">
+                                <div class="flex items-center justify-between">First Name <i id="sort-icon-firstName" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-400 group-hover:text-slate-600"></i></div>
+                            </th>
+                            <th class="py-2 px-2 border-r border-slate-300">Middle Name</th>
+                            <th class="py-2 px-2 border-r border-slate-300 cursor-pointer hover:bg-slate-300 group select-none transition-colors" onclick="sortTable('lastName')">
+                                <div class="flex items-center justify-between">Last Name <i id="sort-icon-lastName" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-400 group-hover:text-slate-600"></i></div>
+                            </th>
+                            <th class="py-2 px-2 border-r border-slate-300 text-center">Gender</th>
+                            <th class="py-2 px-2 border-r border-slate-300 cursor-pointer hover:bg-slate-300 group select-none transition-colors" onclick="sortTable('passportNumber')">
+                                <div class="flex items-center justify-between">Passport No. <i id="sort-icon-passportNumber" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-400 group-hover:text-slate-600"></i></div>
+                            </th>
+                            <th class="py-2 px-2 border-r border-slate-300 cursor-pointer hover:bg-slate-300 group select-none transition-colors" onclick="sortTable('nationality')">
+                                <div class="flex items-center justify-between">Nationality <i id="sort-icon-nationality" data-lucide="arrow-up-down" class="w-3 h-3 text-slate-400 group-hover:text-slate-600"></i></div>
+                            </th>
+                            <th class="py-2 px-2 border-r border-slate-300">Birth Date</th>
+                            <th class="py-2 px-2 border-r border-slate-300">Check-out</th>
+                            <th class="py-2 px-2">Phone No.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="bg-white">
+                        <tr>
+                            <td colspan="12" class="text-center py-12 text-slate-400 font-bold uppercase tracking-widest">
+                                <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-3 text-slate-300"></i>
+                                Waiting for passports from Telegram...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="bg-slate-100 p-1.5 border-t border-slate-300 flex justify-between items-center shrink-0">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2" id="status-footer">Queue Live</span>
+            </div>
+        </main>
+    </div>
 
     <!-- Custom Confirm Modal -->
-    <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-        <div class="bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-4 w-full max-w-xs mx-2 text-center">
-            <div class="flex justify-center mb-2"><i data-lucide="alert-triangle" class="w-8 h-8 text-red-500"></i></div>
-            <h3 class="text-sm font-bold text-white mb-2">Confirm Deletion</h3>
-            <p id="confirm-text" class="text-xs text-slate-400 mb-4">Are you sure you want to delete?</p>
+    <div id="confirm-modal" class="alert-modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm text-center border-2 border-slate-800">
+            <div class="flex justify-center mb-3"><i data-lucide="alert-triangle" class="w-10 h-10 text-red-500"></i></div>
+            <h3 class="text-base font-black text-slate-800 uppercase mb-2">Confirm Deletion</h3>
+            <p id="confirm-text" class="text-sm font-bold text-slate-500 mb-6">Are you sure you want to delete?</p>
             <div class="flex justify-center gap-2">
-                <button onclick="closeConfirmModal()" class="px-4 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded transition-colors border border-slate-700">Cancel</button>
-                <button id="confirm-yes-btn" class="bg-red-600 hover:bg-red-500 text-white px-5 py-1.5 rounded text-xs font-bold shadow transition-colors">Delete</button>
+                <button onclick="closeConfirmModal()" class="btn-modal bg-slate-200 text-slate-700 hover:bg-slate-300">Cancel</button>
+                <button id="confirm-yes-btn" class="btn-modal bg-red-600 hover:bg-red-700 text-white">Delete</button>
             </div>
         </div>
     </div>
 
-    <!-- Credentials Modal -->
-    <div id="credentials-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-        <div class="bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-4 w-full max-w-sm mx-2">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="text-sm font-bold text-white flex items-center gap-1.5"><i data-lucide="key" class="w-3.5 h-3.5 text-sky-400"></i> TM30 Credentials</h3>
-                <button onclick="document.getElementById('credentials-modal').classList.add('hidden')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+    <!-- Credentials Modal (Updated to Light Theme) -->
+    <div id="credentials-modal" class="alert-modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-2 border-slate-800 flex flex-col overflow-hidden">
+            <div class="bg-slate-900 p-3 text-white font-bold uppercase flex justify-between items-center text-sm">
+                <div class="flex items-center gap-2"><i data-lucide="key" class="w-4 h-4 text-emerald-400"></i> TM30 Credentials</div>
+                <button onclick="document.getElementById('credentials-modal').classList.remove('active')" class="text-slate-400 hover:text-white cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <div class="space-y-4">
-                <div>
-                    <a href="https://tm30.immigration.go.th/" target="_blank" class="text-sky-400 hover:text-sky-300 text-xs flex items-center gap-1 font-medium mb-3"><i data-lucide="external-link" class="w-3 h-3"></i> tm30.immigration.go.th</a>
+            <div class="p-4 space-y-4">
+                <div class="text-center">
+                    <a href="https://tm30.immigration.go.th/" target="_blank" class="text-blue-600 hover:text-blue-700 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-1 bg-blue-50 py-2 rounded border border-blue-200 transition-colors"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> tm30.immigration.go.th</a>
                 </div>
                 
-                <div class="bg-slate-950 p-2 rounded border border-slate-800">
-                    <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-1.5">Wet Pool Party</div>
-                    <div class="flex flex-col gap-1 text-xs">
-                        <div class="flex justify-between items-center hover:bg-slate-800 p-1.5 rounded cursor-pointer transition-colors" onclick="copyText('pontip031217@gmail.com', 'Wet Pool Username copied')">
-                            <span class="text-slate-500 font-medium">User:</span> <span class="text-slate-300 font-mono">pontip031217@gmail.com</span>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="text-[11px] text-emerald-600 font-black uppercase tracking-wider mb-2 border-b border-slate-200 pb-1">Wet Pool Party</div>
+                    <div class="flex flex-col gap-1.5 text-xs">
+                        <div class="flex justify-between items-center hover:bg-white p-1.5 rounded cursor-pointer transition-colors border border-transparent hover:border-slate-200 shadow-sm" onclick="copyText('pontip031217@gmail.com', 'Wet Username copied')">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">User:</span> <span class="text-slate-700 font-bold">pontip031217@gmail.com</span>
                         </div>
-                        <div class="flex justify-between items-center hover:bg-slate-800 p-1.5 rounded cursor-pointer transition-colors" onclick="copyText('Pontip@chongkonphuet03', 'Wet Pool Password copied')">
-                            <span class="text-slate-500 font-medium">Pass:</span> <span class="text-slate-300 font-mono">Pontip@chongkonphuet03</span>
+                        <div class="flex justify-between items-center hover:bg-white p-1.5 rounded cursor-pointer transition-colors border border-transparent hover:border-slate-200 shadow-sm" onclick="copyText('Pontip@chongkonphuet03', 'Wet Password copied')">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">Pass:</span> <span class="text-slate-700 font-bold">Pontip@chongkonphuet03</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-slate-950 p-2 rounded border border-slate-800">
-                    <div class="text-[10px] text-sky-400 font-bold uppercase tracking-wider mb-1.5">Swims</div>
-                    <div class="flex flex-col gap-1 text-xs">
-                        <div class="flex justify-between items-center hover:bg-slate-800 p-1.5 rounded cursor-pointer transition-colors" onclick="copyText('maxfriendlyresort@gmail.com', 'Swims Username copied')">
-                            <span class="text-slate-500 font-medium">User:</span> <span class="text-slate-300 font-mono">maxfriendlyresort@gmail.com</span>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="text-[11px] text-blue-600 font-black uppercase tracking-wider mb-2 border-b border-slate-200 pb-1">Swims Resort</div>
+                    <div class="flex flex-col gap-1.5 text-xs">
+                        <div class="flex justify-between items-center hover:bg-white p-1.5 rounded cursor-pointer transition-colors border border-transparent hover:border-slate-200 shadow-sm" onclick="copyText('maxfriendlyresort@gmail.com', 'Swims Username copied')">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">User:</span> <span class="text-slate-700 font-bold">maxfriendlyresort@gmail.com</span>
                         </div>
-                        <div class="flex justify-between items-center hover:bg-slate-800 p-1.5 rounded cursor-pointer transition-colors" onclick="copyText('Max0838888341!', 'Swims Password copied')">
-                            <span class="text-slate-500 font-medium">Pass:</span> <span class="text-slate-300 font-mono">Max0838888341!</span>
+                        <div class="flex justify-between items-center hover:bg-white p-1.5 rounded cursor-pointer transition-colors border border-transparent hover:border-slate-200 shadow-sm" onclick="copyText('Max0838888341!', 'Swims Password copied')">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">Pass:</span> <span class="text-slate-700 font-bold">Max0838888341!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="text-[11px] text-purple-600 font-black uppercase tracking-wider mb-2 border-b border-slate-200 pb-1">LOUD Samui</div>
+                    <div class="flex flex-col gap-1.5 text-xs">
+                        <div class="flex justify-between items-center hover:bg-white p-1.5 rounded cursor-pointer transition-colors border border-transparent hover:border-slate-200 shadow-sm" onclick="copyText('warisara.noppa@gmail.com', 'Loud Username copied')">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">User:</span> <span class="text-slate-700 font-bold">warisara.noppa@gmail.com</span>
+                        </div>
+                        <div class="flex justify-between items-center hover:bg-white p-1.5 rounded cursor-pointer transition-colors border border-transparent hover:border-slate-200 shadow-sm" onclick="copyText('Elements24', 'Loud Password copied')">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">Pass:</span> <span class="text-slate-700 font-bold">Elements24</span>
                         </div>
                     </div>
                 </div>
@@ -159,78 +213,85 @@
     </div>
 
     <!-- Bulk Assign Modal -->
-    <div id="bulk-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-        <div class="bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-4 w-full max-w-xs mx-2">
-            <h3 class="text-sm font-bold text-white mb-2">Bulk Edit Property</h3>
-            <p class="text-xs text-slate-400 mb-3">Assign a property to <span id="bulk-count" class="font-bold text-white">0</span> selected guests.</p>
-            <input type="text" id="bulk-property" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white text-xs mb-4" placeholder="e.g. WET or SWIMS">
-            <div class="flex justify-end gap-2">
-                <button onclick="closeBulkAssignModal()" class="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white">Cancel</button>
-                <button onclick="applyBulkProperty()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-1.5 rounded text-xs font-semibold shadow">Apply to All</button>
+    <div id="bulk-modal" class="alert-modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-2 border-slate-800 flex flex-col overflow-hidden">
+            <div class="bg-slate-900 p-3 text-white font-bold uppercase text-center text-sm">Bulk Edit Property</div>
+            <div class="p-5 text-center">
+                <p class="text-sm font-bold text-slate-500 mb-3">Assign property to <span id="bulk-count" class="font-black text-slate-800">0</span> selected guests.</p>
+                <input type="text" id="bulk-property" class="input-base text-center !text-sm mb-4" placeholder="e.g. WET or SWIMS">
+                <div class="flex justify-center gap-2">
+                    <button onclick="closeBulkAssignModal()" class="btn-modal bg-slate-200 text-slate-700 hover:bg-slate-300">Cancel</button>
+                    <button onclick="applyBulkProperty()" class="btn-modal bg-purple-600 hover:bg-purple-700 text-white">Apply</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Edit Profile Modal -->
-    <div id="edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-        <div class="bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-4 w-full max-w-md max-h-[90vh] overflow-y-auto mx-2">
-            <h3 class="text-sm font-bold text-white mb-3">Edit Guest Details</h3>
-            <input type="hidden" id="edit-doc-id">
-            <div class="grid grid-cols-2 gap-3 text-xs">
-                <div class="col-span-2">
-                    <label class="block text-slate-500 mb-1">Property Assignment</label>
-                    <input type="text" id="edit-property" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white" placeholder="e.g. SWIMS">
-                </div>
-                <div>
-                    <label class="block text-slate-500 mb-1">First Name <span class="text-red-400">*</span></label>
-                    <input type="text" id="edit-first" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
-                </div>
-                <div>
-                    <label class="block text-slate-500 mb-1">Middle Name</label>
-                    <input type="text" id="edit-middle" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-slate-500 mb-1">Last Name <span class="text-red-400">*</span></label>
-                    <input type="text" id="edit-last" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
-                </div>
-                <div>
-                    <label class="block text-slate-500 mb-1">Passport <span class="text-red-400">*</span></label>
-                    <input type="text" id="edit-passport" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
-                </div>
-                <div>
-                    <label class="block text-slate-500 mb-1">Nationality <span class="text-red-400">*</span></label>
-                    <input type="text" id="edit-nationality" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
-                </div>
-                <div>
-                    <label class="block text-slate-500 mb-1">Check-out (DD/MM/YYYY)</label>
-                    <input type="text" id="edit-checkout" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white" placeholder="DD/MM/YYYY">
-                </div>
-                <div>
-                    <label class="block text-slate-500 mb-1">Phone No.</label>
-                    <input type="text" id="edit-phone" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white">
-                </div>
-                <div class="col-span-2 flex gap-2">
-                    <div class="flex-1">
-                        <label class="block text-slate-500 mb-1">Day</label>
-                        <input type="text" id="edit-day" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white" placeholder="DD">
+    <div id="edit-modal" class="alert-modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md border-2 border-slate-800 flex flex-col overflow-hidden max-h-[90vh]">
+            <div class="bg-slate-900 p-3 text-white font-bold uppercase text-sm flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2"><i data-lucide="user" class="w-4 h-4"></i> Edit Guest Details</div>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="p-4 overflow-y-auto flex-1">
+                <input type="hidden" id="edit-doc-id">
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="col-span-2">
+                        <label class="label-base">Property Assignment</label>
+                        <input type="text" id="edit-property" class="input-base" placeholder="e.g. SWIMS">
                     </div>
-                    <div class="flex-1">
-                        <label class="block text-slate-500 mb-1">Month</label>
-                        <input type="text" id="edit-month" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white" placeholder="MM">
+                    <div>
+                        <label class="label-base">First Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit-first" class="input-base">
                     </div>
-                    <div class="flex-1">
-                        <label class="block text-slate-500 mb-1">Year</label>
-                        <input type="text" id="edit-year" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white" placeholder="YYYY">
+                    <div>
+                        <label class="label-base">Middle Name</label>
+                        <input type="text" id="edit-middle" class="input-base">
                     </div>
-                    <div class="flex-1">
-                        <label class="block text-slate-500 mb-1">Gender</label>
-                        <input type="text" id="edit-gender" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-white" placeholder="M/F">
+                    <div class="col-span-2">
+                        <label class="label-base">Last Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit-last" class="input-base">
+                    </div>
+                    <div>
+                        <label class="label-base">Passport <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit-passport" class="input-base font-mono">
+                    </div>
+                    <div>
+                        <label class="label-base">Nationality <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit-nationality" class="input-base text-center">
+                    </div>
+                    <div>
+                        <label class="label-base">Check-out (DD/MM/YYYY)</label>
+                        <input type="text" id="edit-checkout" class="input-base text-center" placeholder="DD/MM/YYYY">
+                    </div>
+                    <div>
+                        <label class="label-base">Phone No.</label>
+                        <input type="text" id="edit-phone" class="input-base">
+                    </div>
+                    <div class="col-span-2 flex gap-2 border-t border-slate-200 pt-3 mt-1">
+                        <div class="flex-1">
+                            <label class="label-base">Day</label>
+                            <input type="text" id="edit-day" class="input-base text-center" placeholder="DD">
+                        </div>
+                        <div class="flex-1">
+                            <label class="label-base">Month</label>
+                            <input type="text" id="edit-month" class="input-base text-center" placeholder="MM">
+                        </div>
+                        <div class="flex-1">
+                            <label class="label-base">Year</label>
+                            <input type="text" id="edit-year" class="input-base text-center" placeholder="YYYY">
+                        </div>
+                        <div class="flex-1">
+                            <label class="label-base">Gender</label>
+                            <input type="text" id="edit-gender" class="input-base text-center" placeholder="M/F">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="flex justify-end gap-2 mt-4">
-                <button onclick="closeEditModal()" class="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white">Cancel</button>
-                <button onclick="saveEdit()" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-1.5 rounded text-xs font-semibold shadow">Save Changes</button>
+            <div class="p-3 bg-slate-100 border-t border-slate-200 flex justify-end gap-2 shrink-0">
+                <button onclick="closeEditModal()" class="btn-modal bg-slate-200 text-slate-700 hover:bg-slate-300 !py-1.5">Cancel</button>
+                <button onclick="saveEdit()" class="btn-modal bg-blue-600 hover:bg-blue-700 text-white !py-1.5 shadow">Save Changes</button>
             </div>
         </div>
     </div>
@@ -250,6 +311,7 @@
         let currentSubmissionsList = [];
         let historyList = [];
         let viewMode = 'queue';
+        let currentPropFilter = 'ALL';
         
         let searchTerm = '';
         let sortCol = 'createdAt'; 
@@ -273,9 +335,13 @@
         window.closeBulkAssignModal = closeBulkAssignModal;
         window.applyBulkProperty = applyBulkProperty;
         
-        // Custom Confirm Modal Bindings
         window.confirmBulkDelete = confirmBulkDelete;
         window.closeConfirmModal = closeConfirmModal;
+
+        window.setPropFilter = (f) => {
+            currentPropFilter = f;
+            renderCurrentView();
+        };
 
         lucide.createIcons();
 
@@ -283,8 +349,8 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById('connection-dot').querySelector('.bg-red-500').classList.replace('bg-red-500', 'bg-sky-500');
-                document.getElementById('connection-dot').querySelector('.bg-red-400').classList.replace('bg-red-400', 'bg-sky-400');
+                document.getElementById('connection-dot').querySelector('.bg-red-500').classList.replace('bg-red-500', 'bg-emerald-500');
+                document.getElementById('connection-dot').querySelector('.bg-red-400').classList.replace('bg-red-400', 'bg-emerald-400');
                 document.getElementById('connection-dot').title = "Online";
                 startListening();
             }
@@ -317,9 +383,10 @@
             if (viewMode === 'queue') {
                 viewMode = 'history';
                 btnText.innerText = "QUEUE";
-                if(title) title.innerText = "TM30 Archive (Past 300)";
+                if(title) title.innerText = "TM30 Archive";
+                document.getElementById('status-footer').innerText = "History Archive (Past 300)";
                 
-                document.getElementById('table-body').innerHTML = '<tr><td colspan="12" class="text-center py-8 text-slate-500 font-medium"><i data-lucide="loader-2" class="w-6 h-6 mx-auto mb-2 animate-spin"></i>Loading archive...</td></tr>';
+                document.getElementById('table-body').innerHTML = '<tr><td colspan="12" class="text-center py-12 text-slate-400 font-bold uppercase tracking-widest"><i data-lucide="loader-2" class="w-8 h-8 mx-auto mb-3 animate-spin text-blue-500"></i>Loading archive...</td></tr>';
                 lucide.createIcons();
 
                 try {
@@ -345,7 +412,8 @@
             } else {
                 viewMode = 'queue';
                 btnText.innerText = "ARCHIVE";
-                if(title) title.innerText = "TM30 Dashboard";
+                if(title) title.innerText = "TM30 Queue";
+                document.getElementById('status-footer').innerText = "Queue Live";
                 renderCurrentView();
             }
         }
@@ -369,12 +437,12 @@
                 if (iconEl) {
                     if (sortCol === c) {
                         iconEl.setAttribute('data-lucide', sortDesc ? 'arrow-down' : 'arrow-up');
-                        iconEl.classList.remove('text-slate-600');
-                        iconEl.classList.add('text-sky-400');
+                        iconEl.classList.remove('text-slate-400');
+                        iconEl.classList.add('text-blue-600');
                     } else {
                         iconEl.setAttribute('data-lucide', 'arrow-up-down');
-                        iconEl.classList.remove('text-sky-400');
-                        iconEl.classList.add('text-slate-600');
+                        iconEl.classList.remove('text-blue-600');
+                        iconEl.classList.add('text-slate-400');
                     }
                 }
             });
@@ -383,6 +451,16 @@
 
         function renderCurrentView() {
             let list = viewMode === 'queue' ? currentSubmissionsList : historyList;
+
+            // Apply property filter dropdown
+            list = list.filter(g => {
+                if (currentPropFilter === 'ALL') return true;
+                let pRaw = (g.property || 'SWIMS').toUpperCase();
+                if (pRaw === 'SWIMS_RESORT') pRaw = 'SWIMS';
+                if (pRaw === 'LOUD_SAMUI') pRaw = 'LOUD';
+                if (pRaw === 'WET_POOL') pRaw = 'WET';
+                return pRaw === currentPropFilter;
+            });
 
             if (searchTerm) {
                 list = list.filter(g =>
@@ -431,8 +509,8 @@
             if (list.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="12" class="text-center py-8 text-slate-500 font-medium">
-                            <i data-lucide="${viewMode === 'history' || searchTerm ? 'search' : 'check-circle'}" class="w-6 h-6 mx-auto mb-2 opacity-80 ${viewMode === 'history' || searchTerm ? 'text-slate-600' : 'text-emerald-500'}"></i>
+                        <td colspan="12" class="text-center py-12 text-slate-400 font-bold uppercase tracking-widest">
+                            <i data-lucide="${viewMode === 'history' || searchTerm ? 'search' : 'check-circle'}" class="w-8 h-8 mx-auto mb-3 opacity-80 ${viewMode === 'history' || searchTerm ? 'text-slate-300' : 'text-emerald-500'}"></i>
                             ${searchTerm ? 'No results match your search.' : viewMode === 'history' ? 'No historical records found.' : 'Queue is empty. Ready for passports.'}
                         </td>
                     </tr>`;
@@ -442,24 +520,24 @@
 
             list.forEach(guest => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-800 hover:bg-slate-900/50 transition-colors";
+                tr.className = "border-b border-slate-200 hover:bg-slate-50 transition-colors text-slate-700";
                 tr.id = `row-${guest.id}`;
                 
                 let actsColumn = '';
                 if (viewMode === 'history') {
                     actsColumn = `
-                    <td class="py-1 px-2 border-r border-slate-800 text-center">
+                    <td class="py-1 px-2 border-r border-slate-200 text-center">
                         <div class="flex gap-2 items-center justify-center">
-                            <span class="text-[9px] bg-slate-800 text-slate-400 px-1 py-0.5 rounded font-bold mt-0.5">FILED</span>
-                            <button id="del-${guest.id}" onclick="deleteGuest('${guest.id}')" class="text-slate-500 hover:text-red-400" title="Delete (Double tap)"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
+                            <span class="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded font-black mt-0.5">FILED</span>
+                            <button id="del-${guest.id}" onclick="deleteGuest('${guest.id}')" class="text-slate-400 hover:text-red-500 transition-colors" title="Delete (Double tap)"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
                         </div>
                     </td>`;
                 } else {
                     actsColumn = `
-                    <td class="py-1 px-2 border-r border-slate-800 text-center">
+                    <td class="py-1 px-2 border-r border-slate-200 text-center">
                         <div class="flex gap-2 items-center justify-center">
-                            <button onclick='openEditModal(${JSON.stringify(guest).replace(/'/g, "&#39;")})' class="text-slate-400 hover:text-sky-400" title="Edit"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            <button id="del-${guest.id}" onclick="deleteGuest('${guest.id}')" class="text-slate-500 hover:text-red-400" title="Delete (Double tap)"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
+                            <button onclick='openEditModal(${JSON.stringify(guest).replace(/'/g, "&#39;")})' class="text-slate-400 hover:text-blue-500 transition-colors" title="Edit"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            <button id="del-${guest.id}" onclick="deleteGuest('${guest.id}')" class="text-slate-400 hover:text-red-500 transition-colors" title="Delete (Double tap)"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
                         </div>
                     </td>`;
                 }
@@ -467,21 +545,21 @@
                 const dobString = (guest.dobDay && guest.dobMonth && guest.dobYear) ? `${guest.dobDay}/${guest.dobMonth}/${guest.dobYear}` : "";
 
                 tr.innerHTML = `
-                    <td class="py-1 px-2 border-r border-slate-800 text-center bg-slate-900/20">
+                    <td class="py-1 px-2 border-r border-slate-200 text-center bg-slate-50">
                         <input type="checkbox" class="row-checkbox" value="${guest.id}" onchange="updateBulkActionVisibility()">
                     </td>
                     ${actsColumn}
-                    <td class="py-1 px-2 border-r border-slate-800 font-bold text-sky-400 cell-hover" onclick="copyText('${guest.property || 'UNASSIGNED'}', 'Property copied')">${guest.property || 'UNASSIGNED'}</td>
+                    <td class="py-1 px-2 border-r border-slate-200 font-black text-blue-600 hover:bg-blue-50 cursor-pointer transition-colors" onclick="copyText('${guest.property || 'UNASSIGNED'}', 'Property copied')">${guest.property || 'UNASSIGNED'}</td>
                     
-                    <td class="py-1 px-2 border-r border-slate-800 cell-hover" onclick="copyText('${guest.firstName || ''}', 'First Name copied')">${guest.firstName || ''}</td>
-                    <td class="py-1 px-2 border-r border-slate-800 cell-hover" onclick="copyText('${guest.middleName || ''}', 'Middle Name copied')">${guest.middleName || ''}</td>
-                    <td class="py-1 px-2 border-r border-slate-800 cell-hover" onclick="copyText('${guest.lastName || ''}', 'Last Name copied')">${guest.lastName || ''}</td>
-                    <td class="py-1 px-2 border-r border-slate-800 cell-hover text-center" onclick="copyText('${guest.gender || ''}', 'Gender copied')">${guest.gender || ''}</td>
-                    <td class="py-1 px-2 border-r border-slate-800 cell-hover font-mono text-[11px]" onclick="copyText('${guest.passportNumber || ''}', 'Passport copied')">${guest.passportNumber || '-'}</td>
-                    <td class="py-1 px-2 border-r border-slate-800 cell-hover" onclick="copyText('${guest.nationality || ''}', 'Nationality copied')">${guest.nationality || '-'}</td>
-                    <td class="py-1 px-2 border-r border-slate-800 cell-hover" onclick="copyText('${dobString}', 'DOB copied')">${dobString}</td>
-                    <td class="py-1 px-2 border-r border-slate-800 cell-hover" onclick="copyText('${guest.checkoutDate || ''}', 'Check-out copied')">${guest.checkoutDate || ''}</td>
-                    <td class="py-1 px-2 cell-hover" onclick="copyText('${guest.phoneNo || ''}', 'Phone No. copied')">${guest.phoneNo || ''}</td>
+                    <td class="py-1 px-2 border-r border-slate-200 font-bold hover:bg-slate-100 cursor-pointer transition-colors" onclick="copyText('${guest.firstName || ''}', 'First Name copied')">${guest.firstName || ''}</td>
+                    <td class="py-1 px-2 border-r border-slate-200 font-bold hover:bg-slate-100 cursor-pointer transition-colors" onclick="copyText('${guest.middleName || ''}', 'Middle Name copied')">${guest.middleName || ''}</td>
+                    <td class="py-1 px-2 border-r border-slate-200 font-bold hover:bg-slate-100 cursor-pointer transition-colors" onclick="copyText('${guest.lastName || ''}', 'Last Name copied')">${guest.lastName || ''}</td>
+                    <td class="py-1 px-2 border-r border-slate-200 font-black text-center hover:bg-slate-100 cursor-pointer transition-colors" onclick="copyText('${guest.gender || ''}', 'Gender copied')">${guest.gender || ''}</td>
+                    <td class="py-1 px-2 border-r border-slate-200 font-mono text-[11px] font-bold text-slate-800 hover:bg-slate-100 cursor-pointer transition-colors" onclick="copyText('${guest.passportNumber || ''}', 'Passport copied')">${guest.passportNumber || '-'}</td>
+                    <td class="py-1 px-2 border-r border-slate-200 font-bold text-purple-700 hover:bg-slate-100 cursor-pointer transition-colors" onclick="copyText('${guest.nationality || ''}', 'Nationality copied')">${guest.nationality || '-'}</td>
+                    <td class="py-1 px-2 border-r border-slate-200 font-bold hover:bg-slate-100 cursor-pointer transition-colors" onclick="copyText('${dobString}', 'DOB copied')">${dobString}</td>
+                    <td class="py-1 px-2 border-r border-slate-200 font-bold hover:bg-slate-100 cursor-pointer transition-colors" onclick="copyText('${guest.checkoutDate || ''}', 'Check-out copied')">${guest.checkoutDate || ''}</td>
+                    <td class="py-1 px-2 font-bold hover:bg-slate-100 cursor-pointer transition-colors" onclick="copyText('${guest.phoneNo || ''}', 'Phone No. copied')">${guest.phoneNo || ''}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -518,10 +596,11 @@
             if (checkedCount === 0) return;
             document.getElementById('bulk-count').innerText = checkedCount;
             document.getElementById('bulk-property').value = '';
-            document.getElementById('bulk-modal').classList.remove('hidden');
+            document.getElementById('bulk-modal').classList.add('active');
+            setTimeout(() => document.getElementById('bulk-property').focus(), 100);
         }
 
-        function closeBulkAssignModal() { document.getElementById('bulk-modal').classList.add('hidden'); }
+        function closeBulkAssignModal() { document.getElementById('bulk-modal').classList.remove('active'); }
 
         async function applyBulkProperty() {
             const prop = document.getElementById('bulk-property').value.toUpperCase().trim();
@@ -570,7 +649,7 @@
             if (checkboxes.length === 0) return;
             
             document.getElementById('confirm-text').innerText = `Permanently delete ${checkboxes.length} guests?`;
-            document.getElementById('confirm-modal').classList.remove('hidden');
+            document.getElementById('confirm-modal').classList.add('active');
             
             document.getElementById('confirm-yes-btn').onclick = () => {
                 closeConfirmModal();
@@ -579,13 +658,13 @@
         }
 
         function closeConfirmModal() {
-            document.getElementById('confirm-modal').classList.add('hidden');
+            document.getElementById('confirm-modal').classList.remove('active');
         }
 
         async function executeBulkDelete(checkboxes) {
-            const btn = document.getElementById('bulk-delete-btn');
+            const btn = document.getElementById('confirm-yes-btn');
             const origHtml = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> DELETING...`;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> DELETING...`;
             btn.disabled = true;
 
             try {
@@ -632,12 +711,12 @@
                     showToast("Deleted", "Guest removed.", "success");
                 } catch (e) { showToast("Error", "Could not delete.", "error"); }
             } else {
-                btn.classList.add('text-red-500');
+                btn.classList.replace('text-slate-400', 'text-red-500');
                 btn.innerHTML = `<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>`;
                 lucide.createIcons();
                 deleteTimers[id] = setTimeout(() => {
                     delete deleteTimers[id];
-                    btn.classList.remove('text-red-500');
+                    btn.classList.replace('text-red-500', 'text-slate-400');
                     btn.innerHTML = `<i data-lucide="trash" class="w-3.5 h-3.5"></i>`;
                     lucide.createIcons();
                 }, 3000);
@@ -658,10 +737,10 @@
             document.getElementById('edit-month').value = guest.dobMonth || '';
             document.getElementById('edit-year').value = guest.dobYear || '';
             document.getElementById('edit-gender').value = guest.gender || '';
-            document.getElementById('edit-modal').classList.remove('hidden');
+            document.getElementById('edit-modal').classList.add('active');
         }
 
-        function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+        function closeEditModal() { document.getElementById('edit-modal').classList.remove('active'); }
 
         async function saveEdit() {
             const id = document.getElementById('edit-doc-id').value;
@@ -688,10 +767,18 @@
         async function markAllAsFiled() {
             const btn = document.getElementById('clear-queue-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Clearing...`;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> CLR...`;
             btn.disabled = true;
             try {
-                let listToClear = currentSubmissionsList;
+                let listToClear = currentSubmissionsList.filter(g => {
+                    if (currentPropFilter === 'ALL') return true;
+                    let pRaw = (g.property || 'SWIMS').toUpperCase();
+                    if (pRaw === 'SWIMS_RESORT') pRaw = 'SWIMS';
+                    if (pRaw === 'LOUD_SAMUI') pRaw = 'LOUD';
+                    if (pRaw === 'WET_POOL') pRaw = 'WET';
+                    return pRaw === currentPropFilter;
+                });
+                
                 if (searchTerm) {
                     listToClear = listToClear.filter(g =>
                         (g.firstName || "").toLowerCase().includes(searchTerm) ||
@@ -724,13 +811,20 @@
             let listToExport = [];
             const checkboxes = document.querySelectorAll('.row-checkbox:checked');
             
-            // If rows are selected, only export those. Otherwise export all in view.
+            const activeBaseList = (viewMode === 'queue' ? currentSubmissionsList : historyList).filter(g => {
+                if (currentPropFilter === 'ALL') return true;
+                let pRaw = (g.property || 'SWIMS').toUpperCase();
+                if (pRaw === 'SWIMS_RESORT') pRaw = 'SWIMS';
+                if (pRaw === 'LOUD_SAMUI') pRaw = 'LOUD';
+                if (pRaw === 'WET_POOL') pRaw = 'WET';
+                return pRaw === currentPropFilter;
+            });
+            
             if (checkboxes.length > 0) {
                 const selectedIds = Array.from(checkboxes).map(cb => cb.value);
-                const sourceList = viewMode === 'queue' ? currentSubmissionsList : historyList;
-                listToExport = sourceList.filter(g => selectedIds.includes(g.id));
+                listToExport = activeBaseList.filter(g => selectedIds.includes(g.id));
             } else {
-                listToExport = viewMode === 'queue' ? currentSubmissionsList : historyList;
+                listToExport = activeBaseList;
                 if (searchTerm) {
                     listToExport = listToExport.filter(g =>
                         (g.firstName || "").toLowerCase().includes(searchTerm) ||
@@ -744,7 +838,6 @@
 
             if (listToExport.length === 0) return showToast("Error", "No guests to export.", "error");
 
-            // EXACT formatting pulled directly from your working file backup (TM30_Batch_2026-09-03.xlsx)
             const headerRow = [
                 "ชื่อ\nFirst Name *",
                 "ชื่อกลาง\nMiddle Name",
@@ -775,15 +868,7 @@
             const worksheet = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
             
             worksheet['!cols'] = [
-                { wch: 20 }, // First Name
-                { wch: 15 }, // Middle Name
-                { wch: 20 }, // Last Name
-                { wch: 10 }, // Gender
-                { wch: 15 }, // Passport No.
-                { wch: 15 }, // Nationality
-                { wch: 25 }, // Date of Birth
-                { wch: 25 }, // Check-out Date
-                { wch: 15 }  // Phone No.
+                { wch: 20 }, { wch: 15 }, { wch: 20 }, { wch: 10 }, { wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 25 }, { wch: 15 }
             ];
 
             const workbook = XLSX.utils.book_new();
@@ -792,14 +877,22 @@
             const propertyPrefix = (listToExport.length > 0 && listToExport[0].property) ? listToExport[0].property + "_" : "";
             const dateStr = new Date().toISOString().split('T')[0];
             
-            // Restored the proper .xlsx extension that the SheetJS library outputs
             XLSX.writeFile(workbook, `${propertyPrefix}TM30_Batch_${dateStr}.xlsx`); 
             
             showToast("Exported", `TM30 XLSX generated for ${listToExport.length} guests.`, "success");
         }
 
         function sendToExtension() {
-            let listToExport = viewMode === 'queue' ? currentSubmissionsList : historyList;
+            const activeBaseList = (viewMode === 'queue' ? currentSubmissionsList : historyList).filter(g => {
+                if (currentPropFilter === 'ALL') return true;
+                let pRaw = (g.property || 'SWIMS').toUpperCase();
+                if (pRaw === 'SWIMS_RESORT') pRaw = 'SWIMS';
+                if (pRaw === 'LOUD_SAMUI') pRaw = 'LOUD';
+                if (pRaw === 'WET_POOL') pRaw = 'WET';
+                return pRaw === currentPropFilter;
+            });
+            
+            let listToExport = activeBaseList;
             if (searchTerm) {
                 listToExport = listToExport.filter(g =>
                     (g.firstName || "").toLowerCase().includes(searchTerm) ||
@@ -812,7 +905,7 @@
 
             const btn = document.getElementById('send-ext-btn');
             const originalHtml = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Loading...`;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> LOAD...`;
             
             const payload = listToExport.map(guest => ({
                 tm30Payload: true,
@@ -828,7 +921,7 @@
             }));
 
             copyText(JSON.stringify(payload), `Loaded ${payload.length} guests for extension.`);
-            btn.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i> Ready`;
+            btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> Ready`;
             btn.classList.replace('bg-sky-600', 'bg-emerald-600');
             setTimeout(() => {
                 btn.innerHTML = originalHtml;
@@ -851,14 +944,14 @@
         function showToast(title, text, type = "success") {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const bgColor = type === "success" ? "bg-emerald-900/90 border-emerald-700" : "bg-red-900/90 border-red-700";
-            const icon = type === "success" ? `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>` : `<i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>`;
+            const bgColor = type === "success" ? "bg-emerald-600 border-emerald-500 shadow-emerald-500/20" : "bg-red-600 border-red-500 shadow-red-500/20";
+            const icon = type === "success" ? `<i data-lucide="check-circle" class="w-4 h-4 text-white"></i>` : `<i data-lucide="alert-circle" class="w-4 h-4 text-white"></i>`;
             
-            toast.className = `${bgColor} border backdrop-blur-md text-white p-3 rounded shadow-lg transform transition-all duration-300 translate-x-full opacity-0 max-w-xs`;
+            toast.className = `${bgColor} border text-white p-3 rounded-lg shadow-xl transform transition-all duration-300 translate-x-full opacity-0 max-w-xs`;
             toast.innerHTML = `
                 <div class="flex items-start gap-2">
                     <div class="mt-0.5">${icon}</div>
-                    <div><h4 class="text-xs font-bold">${title}</h4><p class="text-[11px] text-slate-200 mt-0.5 leading-tight">${text}</p></div>
+                    <div><h4 class="text-xs font-black uppercase tracking-widest">${title}</h4><p class="text-[11px] font-bold text-white/90 mt-0.5 leading-tight">${text}</p></div>
                 </div>`;
             container.appendChild(toast);
             lucide.createIcons();
