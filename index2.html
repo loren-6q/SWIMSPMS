@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wild & Wandering | App Portal</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Roboto+Condensed:wght@400;700;900&display=swap');
+        body { font-family: 'Roboto Condensed', sans-serif; background: #0f172a; color: #f8fafc; }
+        .app-card { transition: all 0.2s ease-in-out; }
+        .app-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-8 flex flex-col items-center">
+        <img src="https://loren-6q.github.io/SWIMSPMS/gfx/WWicon.png" alt="Wild & Wandering" class="h-16 object-contain mb-6">
+        <h2 class="text-xl font-black uppercase tracking-widest text-white mb-2">Staff Login</h2>
+        <p class="text-xs font-bold text-slate-400 mb-6 text-center">Authorized personnel only.</p>
+        
+        <div class="w-full space-y-4">
+            <div>
+                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1 tracking-widest">Email Address</label>
+                <input type="email" id="email" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white outline-none focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1 tracking-widest">Password</label>
+                <input type="password" id="password" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white outline-none focus:border-blue-500">
+            </div>
+            <button onclick="alert('Firebase Auth not fully configured for emails yet. Use Dev Bypass for now.')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black uppercase rounded py-2 transition-colors mt-2">Sign In</button>
+        </div>
+
+        <div class="mt-8 pt-4 border-t border-slate-800 w-full">
+            <button onclick="window.devBypass()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white font-bold uppercase rounded py-2 text-xs transition-colors border border-slate-700 flex items-center justify-center gap-2">
+                <i data-lucide="shield-alert" size="14"></i> Dev Bypass (Admin)
+            </button>
+        </div>
+    </div>
+
+    <!-- APP PORTAL (HIDDEN UNTIL LOGGED IN) -->
+    <div id="portal-screen" class="w-full max-w-4xl hidden flex-col items-center">
+        <img src="https://loren-6q.github.io/SWIMSPMS/gfx/WWicon.png" alt="Wild & Wandering" class="h-14 object-contain mb-8">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+            
+            <!-- PMS Card -->
+            <a href="pms.html" class="app-card bg-slate-900 border border-slate-700 rounded-xl p-6 flex flex-col items-center text-center cursor-pointer group">
+                <div class="w-16 h-16 rounded-full bg-blue-500/20 border border-blue-500/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="calendar-days" class="text-blue-400 w-8 h-8"></i>
+                </div>
+                <h3 class="text-lg font-black uppercase tracking-widest text-white mb-2">PMS Dashboard</h3>
+                <p class="text-xs text-slate-400 font-bold">Manage bookings, timelines, drag-and-drop rooms, and process payments.</p>
+            </a>
+
+            <!-- TM30 Card -->
+            <a href="tm30.html" class="app-card bg-slate-900 border border-slate-700 rounded-xl p-6 flex flex-col items-center text-center cursor-pointer group">
+                <div class="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="id-card" class="text-emerald-400 w-8 h-8"></i>
+                </div>
+                <h3 class="text-lg font-black uppercase tracking-widest text-white mb-2">TM30 Portal</h3>
+                <p class="text-xs text-slate-400 font-bold">Review incoming passport scans and export batches for Thai Immigration.</p>
+            </a>
+
+            <!-- Settings Card -->
+            <a href="settings.html" class="app-card bg-slate-900 border border-slate-700 rounded-xl p-6 flex flex-col items-center text-center cursor-pointer group">
+                <div class="w-16 h-16 rounded-full bg-purple-500/20 border border-purple-500/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="settings" class="text-purple-400 w-8 h-8"></i>
+                </div>
+                <h3 class="text-lg font-black uppercase tracking-widest text-white mb-2">Property Setup</h3>
+                <p class="text-xs text-slate-400 font-bold">Configure room inventory, sort orders, pricing, and OTA mapping.</p>
+            </a>
+            
+        </div>
+        
+        <button onclick="window.logOut()" class="mt-12 text-slate-500 hover:text-slate-300 font-bold uppercase text-xs flex items-center gap-1 transition-colors">
+            <i data-lucide="log-out" size="14"></i> Sign Out
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyCyz--TlQZf_d-YNxhtGCV29LuFoRBfEeU", authDomain: "swimspms.firebaseapp.com", projectId: "swimspms" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        lucide.createIcons();
+
+        // Listen for Auth State
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('portal-screen').style.display = 'flex';
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('portal-screen').style.display = 'none';
+            }
+        });
+
+        // The Dev Bypass
+        window.devBypass = async () => {
+            try {
+                await signInAnonymously(auth);
+            } catch (e) {
+                alert("Login failed: " + e.message);
+            }
+        };
+
+        window.logOut = () => {
+            signOut(auth);
+        };
+    </script>
+</body>
+</html>
